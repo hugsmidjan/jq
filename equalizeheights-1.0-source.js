@@ -5,34 +5,31 @@
       evSet = false,
       sets = [];
 
+  function rerun () {
+    for (var i = 0; i < sets.length; i++) {
+      sets[i].equalHeight();
+    }
+  }
+
 	$.fn.extend({
 
 		equalHeight: function( subselector ) {
 
-      // if we get a subselector we simply recurse
+      // if we get a subselector we recurse
       if ( subselector ) {
-        
-        return $( subselector, this ).equalHeight();
-      
+        return this.find( subselector ).equalHeight();
       }
       else {
 
-        var maxHeight = 0;
-
         // find highest natural height
+        var maxHeight = 0;
         this.each(function ( i ) {
-          
           $( this ).css( heightAttribute, 0 );
           maxHeight = Math.max( $( this ).height(), maxHeight );
-
         });
 
         // assign new min-heights to collection
-        this.each(function ( i ) {
-          
-          $( this ).css( heightAttribute, maxHeight );
-          
-        });
+        this.css( heightAttribute, maxHeight );
 
         // for browser with ok resize events, redo on next occurence
         if (!$.browser.msie && !this._noPush) {
@@ -42,17 +39,14 @@
   
           // add resize event 
           if (!evSet) {
-  
             evSet = true;
-            
-            $( window ).bind( 'resize', function() {
-  
-              for (var i = 0; i < sets.length; i++) {
-                sets[i].equalHeight();
-              }
-              
-            });
-  
+            $( window ).bind( 'resize', rerun ).load( rerun );
+          }
+        }
+        else {
+          if (!evSet) {
+            evSet = true;
+            $( window ).load( rerun );
           }
         }
       }
