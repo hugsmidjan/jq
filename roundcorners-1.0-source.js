@@ -1,5 +1,5 @@
 // encoding: utf-8
-jQuery.fn.roundcorners = function (opts)
+jQuery.fn.roundCorners = function (opts)
 {
   opts = jQuery.extend({
               tag : 'span',

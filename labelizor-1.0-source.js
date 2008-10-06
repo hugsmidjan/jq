@@ -1,6 +1,6 @@
 (function ($) {
   
-  var _hideClass = 'stream';
+  var _defaultHideClass = 'stream';
   
   $.fn.extend({
     labelizor : function ( hideClass ) {
@@ -12,7 +12,7 @@
           if (!this.defaultValue && !this.value) {
             this.defaultValue = _labelText;
           }
-          _label.addClass( hideClass || _hideClass );
+          _label.addClass( hideClass || _defaultHideClass );
           _field
             .attr('title', _labelText)
             .focus(function () {

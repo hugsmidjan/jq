@@ -7,17 +7,17 @@
 
   function rerun () {
     for (var i = 0; i < sets.length; i++) {
-      sets[i].equalHeight();
+      sets[i].equalizeHeights();
     }
   }
 
-	$.fn.extend({
+  $.fn.extend({
 
-		equalHeight: function( subselector ) {
+    equalizeHeights: function( subselector ) {
 
       // if we get a subselector we recurse
       if ( subselector ) {
-        return this.find( subselector ).equalHeight();
+        return this.find( subselector ).equalizeHeights();
       }
       else {
 

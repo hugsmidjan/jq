@@ -41,13 +41,13 @@ jQuery.fn.descendantOf = function ( context ) {
 Noted here if you wish to add parallel functionality to $()
 
 if ( selector.nodeType ) {
-	// Handle $(DOMElement,	context)
-	if ( context &&	!jQuery.comparePosition( selector, context ) ) {
-		return jQuery( [] );
-	}
-	// Handle $(DOMElement)
-	this[0]	= selector;
-	this.length = 1;
-	return this;
+  // Handle $(DOMElement,	context)
+  if ( context &&	!jQuery.comparePosition( selector, context ) ) {
+    return jQuery( [] );
+  }
+  // Handle $(DOMElement)
+  this[0]	= selector;
+  this.length = 1;
+  return this;
 }
 */
