@@ -35,7 +35,7 @@
     // (similar to .each(function) that always returns false.)
     once: function (func)
     {
-      func(this);
+      func.call(this);
       return this;
     },
 
