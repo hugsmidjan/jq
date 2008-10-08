@@ -19,7 +19,7 @@ jQuery.fn.treeCollapse = function (cfg)
 
   var _closedClass = cfg.closedClass,
       _openClass = cfg.openClass,
-      _branches = $(this)
+      _branches = this
           .addClass(cfg.activeClass)
           .click(function(e) {
               var _target = e.target,
@@ -31,9 +31,9 @@ jQuery.fn.treeCollapse = function (cfg)
                 _parent
                     .removeClass(_isOpen? _openClass : _closedClass)
                     .addClass   (_isOpen? _closedClass : _openClass);
+                return false;
               }
 
-              return false;
             })
           .find(cfg.branches)
               .addClass(_closedClass)
