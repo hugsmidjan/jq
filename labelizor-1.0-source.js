@@ -10,7 +10,7 @@
           var _label = $('label[for='+this.id+']'),
               _labelText = $.trim( _label.text().replace(/(\*|:[\W\S]*$)/, '') );
           if (!this.defaultValue && !this.value) {
-            this.defaultValue = _labelText;
+            this.value = this.defaultValue = _labelText;
           }
           _label.addClass( hideClass || _defaultHideClass );
           _field
