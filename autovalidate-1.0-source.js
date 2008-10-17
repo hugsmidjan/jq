@@ -461,7 +461,7 @@
 
           // extra requirement check
           var name = control.attr('name');
-          var reqchk = conf.customReqCheck[name];
+          var reqchk = conf.customReqCheck && conf.customReqCheck[name];
           if (reqchk && $.isFunction( reqchk )) {
             required = reqchk.call( this, value, wrap.get(0) || this, lang );
           }
@@ -477,7 +477,8 @@
           }
 
           // are there any extra validations for this field
-          if ($.isFunction( conf.customTypeCheck[name] )) {
+          // TODO : can this be? is there need for adding custom type checks directly onto the field?
+          if (conf.customTypeCheck && $.isFunction( conf.customTypeCheck[name] )) {
             tests[name] = conf.customTypeCheck[name];
           }
 
