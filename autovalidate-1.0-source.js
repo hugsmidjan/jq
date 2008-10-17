@@ -143,7 +143,7 @@
       config : function ( ctx, config ) {
 
         var context = $( ctx );
-        var form    = context.is('form') ? context : $( context.attr('form') || context.parent('form')[0] );
+        var form    = context.is('form') ? context : $( context.attr('form') || context.parent('form').get(0) );
 
         if ( config ) { // setting
           form.data( 'av-config', config );
@@ -163,7 +163,6 @@
         // we really should examine the whole form for more links as a subsection can
         // be validated and it's final control loose it's last member next link despite
         // there being errors further down the form
-
         var conf = $.av.config( ctrllist[0] );
 
         $.each(ctrllist, function(i){
@@ -192,7 +191,7 @@
 
         var conf = $.av.config( ctrllist[0] );
         var lang = $( ctrllist[0] ).attr('lang') || $( ctrllist[0] ).parents('[lang]').attr('lang');
-        $( ctrllist[0] ).attr('lang', lang);
+        $( ctrllist[0] ).attr( 'lang', lang );
 
         var missing   = [];
         var malformed = [];
@@ -238,7 +237,11 @@
         // find next control that doesn't have tabindex -1
         while (elms[++n] && elms[n].tabIndex == -1) {}
         // loop to first one if we have no target
-        return $( elms[n] || elms[0] ).focus();
+        var felm = $( elms[n] || elms[0] );
+        setTimeout(function () {
+          felm.focus();
+        },1);
+        return felm;
       },
 
     }
@@ -288,7 +291,7 @@
           if ( confirm($.av.getText( 'resetAlert', lang )) ) {
             // call a reset function if this isn't an actual reset button
             if (btn.attr('type') !== "reset") {
-              var form = btn.parents('form')[0];
+              var form = btn.parents('form').get(0);
               if (form) { form.reset(); }
             }
             return true;  // accept the click
@@ -321,7 +324,7 @@
       this.each(function(){
 
         var context = $( this );
-        var form = context.is('form') ? context : $( this.form || context.parent('form')[0] );
+        var form = context.is('form') ? context : $( this.form || context.parent('form').get(0) );
 
         var conf = $.extend( {}, defaultConfig, config );
         $.av.config( this, conf );
@@ -460,7 +463,7 @@
           var name = control.attr('name');
           var reqchk = conf.customReqCheck[name];
           if (reqchk && $.isFunction( reqchk )) {
-            required = reqchk.call( this, value, wrap[0] || this, lang );
+            required = reqchk.call( this, value, wrap.get(0) || this, lang );
           }
           else if (reqchk && typeof(reqchk) === 'string') {
             var m = /^(!)?(.*)$/.exec(reqchk);
@@ -487,7 +490,7 @@
 
             // rather than doing $.trim( $(this).val() ) within each call...
             // it's out of the loop and into a parameter
-            var res = tests[v].call( this, value, wrap[0] || this, lang );
+            var res = tests[v].call( this, value, wrap.get(0) || this, lang );
 
             // react to invalid control
             if ( res !== true ) {
@@ -501,7 +504,7 @@
               if ( typeof(res) === 'string' ) {
 
                 // string should detail how to complete the field
-                contextInvalids.push( wrap[0]) );
+                contextInvalids.push( wrap.get(0) );
                 wrap.data( 'av-error', res );
 
                 // mark wrapper (or control) with error class
@@ -512,7 +515,7 @@
               else if (required) {
 
                 // add a field missing message
-                contextInvalids.push( wrap[0] );
+                contextInvalids.push( wrap.get(0) );
 
                 // mark wrapper (or control) with error class
                 wrap.addClass( conf.reqErrorClass );
@@ -593,14 +596,17 @@ jQuery.extend(jQuery.av.lang.en, {
 //
 
 jQuery.extend(jQuery.av.type, {
+  
 
   fi_kt : function ( v, w, lang ) {
     var error = jQuery.av.getError( 'fi_kt', lang );
     if (v) {
       var kt = v.replace(/[\s\-]/g, ''); // Allow "-" and " " as delimiting characters (strip them out).
-      jQuery(this).val( kt );
+      jQuery( this ).val( kt );
       // remainder must all be numericals, 10 characters, and the last character must be 0 or 9 
-      if ( !/^\d{9}[90]$/.test(kt) ) { 
+      // kt must not be a robot
+      var robot = /010130[- ]?(2(12|20|39|47|55|63|71|98)|3(01|36)|4(33|92)|506|778)9/.test(kt);
+      if ( !/^\d{9}[90]$/.test(kt) || robot) { 
         return error;
       }
       // Checksum validation
@@ -617,7 +623,7 @@ jQuery.extend(jQuery.av.type, {
   },
 
 
-  // ====[ internets & communication ]====
+  // ====[ internet & communication ]====
 
   fi_email : function ( v, w, lang ) {
     if (v && !/^[a-z0-9-._+]+@([a-z0-9-_]+\.)+[a-z0-9-_]{2,99}$/i.test(v)) {
@@ -629,8 +635,8 @@ jQuery.extend(jQuery.av.type, {
   fi_url : function( v, w, lang ) {
     if (v) { 
       var _url = v.replace(/^[a-z]+:\/\/.+$/i, '');
-      if ( !/^[a-z]+:\/\/.+\..+$/.test(v) || 
-           /[\(\)\<\>\,\:\"\[\]\\]/.test(_url) ) {
+      if ( !/^[a-z]+:\/\/.+\..+$/.test( v ) || 
+           /[\(\)\<\>\,\:\"\[\]\\]/.test( _url ) ) {
         return jQuery.av.getError( 'fi_url', lang );
       }
       return true;
@@ -643,7 +649,7 @@ jQuery.extend(jQuery.av.type, {
     if (v) {
       // This function simply removes all *legal* characters from the string
       // and then returns false if there are any left overs afterwards.
-      return !v.replace(/(\s|[-+]|\d)/g, '') || '';
+      return !v.replace( /(\s|[-+]|\d)/g, '' ) || '';
     }
     return false;
   },
@@ -652,14 +658,13 @@ jQuery.extend(jQuery.av.type, {
   // Returns true on a valid Icelandic Zip-code ("póstnúmer").
 //    is : "dæmi: 101",
 //    en : "example: 101",
-  fi_pnr : function ( v, w, lang ) {
+  fi_postal_is : function ( v, w, lang ) {
     
     if (v) {
-
       // have no DB -- fallback to a simple 3-digits test
       var codes = jQuery.av.postCodes && jQuery.av.postCodes.is;
       if (!codes) { 
-        return /^\d\d\d$/.test(v) || jQuery.av.getError( 'fi_pnr', lang );
+        return /^\d\d\d$/.test( v ) || jQuery.av.getError( 'fi_pnr', lang );
       }
       // have DB and code is present in it -- 
       else if ( codes[v] ) {  
@@ -690,12 +695,12 @@ jQuery.extend(jQuery.av.type, {
 */
   fi_pnrs : function ( v, w, lang ) {
     if ( v ) {
-      var pnrs = v.replace(/(^[ ,;]+|[ ,;]$)/g,'').split(/[ ,;]+/);
+      var pnrs = v.replace(/(^[ ,;]+|[ ,;]+$)/g,'').split(/[ ,;]+/);
       var v, valid = false;
       for (var i=0; i < pnrs.length; i++) {
-        v = jQuery.av.type['fi_pnr']( pnrs[i], null, lang );
+        v = jQuery.av.type['fi_postal_is']( pnrs[i], null, lang );
         if (v !== true) {
-          return v;  // passes error exception through
+        return v;  // passes error exception through
         }
       }
       return true;
@@ -722,6 +727,8 @@ jQuery.extend(jQuery.av.type, {
   },
 
 
+
+
   // ====[ dates ]====
 
   // Returns true on a valid date (dd.mm.yyyy|d/m/yy|etc.). 
@@ -731,8 +738,108 @@ jQuery.extend(jQuery.av.type, {
       return jQuery.av.getError( 'fi_year', lang );
     }
     return (v != '');
-  }
+  },
+  
+  // Returns true on a valid date (dd.mm.yyyy|d/m/yy|etc.). 
+  // Valid year-range: 1900-2099. one or two digit days and months, two or four digit years
+  //    is : "dæmi: %format",
+  //    en : "example: %format",
+  fi_date : function ( v, w, lang ) {
+    if (v) {
+      var error = jQuery.av.getError( 'fi_year', lang );
 
+      // has datepicker
+      if (window.datePicker && datePicker.VERSION < 2) {
+        var _id = $.av.id( this ),
+            _dateUI = datePicker.fields[_id];
+        if ( _dateUI ) {
+          var _parsedDate = datePicker.parseDate( _id );
+          if (!_parsedDate) {
+            return error;
+          }
+          else {
+            var _dateStr = datePicker.printDateValue( _parsedDate, _dateUI.dateFormat, lang ).replace( /(^\s+|\s+$)/g, '' );
+            if (!_dateUI.caseSensitive) {
+              v = v.toLowerCase();
+              _dateStr = _dateStr.toLowerCase();
+            }
+            return (_dateStr != v) || error;
+          }
+        }
+      }
+
+      // we can get to here if: we have no datepicker, we have datepicker but no config for this field
+      v = v.replace(/[ .-\/]+/g, '.').replace(/\.(\d\d)$/, '.20$1');
+      // $(this).val( v );
+      return /^(3[01]|[12]?[0-9]|(0)?[1-9])\.(1[012]|(0)?[1-9])\.(19|20)?\d\d$/.test(v) || error;
+      
+    }
+    return (v != '');
+  },
+
+
+  // validate a correct time entry
+  fi_time : function ( v, w, lang ) {
+    if (v) {
+      var error = jQuery.av.getError( 'fi_time', lang );
+      if ( /^([01]?\d|2[01234])(:([0-5]\d))?(:([0-5]\d))?\s*([ap]\.?m\.?)?$/i.test( v ) ) {
+        var h = parseInt( RegExp.$1, 10 ),
+            m = parseInt( RegExp.$3 || '0', 10 ),
+            s = parseInt( RegExp.$5 || '0', 10 ),
+            t = (RegExp.$6 + '').replace('.', '').toLowerCase();
+        if (t == 'pm') { h += 12; }
+        var time = (h * 60 * 60) + (m * 60) + (s * 60);
+        return (time <= 86400) || error;
+      }
+      else {
+        return error;
+      }
+    }
+    return (v != '');
+  },
+  
+
+  // ====[ credit cards ]====
+
+
+  // Returns true if valid credid card number
+  fi_ccnum : function ( v, w, lang ) {
+    var error = jQuery.av.getError( 'fi_ccnum', lang );
+    if (v) {
+      // Strip out the optional space|dash delimiters
+      var ccNum = v.replace(/[ -]/g, ''); 
+      // ...then make sure there are only 16 digits left
+      if ( !/^\d{16}$/.test( ccNum ) ) { 
+        return error; 
+      } 
+      // insert the cleaned up creditcard number back into the field
+      // jQuery( this ).val( ccNum ); 
+      var checkSum = 0;
+      for (var i=0; i < ccNum.length; i++)  {
+        if ( (i % 2) === 0 ) {
+          var item = ccNum.charAt( i ) * 2;
+          checkSum += (item > 9) ? Math.floor((item / 10) + (item % 10)) : item;
+        }
+        else {
+          checkSum += ccNum.charAt(i) * 1;
+        }
+      }
+      return ((checkSum % 10) === 0) || error;  // checkSum % 10 must be 0
+    }
+    return (v != '');
+  },
+
+  // Returns true if valid credid card expiry date (further development needed to check against the current year)
+  fi_ccexp : function ( v, w, lang ) { 
+    if (v) {
+      // accept space and dash, and change them into "/". Then remove all spaces
+      v = v.replace(/(\d\d)\s*[ -\/]?\s*(\d\d)/, '$1/$2').replace(/\s+/g, ''); 
+      // ...then test against the pattern "mm/yy"
+      return /^(0\d|1[012])\/(\d\d)$/.test(v) || jQuery.av.getError( 'fi_ccexp', lang ); 
+    }
+    return (v != '');
+  }
+  
 
 });
 
