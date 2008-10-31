@@ -31,11 +31,26 @@
 
   $.fn.extend({
 
-    // run a function once.
-    // (similar to .each(function) that always returns false.)
-    once: function (func)
+    if_: function (cond)
     {
-      func.call(this);
+      if ($.isFunction(cond)) { cond = cond.call(this); }
+      this.if_CondMet = !!cond;
+      return this.pushStack(cond ? this : []);
+    },
+    else_: function (cond)
+    {
+      var _this = this.end();
+      return _this.if_CondMet ?
+                  _this.pushStack([]):
+                  _this.if_(arguments.length ? cond : 1);
+    },
+
+
+    // run a function once.
+    // (similar to .each(function) that always returns false - except that inside the function this == the jQuery collection.)
+    run: function (func, args)
+    {
+      func.apply(this, args);
       return this;
     },
 
@@ -51,6 +66,19 @@
       return this;
     },
 
+
+    toggleClasses: function(a, b)
+    {
+      return this.each(function(){
+          var _elm = $(this),
+              A = _elm.hasClass(a);
+          _elm
+              .removeClass(A? a : b)
+              .addClass   (A? b : a);
+        });
+    },
+
+
     // returns the lang="" value of the first item in the collection
     lang: function (returnFull)
     {
@@ -62,6 +90,7 @@
 
 
   $.extend({
+
 
     // prototypal inheritence under jquery
     beget : function (proto, props)
@@ -264,9 +293,9 @@
 
 
 
-    // Simple templating (variable injection)
+    // Simple String templating (variable injection) that accepts either arrays or hash-maps.
     // Usage:
-    // $.inject('Hello %{2}! Hava a %{1}', ['banana', 'John']);                           // Returns  'Hello John! Have a banana'
+    // $.inject('Hello %{1}! Hava a %{0}', ['banana', 'John']);                           // Returns  'Hello John! Have a banana'
     // $.inject('Hello %{name}! Hava a %{food}', { food : 'banana', person : 'John' });   // Returns  'Hello John! Have a banana'
     //
     inject: function(_theString, _vars)
@@ -274,6 +303,7 @@
       var _keys = [],
           l = _vars.length,
           i;
+      // fail early to save time
       if (this.indexOf('%{')>-1)
       {
         // NOTE: this is a fairly ugly way to collect the "keys" depending on if _vars is a List or an Object.
@@ -289,7 +319,48 @@
         }
       }
       return _theString;
+    },
+
+
+
+    delegate: function (selector, handler)
+    {
+      var _isSimpleSelector = !/ /.test( selector.replace(/ *, */g, ',') );
+
+      return function (e) {
+        var _target = $(e.target),
+            _allParents = _target.add(_target.parents()),
+            _parents = _allParents.slice(0, $.inArray(this, _allParents)),
+            _elm;
+
+        if (_isSimpleSelector)
+        {
+          _elm = _parents.filter(_bits[0])[0];
+        }
+        else
+        {
+          var _allElms = $(selector, this),
+              i = _allElms.length;
+          // loop backwars to find the innermost matching element
+          while (i--)
+          {
+            if ( _elm = _parents[_parents.index(_allElms[i])] )
+            {
+              break;
+            } 
+          }
+        }
+
+        if (_elm)
+        {
+          return handler.call(this, e, _elm);
+        }
+
+      }
     }
+
+
+
 
 
 

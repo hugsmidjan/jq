@@ -22,46 +22,40 @@ jQuery.fn.treeCollapse = function (cfg)
             injectTogglers: 0 // inject new links rather than hook exisitng ones 
           }, cfg);
 
-  var _closedClass = cfg.closedClass,
-      _openClass = cfg.openClass,
-      _togglerPlus = cfg.togglerPlus,
+  var _closedClass  = cfg.closedClass,
+      _openClass    = cfg.openClass,
+
+      _togglerPlus  = cfg.togglerPlus,
       _togglerMinus = cfg.togglerMinus,
-      _togglerHtml = cfg.injectTogglers
-                        ? $(cfg.togglerHtml)
-                              .text(_togglerPlus)
-                        : '',
 
       _branches = this
           .addClass(cfg.rootClass)
+          .click( $.delegate(cfg.branch, function(e, delegateElm) {
+                if ($.inArray( e.target, delegateElm.find(cfg.toggler) ) > -1)
+                {
+                  delegateElm
+                      .toggleClasses(_openClass, _closedClass)
+                      .if_(cfg.injectTogglers)
+                          .find(cfg.togglerInt)
+                              .text( _parent.hasClass(_openClass) ? _togglerMinus : _togglerPlus )
+                          //.end();
+                      //.end();
+                  return false;
+                }
+              })
+            })
           .find(cfg.branch)
+              .if_(cfg.injectTogglers)
+                  .prepend( $(cfg.togglerHtml).text(_togglerPlus) )
+              .end()
               .addClass(_closedClass)
-              .prepend(_togglerHtml)
               .filter(cfg.startOpen)
                   .removeClass(_closedClass)
                   .addClass(_openClass)
-                  .find(cfg.togglerInt)
-                      .text(_togglerMinus)
-                  .end()
-              .end()
-          .end()
-          .click(function(e) { // delegated event handling
-              var _target = e.target,
-                  _parents = $(_target).parents(cfg.branch),
-                  _parent = _parents.eq(0);
+                  .if_(cfg.injectTogglers)
+                      .find(cfg.togglerInt)
+                          .text(_togglerMinus);
 
-              if ($.inArray( _target, _parent.find(cfg.toggler).get() ) > -1)
-              {
-                var _isOpen = _parent.hasClass(cfg.openClass);
-                _parent
-                    .removeClass(_isOpen? _openClass : _closedClass)
-                    .addClass   (_isOpen? _closedClass : _openClass)
-                    .find(cfg.togglerInt)
-                        .text(_isOpen? _togglerPlus : cfg.togglerMinus);
-                return false;
-              }
-
-            });
-  
   return this;
 };
 
