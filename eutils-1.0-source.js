@@ -29,6 +29,29 @@
 
 
 
+  // The :childof() and :descof() selector expressions make .is(), .parents() 
+  // and other such methods sooo much more interesting...!
+  // these work wonders when combined with $.delegate() (see below)
+  // Example:
+  $.extend($.expr[':'], {
+
+    childof: function (a, i, m) {
+      return $(a.parentNode).is(m[3]);
+    },
+
+    descof: function (a, i, m) {
+      while ((a = a.parentNode)  &&  a !== document) {
+        if ($(a).is(m[3])) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+  });
+
+
+
   $.fn.extend({
 
     if_: function (cond)
@@ -323,22 +346,55 @@
 
 
 
+    // Transforms complex selectors into "simple" ones
+    // (Super useful for event delegation and passing user-defined selectors into `.is()` and `.parents()`):
+    //   * 'p a'        -->  'a:descof( p )'
+    //   * 'p > a'      -->  'a:childof( p )'
+    //   * 'div p > a'  -->  'a:childof( p:descof( div ) )'
+    invSelectors: function (selector)
+    {
+      selector = $.trim(selector).replace(/  +/, ' ').replace(/ ?> ?/g, '>');
+      var _selectors = [];
+      $.each(selector.split(/ ?, ?/), function(j, _sel){
+        var _newSel = '',
+            i=0;
+
+        while (_sel = _sel.replace(/(^| |>)([^ >]*)$/, function(all, p1, p2){
+            _newSel += p2 + ((p1==' ') ? ':descof(' : (p1=='>') ? ':childof(' : '');
+            i++;
+            return '';
+          })
+        ) {}
+
+        _selectors[j] = _newSel + (new Array(i)).join(')');
+      });
+      return _selectors.join(',');
+    },
+
+
+
     delegate: function (selector, handler)
     {
-      var _isSimpleSelector = !/ /.test( selector.replace(/ *, */g, ',') );
+      selector = $.invSelectors(selector);
+/*
+      var _isSimpleSelector = !/ /.test( selector );
+*/
 
-      return function (e) {
-        var _target = $(e.target),
-            _allParents = _target.add(_target.parents()),
+      return function (event/*, delegationTargetElm*/) {
+        var _target = $(event.target),
+            _allParents = _target.add(_target.parents()), // include the event target itself.
+            _elm = _allParents.slice(0, _allParents.index(this)).filter(selector)[0];
+/*
             _parents = _allParents.slice(0, $.inArray(this, _allParents)),
             _elm;
 
         if (_isSimpleSelector)
         {
-          _elm = _parents.filter(_bits[0])[0];
+          _elm = _parents.filter(selector)[0];
         }
-        else
+        else // Warning complex selectors (such as 'p > a.foo span') do not scale AT ALL for a large DOM tree.
         {
+          // eeek! inefficient!
           var _allElms = $(selector, this),
               i = _allElms.length;
           // loop backwars to find the innermost matching element
@@ -350,10 +406,11 @@
             } 
           }
         }
+*/
 
         if (_elm)
         {
-          return handler.call(this, e, _elm);
+          return handler.call(this, event, _elm);
         }
 
       }

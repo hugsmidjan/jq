@@ -283,7 +283,7 @@
     // defangReset can may be run against any collection of elements to defang
     // them OR, in case of non reset buttons, turn them into reset buttons.
     defangReset : function () {
-      this.each(function(){
+      return this.each(function(){
         $( this ).click(function(e){
           var btn = $( this );
           var lang = btn.attr('lang') || btn.parents('[lang]').attr('lang') || 'en';
@@ -299,11 +299,10 @@
           return false;  // cancel the click by default
         })
       });
-      return this;
     },
 
     defangEnter : function () {
-      this.each(function(){
+      return this.each(function(){
         $( this ).keydown(function(e){
           var target = e.target;
           if ( e.keyCode == 13 &&
@@ -314,14 +313,13 @@
           return true;
         })
       });
-      return this;
     },
 
     autoValidate : function ( config ) {
 
       // TODO : validateEachField is missing
 
-      this.each(function(){
+      return this.each(function(){
 
         var context = $( this );
         var form = context.is('form') ? context : $( this.form || context.parent('form').get(0) );
@@ -549,6 +547,8 @@
   });
 
 })(jQuery);
+
+
 jQuery.extend(jQuery.av.lang, {
 
   // Icelandic translation
