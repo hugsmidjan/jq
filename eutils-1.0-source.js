@@ -90,6 +90,12 @@
     },
 
 
+    delegate: function(type, subselector, handler)
+    {
+      return this.bind(type, $.delegate(subselector, handler));
+    },
+
+
     toggleClasses: function(a, b)
     {
       return this.each(function(){
@@ -346,19 +352,26 @@
 
 
 
-    // Transforms complex selectors into "simple" ones
+    // Transforms normal selectors into "reversed" ones
     // (Super useful for event delegation and passing user-defined selectors into `.is()` and `.parents()`):
-    //   * 'p a'        -->  'a:descof( p )'
-    //   * 'p > a'      -->  'a:childof( p )'
-    //   * 'div p > a'  -->  'a:childof( p:descof( div ) )'
+    //   * 'p a'        -->  'a:descof(p)'
+    //   * 'p > a'      -->  'a:childof(p)'
+    //   * 'div p > a'  -->  'a:childof(p:descof(div))'
+    //
+    // Note: We're not handling 'a ~ span' or 'a + span'  - at least for now
+    //
     invSelectors: function (selector)
     {
-      selector = $.trim(selector).replace(/  +/, ' ').replace(/ ?> ?/g, '>');
+      selector = $.trim(selector)
+                  .replace(/  +/, ' ')
+                  .replace(/ ?> ?/g, '>')
+                  .replace(/ \)/g, ')')
+                  .replace(/\( /g, '(');
       var _selectors = [];
       $.each(selector.split(/ ?, ?/), function(j, _sel){
         var _newSel = '',
             i=0;
-
+        _sel = _sel.replace(/^>/g, '');
         while (_sel = _sel.replace(/(^| |>)([^ >]*)$/, function(all, p1, p2){
             _newSel += p2 + ((p1==' ') ? ':descof(' : (p1=='>') ? ':childof(' : '');
             i++;
