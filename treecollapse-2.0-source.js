@@ -8,71 +8,103 @@
 //
 jQuery.fn.treeCollapse = function (cfg)
 {
-  var _branch         = cfg.branch         || 'li.branch',
-      _toggler        = cfg.toggler        || '> a',
+  cfg = $.extend({
+      rootClass:    'tree-active',
 
-      _rootClass      = cfg.toggler        || 'tree-active',
-      _openClass      = cfg.openClass      || 'open',
-      _closedClass    = cfg.closedClass    || 'closed',
-      _parentClass    = cfg.parentClass    || 'parent',
-      _selectClass    = cfg.selectClass    || 'selected',
+      branch:       'li.branch',
+      toggler:      '> a',
+      openClass:    'open',
+      closedClass:  'closed',
 
-      _startOpen      = cfg.startOpen      || '.parent, .selected, .open', // things that start opened have these/this class
+      leaf:         'li',
+      parentClass:  'parent',
+      selectClass:  'selected',
+      doSelect:     0,
 
-      _togglerInt     = cfg.togglerInt     || '> a.expand',
-      _togglerHtml    = cfg.togglerHtml    || '<a class="expand" href="#"></a>',
-      _togglerPlus    = cfg.togglerPlus    || '+',
-      _togglerMinus   = cfg.togglerMinus   || '-',
-      _injectTogglers = cfg.injectTogglers || 0, // inject new links rather than hook exisitng ones 
+      startOpen:    '.parent, .selected, .open', // things that start opened have these/this class
 
-      _selBranch;
+      togglerInt:   '> a.expand',
+      togglerHtml:  '<a class="expand" href="#"></a>',
+      togglerPlus:  '+',
+      togglerMinus: '-',
+      doTogglers:   0 // inject new links rather than hook exisitng ones
 
-    return this
-        .addClass(_rootClass)
-        .delegate('click', _branch+' '+_toggler, function(e, _delegateElm) { // delegated event handling
+    }, cfg);
 
-            if (_selBranch)
-            {
-              _selBranch
-                  .removeClass(_selectClass)
-                  .parents(_branch)
-                      .removeClass(_parentClass);
-            }
 
-            var _parents = $(_delegateElm).parents(_branch);
-                _selBranch = _parents.eq(0);
-            
-            _parents
-                .slice(1)
-                    .addClass(_parentClass);
+  // shortcuts to compress the code...
+  var _branch         = cfg.branch,
+      _openClass      = cfg.openClass,
+      _closedClass    = cfg.closedClass,
+      _parentClass    = cfg.parentClass,
+      _selectClass    = cfg.selectClass,
 
-            _selBranch
-                .addClass(_selectClass)
-                .toggleClasses(_openClass, _closedClass)
-                .if_(_injectTogglers)
-                    .find(_togglerInt)
-                        .text(_selBranch.hasClass(_openClass) ? _togglerMinus : _togglerPlus )
-                    //.end();
-                //.end();
+      _togglerInt     = cfg.togglerInt,
+      _togglerPlus    = cfg.togglerPlus,
+      _togglerMinus   = cfg.togglerMinus,
+      _doTogglers     = cfg.doTogglers;
 
-            return false;
-          })
-        .find(_branch)
-            .if_(_injectTogglers)
-                .prepend( $(_togglerHtml).text(_togglerPlus) )
-            .end()
-            .addClass(_closedClass)
-            .filter(_startOpen)
-                .removeClass(_closedClass)
-                .addClass(_openClass)
-                .if_(_injectTogglers)
-                    .find(_togglerInt)
-                        .text(_togglerMinus);
-                    //.end();
-                //.end();
-            //.end();
-        //.end();
+  this
+      .addClass(cfg.rootClass)
+      .if_(cfg.doSelect)
+          .each(function(){ // closure to scope _selBranch for each individual tree
+              var _selBranch = $(this).find(cfg.leaf+'.'+_selectClass).eq(0);
+              $(this)
+                  .delegate(cfg.leaf, 'click', function(e) { // delegated event handling
 
+                      if (_selBranch.length)
+                      {
+                        _selBranch
+                            .removeClass(_selectClass)
+                            .parents(_branch)
+                                .removeClass(_parentClass);
+                      }
+                      _selBranch = $(e.delegate);
+                      _selBranch
+                          .addClass(_selectClass)
+                          .parents(_branch)
+                              .addClass(_parentClass);
+
+                    });
+
+            })
+      .end()
+      .delegate(_branch+' '+cfg.toggler, 'click', function(e) { // delegated event handling
+
+          var _theBranch = $(e.delegate).parents(_branch).eq(0),
+              _wasClosed = _theBranch.hasClass(_closedClass);
+
+          $(this)
+              .trigger('Branch'+(_wasClosed?'Open':'Close'), { branch: _theBranch[0] });
+
+          _theBranch
+              .toggleClasses(_openClass, _closedClass)
+              .if_(_doTogglers)
+                  .find(_togglerInt)
+                      .text(_wasClosed ? _togglerMinus : _togglerPlus );
+                      
+                  //.end();
+              //.end();
+
+          return false;
+        })
+      .find(_branch)
+          .if_(_doTogglers)
+              .prepend( $(cfg.togglerHtml).text(_togglerPlus) )
+          .end()
+          .addClass(_closedClass)
+          .filter(cfg.startOpen)
+              .removeClass(_closedClass)
+              .addClass(_openClass)
+              .if_(_doTogglers)
+                  .find(_togglerInt)
+                      .text(_togglerMinus);
+                  //.end();
+              //.end();
+          //.end();
+      //.end();
+
+  return this;
 };
 
 

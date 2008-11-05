@@ -90,9 +90,9 @@
     },
 
 
-    delegate: function(type, subselector, handler)
+    delegate: function(subselector, type, handler, data)
     {
-      return this.bind(type, $.delegate(subselector, handler));
+      return this.bind(type, data, $.delegate(subselector, handler));
     },
 
 
@@ -393,7 +393,7 @@
       var _isSimpleSelector = !/ /.test( selector );
 */
 
-      return function (event/*, delegationTargetElm*/) {
+      return function (event) {
         var _target = $(event.target),
             _allParents = _target.add(_target.parents()), // include the event target itself.
             _elm = _allParents.slice(0, _allParents.index(this)).filter(selector)[0];
@@ -423,7 +423,8 @@
 
         if (_elm)
         {
-          return handler.call(this, event, _elm);
+          event.delegate = _elm;
+          return handler.call(this, event);
         }
 
       }
