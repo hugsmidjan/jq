@@ -6,6 +6,10 @@
 //
 // version: 2.0.0
 //
+//  Requires:
+//    * $.delegate plugin
+//    * if_ ... else_ plugin
+//
 jQuery.fn.treeCollapse = function (cfg)
 {
   cfg = $.extend({
