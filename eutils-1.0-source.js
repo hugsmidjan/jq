@@ -69,6 +69,12 @@
     },
 
 
+    pause: function (speed, callback)
+    {
+      return this.animate({ smu:0 }, speed||800, callback);
+    },
+
+
     // run a function once.
     // (similar to .each(function) that always returns false - except that inside the function this == the jQuery collection.)
     run: function (func, args)
