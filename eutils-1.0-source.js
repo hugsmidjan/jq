@@ -17,6 +17,8 @@
       _win = window,
       _doc = document,
       R = RegExp,
+      _browser = $.browser,
+      _msie = _browser.msie,
 
       // suffix and prefix used to generate temporary @id-values for HTMLelements without an @id
       _guidPrefix = 'tmp_' + (new Date()).getTime() + '_',
@@ -49,6 +51,37 @@
     }
 
   });
+
+
+
+
+  var _RigUpDOMEventAsEventPlugin = function (_type, _DOMtype, _useCapture/*, _triggerFunc*/)
+      {
+        _triggerFunc = /* _triggerFunc ||*/ function (e) {
+          e.type = _type;
+          return $.event.handle.apply(this, arguments);
+        };
+        $.event.special[_type] = {
+          setup: function () {
+            if (_msie) { return !1; }
+            this.addEventListener( _DOMtype, _triggerFunc, !!_useCapture );
+          },
+          teardown: function () {
+            if (_msie) { return !1; }
+            this.removeEventListener( _DOMtype, _triggerFunc, !!_useCapture );
+          }
+        };
+
+      };
+
+
+     // implement cross-browser `focusin` and `focusout` events. (bubbling focus and blur)
+  var _oldFF = _browser.mozilla && parseFloat(_browser.version) < 1.9; // Firefox <3 doesn't support DOMFocus[In|Out] so we resort to nasty capture events.
+                                                                        // ...run to the hills and expect the worst!!
+  _RigUpDOMEventAsEventPlugin('focusin',  _oldFF?'focus':'DOMFocusIn',   _oldFF);
+  _RigUpDOMEventAsEventPlugin('focusout', _oldFF?'blur' :'DOMFocusOut',  _oldFF);
+
+
 
 
 
@@ -214,7 +247,7 @@
     {
       if (!arguments.length)
       {
-        if ($.browser.msie)
+        if (_msie)
         {
           var d = _doc.documentElement;  // default to IE6 strict
           if (!d || !d.scrollTop) { d = _doc.body; }  // fallback for other values of IE
@@ -364,7 +397,7 @@
     //   * 'p > a'      -->  'a:childof(p)'
     //   * 'div p > a'  -->  'a:childof(p:descof(div))'
     //
-    // Note: We're not handling 'a ~ span' or 'a + span'  - at least for now
+    // Note: We're not handling 'a ~ span' or 'a + span'  (at least for now)
     //
     invSelectors: function (selector)
     {
