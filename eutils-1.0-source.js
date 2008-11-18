@@ -83,7 +83,7 @@
       return this;
     },
 
-    // assigns/enforces an id on all items in the collection
+    // enforces DOM-ids on all items in the collection
     aquireId: function ()
     {
       return this.each(function() { $.aquireId(this); });
@@ -91,7 +91,7 @@
 
     setFocus: function ()
     {
-      $.outerHTML(this[0]);
+      $.setFocus(this[0]);
       return this;
     },
 
