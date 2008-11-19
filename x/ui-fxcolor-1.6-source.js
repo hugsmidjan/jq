@@ -52,7 +52,7 @@ function getRGB(color) {
 
 		// Look for rgba(0, 0, 0, 0) == transparent in Safari 3
 		if (result = /rgba\(0, 0, 0, 0\)/.exec(color))
-				return colors['transparent']
+				return colors['transparent'];
 
 		// Otherwise, we're most likely dealing with a named color
 		return colors[$.trim(color).toLowerCase()];

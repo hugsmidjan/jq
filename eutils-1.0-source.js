@@ -75,7 +75,7 @@
       };
 
 
-     // implement cross-browser `focusin` and `focusout` events. (bubbling focus and blur)
+  // implement cross-browser `focusin` and `focusout` events. (bubbling focus and blur)
   var _oldFF = _browser.mozilla && parseFloat(_browser.version) < 1.9; // Firefox <3 doesn't support DOMFocus[In|Out] so we resort to nasty capture events.
                                                                         // ...run to the hills and expect the worst!!
   _RigUpDOMEventAsEventPlugin('focusin',  _oldFF?'focus':'DOMFocusIn',   _oldFF);
