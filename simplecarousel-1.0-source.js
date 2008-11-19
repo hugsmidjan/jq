@@ -77,51 +77,47 @@
     
   };
 
-  $.fn.extend({
+  $.fn.simpleCarousel = function( config ) {
 
-  	simpleCarousel : function( config ) {
+    this.each(function(){
 
-      this.each(function(){
+      var conf = $.extend( {}, defaults, config );
 
-        var conf = $.extend( {}, defaults, config );
+      conf.handle = $( this );
+      conf.handle.addClass( 'carousel-active' );
 
-        conf.handle = $( this );
-        conf.handle.addClass( 'carousel-active' );
+      conf.container = conf.handle.wrap( '<div class="container"></div>' ).parent();
+      conf.container.scrollLeft( 0 );
+      conf.windowSize = conf.container.width();
+      
+      var itemsWidth = 0;
+      conf.items = $( conf.item, conf.handle ).each(function(){
+          itemsWidth += $(this).outerWidth();
+        });
 
-        conf.container = conf.handle.wrap( '<div class="container"></div>' ).parent();
-        conf.container.scrollLeft( 0 );
-        conf.windowSize = conf.container.width();
-        
-        var itemsWidth = 0;
-        conf.items = $( conf.item, conf.handle ).each(function(){
-            itemsWidth += $(this).outerWidth();
-          });
+      var itemsPadded = Math.ceil( itemsWidth / conf.windowSize ) * conf.windowSize;
 
-        var itemsPadded = Math.ceil( itemsWidth / conf.windowSize ) * conf.windowSize;
+      conf.maxScroll   = itemsPadded - conf.windowSize;
+      conf.numScreens  = itemsPadded / conf.windowSize;
+      conf.handle.width( itemsPadded );
 
-        conf.maxScroll   = itemsPadded - conf.windowSize;
-        conf.numScreens  = itemsPadded / conf.windowSize;
-        conf.handle.width( itemsPadded );
+      conf.itemsPerPage = Math.ceil( conf.items.length / conf.numScreens );
 
-        conf.itemsPerPage = Math.ceil( conf.items.length / conf.numScreens );
-  
-        // build controls and add them
-        conf.controls = buildControls( conf );
-        var indicators = '';
-        for (var i=0; i<conf.numScreens; i++) {
-          indicators += '<span class="i"><i>' + (i+1) + '</i></span>';
-        }
-        var dir = $('.direct', conf.controls).append( indicators );
-        conf.container.after( conf.controls );
-        conf.currentPage = 0;
-        updateIndicator( conf );
-  
-        conf.initCallback( conf );
-      });
+      // build controls and add them
+      conf.controls = buildControls( conf );
+      var indicators = '';
+      for (var i=0; i<conf.numScreens; i++) {
+        indicators += '<span class="i"><i>' + (i+1) + '</i></span>';
+      }
+      var dir = $('.direct', conf.controls).append( indicators );
+      conf.container.after( conf.controls );
+      conf.currentPage = 0;
+      updateIndicator( conf );
 
-    }
+      conf.initCallback( conf );
+    });
 
-  });
+  };
 
 
 })(jQuery);
