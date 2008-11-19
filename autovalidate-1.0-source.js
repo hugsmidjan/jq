@@ -242,7 +242,7 @@
           felm.focus();
         },1);
         return felm;
-      },
+      }
 
     }
 
@@ -564,7 +564,7 @@ jQuery.extend(jQuery.av.lang, {
 
     fi_email        : 'Vinsamlega sláðu inn rétt netfang (dæmi: notandi@daemi.is)',
     fi_url          : 'Vinsamlega sláðu inn löggilda vefslóð (dæmi: http://www.example.is)',
-    fi_year         : 'Vinsamlega sláðu inn rétt ártal (dæmi: 1998)',
+    fi_year         : 'Vinsamlega sláðu inn rétt ártal (dæmi: 1998)'
   }
 
 });
