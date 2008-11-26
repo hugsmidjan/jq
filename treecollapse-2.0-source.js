@@ -10,7 +10,9 @@
 //    * $.delegate plugin
 //    * if_ ... else_ plugin
 //
-jQuery.fn.treeCollapse = function (cfg)
+(function($){
+
+$.fn.treeCollapse = function (cfg)
 {
   cfg = $.extend({
       rootClass:    'tree-active',
@@ -112,5 +114,4 @@ jQuery.fn.treeCollapse = function (cfg)
 };
 
 
-
-
+})(jQuery);

@@ -1,3 +1,7 @@
+// jquery.av.core.js
+// jquery.av.lang.is.js
+// jquery.av.extratypes.js
+
 (function($){
 
   var idPrefix = 'tmp_' + (new Date()).getTime();
@@ -36,7 +40,7 @@
 
 
   // autovalidator space
-  jQuery.extend({
+  $.extend({
     av : {
       lang : {
         en : {
@@ -249,7 +253,7 @@
   });
 
   // space for types
-  jQuery.extend( jQuery.av, {
+  $.extend( $.av, {
     type : {
       'fi_btn' : function ( v, w ) {
         return true; // prevents nonsense requirements
@@ -277,8 +281,9 @@
     }
   });
 
+
   // jq functions
-  jQuery.fn.extend({
+  $.fn.extend({
 
     // defangReset can may be run against any collection of elements to defang
     // them OR, in case of non reset buttons, turn them into reset buttons.
@@ -313,6 +318,7 @@
           return true;
         })
       });
+      return this;
     },
 
     autoValidate : function ( config ) {
@@ -549,29 +555,28 @@
 })(jQuery);
 
 
-jQuery.extend(jQuery.av.lang, {
+// Icelandic translation
+jQuery.av.lang.is = {
 
-  // Icelandic translation
-  is : {
-    bullet          : ' • ',
-    errorReqMsg     : 'Það þarf að fylla út þessa liði:\n\n',
-    errorTypeMsg    : 'Þessir liðir eru rangt útfylltir:\n\n',
-    inlineMsgPrefix : 'Villa:',
-    inlineReqMsg    : 'Það þarf að fylla út þennan lið ',
-    inlineTypeMsg   : 'Þessi liður er rangt út fylltur ',
-    inlineNextError : 'Næsta villa',
-    resetAlert      : 'Ath: Þú ert í þann mund að afturkalla öll innslegin gildi...',
+  bullet          : ' • ',
+  errorReqMsg     : 'Það þarf að fylla út þessa liði:\n\n',
+  errorTypeMsg    : 'Þessir liðir eru rangt útfylltir:\n\n',
+  inlineMsgPrefix : 'Villa:',
+  inlineReqMsg    : 'Það þarf að fylla út þennan lið ',
+  inlineTypeMsg   : 'Þessi liður er rangt út fylltur ',
+  inlineNextError : 'Næsta villa',
+  resetAlert      : 'Ath: Þú ert í þann mund að afturkalla öll innslegin gildi...',
 
-    fi_email        : 'Vinsamlega sláðu inn rétt netfang (dæmi: notandi@daemi.is)',
-    fi_url          : 'Vinsamlega sláðu inn löggilda vefslóð (dæmi: http://www.example.is)',
-    fi_year         : 'Vinsamlega sláðu inn rétt ártal (dæmi: 1998)'
-  }
+  fi_email        : 'Vinsamlega sláðu inn rétt netfang (dæmi: notandi@daemi.is)',
+  fi_url          : 'Vinsamlega sláðu inn löggilda vefslóð (dæmi: http://www.example.is)',
+  fi_year         : 'Vinsamlega sláðu inn rétt ártal (dæmi: 1998)'
 
-});
+};
 
 
+(function($){
 
-jQuery.extend(jQuery.av.lang.en, {
+$.extend($.av.lang.en, {
 
   fi_email : 'Please provide a valid e-mail address (example: user@example.com)',
   fi_url   : 'Please provide a valid web address (example: http://www.example.is)',
@@ -596,14 +601,14 @@ jQuery.extend(jQuery.av.lang.en, {
 //           or '' if default error is to be used 
 //
 
-jQuery.extend(jQuery.av.type, {
+$.extend($.av.type, {
   
 
   fi_kt : function ( v, w, lang ) {
-    var error = jQuery.av.getError( 'fi_kt', lang );
+    var error = $.av.getError( 'fi_kt', lang );
     if (v) {
       var kt = v.replace(/[\s\-]/g, ''); // Allow "-" and " " as delimiting characters (strip them out).
-      jQuery( this ).val( kt );
+      $( this ).val( kt );
       // remainder must all be numericals, 10 characters, and the last character must be 0 or 9 
       // kt must not be a robot
       var robot = /010130[- ]?(2(12|20|39|47|55|63|71|98)|3(01|36)|4(33|92)|506|778)9/.test(kt);
@@ -628,7 +633,7 @@ jQuery.extend(jQuery.av.type, {
 
   fi_email : function ( v, w, lang ) {
     if (v && !/^[a-z0-9-._+]+@([a-z0-9-_]+\.)+[a-z0-9-_]{2,99}$/i.test(v)) {
-      return jQuery.av.getError( 'fi_email', lang );
+      return $.av.getError( 'fi_email', lang );
     }
     return (v != '');
   },
@@ -638,7 +643,7 @@ jQuery.extend(jQuery.av.type, {
       var _url = v.replace(/^[a-z]+:\/\/.+$/i, '');
       if ( !/^[a-z]+:\/\/.+\..+$/.test( v ) || 
            /[\(\)\<\>\,\:\"\[\]\\]/.test( _url ) ) {
-        return jQuery.av.getError( 'fi_url', lang );
+        return $.av.getError( 'fi_url', lang );
       }
       return true;
     }
@@ -663,25 +668,25 @@ jQuery.extend(jQuery.av.type, {
     
     if (v) {
       // have no DB -- fallback to a simple 3-digits test
-      var codes = jQuery.av.postCodes && jQuery.av.postCodes.is;
+      var codes = $.av.postCodes && $.av.postCodes.is;
       if (!codes) { 
-        return /^\d\d\d$/.test( v ) || jQuery.av.getError( 'fi_pnr', lang );
+        return /^\d\d\d$/.test( v ) || $.av.getError( 'fi_pnr', lang );
       }
       // have DB and code is present in it -- 
       else if ( codes[v] ) {  
         // report the zone name
         if (this.nodeType) {
-          var unit = jQuery( this ).siblings('span.unit');
+          var unit = $( this ).siblings('span.unit');
           if (!unit.length) {
-            unit = jQuery('<span class="unit"></span>');
-            jQuery( this ).after( unit );
+            unit = $('<span class="unit"></span>');
+            $( this ).after( unit );
           }
           unit.html( codes[v] );
         }
         return true;
       }
       // have DB but code isn't found in it
-      return jQuery.av.getError( 'fi_pnr', lang ); 
+      return $.av.getError( 'fi_pnr', lang ); 
 
     }
     return false;
@@ -699,7 +704,7 @@ jQuery.extend(jQuery.av.type, {
       var pnrs = v.replace(/(^[ ,;]+|[ ,;]+$)/g,'').split(/[ ,;]+/);
       var v, valid = false;
       for (var i=0; i < pnrs.length; i++) {
-        v = jQuery.av.type['fi_postal_is']( pnrs[i], null, lang );
+        v = $.av.type['fi_postal_is']( pnrs[i], null, lang );
         if (v !== true) {
         return v;  // passes error exception through
         }
@@ -716,14 +721,14 @@ jQuery.extend(jQuery.av.type, {
   
   // Returns true only on a positive integer value.
   fi_qty : function( v, w, lang ) {
-    jQuery( this ).val( v );  // set field to trimmed value
+    $( this ).val( v );  // set field to trimmed value
     return !v || /^\d+$/.test(v) || '';
   },
 
   // Returns true only on any numeric value (floats, negative values, etc.).
   fi_num : function( v, w, lang ) {
     var v = v.replace(/^-\s+/, '-').replace(/[,.]$/, '');
-    jQuery( this ).val( v );
+    $( this ).val( v );
     return !v || (/\d/.test(v) && /^-?\d*[.,]?\d*$/.test(v)) || '';
   },
 
@@ -736,7 +741,7 @@ jQuery.extend(jQuery.av.type, {
   // Valid year-range: 1900-2099. one or two digit days and months, two or four digit years.
   fi_year : function ( v, w, lang ) {
     if (v && !/^(19|20)\d\d$/.test(v)) {
-      return jQuery.av.getError( 'fi_year', lang );
+      return $.av.getError( 'fi_year', lang );
     }
     return (v != '');
   },
@@ -747,7 +752,7 @@ jQuery.extend(jQuery.av.type, {
   //    en : "example: %format",
   fi_date : function ( v, w, lang ) {
     if (v) {
-      var error = jQuery.av.getError( 'fi_year', lang );
+      var error = $.av.getError( 'fi_year', lang );
 
       // has datepicker
       if (window.datePicker && datePicker.VERSION < 2) {
@@ -782,7 +787,7 @@ jQuery.extend(jQuery.av.type, {
   // validate a correct time entry
   fi_time : function ( v, w, lang ) {
     if (v) {
-      var error = jQuery.av.getError( 'fi_time', lang );
+      var error = $.av.getError( 'fi_time', lang );
       if ( /^([01]?\d|2[01234])(:([0-5]\d))?(:([0-5]\d))?\s*([ap]\.?m\.?)?$/i.test( v ) ) {
         var h = parseInt( RegExp.$1, 10 ),
             m = parseInt( RegExp.$3 || '0', 10 ),
@@ -805,7 +810,7 @@ jQuery.extend(jQuery.av.type, {
 
   // Returns true if valid credid card number
   fi_ccnum : function ( v, w, lang ) {
-    var error = jQuery.av.getError( 'fi_ccnum', lang );
+    var error = $.av.getError( 'fi_ccnum', lang );
     if (v) {
       // Strip out the optional space|dash delimiters
       var ccNum = v.replace(/[ -]/g, ''); 
@@ -814,7 +819,7 @@ jQuery.extend(jQuery.av.type, {
         return error; 
       } 
       // insert the cleaned up creditcard number back into the field
-      // jQuery( this ).val( ccNum ); 
+      // $( this ).val( ccNum ); 
       var checkSum = 0;
       for (var i=0; i < ccNum.length; i++)  {
         if ( (i % 2) === 0 ) {
@@ -836,11 +841,14 @@ jQuery.extend(jQuery.av.type, {
       // accept space and dash, and change them into "/". Then remove all spaces
       v = v.replace(/(\d\d)\s*[ -\/]?\s*(\d\d)/, '$1/$2').replace(/\s+/g, ''); 
       // ...then test against the pattern "mm/yy"
-      return /^(0\d|1[012])\/(\d\d)$/.test(v) || jQuery.av.getError( 'fi_ccexp', lang ); 
+      return /^(0\d|1[012])\/(\d\d)$/.test(v) || $.av.getError( 'fi_ccexp', lang ); 
     }
     return (v != '');
   }
   
 
 });
+
+
+})(jQuery);
 

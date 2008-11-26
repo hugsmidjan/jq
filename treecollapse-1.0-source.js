@@ -6,7 +6,9 @@
 //      * Check out http://plugins.jquery.com/project/Listen as a starting point
 //  * make expand links carry localized text.
 //
-jQuery.fn.treeCollapse = function (cfg)
+(function($){
+
+$.fn.treeCollapse = function (cfg)
 {
   cfg = $.extend({
             rootClass:      'tree-active',
@@ -65,6 +67,5 @@ jQuery.fn.treeCollapse = function (cfg)
   return this;
 };
 
-
-
+})(jQuery);
 
