@@ -19,8 +19,6 @@
       var _blurClass = cfg.blurClass,
           _labelFilter = cfg.labelFilter;
 
-      ;;;window.console&&console.dir(cfg);
-
       return this.each(function() {
 
               var _this = this;
