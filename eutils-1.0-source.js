@@ -226,8 +226,8 @@
     //
     lang: function (elm, returnFull)
     {
-      returnFull = returnFull || (elm === true  || elm === 1);
-      var e = elm = (elm && (elm.nodeName && elm) || (elm.jquery && elm[0]))  || _doc.documentElement; // default to checking the <html> element
+      returnFull = returnFull || elm === true  || elm === 1;
+      var e = elm = (elm && ((elm.nodeName && elm) || (elm.jquery && elm[0])))  || _doc.documentElement; // default to checking the <html> element
       while (!e.lang && (e.tagName != "HTML")) { e = e.parentNode; }
       return  (e.lang) ? (elm.lang = e.lang).substr(0, (returnFull ? 99 : 2)).toLowerCase() : null;
     },
