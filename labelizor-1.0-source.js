@@ -2,28 +2,50 @@
 
   $.fn.extend({
 
-    labelizor : function ( hideClass, blurClass ) {
+    labelizor : function ( cfg, b ) {
 
-      hideClass = hideClass || 'stream';
-      blurClass = blurClass || 'labelized';
+      // also supporting the old `$(':input').labelizor(hideClass, blurClass)` syntax
+      var a = cfg && cfg.charAt ? cfg : '';
+      cfg = $.extend({
+          //lRe:         /(\*|:[\W\S]*$)/g,     // pattern used to clean the <label> text.
+          //lPlace:      '',                    // replacement text/pattern for cfg.lRe
+          //labelFilter: 'i',                   // label sub-selector  (may also be a function - see below)
+          //labelFilter: function(labelElm){ return $('i', labelElm).text(); },
+          //labelText:   'My custom label text'
+          blurClass:    b||'labelized',
+          hideClass:    a||'stream'
+        },
+        !a&&cfg);
+      var _blurClass = cfg.blurClass,
+          _labelFilter = cfg.labelFilter;
 
-      return this.each(function(i) {
+      ;;;window.console&&console.dir(cfg);
+
+      return this.each(function() {
 
               var _this = this;
 
               if (_this.id || _this.title && $(_this).is(':text, textarea'))
               {
-                var _label = $('label[for='+_this.id+']'),
-                    _labelText = $.trim( (_label.text() || _this.title).replace(/(\*|:[\W\S]*$)/g, '') ),
-                    _removeDefaultValue = function ()
+                var _labelText = cfg.labelText;
+                if (!_labelText)
+                {
+                  var _label = $('label[for='+_this.id+']').addClass(cfg.hideClass);
+                  _labelText = !_labelFilter ?
+                                    _label.text():
+                                $.isFunction(_labelFilter) ?
+                                    _labelFilter(_label):
+                                    $(_labelFilter, _label).text();
+                  _labelText = $.trim( (_labelText || _this.title).replace(cfg.lRe||/(\*|:[\W\S]*$)/g, cfg.lPlace||'') );
+                }
+                var _removeDefaultValue = function ()
                     {
                       if (_this.value == _labelText) {
                         _this.value = '';
-                        $(_this).removeClass(blurClass);
+                        $(_this).removeClass(_blurClass);
                       }
                     };
 
-                _label.addClass(hideClass);
                 $(_this)
                     .attr('title', _labelText)
                     .focus(function (e) {
@@ -33,14 +55,14 @@
                         if (!_this.value)
                         {
                           _this.value = _labelText;
-                          $(_this).addClass(blurClass);
+                          $(_this).addClass(_blurClass);
                         }
                       });
 
                 if (!_this.getAttribute('value')) // note: using _this.value would cause problems when the user leaves the page and then history back/forward.
                 {
                   _this.value = _labelText;
-                  $(_this).addClass(blurClass);
+                  $(_this).addClass(_blurClass);
                 }
                     
                 $(_this.form).submit(_removeDefaultValue);

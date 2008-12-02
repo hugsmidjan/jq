@@ -34,7 +34,7 @@
                                              //  false - doesn't alter bowser defaults,
                                              //  auto  - disables enter submitions if form has a POST method or >1 submit button
     emulateTab          : false,
-    maxLengthTab        : true
+    maxLengthTab        : false
 
   };
 
@@ -411,7 +411,7 @@
 
       var invalids = [];
       var errMsgSel = '';
-      report = (report || report == null) ? true : false;
+      report = !!(report || report == null);
 
       var displayAlert = false;   // trigger alerting if any of the contexts want's one
 
@@ -623,7 +623,7 @@ $.extend($.av.type, {
       if (_summa % 11) {
         return error;
       }
-      
+
     }
     return (v != '');
   },
