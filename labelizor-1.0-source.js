@@ -16,7 +16,8 @@
           hideClass:    a||'stream'
         },
         !a&&cfg);
-      var _blurClass = cfg.blurClass,
+      var _hideClass = cfg.hideClass,
+          _blurClass = cfg.blurClass,
           _labelFilter = cfg.labelFilter;
 
       return this.each(function() {
@@ -25,10 +26,10 @@
 
               if (_this.id || _this.title && $(_this).is(':text, textarea'))
               {
-                var _labelText = cfg.labelText;
+                var _labelText = cfg.labelText,
+                     _label = (_labelText || _hideClass)  &&  $('label[for='+_this.id+']').addClass(_hideClass);
                 if (!_labelText)
                 {
-                  var _label = $('label[for='+_this.id+']').addClass(cfg.hideClass);
                   _labelText = !_labelFilter ?
                                     _label.text():
                                 $.isFunction(_labelFilter) ?
