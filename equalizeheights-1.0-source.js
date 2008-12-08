@@ -1,63 +1,66 @@
 (function($){
 
-  var quirky = !!( $.browser.msie && ( parseInt($.browser.version, 10) < 7 || document.compatMode == 'BackCompat' ) ),         
-      heightAttribute = (quirky) ? 'height' : 'min-height',
-      evSet = false,
-      sets = [];
+  var _msie = $.browser.msie,
+      _quirkyOldIE = !!(_msie  && ( parseInt($.browser.version, 10) < 7 || document.compatMode == 'BackCompat' ) ),
+      _heightAttribute = (_quirkyOldIE) ? 'height' : 'min-height',
+      _evSet,
+      _sets = [],
+      _cfgs = [],
 
-  function rerun () {
-    for (var i = 0; i < sets.length; i++) {
-      sets[i].equalizeHeights();
-    }
-  }
+      _reRun = function (i) {
+          i = _sets.length;
+          while (i--) {
+            _sets[i].equalizeHeights(_cfgs[i]);
+          }
+        };
 
-  $.fn.extend({
+  $.fn.equalizeHeights = function( cfg ) {
 
-    equalizeHeights: function( subselector ) {
+    cfg = !cfg ? {} : (typeof cfg == 'boolean') ? { margins:cfg } : cfg;
 
-      // if we get a subselector we recurse
-      if ( subselector ) {
-        return this.find( subselector ).equalizeHeights();
-      }
-      else {
-
+    var _maxHeight = 0,
+        _paddings = [];
+    this
         // find highest natural height
-        var maxHeight = 0;
-        this.each(function ( i ) {
-          $( this ).css( heightAttribute, 0 );
-          maxHeight = Math.max( $( this ).height(), maxHeight );
-        });
-
+        .each(function ( i ) {
+            var _this = $( this );
+            _this.css( _heightAttribute, 0 );
+            var _totalHeight = _this.outerHeight(!!cfg.margins);
+            _paddings[i] = _totalHeight - _this.height();
+            _maxHeight = Math.max( _totalHeight, _maxHeight );
+          })
         // assign new min-heights to collection
-        this.css( heightAttribute, maxHeight );
+        .each(function( i ){
+            $(this).css( _heightAttribute,  _maxHeight - _paddings[i] );
+          });
 
-        // for browser with ok resize events, redo on next occurence
-        if (!$.browser.msie && !this._noPush) {
-  
-          this._noPush = true;   // prevent inifinite loops when looping through the sets
-          sets.push( this );
-  
-          // add resize event 
-          if (!evSet) {
-            evSet = true;
-            $( window ).bind( 'resize', rerun ).load( rerun );
-          }
-        }
-        else {
-          if (!evSet) {
-            evSet = true;
-            $( window ).load( rerun );
-          }
-        }
+
+    // for browser with ok resize events, redo on next occurence
+    if (!_msie && !this.eqh_done)
+    {
+      this.eqh_done = 1;   // prevent inifinite loops when looping through the _sets
+      _sets.push( this );
+      _cfgs.push( cfg );
+
+      if (!_evSet)
+      {
+        // add resize event 
+        $( window ).bind( 'resize', _reRun );
       }
-      
-      // kick the renderer
-      document.body.className += '';  
-      
-      return this;
-      
     }
-  
-  });
+
+    if (!_evSet)
+    {
+      _evSet = 1;
+      $( window ).load( _reRun );
+    }
+    
+    // kick the renderer
+    document.body.className += '';  
+    
+    return this;
+    
+  };
 
 })(jQuery);
+
