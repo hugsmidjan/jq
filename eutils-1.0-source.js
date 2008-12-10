@@ -16,7 +16,6 @@
   var _dummyElm,  // dummy element used by $.setHash();
       _win = window,
       _doc = document,
-      R = RegExp,
       _browser = $.browser,
       _msie = _browser.msie,
 
@@ -26,9 +25,8 @@
       // a counter that should be incremented with each use.
       _guid = 1,
 
-      _injectRegExpCache = {}; // used by $.inject(); to store regexp objects.
-
-
+      _injectRegExpCache = {}, // used by $.inject(); to store regexp objects.
+      _RegExpEscape = function(s) { return s.replace(/([\\\^\$*+[\]?{}.=!:(|)])/g, '\\$1'); };
 
 
   // The :childof() and :descof() selector expressions make .is(), .parents() 
@@ -372,7 +370,7 @@
           l = _vars.length,
           i;
       // fail early to save time
-      if (this.indexOf('%{')>-1)
+      if (_theString.indexOf('%{')>-1)
       {
         // NOTE: this is a fairly ugly way to collect the "keys" depending on if _vars is a List or an Object.
         if (isNaN(l)) { for (i in _vars)    { _keys.push(i); } }
@@ -382,7 +380,7 @@
         while (i--)
         {
           var _key = _keys[i],
-              re   = _injectRegExpCache[_key] || (_injectRegExpCache[_key] = new R(R.escape('%{'+_key+'}'),'g')); // retieve the corresponding RegExp from the cache.
+              re   = _injectRegExpCache[_key] || (_injectRegExpCache[_key] = new RegExp(_RegExpEscape('%{'+_key+'}'),'g')); // retieve the corresponding RegExp from the cache.
           _theString = _theString.replace(re, _vars[_key]);
         }
       }
