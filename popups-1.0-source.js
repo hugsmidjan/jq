@@ -9,13 +9,31 @@
 
     cfg = cfg || {};
 
+/*
+  Default Config =
+    {
+      target    : '_top', // checks the element first for a target="" attribute
+      markTitle : false,  // if true, will add $.fn.popUps.titleSuffix[lang] suffix to the link's title="" atribute
+      width     : null,   // px
+      height    : null,   // px
+      minimal   : false,  // true will automatically turn all of the following UI/Chrome options to false.
+
+      toolbar    : null,
+      menubar    : null,
+      status     : null,
+      scrollbars : null,
+      location   : null
+    }
+*/
+
+
     var settings = '';
     if (cfg.width)  { settings += ',width='+cfg.width; }
     if (cfg.height) { settings += ',height='+cfg.height; }
     cfg.titleSuffix = $.extend( {}, p.titleSuffix, cfg.titleSuffix || {} );
 
     $.each(['toolbar','menubar','status','scrollbars','location'], function(i, param){
-      if (cfg[param] === undefined) { settings += ','+param + (cfg[param]?'=yes':'=no'); }
+      if (cfg[param] !== undefined) { settings += ','+param + (cfg[param]?'=yes':'=no'); }
       else if (cfg.minimal) { settings += ','+param+'=no'; }
     });
     cfg._wSettings = settings.substr(1);
@@ -64,7 +82,7 @@
   var undefined,
        _dataKey  = 'pop'+(new Date()).getTime(),
        i = 0,
-       
+
 
       _pop = function (e) 
       {

@@ -10,9 +10,7 @@
 //    * $.delegate plugin
 //    * if_ ... else_ plugin
 //
-(function($){
-
-$.fn.treeCollapse = function (cfg)
+jQuery.fn.treeCollapse = function (cfg)
 {
   cfg = $.extend({
       rootClass:    'tree-active',
@@ -37,6 +35,9 @@ $.fn.treeCollapse = function (cfg)
 
     }, cfg);
 
+  var uniBranched  = !cfg.branch;
+  if (uniBranched) { this.aquireId(); }
+
 
   // shortcuts to compress the code...
   var _branch         = cfg.branch,
@@ -57,55 +58,62 @@ $.fn.treeCollapse = function (cfg)
               var _selBranch = $(this).find(cfg.leaf+'.'+_selectClass).eq(0);
               $(this)
                   .delegate(cfg.leaf, 'click', function(e) { // delegated event handling
+                  
+                      var _thisBranch = _branch || '#'+this.id;
 
                       if (_selBranch.length)
                       {
                         _selBranch
                             .removeClass(_selectClass)
-                            .parents(_branch)
+                            .parents(_thisBranch)
                                 .removeClass(_parentClass);
                       }
                       _selBranch = $(e.delegate);
                       _selBranch
                           .addClass(_selectClass)
-                          .parents(_branch)
+                          .parents(_thisBranch)
                               .addClass(_parentClass);
 
                     });
 
             })
       .end()
-      .delegate(_branch+' '+cfg.toggler, 'click', function(e) { // delegated event handling
-
-          var _theBranch = $(e.delegate).parents(_branch).eq(0),
-              _wasClosed = _theBranch.hasClass(_closedClass);
-
+      .each(function(){
+          var _thisBranch = _branch || '#'+this.id;
           $(this)
-              .trigger('Branch'+(_wasClosed?'Open':'Close'), { branch: _theBranch[0] });
+              .delegate(_thisBranch+' '+cfg.toggler, 'click', function(e) { // delegated event handling
 
-          _theBranch
-              .toggleClasses(_openClass, _closedClass)
-              .if_(_doTogglers)
-                  .find(_togglerInt)
-                      .text(_wasClosed ? _togglerMinus : _togglerPlus );
-                      
-                  //.end();
-              //.end();
+                  var _theBranch = $(e.delegate).parents(_thisBranch).eq(0),
+                      _wasClosed = _theBranch.hasClass(_closedClass);
 
-          return false;
-        })
-      .find(_branch)
+                  $(this)
+                      .trigger('Branch'+(_wasClosed?'Open':'Close'), { branch: _theBranch[0] });
+
+                  _theBranch
+                      .toggleClasses(_openClass, _closedClass)
+                      .if_(_doTogglers)
+                          .find(_togglerInt)
+                              .text(_wasClosed ? _togglerMinus : _togglerPlus );
+                              
+                          //.end();
+                      //.end();
+
+                  return false;
+                });
+        });
+
+  var _branches = uniBranched ? this : this.find(_branch);
+  _branches
+      .if_(_doTogglers)
+          .prepend( $(cfg.togglerHtml).text(_togglerPlus) )
+      .end()
+      .addClass(_closedClass)
+      .filter(cfg.startOpen)
+          .removeClass(_closedClass)
+          .addClass(_openClass)
           .if_(_doTogglers)
-              .prepend( $(cfg.togglerHtml).text(_togglerPlus) )
-          .end()
-          .addClass(_closedClass)
-          .filter(cfg.startOpen)
-              .removeClass(_closedClass)
-              .addClass(_openClass)
-              .if_(_doTogglers)
-                  .find(_togglerInt)
-                      .text(_togglerMinus);
-                  //.end();
+              .find(_togglerInt)
+                  .text(_togglerMinus);
               //.end();
           //.end();
       //.end();
@@ -114,4 +122,5 @@ $.fn.treeCollapse = function (cfg)
 };
 
 
-})(jQuery);
+
+
