@@ -12,6 +12,7 @@
 //
 jQuery.fn.treeCollapse = function (cfg)
 {
+  var $ = jQuery;
   cfg = $.extend({
       rootClass:    'tree-active',
 
