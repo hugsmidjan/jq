@@ -451,10 +451,13 @@ jQuery.imgAreaSelect.init = function (img, options) {
 
         update();
 
+
         if (newOptions.hide)
             $a.add($o).hide();
         else if (newOptions.show)
-            $a.add($o).show();
+            $a.add($o).css('display', 'block');
+
+
 
         $o.addClass(options.classPrefix + '-outer');
         $area.addClass(options.classPrefix + '-selection');
@@ -486,6 +489,7 @@ jQuery.imgAreaSelect.init = function (img, options) {
 
         jQuery(options.parent).append($o.add($a));
 
+
         options.enable = options.disable = undefined;
     };
 
@@ -495,7 +499,14 @@ jQuery.imgAreaSelect.init = function (img, options) {
     jQuery.imgAreaSelect.keyPress = jQuery.browser.msie ||
         jQuery.browser.safari ? 'keydown' : 'keypress';
 
+
 // BEGIN: bugfix by Már Örlygsson (2008-12-17)
+    $a.add($o).css({
+        display: 'none',
+        overflow: 'hidden'
+      });
+    $area.css({ borderStyle: 'solid' });
+
     var initOptions = {
         borderColor1: '#000',
         borderColor2: '#fff',
@@ -514,13 +525,21 @@ jQuery.imgAreaSelect.init = function (img, options) {
     };
     options = jQuery.extend(initOptions, options);
     this.setOptions(options);
+
+    $a.add($o).css({ 
+        position: fixed ? 'fixed' : 'absolute',
+        zIndex: zIndex > 0 ? zIndex : '0'
+      });
+
 // END: bugfix by Már Örlygsson (2008-12-17)
+
+
+/* BEGIN: original code (2008-12-17):
 
     $a.add($o).css({ display: 'none', position: fixed ? 'fixed' : 'absolute',
         overflow: 'hidden', zIndex: zIndex > 0 ? zIndex : '0' });
     $area.css({ borderStyle: 'solid' });
 
-/* BEGIN: original code (2008-12-17):
     initOptions = {
         borderColor1: '#000',
         borderColor2: '#fff',
