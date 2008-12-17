@@ -496,12 +496,30 @@ jQuery.imgAreaSelect.init = function (img, options) {
         jQuery.browser.safari ? 'keydown' : 'keypress';
 
 // BEGIN: bugfix by Már Örlygsson (2008-12-17)
+    var initOptions = {
+        borderColor1: '#000',
+        borderColor2: '#fff',
+        borderWidth: 1,
+        classPrefix: 'imgareaselect',
+        movable: true,
+        resizable: true,
+        selectionColor: '#fff',
+        selectionOpacity: 0.2,
+        outerColor: '#000',
+        outerOpacity: 0.2,
+        parent: 'body',
+        onSelectStart: function () {},
+        onSelectChange: function () {},
+        onSelectEnd: function () {}
+    };
+    options = jQuery.extend(initOptions, options);
     this.setOptions(options);
 // END: bugfix by Már Örlygsson (2008-12-17)
 
     $a.add($o).css({ display: 'none', position: fixed ? 'fixed' : 'absolute',
         overflow: 'hidden', zIndex: zIndex > 0 ? zIndex : '0' });
     $area.css({ borderStyle: 'solid' });
+
 /* BEGIN: original code (2008-12-17):
     initOptions = {
         borderColor1: '#000',
@@ -525,28 +543,7 @@ jQuery.imgAreaSelect.init = function (img, options) {
 };
 
 jQuery.fn.imgAreaSelect = function (options) {
-// BEGIN: bugfix by Már Örlygsson (2008-12-17)
-    var initOptions = {
-        borderColor1: '#000',
-        borderColor2: '#fff',
-        borderWidth: 1,
-        classPrefix: 'imgareaselect',
-        movable: true,
-        resizable: true,
-        selectionColor: '#fff',
-        selectionOpacity: 0.2,
-        outerColor: '#000',
-        outerOpacity: 0.2,
-        parent: 'body',
-        onSelectStart: function () {},
-        onSelectChange: function () {},
-        onSelectEnd: function () {}
-    };
-    options = jQuery.extend(initOptions, options||{});
-// END: bugfix by Már Örlygsson (2008-12-17)
-/* BEGIN: original code (2008-12-17):
     options = options || {};
-*/
 
     this.each(function () {
         if (jQuery(this).data('imgAreaSelect'))
