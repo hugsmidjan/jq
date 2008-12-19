@@ -751,7 +751,8 @@ $.extend($.av.type, {
   //    is : "dæmi: %format",
   //    en : "example: %format",
   fi_date : function ( v, w, lang ) {
-    if (v) {
+    if (v)
+    {
       var error = $.av.getError( 'fi_year', lang );
 
       // has datepicker
@@ -769,7 +770,7 @@ $.extend($.av.type, {
               v = v.toLowerCase();
               _dateStr = _dateStr.toLowerCase();
             }
-            return (_dateStr != v) || error;
+            return (_dateStr == v) || datePicker.printDateValue(new Date(2000,4,27), _dateUI.dateFormat, lang);
           }
         }
       }
