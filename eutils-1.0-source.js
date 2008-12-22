@@ -53,32 +53,39 @@
 
 
 
-  var _RigUpDOMEventAsEventPlugin = function (_type, _DOMtype, _useCapture/*, _triggerFunc*/)
-      {
-        _triggerFunc = /* _triggerFunc ||*/ function (e) {
-          e.type = _type;
-          return $.event.handle.apply(this, arguments);
-        };
-        $.event.special[_type] = {
-          setup: function () {
-            if (_msie) { return !1; }
-            this.addEventListener( _DOMtype, _triggerFunc, !!_useCapture );
-          },
-          teardown: function () {
-            if (_msie) { return !1; }
-            this.removeEventListener( _DOMtype, _triggerFunc, !!_useCapture );
-          }
-        };
-
+  // does not work in MSIE<=7
+  var _RigUpDOMEventAsEventPlugin = function (_type, _DOMtype, _useCapture, _triggerFunc)
+  {
+    if (!_msie)
+    {
+      _triggerFunc = /* _triggerFunc ||*/ function (e) {
+        var args = [].slice.call(arguments, 0);
+        e = $.event.fix(e);
+        e.type = _type;
+        args[0] = e;
+        return $.event.handle.apply(this, args);
       };
+      $.event.special[_type] = {
+        setup: function () {
+          this.addEventListener( _DOMtype, _triggerFunc, !!_useCapture );
+        },
+        teardown: function () {
+          this.removeEventListener( _DOMtype, _triggerFunc, !!_useCapture );
+        }
+      };
+    }
+
+  };
 
 
-  // implement cross-browser `focusin` and `focusout` events. (bubbling focus and blur)
-  var _oldFF = _browser.mozilla && parseFloat(_browser.version) < 1.9; // Firefox <3 doesn't support DOMFocus[In|Out] so we resort to nasty capture events.
-                                                                        // ...run to the hills and expect the worst!!
-  _RigUpDOMEventAsEventPlugin('focusin',  _oldFF?'focus':'DOMFocusIn',   _oldFF);
-  _RigUpDOMEventAsEventPlugin('focusout', _oldFF?'blur' :'DOMFocusOut',  _oldFF);
-
+  if (!_msie)
+  {
+    // Implement cross-browser `focusin` and `focusout` events (i.e. `focus` and `blur` that bubbles!)
+    var _isFF = _browser.mozilla; // Firefox (as of version 3.0) doesn't support DOMFocus[In|Out]
+                                   // so we resort to nasty capture events.  ...Run to the hills and expect the worst!!
+    _RigUpDOMEventAsEventPlugin('focusin',  _isFF?'focus':'DOMFocusIn',   _isFF);
+    _RigUpDOMEventAsEventPlugin('focusout', _isFF?'blur' :'DOMFocusOut',  _isFF);
+  }
 
 
 
