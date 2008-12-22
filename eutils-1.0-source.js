@@ -100,6 +100,11 @@
     },
 
 
+    // Clones the jQuery object and wipes out the it's `.prevObject` stack, and other instance-properties.
+    // This allows the garbage collector to free up memory. (In some cases gobs of it!)
+    fin: function(){ return $(this) }, 
+
+
     pause: function (speed, callback)
     {
       return this.animate({ smu:0 }, speed||800, callback);
