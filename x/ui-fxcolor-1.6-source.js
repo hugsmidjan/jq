@@ -19,7 +19,7 @@ $.each(['backgroundColor', 'borderBottomColor', 'borderLeftColor', 'borderRightC
 						Math.max(Math.min( parseInt((fx.pos * (fx.end[1] - fx.start[1])) + fx.start[1]), 255), 0),
 						Math.max(Math.min( parseInt((fx.pos * (fx.end[2] - fx.start[2])) + fx.start[2]), 255), 0)
 				].join(",") + ")";
-	};
+		}
 });
 
 // Color Conversion functions from highlightFade
@@ -36,7 +36,7 @@ function getRGB(color) {
 
 		// Look for rgb(num,num,num)
 		if (result = /rgb\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*\)/.exec(color))
-				return [parseInt(result[1],10), parseInt(result[2],10), parseInt(result[3],10)];
+				return [parseInt(result[1]), parseInt(result[2]), parseInt(result[3])];
 
 		// Look for rgb(num%,num%,num%)
 		if (result = /rgb\(\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*\)/.exec(color))
@@ -77,6 +77,7 @@ function getColor(elem, attr) {
 // Some named colors to work with
 // From Interface by Stefan Petre
 // http://interface.eyecon.ro/
+
 var colors = {
 /*
 	aqua:[0,255,255],

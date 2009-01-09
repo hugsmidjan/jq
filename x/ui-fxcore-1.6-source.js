@@ -1,11 +1,10 @@
 /*
- * jQuery UI Effects 1.6rc2
-
+ * jQuery UI Effects 1.6rc4
  *
- * Copyright (c) 2008 Aaron Eisenberger (aaronchi@gmail.com)
+ * Copyright (c) 2008 AUTHORS.txt (http://ui.jquery.com/about)
  * Dual licensed under the MIT (MIT-LICENSE.txt)
  * and GPL (GPL-LICENSE.txt) licenses.
- * 
+ *
  * http://docs.jquery.com/UI/Effects/
  */
 ;(function($) {
@@ -13,6 +12,7 @@
 $.effects = $.effects || {}; //Add the 'effects' scope
 
 $.extend($.effects, {
+	version: "1.6rc4",
 	save: function(el, set) {
 		for(var i=0;i<set.length;i++) {
 			if(set[i] !== null) $.data(el[0], "ec.storage."+set[i], el[0].style[set[i]]);
@@ -175,6 +175,5 @@ $.fn.extend({
 		return val;
 	}
 });
-
 
 })(jQuery);
