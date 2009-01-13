@@ -48,7 +48,7 @@ jQuery(function($){
       }
 
 
-      if (cfg.tagName || cfg.jquery)
+      if (cfg  &&  (cfg.tagName || cfg.jquery))
       {
         elm = cfg;
         cfg = {};
