@@ -324,24 +324,23 @@
     setFocus: function (_elm)
     {
       _elm = $(_elm);
-      var _focusElm = _elm[0];
-      if (!_focusElm.focus)
+      var _focusElm = _elm.is(_selector) && _elm,
+          _selector = 'a,input,textarea,button,area';
+      if (!_focusElm)
       {
-        $('*', _elm)
-            .each(function()
-              {
-                if (this.focus)
-                {
-                  _focusElm = this;
-                  return false;  // break the .each loop
-                }
-              });
+        $('*', _elm).each(function(){
+            if ( $(this).is(_selector) )
+            {
+              _focusElm = this;
+              return false;  // break the .each loop
+            }
+          });
       }
-      if (_focusElm.focus)
+      if (_focusElm)
       {
         var _before = $.scroll();
 
-        // emulate the click action - putting the focus inside the section
+        // Put the focus inside the section
         // (the browser only scrolls the page if the _focusElm is outside the viewport)
         _focusElm.focus();
 
@@ -354,6 +353,7 @@
           if (_newTop < 10) { _newTop = 0; }
           $.scroll({ top: _newTop });
         }
+
       }
     },
 
