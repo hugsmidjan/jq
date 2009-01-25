@@ -12,10 +12,11 @@ jQuery.fn.roundCorners = function (opts)
   var S = '<'+opts.tag+' class="',
       E = '" />';
 
-  return this
-          .not(':has(>'+opts.tag+'.'+opts.tr+')')
+  this
+      .not(':has(>'+opts.tag+'.'+opts.tr+')')
           .addClass( opts.activeClass )
           .prepend( S+opts.tr+E  +  S+opts.tl+E )
           .append( S+opts.bl+E  +  S+opts.br+E );
 
+  return this;
 };
