@@ -1,5 +1,5 @@
 /*
-  Requires:  jQuery 1.2 or 1.3
+  Requires:  jQuery 1.3
 
   Usage:
 
@@ -55,7 +55,8 @@ jQuery(function($){
       }
 
       cfg = $.extend({
-          className: 'curtain-overlay'
+          className: 'curtain-overlay',
+          container: (elm && elm.parentNode) || document.body
         },
         typeof(cfg)=='string' ?
             { className: cfg }:
@@ -64,13 +65,20 @@ jQuery(function($){
             cfg || {}
       );
 
-      var _curtain = $(elm || '<div />')
-              .remove()  // $('<div />').parent() will otherwise return an anomymous <div>.
-                         // remove() allows us to optimize the window.onresize event below
-              .addClass(cfg.className)
+      var _curtain = $(elm || '<div />');
+      _curtain
+              .addClass( cfg.className )
+              .appendTo( cfg.container )
               .css({ position: 'absolute', top: 0, left: 0 })
               .hide()
               .bind('click', function(e){ e.stopPropagation(); return false; });
+
+      // TODO remove this block as soon as the IE opacity bug is fixed in jQuery 1.3
+      // (http://dev.jquery.com/ticket/3981)
+      if ( !$.support.opacity && _curtain.css('opacity') == 1 ) {
+        _curtain.css('opacity', _curtain.css('filter').match(/opacity=(\d+)/) ? RegExp.$1/100 : 1);
+      }
+
 
       _curtainlist.push(_curtain[0]);
 
@@ -81,7 +89,6 @@ jQuery(function($){
       {
         _curtain.css({
             backgroundColor: cfg.bgcol,
-            opacity: cfg.opacity,
             zIndex: cfg.z
           });
       }
@@ -102,7 +109,7 @@ jQuery(function($){
         while (i--)
         {
           var elm = _curtainlist[i];
-          if ( elm  &&  (elm.parentNode || e == 'init') )
+          if ( elm  &&  ( (elm.parentNode  &&  $(elm).is(':visible'))  ||  e == 'init' ) )
           {
             W = W!=-1 ? W : Math.max( w.width(),  b.innerWidth() );
             H = H!=-1 ? H : Math.max( w.height(), b.innerHeight() );
