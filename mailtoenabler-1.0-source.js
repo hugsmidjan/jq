@@ -1,5 +1,8 @@
 // encoding: UTF-8
 
+// Requires jQuery 1.2.6
+// Runs OK in 1.3
+
 jQuery.fn.mailtoEnabler = function (_cfg)
 {
   var _this = this,
@@ -8,7 +11,7 @@ jQuery.fn.mailtoEnabler = function (_cfg)
   if (_this.length)
   {
     _cfg = $.extend({
-        successClass : 'email',
+        //successClass : 'email-active',
         dotSymbols   : ['dot','punktur','period','\\.'],
         atSymbols    : ['at','hj[aá]','@'],
         openBracket  : [' ','\\-','_','{','\\[','('],
@@ -25,24 +28,21 @@ jQuery.fn.mailtoEnabler = function (_cfg)
         _decodeURI = window.decodeURI || function(s){return s;}; // NOTE: <-- this causes the script will fail to enable certain mailto: links in in IE5/Win
 
     return _this.each(function(){
-        var _link = this,
+        var _link = $('a', this)[0] || this,
             _isAnchor = _link.tagName == 'A',
             _linkText = (_link.href) ? _decodeURI(_link.href).replace(_mailtoPrefix, '') : '',
             _useInnerText = !_linkText || _linkText == _decodeURI(_link.href);
 
         if (_useInnerText)
         {
-          ;;;window.console&&console.log(_linkText, _decodeURI(_link.href));
-          $('img', _link).each(function(){
-              $(this).replaceWith(this.alt);
-            });
+          $('img', _link).each(function(){ $(this).replaceWith(this.alt); });
           _linkText = $(_link).text().replace(_mailtoPrefix, '');
         }
         _linkText = _linkText
             .replace(_atPattern, '@')
             .replace(_dotPattern, '.');
 
-        $(_link).addClass(_cfg.successClass);
+        _cfg.successClass && $(_link).addClass(_cfg.successClass);
 
         // create a link inside the element.
         if (_cfg.createLinks  &&  !_isAnchor)
