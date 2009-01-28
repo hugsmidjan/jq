@@ -1,11 +1,12 @@
 // encoding: utf-8
 // Gereric Popup window script ** version 1.0 **
 // requires jQuery 1.2
+// works with jQuery 1.3
 
 (function($){
 
 
-  $.fn.popUps = function p (cfg) {
+  var p = $.fn.popUps = function (cfg) {
 
     cfg = cfg || {};
 
@@ -14,29 +15,32 @@
     {
       target    : '_top', // checks the element first for a target="" attribute
       markTitle : false,  // if true, will add $.fn.popUps.titleSuffix[lang] suffix to the link's title="" atribute
+      titleSuffix: { en:'mytitlesuffix', se:'hurdygurdy' },
       width     : null,   // px
       height    : null,   // px
       minimal   : false,  // true will automatically turn all of the following UI/Chrome options to false.
 
-      toolbar    : null,
+      location   : null,
       menubar    : null,
-      status     : null,
+      resizable  : null,
       scrollbars : null,
-      location   : null
+      status     : null,
+      toolbar    : null
     }
 */
 
-
-    var settings = '';
-    if (cfg.width)  { settings += ',width='+cfg.width; }
-    if (cfg.height) { settings += ',height='+cfg.height; }
+    var settings = [];
+    if (cfg.width)  { settings.push('width='+cfg.width); }
+    if (cfg.height) { settings.push('height='+cfg.height); }
     cfg.titleSuffix = $.extend( {}, p.titleSuffix, cfg.titleSuffix || {} );
 
-    $.each(['toolbar','menubar','status','scrollbars','location'], function(i, param){
-      if (cfg[param] !== undefined) { settings += ','+param + (cfg[param]?'=yes':'=no'); }
-      else if (cfg.minimal) { settings += ','+param+'=no'; }
+    $.each(['location','menubar','scrollbars','status','toolbar'], function(i, param){
+      if (cfg[param] !== undefined) { settings.push(param + (cfg[param]?'=yes':'=no') ); }
+      else if (cfg.minimal) { settings.push(param+'=no'); }
     });
-    cfg._wSettings = settings.substr(1);
+    // default to resziable=yes
+    settings.push( 'resizable=' + (cfg.resizable===undefined || cfg.resizable ?'yes':'no') );
+    cfg._wSettings = settings.join(',');
 
     return this.each(function(i, _elm){
         var _Elm = $(_elm);
@@ -44,7 +48,7 @@
 
         if (cfg.markTitle  &&  _elm.tagName != 'FORM')
         {
-          var _elmLang = ($.lang && $.lang(_elm)) || 'en';
+          var _elmLang = ( $.lang && $.lang(_elm) || $('html').attr('lang') ) || 'en';
           _elm.title = (_elm.title || _Elm.text() || _elm.value) +' '+ (cfg.titleSuffix[_elmLang] || cfg.titleSuffix.en);
         }
 
@@ -91,7 +95,6 @@
             _target = _elm.target || _conf.target || '_'+'top',
             _wasBlank = (_target.toLowerCase() == '_'+'blank'),
             _url = _conf.url || 'about:blank';
-
 
         if (_wasBlank)
         {
