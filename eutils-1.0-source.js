@@ -1,3 +1,4 @@
+// encoding: utf-8
 (function($){
 
 /*
@@ -122,7 +123,7 @@
     // (similar to .each(function) that always returns false - except that inside the function this == the jQuery collection.)
     run: function (func, args)
     {
-      func.apply(this, args);
+      func.apply(this, args||[]);
       return this;
     },
 
@@ -324,12 +325,13 @@
     setFocus: function (_elm)
     {
       _elm = $(_elm);
-      var _focusElm = _elm.is(_selector) && _elm,
-          _selector = 'a,input,textarea,button,area';
+      var _focusable = 'a,input,textarea,button,area',
+          _focusElm = _elm.is(_focusable) && _elm;
+          
       if (!_focusElm)
       {
         $('*', _elm).each(function(){
-            if ( $(this).is(_selector) )
+            if ( $(this).is(_focusable) )
             {
               _focusElm = this;
               return false;  // break the .each loop
