@@ -3,10 +3,10 @@
 // requires jQuery 1.2
 // works with jQuery 1.3
 
-(function($){
+(function($, p){
 
 
-  var p = $.fn.popUps = function (cfg) {
+  p = $.fn.popUps = function (cfg) {
 
     cfg = cfg || {};
 
@@ -39,7 +39,7 @@
       else if (cfg.minimal) { settings.push(param+'=no'); }
     });
     // default to resziable=yes
-    settings.push( 'resizable=' + (cfg.resizable===undefined || cfg.resizable ?'yes':'no') );
+    settings.push( 'resizable=' + ((cfg.resizable===undefined || cfg.resizable) ?'yes':'no') );
     cfg._wSettings = settings.join(',');
 
     return this.each(function(i, _elm){
@@ -48,23 +48,23 @@
 
         if (cfg.markTitle  &&  _elm.tagName != 'FORM')
         {
-          var _elmLang = ( $.lang && $.lang(_elm) || $('html').attr('lang') ) || 'en';
+          var _elmLang = ( $.lang && $.lang(_elm) ) || $('html').attr('lang')  || 'en';
           _elm.title = (_elm.title || _Elm.text() || _elm.value) +' '+ (cfg.titleSuffix[_elmLang] || cfg.titleSuffix.en);
         }
 
         switch(_elm.tagName)
         {
           case 'FORM':
-            _Elm.submit(_pop);
+            _Elm.bind('submit', _pop);
             break;
           case 'INPUT':
           case 'BUTTON':
-            _Elm.click(_popButton);
+            _Elm.bind('click', _popButton);
             break;
           //case 'A':
           //case 'AREA':
           default:
-            _Elm.click(_pop);
+            _Elm.bind('click', _pop);
             break;
         }
 
@@ -90,10 +90,11 @@
 
       _pop = function (e) 
       {
-        var _elm = this,
+        var uscore = '_', // hack to prevent overzealous dean.edwards.name/packer from accidentally handling _top and _blank as "private" variable names
+            _elm = this,
             _conf = $(_elm).data(_dataKey),
-            _target = _elm.target || _conf.target || '_'+'top',
-            _wasBlank = (_target.toLowerCase() == '_'+'blank'),
+            _target = _elm.target || _conf.target || uscore+'top',
+            _wasBlank = (_target.toLowerCase() == uscore+'blank'),
             _url = _conf.url || 'about:blank';
 
         if (_wasBlank)
@@ -110,7 +111,7 @@
         {
           _elm.target = _target;  // set it temporarily (while the action is taking place)
           setTimeout(function() { // and then remove/reset it again (after a while)
-            _elm.target = (_wasBlank) ? '_'+'blank' : '';
+            _elm.target = (_wasBlank) ? uscore+'blank' : '';
           }, 150);
         }
         // return true/undefined because there might be other handlers that'd like to modify the link.href before it's activated,
@@ -128,7 +129,7 @@
 
         _Form
             .data( _dataKey, $(this).data(_dataKey) )
-            .submit(_pop);
+            .bind('submit', _pop);
 
         setTimeout(function(){  // cleanup - unconditionally (not 'on submit') because the submit event might get cancelled for some reason.
           if (_wasFormCfg)
