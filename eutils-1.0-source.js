@@ -1,5 +1,5 @@
 // encoding: utf-8
-(function($){
+(function($, undefined){
 
 /*
  TODO:
@@ -9,8 +9,6 @@
 ??
   bind
   bindAfter
-  viewportSize
-  docSize
 
 */
 
@@ -41,7 +39,7 @@
     },
 
     descof: function (a, i, m) {
-      while ((a = a.parentNode)  &&  a !== document) {
+      while ((a = a.parentNode)  &&  a !== _doc) {
         if ($(a).is(m[3])) {
           return true;
         }
@@ -133,9 +131,9 @@
       return this.each(function() { $.aquireId(this); });
     },
 
-    setFocus: function ()
+    setFocus: function (_noScroll)
     {
-      $.setFocus(this[0]);
+      $.setFocus(this[0], _noScroll);
       return this;
     },
 
@@ -146,11 +144,32 @@
     },
 
 
-    toggleClasses: function(a, b)
+    // Yes this is strictly speaking completely redundant, 
+    // but jQuery's fn.scrollLeft and fn.scrollTop methods are so #$% inelegant to use.
+    //
+    // Usage:
+    // collection.scroll();                    // returns { left:pageXOffset,  top:pageYOffset }
+    // collection.scroll(xPos, yPos);          // scrolls to xPos, yPos
+    // collection.scroll(xPos);                // scrolls to xPos - maintaining the current pageYOffset
+    // collection.scroll(null, yPos);          // scrolls to yPos - maintaining the current pageXOffset
+    // collection.scroll({ left:xPos, top:yPos });  // scrolls to xPos, yPos
+    scroll: function (x, y)
+    {
+      if (x == undefined && y == undefined)
+      {
+        return { left:this.scrollLeft()  , top:this.scrollTop()  };
+      }
+      x!=undefined  &&  this.scrollLeft(x);
+      y!=undefined  &&  this.scrollTop(y);
+      return this;
+    },
+
+
+    toggleClasses: function(a, b, state)
     {
       return this.each(function(){
           var _elm = $(this),
-              A = _elm.hasClass(a);
+              A = arguments.length>2 ? state : _elm.hasClass(a);
           _elm
               .removeClass(A? a : b)
               .addClass   (A? b : a);
@@ -244,47 +263,11 @@
     },
 
 
-
-    // Yes this is strictly speaking completely redundant, 
-    // but jQuery's fn.scrollLeft and fn.scrollTop methods are so #$% inelegant to use.
-    //
-    // Usage:
-    // $.scroll();                    // returns { left:pageXOffset,  top:pageYOffset }
-    // $.scroll(xPos, yPos);          // scrolls to xPos, yPos
-    // $.scroll(xPos);                // scrolls to xPos - maintaining the current pageYOffset
-    // $.scroll(null, yPos);          // scrolls to yPos - maintaining the current pageXOffset
-    // $.scroll({ left:xPos, top:yPos });  // scrolls to xPos, yPos
+    // returns the .scroll() coordinates of $(document)
     scroll: function (x, y)
     {
-      if (!arguments.length)
-      {
-        if (_msie)
-        {
-          var d = _doc.documentElement;  // default to IE6 strict
-          if (!d || !d.scrollTop) { d = _doc.body; }  // fallback for other values of IE
-          x = d.scrollLeft;
-          y = d.scrollTop;
-        }
-        else
-        {
-          x = _win.pageXOffset;
-          y = _win.pageYOffset;
-        }
-        return { left:x, top:y };
-      }
-      else
-      {
-        if (y === undefined  &&  typeof x !== 'number')  // x is an x,y object
-        {
-          x = x.left;
-          y = x.top;
-        }
-        x = (typeof x == 'number') ? x : $.scroll().left;
-        y = (typeof y == 'number') ? y : $.scroll().top;
-        _win.scrollTo(x, y);
-      }
+      return $(_doc).scroll(x, y);
     },
-
 
 
 
@@ -325,9 +308,9 @@
     setFocus: function (_elm)
     {
       _elm = $(_elm);
-      var _focusable = 'a,input,textarea,button,area',
+      var _focusable = 'a,input,select,textarea,button,object,area',
           _focusElm = _elm.is(_focusable) && _elm;
-          
+
       if (!_focusElm)
       {
         $('*', _elm).each(function(){
@@ -340,24 +323,51 @@
       }
       if (_focusElm)
       {
+        // Make note of current scroll position
         var _before = $.scroll();
 
         // Put the focus inside the section
         // (the browser only scrolls the page if the _focusElm is outside the viewport)
         _focusElm.focus();
 
+        // make note of new scroll position
         var _after = $.scroll();
         if (_after.top != _before.top)  // if the browser jumped to the anchor...
         {
-          // then scroll the window to place the anchor at the top of the viewport.
-          // (NOTE: We do this because most browsers place the artificially .focus()ed link at the bottom of the viewport.)
+          // ...then scroll the window to place the anchor at the top of the viewport.
+          // (NOTE: We do this because most browsers place the artificially .focus()ed link at the *bottom* of the viewport.)
           var _newTop = $(_elm).offset().top - 30;
           if (_newTop < 10) { _newTop = 0; }
           $.scroll({ top: _newTop });
         }
-
       }
     },
+
+/* Neato tabIndex trick (offered by AOL's accessibility plugin: http://dev.aol.com/axs) but doesn't work on Safari.. ack!
+
+    // focus any _element 
+    // (for screen-reader accessibility)
+    setFocus: function (_elm)
+    {
+      var _elm = $(_elm);
+      if (!_elm.is('a,input,select,textarea,button,object,area')  &&  _elm.attr("tabIndex")==null) {
+        _elm.attr("tabIndex", -1); // assign tabIndex value to allow focusing
+      }
+      // Make note of current scroll position
+      var _before = $.scroll();
+      // Put the focus inside the section
+      // (the browser only scrolls the page if the _focusElm is outside the viewport)
+      _elm[0].focus(); // <-- use element.focus() rather than $(element).trigger('focus'), because .trigger() doesn't trigger focusin event in MSIE
+      // make note of new scroll position
+      var _after = $.scroll();
+      if (_after.top != _before.top)  // if the browser jumped to the anchor...
+      {
+        // ...then scroll the window to place the anchor at the top of the viewport.
+        // (NOTE: We do this because most browsers place the artificially .focus()ed link at the *bottom* of the viewport.)
+        $.scroll({  top: Math.max( $(_elm).offset().top - 30, 0 )  });
+      }
+    },
+*/
 
 
 
