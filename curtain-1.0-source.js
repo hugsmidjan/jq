@@ -11,7 +11,7 @@
 
     jQuery.curtain({                 // applies options to the curtain element.
         className: String,           //  * element class-name
-        bgcol:     CssColorValue,    //  * inline CSS background-color value
+        bg:        CssColorValue,    //  * inline CSS background-color value
         opacity:   Float [0...1],    //  * inline CSS opacity value
         z:         Integer           //  * inline CSS z-index value
       });
@@ -61,7 +61,7 @@ jQuery(function($){
         typeof(cfg)=='string' ?
             { className: cfg }:
         typeof(cfg)=='boolean'&&cfg ?
-            { bgcol: '#888', opacity: .5, z:99 }:
+            { bg: '#888', opacity: .5, z:99 }:
             cfg || {}
       );
 
@@ -85,11 +85,12 @@ jQuery(function($){
       w.bind('resize', _resizeCurtains);
       _resizeCurtains('init');
 
-      if ( cfg.bgcol || cfg.opacity || cfg.z )
+      if ( cfg.bg || cfg.opacity || cfg.z )
       {
         _curtain.css({
-            backgroundColor: cfg.bgcol,
-            zIndex: cfg.z
+            background: cfg.bg,
+            opacity:    cfg.opacity,
+            zIndex:     cfg.z
           });
       }
 
