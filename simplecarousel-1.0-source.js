@@ -38,7 +38,7 @@
                     $( conf.prevBtnTemplate )
                       .html( conf.labelPrev )
                       .attr('title',  conf.titlePrev || conf.labelPrev || '' )
-                      .click(function(){
+                      .bind('click', function(){
                           var px = conf.container.scrollLeft() - conf.windowSize;
                           px = Math.floor( px / conf.windowSize ) * conf.windowSize;
                           px = ( conf.wrap && px < 0 ) ? conf.maxScroll : Math.max( 0, px );
@@ -51,7 +51,7 @@
                     $( conf.nextBtnTemplate )
                       .html( conf.labelNext )
                       .attr('title',  conf.titleNext || conf.labelNext || '' )
-                      .click(function(){
+                      .bind('click', function(){
                           var px = conf.container.scrollLeft() + conf.windowSize;
                           px = Math.ceil( px / conf.windowSize ) * conf.windowSize;
                           px = ( conf.wrap && px > conf.maxScroll ) ? 0 : Math.min( conf.maxScroll, px ) ;
