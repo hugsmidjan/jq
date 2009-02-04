@@ -45,7 +45,7 @@
                           conf.currentPage += px == conf.maxScroll ? conf.numScreens-1 : -1;
                           moveTo( px, conf );
                           return false;
-                        });
+                        })
                   )
                 .append(
                     $( conf.nextBtnTemplate )
@@ -59,7 +59,7 @@
                           //;;;window.console&&console.log(conf.currentPage, conf.numScreens);
                           moveTo( px, conf );
                           return false;
-                        });
+                        })
                   );
           }
           ctrl.append('<div class="direct"></div>');
