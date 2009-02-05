@@ -28,7 +28,7 @@
 
 */
 
-jQuery(function($){
+(function($){
 
   var curtain = $.curtain = function (cfg, elm) {
 
@@ -131,4 +131,4 @@ jQuery(function($){
     };
 
 
-});
+})(jQuery);
