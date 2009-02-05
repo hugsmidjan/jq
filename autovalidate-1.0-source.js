@@ -821,17 +821,16 @@ $.extend($.av.type, {
       } 
       // insert the cleaned up creditcard number back into the field
       // $( this ).val( ccNum ); 
-      var checkSum = 0;
-      for (var i=0; i < ccNum.length; i++)  {
-        if ( (i % 2) === 0 ) {
-          var item = ccNum.charAt( i ) * 2;
-          checkSum += (item > 9) ? Math.floor((item / 10) + (item % 10)) : item;
-        }
-        else {
-          checkSum += ccNum.charAt(i) * 1;
-        }
+      var checkSum = 0,
+          item,
+           i = ccNum.length;
+      while (i-->0) // warning for 15 digit numbers i may sink below zero
+      {
+        checkSum += ccNum.charAt(i--) * 1;
+        item = ccNum.charAt(i) * 2;
+        checkSum += Math.floor(item/10) + (item%10); // þversumma!
       }
-      return ((checkSum % 10) === 0) || error;  // checkSum % 10 must be 0
+      return !(checkSum % 10) || error;  // checkSum % 10 must be 0
     }
     return (v != '');
   },
