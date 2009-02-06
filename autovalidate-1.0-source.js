@@ -409,17 +409,17 @@
 
     isValid : function ( report ) {
 
-      var invalids = [];
-      var errMsgSel = '';
       report = !!(report || report == null);
 
-      var displayAlert = false;   // trigger alerting if any of the contexts want's one
+      var invalids = [],
+          errMsgSel = '',
+          displayAlert = false;   // trigger alerting if any of the contexts want's one
 
       this.each(function(){
 
-        var context = $( this );
-        var contextInvalids = [];
-        var validContext = true;
+        var context = $( this ),
+            contextInvalids = [],
+            validContext = true;
 
         conf = $.av.config( this );
 
@@ -439,16 +439,14 @@
 
           // get this control's types (defaulting to fi_txt for everything except checkboxes)
           var tests = (this.type == 'checkbox')
-              ? { 'fi_chk' : $.av.type['fi_chk'] }
-              : { 'fi_txt' : $.av.type['fi_txt'] };
+                  ? { 'fi_chk' : $.av.type['fi_chk'] }
+                  : { 'fi_txt' : $.av.type['fi_txt'] },
 
-          // ~= selector isn't really supported by jQuery, it behaves like *= which suffices for now
-          var wrap = control.parents( '[class~=fi_]' );
+              wrap =      control.parents( '[class^="fi_"], [class*=" fi_"]' ),
 
-          var lang = wrap.attr( 'lang' ) || wrap.parents( '[lang]' ).attr( 'lang' );
-          var required = wrap.hasClass( conf.reqClassPattern )
-                   || control.hasClass( conf.reqClassPattern );
-          var value = $.trim( control.val() );
+              lang =      wrap.attr( 'lang' ) || wrap.parents( '[lang]' ).attr( 'lang' ),
+              required =  wrap.hasClass( conf.reqClassPattern ) || control.hasClass( conf.reqClassPattern ),
+              value =     $.trim( control.val() );
 
           // purge wrapper of old error notifications
           wrap.removeClass( conf.reqErrorClass );
@@ -464,8 +462,8 @@
           }
 
           // extra requirement check
-          var name = control.attr('name');
-          var reqchk = conf.customReqCheck && conf.customReqCheck[name];
+          var name = control.attr('name'),
+              reqchk = conf.customReqCheck && conf.customReqCheck[name];
           if (reqchk && $.isFunction( reqchk )) {
             required = reqchk.call( this, value, wrap.get(0) || this, lang );
           }
@@ -495,7 +493,7 @@
 
             // rather than doing $.trim( $(this).val() ) within each call...
             // it's out of the loop and into a parameter
-            var res = tests[v].call( this, value, wrap.get(0) || this, lang );
+            var res = tests[v].call( this, value, wrap.get(0)||this, lang );
 
             // react to invalid control
             if ( res !== true ) {
@@ -531,6 +529,7 @@
           }
 
         });
+
 
         // context ends -- draw inline links for this context if needed
         if (report && /both|inlineonly/.test( conf.errorMsgType )) {
@@ -828,7 +827,7 @@ $.extend($.av.type, {
       {
         checkSum += ccNum.charAt(i--) * 1;
         item = ccNum.charAt(i) * 2;
-        checkSum += Math.floor(item/10) + (item%10); // þversumma!
+        checkSum += Math.floor(item/10) + (item%10); // ?versumma!
       }
       return !(checkSum % 10) || error;  // checkSum % 10 must be 0
     }
