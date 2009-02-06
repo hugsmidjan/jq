@@ -9,11 +9,11 @@
       _evSet,
       _sets = [],
       _cfgs = [],
-      _runningLock;
-      _reRun = $.equalizeHeights = function (i) {
+      _runningLock,
+      _reRun = $.equalizeHeights = function () {
           if (!_runningLock) {
             _runningLock=1;
-            i = _sets.length;
+            var i = _sets.length;
             while (i--) {  _sets[i].equalizeHeights(_cfgs[i]);  }
             _runningLock=0;
           }
@@ -23,7 +23,6 @@
   $.fn.equalizeHeights = function( cfg ) {
     if (this.length)
     {
-
       cfg = !cfg ? {} : (typeof cfg == 'boolean') ? { margins:cfg } : cfg;
 
       var _maxHeight = 0,
@@ -41,7 +40,6 @@
           .each(function( i ){
               $(this).css( _heightAttribute,  _maxHeight - _paddings[i] );
             });
-
 
       if (!this.eqh_insets)
       {
