@@ -21,12 +21,8 @@
       // original allows calling Fontsizer.resize() ... is this important? should we allow it?
       _resize = function ( _newSize ) {
           _config.currentSize = Math.min( _config.maxSize,  Math.max( _config.minSize, _newSize ) );
-          // use $.cookie tools if available
-          if ($.cookie) {
-            $.cookie('fontSize', _config.currentSize, {
-                expires: 365, 
-                path: '/'
-              });
+          if ($.cookie) { // use $.cookie tools if available
+            $.cookie('fontSize', _config.currentSize, { expires: 365, path: '/' });
           }
           return _applySize();
         };
@@ -61,17 +57,17 @@
 
       this
           .find( _config.fontUpSel )
-              .click(function (e) { return _resize( _config.currentSize + 1 ); })
+              .bind('click', function (e) { return _resize( _config.currentSize + 1 ); })
           .end()
           .find( _config.fontDownSel )
-              .click(function (e) { return _resize( _config.currentSize - 1 ); })
+              .bind('click', function (e) { return _resize( _config.currentSize - 1 ); })
           .end()
           .find( '[class*=fsz] > a' )
               .each(function(){
                   if ( /(^|\s)fsz(\d+)(\s|$)/.test( this.parentNode.className ) ) {
                     $( this )
                         .data( 'fontsize', parseInt( RegExp.$2, 10 ) )
-                        .click(function (e) { 
+                        .bind('click', function (e) { 
                             return _resize( $(this).data('fontsize') ); 
                           });
                   }
