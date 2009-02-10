@@ -398,6 +398,12 @@
               // mark this form as submitted
               f.addClass( c.submittedClass );
             }
+            else
+            {
+              // neccessary in jQuery 1.2.6 to prevent forms with inline onsubmit="" attributes returning false getting ignored
+              // (not a problem in jQuery 1.3)
+              e.preventDefault(); 
+            }
             return valid;
           /*}*/
 
