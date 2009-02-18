@@ -1,3 +1,5 @@
+// encoding: utf-8
+//
 // jquery.av.core.js
 // jquery.av.lang.is.js
 // jquery.av.extratypes.js
