@@ -1,14 +1,7 @@
-// encoding: utf-8
-// Requires jQuery 1.2.6
-// Runs OK in 1.3
-
-// todo : set position to list element / page that reports focus
-// todo : add a "current" class to paging items
-// todo : callback function when animation finishes (see: flash class ?)
-
+// todo : set position to list element / page that reports focus (BT: WTF does that even mean?)
+// todo : automove => slideshow, marquee
+// todo : callback function when animation finishes ( no hold, pending use )
 (function ($){
-
-
 
   $.listscroller = {
 
@@ -37,15 +30,19 @@
                         
       aspect            : 'auto',     // auto|horizontal|vertical
       paging            : false,
-                        
+      inputPager        : false,
+      
       initCallback      : function () {},
       moveCallback      : function () {},
 
       classPrefix       : 'listscroller',
       currentPageClass  : 'current',
+      currentItemClass  : 'visible',
+      cursorItemClass   : 'current',
 
       pagingTopClass    : 'paging-top',
       pagingBottomClass : 'paging-bottom',
+
       pagingTemplate    : '<div class="paging"><ul class="stepper"></ul></div>',
       nextBtnTemplate   : '<li class="next"><a href="#"></a></li>',
       prevBtnTemplate   : '<li class="prev"><a href="#"></a></li>',
@@ -53,7 +50,10 @@
       jumpLabelTemplate : '<strong></strong>',
       jumpWrapTemplate  : '<span></span>',
       jumpBtnTemplate   : '<a href="#"></a>',
+      totalTemplate     : '<b></b>',
+      pagerTemplate     : '<input type="text" value="" size="2" />',
 
+      statusLabel       : 'Viewing results:',
       jumpLabel         : 'Pages:',
       labelNext         : 'Next',
       labelPrev         : 'Previous',
@@ -74,15 +74,17 @@
             prop = (c.aspect === 'horizontal') ? 'scrollLeft' : 'scrollTop',
             dimp = (c.aspect === 'horizontal') ? 'outerWidth' : 'outerHeight',
             conf = {};
+
         w.stop();
         p = l.eq( c.index ).position();
-        conf[prop] = p.left + w[prop]();
+        conf[prop] = p.left;
+        
         if ( c.wrap == 'loop' && c.lastIndex == 0 && c.index == last ) {
-          w[prop]( z.position().left + w[prop]() + z[dimp]() );
+          w[prop]( z.position().left + z[dimp]() );
           w.animate( conf, c.speed, c.easing );
         }
         else if ( c.wrap == 'loop' && c.lastIndex == last && c.index == 0 ) {
-          conf[prop] = z.position().left + z[dimp]() + w[prop]();
+          conf[prop] = z.position().left + z[dimp]();
           w.animate(conf, c.speed, c.easing, function () {
             w[prop]( 0 );
           });
@@ -114,14 +116,18 @@
           ac = {};
           if ( nw && !ow ) { // show
             ac[ap] = 'show';
-            $(this).stop().animate( ac, c.speed, c.easing );
+            $(this).stop().animate( ac, c.speed, c.easing, function () {
+              this.style[ap] = '';
+            });
           }
           else if ( !nw && c.lastIndex == null ) { // init
             $(this).stop().hide();
           }
           else if ( !nw && ow ) { // hide
             ac[ap] = 'hide';
-            $(this).stop().animate( ac, c.speed, c.easing );
+            $(this).stop().animate( ac, c.speed, c.easing, function () {
+              this.style[ap] = '';
+            });
           }
         });
       }
@@ -173,11 +179,16 @@
     c.lastIndex = c.index;
     c.index = $.listscroller.wrap[ c.wrap || 'none' ]( _newIndex, list, c );
 
-    // todo : mark overflow list items as well
     list
       .addClass( c.hideClass )
+      .removeClass( c.cursorItemClass )
+      .removeClass( c.currentItemClass )
       .slice( c.index, c.index + c.windowSize )
-        .removeClass( c.hideClass );
+        .addClass( c.currentItemClass )
+        .removeClass( c.hideClass )
+        .eq(0)
+          .addClass( c.cursorItemClass );
+            
     
     if ( $.isFunction( c.moveCallback ) )
       c.moveCallback.call( _block, list, c );
@@ -212,6 +223,9 @@
         .eq( Math.ceil(c.index / c.stepSize) )
           .addClass( c.currentPageClass )
     }
+    else if ( c.pager ) {
+      c.pager.val( Math.ceil(c.index / c.stepSize) + 1 );
+    }
 
   }
   
@@ -230,6 +244,13 @@
   function movePage ( e ) {
     var c = e.data, 
         p = (parseInt( $( this ).text(), 10 ) -1) || 0;
+    setPos( c, p * c.stepSize );
+    return false;
+  }
+  
+  function inputChange ( e ) {
+    var c = e.data, 
+        p = (parseInt( $( this ).val(), 10 ) -1) || 0;
     setPos( c, p * c.stepSize );
     return false;
   }
@@ -255,20 +276,36 @@
       var jmps = []
           page = Math.ceil( c.index / c.stepSize ),
           l = Math.ceil( c.list.length / c.stepSize );
-      for (var i=0; i<l; i++) {
-        var bt = $( c.jumpBtnTemplate );
-        var a = bt.find( 'a' ).andSelf().eq(0)
-                  .text( i + 1 ).bind( 'click', c, movePage );
-        if (c.index == i) a.addClass( c.currentPageClass );
-        jmps.push( a[0] );
-      }
-      c.jumps = $( jmps );
-      
+
       j = $( c.jumpTemplate );
-      j.append(
-        $( c.jumpLabelTemplate || [] ).text( i18n( c.jumpLabel, _lang ) ),
-        $( c.jumpWrapTemplate  || [] ).append( c.jumps )
-      );
+      
+      if ( c.jumpLabelTemplate ) {
+        $( c.jumpLabelTemplate )
+          .text( i18n( c.jumpLabel, _lang ) )
+          .appendTo( j );
+      }
+      
+      // input pager
+      if (c.inputPager) {
+        c.pager   = $( c.pagerTemplate ).appendTo( j );
+        var total = $( c.totalTemplate ).appendTo( j );
+        c.pager.bind( 'change', c, inputChange ).val( page +1 );
+        total.text( l );
+      }
+      // buttons
+      else {
+        // make buttons
+        for (var i=0; i<l; i++) {
+          var bt = $( c.jumpBtnTemplate );
+          var a = bt.find( 'a' ).andSelf().eq(0)
+                    .text( i + 1 ).bind( 'click', c, movePage );
+          if (c.index == i) a.addClass( c.currentPageClass );
+          jmps.push( a[0] );
+        }
+        c.jumps = $( jmps );
+        $( c.jumpWrapTemplate || [] ).append( c.jumps ).appendTo( j );
+      }
+      
     }
 
     var w  = $( c.pagingTemplate );
@@ -305,6 +342,8 @@
     _inner.addClass( c.classPrefix + '-clip' );
     _outer.addClass( c.classPrefix + '-wrapper' )
     _block.addClass( c.classPrefix + '-active' );
+    
+    _inner.add( _outer ).css('position','relative')
 
     // detect aspect 
     if ( c.aspect == 'auto' ) {
