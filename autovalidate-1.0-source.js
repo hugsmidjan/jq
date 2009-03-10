@@ -576,7 +576,8 @@ jQuery.av.lang.is = {
 
   fi_email        : 'Vinsamlega sláðu inn rétt netfang (dæmi: notandi@daemi.is)',
   fi_url          : 'Vinsamlega sláðu inn löggilda vefslóð (dæmi: http://www.example.is)',
-  fi_year         : 'Vinsamlega sláðu inn rétt ártal (dæmi: 1998)'
+  fi_year         : 'Vinsamlega sláðu inn rétt ártal (dæmi: 1998)',
+  fi_ccnum_noamex : 'American Express kort virka ekki'
 
 };
 
@@ -587,7 +588,8 @@ $.extend($.av.lang.en, {
 
   fi_email : 'Please provide a valid e-mail address (example: user@example.com)',
   fi_url   : 'Please provide a valid web address (example: http://www.example.is)',
-  fi_year  : 'Please provide a valid four digit year (example: 1998)'
+  fi_year  : 'Please provide a valid four digit year (example: 1998)',
+  fi_ccnum_noamex: 'American Express cards not accepted'
 
 });
 
@@ -811,7 +813,9 @@ $.extend($.av.type, {
     }
     return (v != '');
   },
-  
+
+
+
 
   // ====[ credit cards ]====
 
@@ -822,10 +826,8 @@ $.extend($.av.type, {
     if (v) {
       // Strip out the optional space|dash delimiters
       var ccNum = v.replace(/[ -]/g, ''); 
-      if (
-            !/^(\d{16}|3[47]\d{13})$/.test( ccNum )                                   // make sure there are 16 digits (or 15 for AmEx cards (starting with 34 or 37))
-            || (ccNum.length == 15 && $(w).hasClass(arguments.callee.noAmExClass) ) // and the field-container doesn't explicitly forbid AmEx cards...
-          ) {
+      // make sure there are 16 digits (or 15 for AmEx cards (starting with 34 or 37))
+      if ( !/^(\d{16}|3[47]\d{13})$/.test( ccNum ) ) {
         return error;
       }
 
@@ -838,12 +840,20 @@ $.extend($.av.type, {
       {
         checkSum += ccNum.charAt(i--) * 1;
         item = ccNum.charAt(i) * 2;
-        checkSum += Math.floor(item/10) + (item%10); // ?versumma!
+        checkSum += Math.floor(item/10) + (item%10); // Þversumma!
       }
-      return !(checkSum % 10) || error;  // checkSum % 10 must be 0
+      var isValid = (checkSum % 10) === 0;  // checkSum % 10 must be 0
+
+      // Make sure the field-container doesn't explicitly forbid AmEx cards (.length == 15)...
+      if (isValid  &&  ccNum.length == 15  &&  $(w).hasClass(arguments.callee.noAmExClass) ) {
+        error = $.av.getError( 'fi_ccnum_noamex', lang );
+      }
+      return !isValid || error;
     }
     return (v != '');
   },
+
+
 
   // Returns true if valid credid card expiry date (further development needed to check against the current year)
   fi_ccexp : function ( v, w, lang ) { 
@@ -864,4 +874,3 @@ $.av.type.fi_ccnum.noAmExClass = 'no-amex';
 
 
 })(jQuery);
-
