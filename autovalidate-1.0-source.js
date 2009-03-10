@@ -822,10 +822,13 @@ $.extend($.av.type, {
     if (v) {
       // Strip out the optional space|dash delimiters
       var ccNum = v.replace(/[ -]/g, ''); 
-      // ...then make sure there are only 16 digits left
-      if ( !/^(\d{16}|3[47]\d{13})$/.test( ccNum ) ) { // 16 digits (or 15 for AmEx cards (starting with 34 or 37))
-        return error; 
-      } 
+      if (
+            !/^(\d{16}|3[47]\d{13})$/.test( ccNum )                                   // make sure there are 16 digits (or 15 for AmEx cards (starting with 34 or 37))
+            || (ccNum.length == 15 && $(w).hasClass(arguments.callee.noAmExClass) ) // and the field-container doesn't explicitly forbid AmEx cards...
+          ) {
+        return error;
+      }
+
       // insert the cleaned up creditcard number back into the field
       // $( this ).val( ccNum ); 
       var checkSum = 0,
@@ -855,6 +858,9 @@ $.extend($.av.type, {
   
 
 });
+
+
+$.av.type.fi_ccnum.noAmExClass = 'no-amex';
 
 
 })(jQuery);
