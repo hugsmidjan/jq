@@ -4,6 +4,9 @@
 // jquery.av.lang.is.js
 // jquery.av.extratypes.js
 
+// todo/bugs:
+//  - custom error messages don't appear in the error alert() (only inline in the dom)
+
 (function($){
 
   var idPrefix = 'tmp_' + (new Date()).getTime();
@@ -847,8 +850,9 @@ $.extend($.av.type, {
       // Make sure the field-container doesn't explicitly forbid AmEx cards (.length == 15)...
       if (isValid  &&  ccNum.length == 15  &&  $(w).hasClass(arguments.callee.noAmExClass) ) {
         error = $.av.getError( 'fi_ccnum_noamex', lang );
+        isValid = !isValid;
       }
-      return !isValid || error;
+      return isValid || error;
     }
     return (v != '');
   },
