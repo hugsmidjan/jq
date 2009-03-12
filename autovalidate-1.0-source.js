@@ -7,6 +7,14 @@
 // todo/bugs:
 //  - custom error messages don't appear in the error alert() (only inline in the dom)
 
+
+// ====================================================================================
+// ====================================================================================
+
+
+
+// encoding: utf-8
+
 (function($){
 
   var idPrefix = 'tmp_' + (new Date()).getTime();
@@ -450,12 +458,12 @@
 
           // get this control's types (defaulting to fi_txt for everything except checkboxes)
           var tests = (this.type == 'checkbox')
-                  ? { 'fi_chk' : $.av.type['fi_chk'] }
+              ? { 'fi_chk' : $.av.type['fi_chk'] }
                   : { 'fi_txt' : $.av.type['fi_txt'] },
 
-              wrap =      control.parents( '[class^="fi_"], [class*=" fi_"]' ),
+              wrap =      control.parents( '[class^="fi_"], [class*=" fi_"]' ).eq(0),  // jQuery 1.3 way: wrap.closest('[class^="fi_"], [class*=" fi_"]').attr('lang')
 
-              lang =      wrap.attr( 'lang' ) || wrap.parents( '[lang]' ).attr( 'lang' ),
+              lang =      wrap.attr( 'lang' ) || wrap.parents( '[lang]' ).attr( 'lang' ),  // jQuery 1.3 way: wrap.closest('[lang]').attr('lang')
               required =  wrap.hasClass( conf.reqClassPattern ) || control.hasClass( conf.reqClassPattern ),
               value =     $.trim( control.val() );
 
@@ -565,7 +573,14 @@
 })(jQuery);
 
 
+
+// ====================================================================================
+// ====================================================================================
+
+
+
 // Icelandic translation
+// encoding: utf-8
 jQuery.av.lang.is = {
 
   bullet          : ' • ',
@@ -585,6 +600,13 @@ jQuery.av.lang.is = {
 };
 
 
+
+// ====================================================================================
+// ====================================================================================
+
+
+
+// encoding: utf-8
 (function($){
 
 $.extend($.av.lang.en, {
@@ -635,9 +657,9 @@ $.extend($.av.type, {
       if (_summa % 11) {
         return error;
       }
-
+      
     }
-    return (v != '');
+    return !!v;
   },
 
 
@@ -647,7 +669,7 @@ $.extend($.av.type, {
     if (v && !/^[a-z0-9-._+]+@([a-z0-9-_]+\.)+[a-z0-9-_]{2,99}$/i.test(v)) {
       return $.av.getError( 'fi_email', lang );
     }
-    return (v != '');
+    return !!v;
   },
   
   fi_url : function( v, w, lang ) {
@@ -755,7 +777,7 @@ $.extend($.av.type, {
     if (v && !/^(19|20)\d\d$/.test(v)) {
       return $.av.getError( 'fi_year', lang );
     }
-    return (v != '');
+    return !!v;
   },
   
   // Returns true on a valid date (dd.mm.yyyy|d/m/yy|etc.). 
@@ -793,7 +815,7 @@ $.extend($.av.type, {
       return /^(3[01]|[12]?[0-9]|(0)?[1-9])\.(1[012]|(0)?[1-9])\.(19|20)?\d\d$/.test(v) || error;
       
     }
-    return (v != '');
+    return !!v;
   },
 
 
@@ -814,9 +836,9 @@ $.extend($.av.type, {
         return error;
       }
     }
-    return (v != '');
+    return !!v;
   },
-
+  
 
 
 
@@ -846,15 +868,17 @@ $.extend($.av.type, {
         checkSum += Math.floor(item/10) + (item%10); // Þversumma!
       }
       var isValid = (checkSum % 10) === 0;  // checkSum % 10 must be 0
-
-      // Make sure the field-container doesn't explicitly forbid AmEx cards (.length == 15)...
-      if (isValid  &&  ccNum.length == 15  &&  $(w).hasClass(arguments.callee.noAmExClass) ) {
-        error = $.av.getError( 'fi_ccnum_noamex', lang );
-        isValid = !isValid;
-      }
       return isValid || error;
     }
-    return (v != '');
+    return !!v;
+  },
+
+
+  fi_ccnum_noamex: function ( v, w, lang ) {
+    if (v && v.replace(/[ -]/g, '').length == 15 ) {
+      return $.av.getError( 'fi_ccnum_noamex', lang );
+    }
+    return !!v;
   },
 
 
@@ -867,14 +891,17 @@ $.extend($.av.type, {
       // ...then test against the pattern "mm/yy"
       return /^(0\d|1[012])\/(\d\d)$/.test(v) || $.av.getError( 'fi_ccexp', lang ); 
     }
-    return (v != '');
+    return !!v;
   }
   
 
 });
 
 
-$.av.type.fi_ccnum.noAmExClass = 'no-amex';
 
 
 })(jQuery);
+
+
+// ====================================================================================
+// ====================================================================================
