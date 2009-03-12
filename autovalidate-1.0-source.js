@@ -256,7 +256,7 @@
         // loop to first one if we have no target
         var felm = $( elms[n] || elms[0] );
         setTimeout(function () {
-          felm.focus();
+          felm.trigger('focus');
         },1);
         return felm;
       }
@@ -265,32 +265,22 @@
 
   });
 
+  var _defaultCheck      = function ( v/*, w, lang */) { return !!v; },
+      _defaultToggleCheck = function ( v/*, w, lang */) {
+          var inp = $(this);
+          return inp.parents('form').find('[name=' + inp.attr('name') + ']').is(':checked');
+        };
+
   // space for types
   $.extend( $.av, {
-    type : {
-      'fi_btn' : function ( v, w ) {
-        return true; // prevents nonsense requirements
-      },
-      'fi_txt' : function ( v, w ) {
-        return v !== '';
-      },
-      'fi_sel' : function ( v, w ) {
-        return v !== '';
-      },
-      'fi_chk' : function ( v, w ) {
-        var inp = $(this);
-        return inp.parents('form').find('[name=' + inp.attr('name') + ']').is(':checked');
-      },
-      'fi_rdo' : function ( v, w ) {
-        var inp = $(this);
-        return inp.parents('form').find('[name=' + inp.attr('name') + ']').is(':checked');
-      },
-      'fi_bdy' : function ( v, w ) {
-        return v !== '';
-      },
-      'fi_file' : function ( v, w ) {
-        return v !== '';
-      }
+    type: {
+      'fi_btn':  function ( v/*, w, lang */) { return true; }, // prevents nonsense requirements
+      'fi_txt':  _defaultCheck,
+      'fi_sel':  _defaultCheck,
+      'fi_bdy':  _defaultCheck,
+      'fi_file': _defaultCheck,
+      'fi_chk':  _defaultToggleCheck,
+      'fi_rdo':  _defaultToggleCheck
     }
   });
 
@@ -301,8 +291,7 @@
     // defangReset can may be run against any collection of elements to defang
     // them OR, in case of non reset buttons, turn them into reset buttons.
     defangReset : function () {
-      return this.each(function(){
-        $( this ).click(function(e){
+      return this.bind('click', function(e){
           var btn = $( this );
           var lang = btn.attr('lang') || btn.parents('[lang]').attr('lang') || 'en';
           btn.attr( 'lang', lang );
@@ -310,28 +299,20 @@
             // call a reset function if this isn't an actual reset button
             if (btn.attr('type') !== "reset") {
               var form = btn.parents('form').get(0);
-              if (form) { form.reset(); }
+              if (form) { form.trigger('reset'); }
             }
             return true;  // accept the click
           }
           return false;  // cancel the click by default
-        })
-      });
+        });
     },
 
+
     defangEnter : function () {
-      return this.each(function(){
-        $( this ).keydown(function(e){
+      return this.bind('keydown', function(e){
           var target = e.target;
-          if ( e.keyCode == 13 &&
-                target.tagName === 'INPUT' &&
-                /^(button|reset|submit)$/i.test(target.type) ) { // this happens every ENTER keypress!
-            return false
-          }
-          return true;
-        })
-      });
-      return this;
+          return ( e.keyCode != 13  ||  target.tagName != 'INPUT'  ||  /^(button|reset|submit)$/i.test(target.type) );
+        });
     },
 
     autoValidate : function ( config ) {
@@ -364,7 +345,7 @@
 
         // turn the enter key into tab for all inputs except textareas, and buttons
         if (conf.emulateTab) {
-          form.keydown(function(e){
+          form.bind('keydown', function(e){
             if (e.keyCode == 13 &&
                 $(e.target).is(':input:not(:button):not(:reset):not(:submit):not(textarea)')) {
               $.av.focusNext( e.target );
@@ -375,7 +356,7 @@
 
         // functionality to tab to the next field when maxlength is reached
         if (conf.maxLengthTab) {
-          form.keyup(function(e){
+          form.bind('keyup', function(e){
             var t = $(e.target);
             var w = e.which;
             // only trigger with keycodes (not scancodes), and where keycode isn't backspace,tab,enter,
@@ -392,7 +373,7 @@
           // $( this ).isValid();
           // what context should the validation be called on?
         }
-        form.submit(function(e){
+        form.bind('submit', function(e){
 
           var f = $( this );
           var c = $.av.config( this );
