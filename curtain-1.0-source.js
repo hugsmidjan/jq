@@ -100,12 +100,13 @@
     _curtainlist = curtain.list = [],
 
     w = $(window),
-    b = $(document.body),
+    b,
 
     _resizeCurtains = function (e) {
         var i = _curtainlist.length,
             W = -1,
             H = W;
+        b = b || $('body');
 
         while (i--)
         {
