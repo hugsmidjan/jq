@@ -9,14 +9,14 @@
       _evSet,
       _sets = [],
       _cfgs = [],
-      _runningLock,
+      _resetTimeout,
+      _resetHeights = function(){
+          var i = _sets.length;
+          while (i--) {  _sets[i].equalizeHeights(_cfgs[i]);  }
+        },
       _reRun = $.equalizeHeights = function () {
-          if (!_runningLock) {
-            _runningLock=1;
-            var i = _sets.length;
-            while (i--) {  _sets[i].equalizeHeights(_cfgs[i]);  }
-            _runningLock=0;
-          }
+          clearTimeout( _resetTimeout );
+          _resetTimeout = setTimeout(_resetHeights, 100);
         };
 
 
