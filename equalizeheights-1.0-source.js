@@ -9,14 +9,20 @@
       _evSet,
       _sets = [],
       _cfgs = [],
-      _resetTimeout,
+      _resetLock,    // msie fix ...to keep MSIE from spinning out of control 
+      _resetTimeout, // msie fix ...to keep MSIE from spinning out of control
       _resetHeights = function(){
+          _resetLock = 1;
           var i = _sets.length;
           while (i--) {  _sets[i].equalizeHeights(_cfgs[i]);  }
+          setTimeout(function(){ _resetLock = 0; }, 0);
         },
       _reRun = $.equalizeHeights = function () {
-          clearTimeout( _resetTimeout );
-          _resetTimeout = setTimeout(_resetHeights, 100);
+          if (!_resetLock)
+          {
+            clearTimeout( _resetTimeout );
+            _resetTimeout = setTimeout(_resetHeights, 100);
+          }
         };
 
 
