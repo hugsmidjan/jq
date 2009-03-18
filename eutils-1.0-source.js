@@ -57,12 +57,10 @@
   {
     if (!_msie)
     {
-      _triggerFunc = /* _triggerFunc ||*/ function (e) {
-        var args = [].slice.call(arguments, 0);
+      _triggerFunc = function (e) {
         e = $.event.fix(e);
         e.type = _type;
-        args[0] = e;
-        return $.event.handle.apply(this, args);
+        return $.event.handle.call(this, e);
       };
       $.event.special[_type] = {
         setup: function () {
@@ -73,7 +71,6 @@
         }
       };
     }
-
   };
 
 
@@ -85,6 +82,36 @@
     _RigUpDOMEventAsEventPlugin('focusin',  _isFF?'focus':'DOMFocusIn',   _isFF);
     _RigUpDOMEventAsEventPlugin('focusout', _isFF?'blur' :'DOMFocusOut',  _isFF);
   }
+
+
+  var _fontresizeInterval,
+      _fontresizeSpan,
+      _lastSize,
+      _monitorFontSize = function(){
+          var _spanSize = _fontresizeSpan.offsetHeight;
+          if (_spanSize != _lastSize)
+          {
+            _lastSize = _spanSize;
+            $(window).trigger('fontresize');
+          }
+        };
+
+  $.event.special.fontresize = {
+    setup: function () {
+      if (this == window) {
+        _fontresizeSpan = $('<i style="display:block !important;font-size:1em;position:absolute;top:0;left:-9999px;right:auto;overflow:hidden !important;padding:0 !important;border:none !important;visibility:hidden;width:1px;height:1em !important;">.</i>')
+                        .appendTo('body')[0];
+        _lastSize = _fontresizeSpan.offsetHeight;
+        _fontresizeInterval = setInterval(_monitorFontSize, 500);
+      }
+    },
+    teardown: function () {
+      if (this == window) {
+        clearTimeout( _fontresizeInterval );
+        $(_fontresizeSpan).remove();
+      }
+    }
+  };
 
 
 

@@ -336,10 +336,8 @@
         if (!conf.emulateTab &&
              conf.defangEnter === true ||
              conf.defangEnter === 'true' ||
-             (conf.defangEnter === 'auto' &&
-               form.attr('method') == 'post' ||   // form uses post method
-               form.is(':has(:submit:eq(1))')     // form has more than one submit button?
-            )) {
+             (conf.defangEnter === 'auto' && form.is(':has(:submit:eq(1))') ) // form has more than one submit button?
+            ) {
           form.defangEnter();
         }
 

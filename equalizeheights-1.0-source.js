@@ -58,8 +58,9 @@
       {
         _evSet = 1;
         // for browser with ok resize events, redo on next occurence
-        $( window ).bind( 'resize', _reRun );
-        $( window ).load( _reRun );
+        $( window )
+            .bind( 'resize', _reRun )
+            .bind( 'load fontresize', _resetHeights );
       }
 
       // kick the renderer
