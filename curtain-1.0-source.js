@@ -105,7 +105,7 @@
     _resizeCurtains = function (e) {
         var i = _curtainlist.length,
             W = -1,
-            H = W;
+            H = -1;
         b = b || $('body');
 
         while (i--)
@@ -113,6 +113,7 @@
           var elm = _curtainlist[i];
           if ( elm  &&  ( (elm.parentNode  &&  $(elm).is(':visible'))  ||  e == 'init' ) )
           {
+            // only calculate window+body dimensions once and only if _curtainlist.length>0
             W = W!=-1 ? W : Math.max( w.width(),  b.innerWidth() );
             H = H!=-1 ? H : Math.max( w.height(), b.innerHeight() );
             var s = elm.style;
