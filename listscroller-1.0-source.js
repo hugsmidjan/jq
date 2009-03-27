@@ -161,19 +161,45 @@
       loop : function ( i, l, c ) {
         return ( (l.length + i) % l.length );
       }
-    }
+    },
     
+    aspectDefaults : {
+      none      : 'vertical',
+      carousel  : 'horizontal',
+      crossfade : 'horizontal',
+      accordion : 'vertical',
+    }
+
   };
 
+  // detect list aspect 
+  function detectAspect ( _items ) {
+    var ret, 
+        i2 = _items.eq( 1 );
+        p1 = _items.eq( 0 ).offset(),
+        p2 = i2.offset();
+    // usable second item?
+    if ( p2 && i2.is(':visible') ) {
+      console.log('item2 is visible and has offset');
+      ret = ( Math.abs( p2.top - p1.top ) <= Math.abs( p2.left - p1.left ) ) 
+              ? 'horizontal' 
+              : 'vertical';
+    }
+    else {
+      console.log('item2 is not visible, grab a good default');
+      ret = false;  // indeterminate
+    }
+    return ret;
+  }
 
   function max ( l, c ) {
     return (c.overflow == 'visible') 
         ? Math.floor( l.length / c.stepSize ) * c.stepSize
         : l.length - c.windowSize;
   }
-  
+
   function setPos ( c, _newIndex, _noflash ) {
-    
+
     var _block = c.block;
     var list   = c.list;
     c.lastIndex = c.index;
@@ -188,26 +214,25 @@
         .removeClass( c.hideClass )
         .eq(0)
           .addClass( c.cursorItemClass );
-            
-    
+
     if ( $.isFunction( c.moveCallback ) )
       c.moveCallback.call( _block, list, c );
-    
+
     if ( $.isFunction( c.animation ) )
       c.animation.call( _block, list, c )
     else
       $.listscroller.animate[ c.animation||'none' ].call( _block, list, c );
-      
+
     _block
       .removeClass( c.topClass )
       .removeClass( c.bottomClass );
-    
+
     if ( c.index == 0 ) 
       _block.addClass( c.topClass ); 
-  
+
     if ( c.index == list.length - c.windowSize ) 
       _block.addClass( c.bottomClass ); 
-    
+
     // flash the container
     if (!_noflash) {
       _block.addClass( c.classPrefix + '-changed' );
@@ -215,7 +240,7 @@
         _block.removeClass( c.classPrefix + '-changed' );
       }, c.speed || 1);
     }
-    
+
     // mark paging link if needed
     if ( c.jumps ) {
       c.jumps
@@ -228,33 +253,33 @@
     }
 
   }
-  
+
   function movePrev ( e ) {
     var c = e.data;
     setPos( c, c.index - c.stepSize );
     return false;
   }
-  
+
   function moveNext ( e ) {
     var c = e.data;
     setPos( c, c.index + c.stepSize );
     return false;
   }
-  
+
   function movePage ( e ) {
     var c = e.data, 
         p = (parseInt( $( this ).text(), 10 ) -1) || 0;
     setPos( c, p * c.stepSize );
     return false;
   }
-  
+
   function inputChange ( e ) {
     var c = e.data, 
         p = (parseInt( $( this ).val(), 10 ) -1) || 0;
     setPos( c, p * c.stepSize );
     return false;
   }
-  
+
   function buildControls ( c, _lang ) {
 
     var n = $( c.nextBtnTemplate );
@@ -278,13 +303,13 @@
           l = Math.ceil( c.list.length / c.stepSize );
 
       j = $( c.jumpTemplate );
-      
+
       if ( c.jumpLabelTemplate ) {
         $( c.jumpLabelTemplate )
           .text( i18n( c.jumpLabel, _lang ) )
           .appendTo( j );
       }
-      
+
       // input pager
       if (c.inputPager) {
         c.pager   = $( c.pagerTemplate ).appendTo( j );
@@ -305,7 +330,7 @@
         c.jumps = $( jmps );
         $( c.jumpWrapTemplate || [] ).append( c.jumps ).appendTo( j );
       }
-      
+
     }
 
     var w  = $( c.pagingTemplate );
@@ -316,7 +341,7 @@
         return elem;
       })
       .append( p, n, j );
-    
+
     return w;
   }
 
@@ -343,28 +368,15 @@
     _outer.addClass( c.classPrefix + '-wrapper' )
     _block.addClass( c.classPrefix + '-active' );
     
-    _inner.add( _outer ).css('position','relative')
-
-    // detect aspect 
-    if ( c.aspect == 'auto' ) {
-      var p1 = _items.eq( 0 ).offset(), 
-          p2 = _items.eq( 1 ).offset();
-      
-      c.aspect = ( p2 && (Math.abs( p2.top - p1.top ) <= Math.abs( p2.left - p1.left )) ) 
-            ? 'horizontal' 
-            : 'vertical';
-    }
-
+    _inner.add( _outer ).css( 'position', 'relative' );
     _outer.addClass( c.classPrefix + '-' + c.aspect );
-      
+
     // for circular carousels
     if ( c.wrap == 'loop' ) {
       // generate flipover items
       c.flipover = _items.slice( 0, c.windowSize ).clone( true );
       _items.parent().append( c.flipover );
     }
-
-    setPos( c, c.startPos || 0, true );
 
     // create and display control-links
     if ( c.controls !== 'none' && _items.length > 0 ) {
@@ -378,6 +390,16 @@
         _outer.after( buildControls( c, _lang ).addClass( c.pagingBottomClass ) );
 
     }
+
+    if ( c.aspect == 'auto' ) {
+      c.aspect = detectAspect( _items ) || // try to determine aspect
+                 $.listscroller.aspectDefaults[ c.animation ] ||  // pick default aspect for animation
+                 'horizontal';  // final fallback
+    }
+    _outer.addClass( c.classPrefix + '-' + c.aspect );
+
+    setPos( c, c.startPos || 0, true );
+
   }
   
   

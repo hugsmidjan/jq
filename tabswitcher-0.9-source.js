@@ -1,8 +1,8 @@
-/*
+/* // encoding: utf-8
+
 jQuery tabSwitcher Plugin
 
-	* Version 1.0
-	* 23.10.2008
+	* Version 0.9
 	* URL: N/A
 	* Description: Privides basic tab functionality in minimal code.
 	* Author: Borgar Þorsteinsson
@@ -15,62 +15,80 @@ jQuery tabSwitcher Plugin
 (function ($) {
 
   var hash = function ( s ) {
-        return s.replace(/^.*#([A-Za-z][A-Za-z0-9:._\-]*)$/, '#$1');
+        return (/(#.+?)$/.test(s)) ? RegExp.$1 : '';
       },
-
-      setTab = function ( tab, ln ) {
-
-        tab.find('.current').removeClass('current');
+      setTab = function ( tab, ln, f ) {
+        var cf = $.fn.tabSwitcher.config,
+            t = $( hash( ln.attr( 'href' ) ) ),
+            p = ln.parent();
+        ln.trigger( 'switchto.tabSwitcher' );
+        tab.find( '.' + cf.current ).removeClass( cf.current );
         $( tab.data( 'tabpanes' ) ).hide();
-        
-        $( hash( ln.attr( 'href' ) ) )
-            .show()
-            .find('input, a.stream').eq(0)
-            .focus();
-
-        var p = ln.parent();
-        if ( !p.is('li') ) { p = ln; }
-        p.addClass('current');
-
+        t.show();
+        if ( f !== false ) t.find('input, a.stream').eq(0).trigger('focus');
+        if ( !p.is('li') ) p = ln;
+        p.addClass( cf.current );
       };
 
   $.fn.tabSwitcher = function ( idx ) {
     this.each(function () {
 
       var tab = $( this ), 
-          ls = tab.find('a'),
-          re = !tab.hasClass( 'tabs-active' ),
+          cf = $.fn.tabSwitcher.config,
+          ls = tab.find( cf.linkselector ),
+          re = !tab.hasClass( cf.active ),
           pn = [];
 
       if (re) {
         // build links to panels
-        for (var i=0; i < ls.length; i++) {
-          pn.push( hash( ls[i].href || '#' ) );
+        for (var h,i=0; i < ls.length; i++) {
+          h = hash( ls[i].href );
+          h && pn.push( h );
         }
-        pn = pn.join(', ');
-        tab.data( 'tabpanes', pn );
-        // add focus links and hide panels
-        $( pn ).hide().prepend( '<a href="#" class="stream"></a>' );
+        if (pn.length) {
+          var p = pn.join(', ');
+          tab.data( 'tabpanes', p );
+          // add focus links and hide panels
+          $( p ).hide().prepend( cf.focuslink );  // hide failing?
+        }
       }
 
-      // calling tabSwitcher with an integer selects a tab
-      if ( (idx||0) > -1 ) {
-        setTab( tab, ls.eq( Math.min( ls.length, idx||0 ) ) );
+      // calling tabSwitcher with an integer selects a tab,
+      // a negative number selects nothing, 
+      // null or undefined selects "current" or first
+      if ( idx == null ) {
+        idx = ls.index( tab.find('.'+ cf.current +' a') );
+        idx = (idx == -1) ? 0 : idx;
+      }
+      if ( idx > -1 && !(re && !pn.length)) {
+        setTab( tab, ls.eq( Math.min( ls.length, idx||0 ) ), !re );
       }
 
-      if (re) {
+      // don't to this twice
+      if (re && pn.length) {
         // click event
-        tab.click(function( e ){
-          var l = $( e.target );
-          if ( l.is('a') ) { setTab( $( this ), l ); }
-          return false;
-        })
-        // don't to this twice
-        .addClass( 'tabs-active' );
+        tab
+          .find( 'a[href$='+ pn.join('],a[href$=') +']' )
+            .bind('click', function( e ){
+              var l = $( this );
+              if ( l.is('a') ) {
+                setTab( l.parents( '.' + cf.active ), l );
+              }
+              return false;
+            })
+            .end()
+          .addClass( cf.active );
       }
 
     });
     return this;
+  };
+  
+  $.fn.tabSwitcher.config = {
+    linkselector : 'li a[href^=#]',
+    focuslink    : '<a href="#" class="stream"></a>',
+    active       : 'tabs-active',
+    current      : 'current'
   };
   
 })(jQuery);
