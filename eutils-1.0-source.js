@@ -85,10 +85,10 @@
 
 
   var _fontresizeInterval,
-      _fontresizeSpan,
+      _body,
       _lastSize,
       _monitorFontSize = function(){
-          var _spanSize = _fontresizeSpan.offsetHeight;
+          var _spanSize = _body.css('fontSize');
           if (_spanSize != _lastSize)
           {
             _lastSize = _spanSize;
@@ -99,9 +99,8 @@
   $.event.special.fontresize = {
     setup: function () {
       if (this == window) {
-        _fontresizeSpan = $('<i style="display:block !important;font-size:1em;position:absolute;top:0;left:-9999px;right:auto;overflow:hidden !important;padding:0 !important;border:none !important;visibility:hidden;width:1px;height:1em !important;">.</i>')
-                        .appendTo('body')[0];
-        _lastSize = _fontresizeSpan.offsetHeight;
+        _body = $('body');
+        _lastSize = _body.css('fontSize');
         _fontresizeInterval = setInterval(_monitorFontSize, 500);
       }
     },
@@ -132,7 +131,6 @@
                   _this.if_(arguments.length ? cond : 1);
     },
 
-
     // Clones the jQuery object and wipes out the it's `.prevObject` stack, and other instance-properties.
     // This allows the garbage collector to free up memory. (In some cases gobs of it!)
     fin: function(){ return $(this) }, 
@@ -141,6 +139,21 @@
     pause: function (speed, callback)
     {
       return this.animate({ smu:0 }, speed||800, callback);
+    },
+
+
+
+    // the reverse of $.fn.wrap()
+    zap: function ()
+    {
+      return this.each(function(){
+          var p = this.parentNode;
+          if (p && p.tagName)
+          {
+            while (this.firstChild) { p.insertBefore(this.firstChild, this); };
+            $(this).remove();
+          }
+        });
     },
 
 
@@ -153,14 +166,15 @@
     },
 
     // enforces DOM-ids on all items in the collection
+    // and returns the id of the first item.
     aquireId: function ()
     {
-      return this.each(function() { $.aquireId(this); });
+      return this.each(function() { $.aquireId(this); }).attr('id');
     },
 
-    setFocus: function (_noScroll)
+    setFocus: function ()
     {
-      $.setFocus(this[0], _noScroll);
+      $.setFocus(this[0]);
       return this;
     },
 
@@ -330,6 +344,7 @@
     },
 
 
+
     // focus an _element (or it's first focusable _subElm) 
     // (for screen-reader accessibility)
     setFocus: function (_elm)
@@ -369,6 +384,7 @@
         }
       }
     },
+
 
 /* Neato tabIndex trick (offered by AOL's accessibility plugin: http://dev.aol.com/axs) but doesn't work on Safari.. ack!
 
