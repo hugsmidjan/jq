@@ -167,7 +167,7 @@
       none      : 'vertical',
       carousel  : 'horizontal',
       crossfade : 'horizontal',
-      accordion : 'vertical',
+      accordion : 'vertical'
     }
 
   };
@@ -180,16 +180,12 @@
         p2 = i2.offset();
     // usable second item?
     if ( p2 && i2.is(':visible') ) {
-      console.log('item2 is visible and has offset');
-      ret = ( Math.abs( p2.top - p1.top ) <= Math.abs( p2.left - p1.left ) ) 
+      return ( Math.abs( p2.top - p1.top ) <= Math.abs( p2.left - p1.left ) ) 
               ? 'horizontal' 
               : 'vertical';
     }
-    else {
-      console.log('item2 is not visible, grab a good default');
-      ret = false;  // indeterminate
-    }
-    return ret;
+    // indeterminate
+    return false;
   }
 
   function max ( l, c ) {
