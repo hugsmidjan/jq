@@ -5,47 +5,41 @@
   $.fn.mediaPlayer = function (cfg) {
 
     cfg = jQuery.extend({
-            //placeholder: null,
+            //container: null,  // selector or element or jQuery collection or HTML code
+            // FIXME: playerHTML þyrfti að hverfa og nota flashEmbed() í staðinn.. og mögulega koma þessari width breytu inn með heppilegri hætti
             width:       125,
-            playerHTML:  '<span class="epmediaplayer"><embed src="%{player}" width="%{width}" height="20" allowscriptaccess="always" allowfullscreen="true" flashvars=playlist=none&amp;height=20&amp;autostart=true" /></span>',
+            playerHTML:  '<embed src="%{player}" width="%{width}" height="20" allowscriptaccess="always" allowfullscreen="true" flashvars="playlist=none&amp;height=20&amp;autostart=true" />',
             playerUrl:   (document.location.protocol=='https:' ? 'https://secure.eplica.is/codecentre' : 'http://codecentre.eplica.is') + '/play/audio.swf?file=%{file}',
           }, cfg );
 
     return this.each(function(){
       
         var _this = this,
-            _fileUrl = _this.href.split('?')[0],
-            _lastPlayer;
+            _fileUrl = _this.href.split('?')[0];
+
         if (/\.(mp3|aac)$/.test(_fileUrl))
         {
-          $(_this).toggle(
-            function (e) {
-              e.preventDefault();
-              if (_lastPlayer)
-              {
-                _lastPlayer.remove();
-              }
-              _lastPlayer = $( cfg.playerHTML
+          var _container = $(cfg.container || '<span class="mediaplayer" />')
+              _containerSibling = $(_container[0].previousSibling || document.body.lastChild),
+              // FIXME: playerHTML þyrfti að hverfa og nota flashEmbed() í staðinn.. og mögulega koma þessari width breytu inn með heppilegri hætti
+              _thePlayer = $( cfg.playerHTML
                                       .replace('%{width}', cfg.width)
                                       .replace('%{player}', cfg.playerUrl)
                                       .replace('%{file}', _fileUrl)
                                 );
-              if (cfg.placeholder)
+
+          $(_this).bind('click', function (e) {
+              // Toggle player
+              if (_thePlayer.parent())
               {
-                $(cfg.placeholder).append(_lastPlayer);
+                _thePlayer.remove();
               }
               else
               {
-                $(_this).after(_lastPlayer);
+                _thePlayer.insertAfter(_containerSibling);
               }
-            },
-            function (e) {
               e.preventDefault();
-              _lastPlayer.remove();
-              _lastPlayer = 0;
-
-            }
-          );
+            });
         }
         
       });
