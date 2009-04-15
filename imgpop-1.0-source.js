@@ -13,6 +13,11 @@
         _isOpen = false,
         _ypos = 0,
         _hrefElms = this,
+        _langIs = $('html').attr('lang') == 'is',
+        _nextText = _langIs ? 'Næsta' : 'Next',
+        _prevText = _langIs ? 'Fyrri' : 'Previous',
+        _closeText = _langIs ? 'Loka' : 'Close',
+        _imageText = _langIs ? 'Mynd' : 'Image',
         _curtainTemp = '<div class="ipopup-curtain"></div>',
         _popupTemp = '<div class="ipopup-container">' +
             '<div class="ipopup-container-wrapper">' +
@@ -23,13 +28,13 @@
               '</div>' +
               '<div class="paging">' +
                 '<div class="status">' +
-                  '<strong>Image</strong> ' +
+                  '<strong>' + _imageText + '</strong> ' +
                   '<span><b>%{num}</b> of %{total}</span>' +
                 '</div>' +
                 '<ul class="stepper">' +
-                  '<li class="next"><a href="#">Next</a></li>' +
-                  '<li class="prev"><a href="#">Prev</a></li>' +
-                  '<li class="close"><a href="#">Close</a></small></li>' +
+                  '<li class="next"><a href="#">' + _nextText + '</a></li>' +
+                  '<li class="prev"><a href="#">' + _prevText + '</a></li>' +
+                  '<li class="close"><a href="#">' + _closeText + '</a></small></li>' +
                 '</ul>' +
               '</div>' +
             '</div>' +
@@ -66,7 +71,17 @@
         _popup.css('top', _ypos).hide();
 
         if(!_isOpen) {
-          _curtain.fadeIn(_fadeSpeed, function(){ _popup.fadeIn(_fadeSpeed); }); // animate in
+          _curtain.fadeIn(_fadeSpeed, function(){ 
+              _popup
+                  .fadeIn(_fadeSpeed)
+                  .find('div.ipopup-container-wrapper')
+                      .bind('click', function(e) {
+                          e.stopPropagation();
+                        })
+                  .end()
+                  .find('a:first')
+                      .focus();
+            }); // animate in
           _isOpen = true;
         } else {
           _curtain.show();
@@ -80,7 +95,7 @@
 
                 if(idx < 0 || idx >= _hrefElms.length)
                 {
-                  $(this).addClass('nav-end').bind('click', function (e) { return false; }); // both ends of the popup nav
+                  $(this).addClass('nav-end').find('a').removeAttr('href'); // both ends of the popup nav
                 }
                 else
                 {
@@ -101,11 +116,18 @@
                     _curtain.fadeOut(_fadeSpeed, function(){
                         _popup.remove();
                         _curtain.remove();
+                        _hrefElms.focus();
                     });
                   }); // animate out
                 _isOpen = false;
                 return false;
               });
+          
+        $('body').keydown( function(e) {
+            if( e.keyCode == 27 ) {
+                _curtain.trigger('click');
+            }
+        });
           
         return false;
 
