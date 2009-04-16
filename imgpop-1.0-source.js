@@ -1,26 +1,33 @@
+// encoding: utf-8
 // Requires:
 //  - jQuery 1.2.6 (Runs OK in jQuery 1.3)
-//  - eutils  (uses: $.inject() )
-// 
+//  - eutils  (uses: $.inject() & $.setFocus() ) 
 
 (function($){
 
-  $.fn.imgPopper = function () {
-
-    var _fadeSpeed = 250, // set 1 for almost no animation;)
-        _navSelectors = 'li.next, li.prev',
+  $.fn.imgPopper = function ( cfg ) {
+      
+    cfg = jQuery.extend({
+            fadeInSpeed : 250, // set 1 for almost no animation
+            fadeOutSpeed : 250, // set 1 for almost no animation
+            easeIn : 'swing',
+            easeOut : 'swing'
+          }, cfg );
+    
+    var _navSelectors = 'li.next, li.prev',
         _closeSelectors = 'div.ipopup-container li.close a, div.ipopup-curtain, div.ipopup-container',
         _isOpen = false,
         _ypos = 0,
         _hrefElms = this,
         _langIs = $('html').attr('lang') == 'is',
-        _nextText = _langIs ? 'Næsta' : 'Next',
+        _nextText = _langIs ? 'NÃ¦sta' : 'Next',
         _prevText = _langIs ? 'Fyrri' : 'Previous',
         _closeText = _langIs ? 'Loka' : 'Close',
         _imageText = _langIs ? 'Mynd' : 'Image',
         _curtainTemp = '<div class="ipopup-curtain"></div>',
         _popupTemp = '<div class="ipopup-container">' +
             '<div class="ipopup-container-wrapper">' +
+              '<a class="focustarget" style="position:absolute;left:auto;right:9999px;" href="#">.</a>' +
               '<div class="image">' +
                 '<span class="img"><img src="%{img}" alt="%{alt}" /></span>' +
                 '<strong class="title">%{title}</strong>' +
@@ -39,6 +46,7 @@
               '</div>' +
             '</div>' +
           '</div>';
+        
 
     _hrefElms.bind('click', function (e) {
         var i = _hrefElms.index(this),
@@ -71,17 +79,15 @@
         _popup.css('top', _ypos).hide();
 
         if(!_isOpen) {
-          _curtain.fadeIn(_fadeSpeed, function(){ 
+          _curtain.fadeIn(cfg.fadeInSpeed, function(){ 
               _popup
-                  .fadeIn(_fadeSpeed)
+                  .fadeIn(cfg.fadeInSpeed, cfg.easeIn)
                   .find('div.ipopup-container-wrapper')
                       .bind('click', function(e) {
                           e.stopPropagation();
                         })
-                  .end()
-                  .find('a:first')
-                      .focus();
-            }); // animate in
+                  .setFocus();
+            }, cfg.easeIn); // animate in
           _isOpen = true;
         } else {
           _curtain.show();
@@ -112,18 +118,18 @@
         // close popup
         $(_closeSelectors)
             .bind('click', function (e) {
-                _popup.fadeOut(_fadeSpeed, function(){
-                    _curtain.fadeOut(_fadeSpeed, function(){
+                _popup.fadeOut(cfg.fadeOutSpeed, function(){
+                    _curtain.fadeOut(cfg.fadeOutSpeed, function(){
                         _popup.remove();
                         _curtain.remove();
                         _hrefElms.focus();
-                    });
-                  }); // animate out
+                    }, cfg.easeOut);
+                  }, cfg.easeOut); // animate out
                 _isOpen = false;
                 return false;
               });
           
-        $('body').keydown( function(e) {
+        $(window).keypress( function(e) {
             if( e.keyCode == 27 ) {
                 _curtain.trigger('click');
             }
