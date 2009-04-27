@@ -1,15 +1,16 @@
 // encoding: utf-8
-jQuery.fn.roundCorners = function (opts)
+jQuery.fn.roundCorners = function (cfg)
 {
-  opts = jQuery.extend({
+  var prefix = 'c_ c_',
+      opts = jQuery.extend({
               tag : 'span',
-              tr  : 'c_tr',
-              tl  : 'c_tl',
-              br  : 'c_br',
-              bl  : 'c_bl',
+              tr  : prefix+'tr',
+              tl  : prefix+'tl',
+              br  : prefix+'br',
+              bl  : prefix+'bl',
               activeClass : 'roundbox-active'
-            }, opts);
-  var S = '<'+opts.tag+' class="',
+            }, cfg),
+      S = '<'+opts.tag+' class="',
       E = '" />';
 
   this
