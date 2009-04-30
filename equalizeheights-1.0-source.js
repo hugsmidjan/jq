@@ -27,7 +27,7 @@
 
 
   $.fn.equalizeHeights = function( cfg ) {
-    if (this.length)
+    if (this.length>1)
     {
       cfg = !cfg ? {} : (typeof cfg == 'boolean') ? { margins:cfg } : cfg;
 
