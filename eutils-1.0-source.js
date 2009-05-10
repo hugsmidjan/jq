@@ -96,18 +96,20 @@
           }
         };
 
+
+  // define a custom event, window.onfontresize that fires whenever the document.body font-size changes.
+  // TODO: allow binding to elements other than just window/body
   $.event.special.fontresize = {
     setup: function () {
-      if (this == window) {
+      if (this == _win  || this == _doc.body) {
         _body = $('body');
         _lastSize = _body.css('fontSize');
         _fontresizeInterval = setInterval(_monitorFontSize, 500);
       }
     },
     teardown: function () {
-      if (this == window) {
+      if (this == _win  ||  this == _doc.body) {
         clearTimeout( _fontresizeInterval );
-        $(_fontresizeSpan).remove();
       }
     }
   };
@@ -116,6 +118,7 @@
 
 
   $.fn.extend({
+
 
     if_: function (cond)
     {
@@ -157,11 +160,24 @@
     },
 
 
+    // Simply pull elements out of the DOM without killing their events or data...
+    // (This is how most jQuery newbies expect .remove() to work.)
+    detach: function ()
+    {
+      return this.each(function(){
+          var parent = this.parentNode;
+          parent  &&  parent.nodeType==1  &&  parent.removeChild(this);
+        });
+    },
+
+
+
+
     // run a function once.
     // (similar to .each(function) that always returns false - except that inside the function this == the jQuery collection.)
     run: function (func, args)
     {
-      func.apply(this, args||[]);
+      this.length  &&  func.apply(this, args||[]);
       return this;
     },
 
@@ -319,7 +335,7 @@
     setHash: function (_hash)
     {
       _hash = _hash.replace(/^#/, '');
-      var _elm = $('#'+_hash);
+      var _elm = $('#'+_hash)[0];
       if (_elm)
       {
         // temporaily defuse the section block's id 
@@ -328,16 +344,18 @@
         //   a) the hash-change populates the browser's history buffer.
         //   b) the viewport doesn't scroll/jump
         // (NOTE: This may be buggy in IE5 - but that's life)
-        _dummyElm = _dummyElm || $('<i style="position:absolute;visibility:hidden;"></i>')[0];
-        _dummyElm.id = _hash;
-        $(_dummyElm)
-            .appendTo(_doc.body)
-            .css('top', $.scroll().top+'px');
+        _dummyElm = _dummyElm || $('<i style="position:absolute;margin:0;" id="'+_hash+'">XXX</i>');
+        //_dummyElm = _dummyElm || $('<i style="position:absolute;margin:0;visibility:hidden;" id="'+_hash+'">XXX</i>');
+        _dummyElm
+            .css('top', $.scroll().top)
+            .appendTo(_doc.body);
+        ;;;window.console&&console.log( $.scroll().top, _dummyElm[0].id );
       }
       document.location.hash = _hash;  // set the damn hash...
       if (_elm)
       {
-        $(_dummyElm).remove();
+        _dummyElm[0].id = "";
+//        _dummyElm.remove();
         // put the old tab-id back in it's place
         _elm.id = _hash;
       }
@@ -370,7 +388,7 @@
 
         // Put the focus inside the section
         // (the browser only scrolls the page if the _focusElm is outside the viewport)
-        _focusElm.focus();
+        $(_focusElm).trigger('focus');
 
         // make note of new scroll position
         var _after = $.scroll();
