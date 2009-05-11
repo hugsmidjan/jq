@@ -344,12 +344,10 @@
         //   a) the hash-change populates the browser's history buffer.
         //   b) the viewport doesn't scroll/jump
         // (NOTE: This may be buggy in IE5 - but that's life)
-        _dummyElm = _dummyElm || $('<i style="position:absolute;margin:0;" id="'+_hash+'">XXX</i>');
-        //_dummyElm = _dummyElm || $('<i style="position:absolute;margin:0;visibility:hidden;" id="'+_hash+'">XXX</i>');
+        _dummyElm = _dummyElm || $('<i style="position:absolute;margin:0;visibility:hidden;" id="'+_hash+'" />');
         _dummyElm
             .css('top', $.scroll().top)
             .appendTo(_doc.body);
-        ;;;window.console&&console.log( $.scroll().top, _dummyElm[0].id );
       }
       document.location.hash = _hash;  // set the damn hash...
       if (_elm)

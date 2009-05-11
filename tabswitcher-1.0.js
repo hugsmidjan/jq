@@ -4,35 +4,8 @@
 // 
 (function($){
 
-  // sets the document.location.hash while suppressing the viewport scrolling
-  function setHash ( h ) {
-    var _dummyElm, _elm = $( '#' + h )[0];
-    if (_elm) {
-      // temporaily defuse the section block's id 
-      _elm.id = '';
-      // then insert and position a hidden dummy element to make sure that
-      //   a) the hash-change populates the browser's history buffer.
-      //   b) the viewport doesn't scroll/jump
-      // (NOTE: This may be buggy in IE5 - but that's life)
-      var _dummyElm = $('<i id="'+h+'"></i>')
-          .css({
-            position   : 'absolute',
-            visibility : 'hidden',
-            overflow   : 'hidden',
-            top        : $(window).scrollTop()
-          })
-          .appendTo(document.body);
 
-    }
-    document.location.hash = h;  // set the fragment
-    if (_elm) {
-      _dummyElm.remove();
-      // put the old tab-id back in it's place
-      _elm.id = h;
-    }
-  };
-
-  /*
+/*
   $.event.special.fragment = {
     setup : function () {
       //data = $.extend({ speed: hover.speed, delay: hover.delay, hovered:0 }, data||{} );
@@ -72,7 +45,7 @@
     };
   })()
   
-  */
+*/
   
   // ===  internal variables  ===
 
@@ -83,113 +56,122 @@
       _allTabIds = {},
       _tabsToOpen;
 
+
   // ===  internal support functions  ===
 
   // get fragment id from URL
-  function getHash ( url ) {
-    return (url + '').replace( /^.*#/, '' );
-  }
+      getHash = function ( url )
+      {
+        return (''+url).replace( /^.*#/, '' );
+      },
 
-  function closePanel ( id ) {
 
-    // grab the panel
-    var panel = $( '#' + id );
-    var data  = panel.data( 'tabswitcher' );
-    var c = data.config;
-
-    // de-highlight the tab
-    data.tab.removeClass( c.currentTabClass );
-
-    // unwrap the `currentTabTag` element if it exists
-    if ( c.currentTabTag ) {
-      var w = data.tab.find( c.currentTabTag );
-      if ( w.length ) {
-        var p = data.link[0];
-        while (w[0].firstChild) { p.appendChild(w[0].firstChild); };
-        w.remove();
-      }
-    }
-
-    // hide the tabPanel block
-    if (c.cssHide) {
-      panel.addClass( c.hiddenPaneClass );
-    }
-    else {
-      panel.hide();
-    }
-
-    if (c.openTabId == id) { delete c.openTabId; }
-    delete _openTabs[id];
-
-    data.block.trigger( 'Tabclose', id );
-    panel.trigger( 'Panelclose', id );
-
-  }
-
-  function openPanel ( id ) {
-
-    var panel = $( '#' + id );
-    var data  = panel.data( 'tabswitcher' );
-    var c = data.config;
-
-    // highlight the tab
-    data.tab.addClass( c.currentTabClass );
-
-    // add new STRONG to current tab
-    if ( c.currentTabTag ) {
-      // don't add strong to tabs that already have it
-      if ( !data.link.find( c.currentTabTag ).length ) {
-        data.link.wrapInner( document.createElement( c.currentTabTag ) );
-      }
-    }
-
-    // hide the tabPanel block
-    if ( c.cssHide ) {
-      panel.removeClass( _conf.hiddenPaneClass );
-    }
-    else {
-      panel.show();
-    }
+      closePanel = function ( id )
+      {
     
-    c.openTabId = id;
-    _openTabs[id] = true;
-
-    data.block.trigger( 'Tabopen', id );
-    panel.trigger( 'Panelopen', id );
-
-  }
-
-  // event delegate monitor that grabs 
-  function crossReferenceMonitor ( e ) {
-    if (e.target) {
-      // nested tabs are causing recursion overflow
-      var l = (e.target.tagName == 'A') ? $( e.target ) : $( e.target ).parents('a');
-      if (l.length && l[0].href && l[0].href.indexOf('#')) {
-        var id = getHash( l.attr('href') );
-        if (_allTabIds[id]) {
-          $.tabSwitcher.switchTo( id, true );
-          return false;
+        // grab the panel
+        var panel = $( '#' + id );
+        var data  = panel.data( 'tabswitcher' );
+        var c = data.config;
+    
+        // de-highlight the tab
+        data.tab.removeClass( c.currentTabClass );
+    
+        // unwrap the `currentTabTag` element if it exists
+        if ( c.currentTabTag ) {
+          var w = data.tab.find( c.currentTabTag );
+          if ( w.length ) {
+            var p = data.link[0];
+            while (w[0].firstChild) { p.appendChild(w[0].firstChild); };
+            w.remove();
+          }
         }
-      }
-    }
-  }
-
-
-  // fragment monitoring system
-  var _lastSetFragment = null,
-      _fragmentsToMonitor = {};
-
-  function monitorFragment ( e ) {
-    var _currentFragment = document.location.hash.substr(1);
-    if ( _lastSetFragment != _currentFragment  &&  _fragmentsToMonitor[_currentFragment] ) {
-      tabSwitcher.switchTo(_currentFragment, true);
-      _lastSetFragment = _currentFragment;
-    }
-  }
-
-  function startFragmentMonitoring() {
     
-  }
+        // hide the tabPanel block
+        if (c.cssHide) {
+          panel.addClass( c.hiddenPaneClass );
+        }
+        else {
+          panel.hide();
+        }
+    
+        if (c.openTabId == id) { delete c.openTabId; }
+        delete _openTabs[id];
+    
+        data.block.trigger( 'Tabclose', id );
+        panel.trigger( 'Panelclose', id );
+
+      },
+
+
+
+      openPanel = function ( id )
+      {
+
+        var panel = $( '#' + id );
+        var data  = panel.data( 'tabswitcher' );
+        var c = data.config;
+    
+        // highlight the tab
+        data.tab.addClass( c.currentTabClass );
+    
+        // add new STRONG to current tab
+        // but don't add strong to tabs that already have it
+        if ( c.currentTabTag  &&  !$( c.currentTabTag, data.link ).length )
+        {
+          data.link.wrapInner('<'+ c.currentTabTag +'/>');
+        }
+    
+        // hide the tabPanel block
+        if ( c.cssHide ) {
+          panel.removeClass( c.hiddenPaneClass );
+        }
+        else {
+          panel.show();
+        }
+        
+        c.openTabId = id;
+        _openTabs[id] = true;
+    
+        data.block.trigger( 'Tabopen', id );
+        panel.trigger( 'Panelopen', id );
+
+      },
+
+
+
+      // event delegate monitor that grabs 
+      crossReferenceMonitor = function ( e )
+      {
+        if (e.target) {
+          // nested tabs are causing recursion overflow
+          var l = (e.target.tagName == 'A') ? $( e.target ) : $( e.target ).parents('a');
+          if (l.length && l[0].href && l[0].href.indexOf('#')) {
+            var id = getHash( l.attr('href') );
+            if (_allTabIds[id]) {
+              $.tabSwitcher.switchTo( id, true );
+              return false;
+            }
+          }
+        }
+      },
+
+
+      // fragment monitoring system
+      _lastSetFragment = null,
+      _fragmentsToMonitor = {},
+    
+      monitorFragment = function ( e ) {
+        var _currentFragment = document.location.hash.substr(1);
+        if ( _lastSetFragment != _currentFragment  &&  _fragmentsToMonitor[_currentFragment] ) {
+          tabSwitcher.switchTo(_currentFragment, true);
+          _lastSetFragment = _currentFragment;
+        }
+      },
+    
+      startFragmentMonitoring = function () {
+        
+      };
 
 /*
 
@@ -231,8 +213,10 @@
       cookieU.set(tabSwitcher.cookieName, _openTabIds.join(','), tabSwitcher.cookiePath, tabSwitcher.cookieTTL);
     };
 
+
 */
   
+
   $.extend({
     tabSwitcher : {
       
@@ -259,9 +243,9 @@
         monitorFragment  : false,          // hook up an document.onfragment() (custom)event to automatically switch tabs when the user navigates back/forward in history.  (`.setFragment` must be `true`)
 
         // template for a link placed at the top of the panel. use '' to disable
-        focusLinkTemplate : '<a href="#" class="focustarget">#</a>',
+        focusLinkTemplate : '<a href="#" class="focustarget">.</a>',
         // template for a link placed at the bottom of the panel. use '' to disable
-        returnLinkTemplate : '<a href="#" class="stream">#</a>',
+        returnLinkTemplate : '<a href="#" class="stream">.</a>',
 
         en : {
           backLinkText     : 'Back to '
@@ -275,13 +259,14 @@
       // newTab may be either string or a link element
       switchTo : function ( _newTab, silentSwitch ) {
         
-        var id    = getHash( _newTab.href || _newTab );
-        var panel = $( '#' + id );
-        var d     = panel.data( 'tabswitcher' );
-        var c     = d.config;
-        var from  = c.openTabId;
+        var id     = getHash( _newTab.href || _newTab ), // accepts: linkElm, URL, DOM-id
+            panel  = $( '#' + id ),
+            d      = panel.data( 'tabswitcher' ),
+            c      = d.config,
+            from   = c.openTabId;
 
-        if (c) {
+        if (c)
+        {
           // Note: we always fire the event... even if the new tab was already open
           d.block.trigger('Tabswitch', {
             from : from,
@@ -290,7 +275,9 @@
 
           if (c.openTabId != id) { // redundant if the new tab is already open.
             if (c.openTabId)
+            {
               closePanel( c.openTabId );
+            }
             // open our new selection
             openPanel( id );
             // save session cookie with current indexes
@@ -302,10 +289,10 @@
           if ( !silentSwitch ) {
             if ( c.setFragment ) {
               _lastSetFragment = id;
-              setHash( id );
+              $.setHash( id );
             }
             if (d.focusLink) 
-              d.focusLink.focus();
+              d.focusLink.trigger('focus');
           }
 
           // Note: we always fire the event... even if the new tab was already open
@@ -319,83 +306,88 @@
     }
   });
 
-  $.fn.extend({
-    tabSwitcher : function ( conf ) {
 
-      // todo : detect usage of id, or index to set tab index => switchto
 
-      _tabsToOpen = [[],[],[],[]];
-      this.each(function() {
 
-        var block     = $( this )
-        var _conf     = $.extend( {}, $.tabSwitcher.defaultConfig, conf );
-        var tabs      = $( _conf.tabSelector, this );
-        var openTabId = '';
-        var openLevel = 0;
+  $.fn.tabSwitcher = function ( conf )
+  {
 
-        _conf.tabs = {};
-        _conf.tabBlock = this;
-        tabs.each(function ( i, t ) {
+    // todo : detect usage of id, or index to set tab index => switchto
+
+    _tabsToOpen = [[],[],[],[]];
+    this.each(function() {
+
+      var block     = $( this ),
+          _conf     = $.extend( {}, $.tabSwitcher.defaultConfig, conf ),
+          tabs      = $( _conf.tabSelector, this ),
+          openTabId = '',
+          openLevel = 0;
+
+      _conf.tabs = {};
+      _conf.tabBlock = this;
+      tabs.each(function ( i, t ) {
 
           var data    = { tab : $(t) };
           data.link   = (t.tagName == 'A') ? data.tab : $( 'a', t );
           data.lang   = data.link.add(data.link.parents()).filter('[lang]').attr('lang') || 'en';
           data.config = _conf;
           data.block  = block;
-          var id      = getHash( data.link.attr('href') );
-          var panel   = $( '#' + id );
+          var id      = getHash( data.link.attr('href') ),
+                 panel   = $( '#' + id );
           panel.data( 'tabswitcher', data );
 
           var returnToTab = function (e) {
             var id = getHash( $( this ).attr('href') );
             var link = $( '#'+id ).data('tabswitcher').link;
-            // setHash( DOM.aquireId( link ) );  // --- WTF?
-            link.focus();
+            // $.setHash( link.aquireId() );  // --- WTF?
+            link.trigger('focus');
             return false;
           };
-          
-          if (panel.length) {
+        
+          if (panel.length)
+          {
 
             panel.addClass( _conf.paneClass );
             var backtxt = $.tabSwitcher.i18n( _conf.en.backLinkText, data.lang ) + data.tab.text();
+
 
             // Accessibility: Add a focusAnchor (+ "return to tab" link) to the top of the _tabPanelElm.
             if (_conf.focusLinkTemplate)
               data.focusLink = $( _conf.focusLinkTemplate )
                                       .attr( 'href', '#'+id )
                                       .attr( 'title', backtxt )
-                                      .click( returnToTab )
+                                      .bind( 'click', returnToTab )
                                       .prependTo( panel );
             // Add a second "return to tab" link to the bottom of the _tabPanelElm.
             if (_conf.returnLinkTemplate)
               data.returnLink = $( _conf.returnLinkTemplate )
                                       .attr( 'href', '#'+id )
                                       .attr( 'title', backtxt )
-                                      .click( returnToTab )
+                                      .bind( 'click', returnToTab )
                                       .appendTo( panel );
 
             // DEFAULT: we don't have an id to open and are on the first item -- set that by default
             if (!i  &&  !openTabId  &&  _conf.showFirst) {
               openTabId = id;
-              openLevel = 1; //DEFAULT;
+              openLevel = 1; // DEFAULT;
             }
             // DOM/ELEMENT: is the index element marked current? -- mark that
             if (openLevel < 2  &&  data.tab.hasClass( _conf.currentTabClass )) {
               openTabId = id;
-              openLevel = 2; //ELEMENT;
+              openLevel = 2; // ELEMENT;
             }
             // COOKIE: is the _tabId in a cookie -- mark that
             if (openLevel < 3  &&  _conf.setCookie  &&  _cookieTargets  &&  $.inArray(_cookieTargets, id)>-1) {
               openTabId = id;
-              openLevel = 3; //COOKIE;
+              openLevel = 3; // COOKIE;
             }
             // HASH: is the index element marked current? -- trumps all
             if (openLevel < 4  &&  _hashTarget == id) {
               openTabId = id;
-              openLevel = 4; //HASH;
+              openLevel = 4; // HASH;
             }
 
-            data.link.click(function (e) { 
+            data.link.bind('click', function (e) {
               $.tabSwitcher.switchTo( this ); 
               return false;
             });
@@ -410,49 +402,92 @@
             }
             
             panel
-              .bind('Tabswitch', function (e){
-                if (e.target !== this) {
-                  $.tabSwitcher.switchTo( this.id, true );
-                }
-              })
-              // todo: ... consider moving this to document
-              .click( crossReferenceMonitor )
+                .bind('Tabswitch', function (e){
+                    if (e.target !== this) {
+                      $.tabSwitcher.switchTo( this.id, true );
+                    }
+                  })
+                // todo: ... consider moving this to document
+                .bind('click', crossReferenceMonitor )
 
           }
 
         });
 
-        // open and activate
-        block.addClass( _conf.stripActiveClass );
-        if (openTabId) 
-          // schedule for opening when _setParentTabTriggers has finished running
-          _tabsToOpen[openLevel-1].unshift( openTabId );
-
-        // Remove the fragment from the location bar --- if that's really what we want. ...?
-        if ($.tabSwitcher.fixInitScroll && openLevel == 4 /*_LEVEL.HASH*/  && !_conf.setFragment) {
-          document.location.hash = '';
-        }
-
-      });
-
-      /*
-      if (!Object.isEmpty(_fragmentsToMonitor)) {
-        EEvent.add( document, 'fragment', _monitorFragment );
+      // open and activate
+      block.addClass( _conf.stripActiveClass );
+      if (openTabId) 
+      {
+        // schedule for opening when _setParentTabTriggers has finished running
+        _tabsToOpen[openLevel-1].unshift( openTabId );
       }
-      */
 
-      // `switchTo` all the tabs that have been scheduled for opening.
-      // todo : consider pushing this to next thread
-      for (var i=0; i<4; i++) {
-        var tabIds = _tabsToOpen[i];
-        for (var j=0, tabId; (tabId = tabIds[j]); j++) {
-          $.tabSwitcher.switchTo( tabId, true );
-        }
+      // Remove the fragment from the location bar --- if that's really what we want. ...?
+      if ($.tabSwitcher.fixInitScroll && openLevel == 4 /*_LEVEL.HASH*/  && !_conf.setFragment) {
+        document.location.hash = '';
       }
-      
-      return this;
 
-    } // tabswitcher
-  });
+    });
+
+    /*
+    if (!Object.isEmpty(_fragmentsToMonitor)) {
+      EEvent.add( document, 'fragment', _monitorFragment );
+    }
+    */
+
+    // `switchTo` all the tabs that have been scheduled for opening.
+    // todo : consider pushing this to next thread
+    for (var i=0; i<4; i++) {
+      var tabIds = _tabsToOpen[i];
+      for (var j=0, tabId; (tabId = tabIds[j]); j++) {
+        $.tabSwitcher.switchTo( tabId, true );
+      }
+    }
+    
+    return this;
+
+  }; // tabswitcher
+
+
+
+
+
+  // Makes .tabbox for those tabpane collections that lack it.
+  // auto-assigns IDs, and pushes the newly created tabbox onto the stack.
+  $.fn.makeTabbox = function ( conf )
+  {
+    conf =  $.extend({
+                titleSel: 'h1, h2, h3',
+                min:      2,
+                boxTempl: '<div class="tab-box"><ul class="tabs" /></div>',
+                tabSel:   'ul',
+                tabTempl: '<li><a href="#%{id}">%{title}</a></li>',
+                makeTab:  function(tabPane, conf){
+                              var tabHtml = $.inject(conf.tabTempl, {id: $.aquireId(this),  title: $(conf.titleSel, this).html()});
+                              return  $(tabHtml);
+                            }
+              }, conf);
+
+    var tabBox = [],
+        tabPanes = this;
+    if (tabPanes.length >= conf.min)
+    {
+      tabBox = $( conf.boxTempl );
+      var tabList = $(conf.tabSel, tabBox);
+
+      tabPanes
+          .each(function(){
+              tabList
+                  .append( conf.makeTab(this, conf) );
+            })
+          .eq(0)
+              .before( tabBox );
+
+    }
+
+    return this.pushStack( tabBox );
+  };
+
+
 
 })(jQuery);
