@@ -117,6 +117,21 @@
 
 
 
+
+  if (!$.fn.detach) // this method is on the jQuery Road Map, so until then...
+  {
+    // Simply pull elements out of the DOM without killing their events or data...
+    // (This is how most jQuery newbies expect .remove() to work.)
+    $.fn.detach = function ()
+    {
+      return this.each(function(){
+          var parent = this.parentNode;
+          parent  &&  parent.nodeType==1  &&  parent.removeChild(this);
+        });
+    }
+  }
+
+
   $.fn.extend({
 
 
@@ -145,6 +160,12 @@
     },
 
 
+    log: function ()
+    {
+      _win.console && console.log(this);
+      return this;
+    },
+
 
     // the reverse of $.fn.wrap()
     // only works if the target element is in the DOM.
@@ -154,19 +175,6 @@
           $(this).children().insertBefore(this);
         }).remove();
     },
-
-
-    // Simply pull elements out of the DOM without killing their events or data...
-    // (This is how most jQuery newbies expect .remove() to work.)
-    detach: function ()
-    {
-      return this.each(function(){
-          var parent = this.parentNode;
-          parent  &&  parent.nodeType==1  &&  parent.removeChild(this);
-        });
-    },
-
-
 
 
     // run a function once.
@@ -345,7 +353,7 @@
             .css('top', $.scroll().top)
             .appendTo(_doc.body);
       }
-      document.location.hash = _hash;  // set the damn hash...
+      _doc.location.hash = _hash;  // set the damn hash...
       if (_elm)
       {
         _dummyElm[0].id = "";
