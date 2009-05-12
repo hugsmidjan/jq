@@ -336,7 +336,7 @@
           elem = elem.firstChild;
         return elem;
       })
-      .append( p, n, j );
+      .append( n, p, j );
 
     return w;
   }

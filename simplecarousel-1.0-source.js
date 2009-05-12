@@ -35,19 +35,6 @@
           if (conf.numScreens > 1) {
             ctrl
                 .append(
-                    $( conf.prevBtnTemplate )
-                      .html( conf.labelPrev )
-                      .attr('title',  conf.titlePrev || conf.labelPrev || '' )
-                      .bind('click', function(){
-                          var px = conf.container.scrollLeft() - conf.windowSize;
-                          px = Math.floor( px / conf.windowSize ) * conf.windowSize;
-                          px = ( conf.wrap && px < 0 ) ? conf.maxScroll : Math.max( 0, px );
-                          conf.currentPage += px == conf.maxScroll ? conf.numScreens-1 : -1;
-                          moveTo( px, conf );
-                          return false;
-                        })
-                  )
-                .append(
                     $( conf.nextBtnTemplate )
                       .html( conf.labelNext )
                       .attr('title',  conf.titleNext || conf.labelNext || '' )
@@ -57,6 +44,19 @@
                           px = ( conf.wrap && px > conf.maxScroll ) ? 0 : Math.min( conf.maxScroll, px ) ;
                           conf.currentPage += px == 0 ? -conf.numScreens+1 : 1;
                           //;;;window.console&&console.log(conf.currentPage, conf.numScreens);
+                          moveTo( px, conf );
+                          return false;
+                        })
+                  )
+                .append(
+                    $( conf.prevBtnTemplate )
+                      .html( conf.labelPrev )
+                      .attr('title',  conf.titlePrev || conf.labelPrev || '' )
+                      .bind('click', function(){
+                          var px = conf.container.scrollLeft() - conf.windowSize;
+                          px = Math.floor( px / conf.windowSize ) * conf.windowSize;
+                          px = ( conf.wrap && px < 0 ) ? conf.maxScroll : Math.max( 0, px );
+                          conf.currentPage += px == conf.maxScroll ? conf.numScreens-1 : -1;
                           moveTo( px, conf );
                           return false;
                         })
