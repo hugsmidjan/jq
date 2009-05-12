@@ -79,11 +79,13 @@
         p = l.eq( c.index ).position();
         conf[prop] = p.left;
         
-        if ( c.wrap == 'loop' && c.lastIndex == 0 && c.index == last ) {
+        if ( c.wrap == 'loop' && c.lastIndex == 0 && c.index == last )
+        {
           w[prop]( z.position().left + z[dimp]() );
           w.animate( conf, c.speed, c.easing );
         }
-        else if ( c.wrap == 'loop' && c.lastIndex == last && c.index == 0 ) {
+        else if ( c.wrap == 'loop' && c.lastIndex == last && c.index == 0 )
+        {
           conf[prop] = z.position().left + z[dimp]();
           w.animate(conf, c.speed, c.easing, function () {
             w[prop]( 0 );
@@ -97,13 +99,16 @@
         l.each(function (i, nw, ow ){
           nw = (i >= c.index && i < c.index + c.windowSize);
           ow = (c.lastIndex == null) || (i >= c.lastIndex && i < c.lastIndex + c.windowSize);
-          if ( nw && !ow ) { // show
+          if ( nw && !ow ) // show
+          {
             $(this).stop().hide().fadeIn( c.speed );
           }
-          else if ( !nw && c.lastIndex == null ) { // init
+          else if ( !nw && c.lastIndex == null ) // init
+          {
             $(this).stop().hide();
           }        
-          else if ( !nw && ow ) { // hide 
+          else if ( !nw && ow )  // hide 
+          {
             $(this).stop().show().fadeOut( c.speed );
           }
         });
@@ -114,16 +119,19 @@
           nw = (i >= c.index && i < c.index + c.windowSize);
           ow = (c.lastIndex == null) || (i >= c.lastIndex && i < c.lastIndex + c.windowSize);
           ac = {};
-          if ( nw && !ow ) { // show
+          if ( nw && !ow ) // show
+          {
             ac[ap] = 'show';
             $(this).stop().animate( ac, c.speed, c.easing, function () {
               this.style[ap] = '';
             });
           }
-          else if ( !nw && c.lastIndex == null ) { // init
+          else if ( !nw && c.lastIndex == null )  // init
+          {
             $(this).stop().hide();
           }
-          else if ( !nw && ow ) { // hide
+          else if ( !nw && ow )  // hide
+          {
             ac[ap] = 'hide';
             $(this).stop().animate( ac, c.speed, c.easing, function () {
               this.style[ap] = '';
@@ -139,20 +147,20 @@
       },
       start : function ( i, l, c ) {
         var m = max( l, c );
-        if ( i < 0 ) return (c.index == 0) ? m : 0;
-        if ( i > m ) return m;
+        if ( i < 0 ) { return (c.index == 0) ? m : 0; }
+        if ( i > m ) { return m; }
         return i;
       },
       end : function ( i, l, c ) {
         var m = max( l, c );
-        if ( i < 0 ) return 0;
-        if ( i > m ) return (c.index == m) ? 0 : m;
+        if ( i < 0 ) { return 0; }
+        if ( i > m ) { return (c.index == m) ? 0 : m; }
         return i;
       },
       both : function ( i, l, c ) {
         var m = max( l, c );
-        if ( i < 0 ) return (c.index == 0) ? m : 0;
-        if ( i > m ) return (c.index == m) ? 0 : m;
+        if ( i < 0 ) { return (c.index == 0) ? m : 0; }
+        if ( i > m ) { return (c.index == m) ? 0 : m; }
         return i;
       },
       random : function ( i, l, c ) {
@@ -173,13 +181,15 @@
   };
 
   // detect list aspect 
-  function detectAspect ( _items ) {
+  function detectAspect ( _items )
+  {
     var ret, 
         i2 = _items.eq( 1 );
         p1 = _items.eq( 0 ).offset(),
         p2 = i2.offset();
     // usable second item?
-    if ( p2 && i2.is(':visible') ) {
+    if ( p2 && i2.is(':visible') )
+    {
       return ( Math.abs( p2.top - p1.top ) <= Math.abs( p2.left - p1.left ) ) 
               ? 'horizontal' 
               : 'vertical';
@@ -188,13 +198,15 @@
     return false;
   }
 
-  function max ( l, c ) {
+  function max ( l, c )
+  {
     return (c.overflow == 'visible') 
         ? Math.floor( l.length / c.stepSize ) * c.stepSize
         : l.length - c.windowSize;
   }
 
-  function setPos ( c, _newIndex, _noflash ) {
+  function setPos ( c, _newIndex, _noflash )
+  {
 
     var _block = c.block;
     var list   = c.list;
@@ -212,25 +224,36 @@
           .addClass( c.cursorItemClass );
 
     if ( $.isFunction( c.moveCallback ) )
+    {
       c.moveCallback.call( _block, list, c );
+    }
 
     if ( $.isFunction( c.animation ) )
+    {
       c.animation.call( _block, list, c )
+    }
     else
+    {
       $.listscroller.animate[ c.animation||'none' ].call( _block, list, c );
+    }
 
     _block
       .removeClass( c.topClass )
       .removeClass( c.bottomClass );
 
-    if ( c.index == 0 ) 
-      _block.addClass( c.topClass ); 
+    if ( c.index == 0 )
+    {
+      _block.addClass( c.topClass );
+    }
 
-    if ( c.index == list.length - c.windowSize ) 
-      _block.addClass( c.bottomClass ); 
+    if ( c.index == list.length - c.windowSize )
+    {
+      _block.addClass( c.bottomClass );
+    }
 
     // flash the container
-    if (!_noflash) {
+    if (!_noflash)
+    {
       _block.addClass( c.classPrefix + '-changed' );
       setTimeout(function () {
         _block.removeClass( c.classPrefix + '-changed' );
@@ -238,76 +261,86 @@
     }
 
     // mark paging link if needed
-    if ( c.jumps ) {
+    if ( c.jumps )
+    {
       c.jumps
         .removeClass( c.currentPageClass )
         .eq( Math.ceil(c.index / c.stepSize) )
           .addClass( c.currentPageClass )
     }
-    else if ( c.pager ) {
+    else if ( c.pager )
+    {
       c.pager.val( Math.ceil(c.index / c.stepSize) + 1 );
     }
 
   }
 
-  function movePrev ( e ) {
+  function movePrev ( e )
+  {
     var c = e.data;
     setPos( c, c.index - c.stepSize );
     return false;
   }
 
-  function moveNext ( e ) {
+  function moveNext ( e )
+  {
     var c = e.data;
     setPos( c, c.index + c.stepSize );
     return false;
   }
 
-  function movePage ( e ) {
+  function movePage ( e )
+  {
     var c = e.data, 
         p = (parseInt( $( this ).text(), 10 ) -1) || 0;
     setPos( c, p * c.stepSize );
     return false;
   }
 
-  function inputChange ( e ) {
+  function inputChange ( e )
+  {
     var c = e.data, 
         p = (parseInt( $( this ).val(), 10 ) -1) || 0;
     setPos( c, p * c.stepSize );
     return false;
   }
 
-  function buildControls ( c, _lang ) {
+  function buildControls ( c, _lang )
+  {
 
-    var n = $( c.nextBtnTemplate );
-    var p = $( c.prevBtnTemplate );
-    var j = $([]);
-    var i18n = $.listscroller.i18n;
+    var n = $( c.nextBtnTemplate ),
+        p = $( c.prevBtnTemplate ),
+        j = $([]),
+        i18n = $.listscroller.i18n;
 
     n.find( 'a' ).andSelf().eq(0)
       .bind( 'click', c, moveNext )
       .attr( 'title', i18n( c.titleNext, _lang ) )
-      .text( i18n( c.labelNext, _lang ) )
+      .text( i18n( c.labelNext, _lang ) );
 
     p.find( 'a' ).andSelf().eq(0)
       .bind( 'click', c, movePrev )
       .attr( 'title', i18n( c.titlePrev, _lang ) )
-      .text( i18n( c.labelPrev, _lang ) )
+      .text( i18n( c.labelPrev, _lang ) );
 
-    if ( c.paging ) {
-      var jmps = []
+    if ( c.paging )
+    {
+      var jmps = [],
           page = Math.ceil( c.index / c.stepSize ),
           l = Math.ceil( c.list.length / c.stepSize );
 
       j = $( c.jumpTemplate );
 
-      if ( c.jumpLabelTemplate ) {
+      if ( c.jumpLabelTemplate )
+      {
         $( c.jumpLabelTemplate )
           .text( i18n( c.jumpLabel, _lang ) )
           .appendTo( j );
       }
 
       // input pager
-      if (c.inputPager) {
+      if (c.inputPager)
+      {
         c.pager   = $( c.pagerTemplate ).appendTo( j );
         var total = $( c.totalTemplate ).appendTo( j );
         c.pager.bind( 'change', c, inputChange ).val( page +1 );
@@ -317,10 +350,10 @@
       else {
         // make buttons
         for (var i=0; i<l; i++) {
-          var bt = $( c.jumpBtnTemplate );
-          var a = bt.find( 'a' ).andSelf().eq(0)
+          var bt = $( c.jumpBtnTemplate ),
+              a = bt.find( 'a' ).andSelf().eq(0)
                     .text( i + 1 ).bind( 'click', c, movePage );
-          if (c.index == i) a.addClass( c.currentPageClass );
+          if (c.index == i) { a.addClass( c.currentPageClass ); }
           jmps.push( a[0] );
         }
         c.jumps = $( jmps );
@@ -336,18 +369,21 @@
           elem = elem.firstChild;
         return elem;
       })
-      .append( p, n, j );
+      .append( n, p, j );
 
     return w;
   }
 
 
   
-  function initScroller ( c, _block, _items ) {
+  function initScroller ( c, _block, _items )
+  {
     
     // test and stop repeat inits
     if ( _block.hasClass( c.classPrefix + '-active' ) )
+    {
       return false;
+    }
 
     c.list = _items;
     c.block = _block;
@@ -355,39 +391,48 @@
     // wrap elements with containers
     var _ref, _inner, _outer;
     if (_items.eq( 0 ).is( 'li' ))
+    {
       _inner = _items.parent();
+    }
     else
+    {
       _inner = _items.wrapAll( '<div />' ).parent();
+    }
 
     _outer = _inner.wrap( '<div />' ).parent();
     _inner.addClass( c.classPrefix + '-clip' );
-    _outer.addClass( c.classPrefix + '-wrapper' )
+    _outer.addClass( c.classPrefix + '-wrapper' );
     _block.addClass( c.classPrefix + '-active' );
     
     _inner.add( _outer ).css( 'position', 'relative' );
     _outer.addClass( c.classPrefix + '-' + c.aspect );
 
     // for circular carousels
-    if ( c.wrap == 'loop' ) {
+    if ( c.wrap == 'loop' )
+    {
       // generate flipover items
       c.flipover = _items.slice( 0, c.windowSize ).clone( true );
       _items.parent().append( c.flipover );
     }
 
     // create and display control-links
-    if ( c.controls !== 'none' && _items.length > 0 ) {
-      
+    if ( c.controls !== 'none' && _items.length > 0 )
+    {
       var _lang = _items.parents( '[lang]' ).attr( 'lang' ) || 'en';
       
       if ( /^(above|both)$/.test( c.controls ) )
+      {
         _outer.before( buildControls( c, _lang ).addClass( c.pagingTopClass ) );
+      }
 
       if ( /^(below|both)$/.test( c.controls ) )
+      {
         _outer.after( buildControls( c, _lang ).addClass( c.pagingBottomClass ) );
-
+      }
     }
 
-    if ( c.aspect == 'auto' ) {
+    if ( c.aspect == 'auto' )
+    {
       c.aspect = detectAspect( _items ) || // try to determine aspect
                  $.listscroller.aspectDefaults[ c.animation ] ||  // pick default aspect for animation
                  'horizontal';  // final fallback
@@ -395,20 +440,22 @@
     _outer.addClass( c.classPrefix + '-' + c.aspect );
 
     setPos( c, c.startPos || 0, true );
-
   }
   
   
-  $.fn.listscroller = function ( config ) {
+  $.fn.listscroller = function ( config )
+  {
 
     var dc = $.listscroller.defaultConfig;
-    if ( (config && config.item) || dc.item ) {
+    if ( (config && config.item) || dc.item )
+    {
       this.each(function () {
         var c = $.extend( {}, dc, config ), b = $( this );
         initScroller( c, b, b.find( c.item ) );
       });
     }
-    else if (this.length) {
+    else if (this.length)
+    {
       initScroller( $.extend( {}, dc, config ),  this.eq(0).parent(), this );
     }
     return this;
