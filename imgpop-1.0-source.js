@@ -46,7 +46,7 @@
               '</div>' +
             '</div>' +
           '</div>';
-        
+
 
     _hrefElms.bind('click', function (e) {
         var i = _hrefElms.index(this),

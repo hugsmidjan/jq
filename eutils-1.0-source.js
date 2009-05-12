@@ -147,16 +147,12 @@
 
 
     // the reverse of $.fn.wrap()
+    // only works if the target element is in the DOM.
     zap: function ()
     {
       return this.each(function(){
-          var p = this.parentNode;
-          if (p && p.tagName)
-          {
-            while (this.firstChild) { p.insertBefore(this.firstChild, this); };
-            $(this).remove();
-          }
-        });
+          $(this).children().insertBefore(this);
+        }).remove();
     },
 
 

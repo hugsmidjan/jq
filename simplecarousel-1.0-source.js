@@ -87,7 +87,7 @@
 
         container.scrollLeft( 0 );
         conf.windowSize = container.width();
-        
+
         var itemsWidth = 0;
         conf.items = $( conf.item, handle ).each(function(){
             itemsWidth += $(this).outerWidth();

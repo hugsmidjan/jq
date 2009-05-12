@@ -58,9 +58,9 @@
           className: 'curtain-overlay',
           container: (elm && elm.parentNode) || document.body
         },
-        typeof(cfg)=='string' ?
+        typeof(cfg)=='string' ?  // cfg == 'myCurtainClassName'
             { className: cfg }:
-        typeof(cfg)=='boolean'&&cfg ?
+        typeof(cfg)=='boolean'&&cfg ? // cfg === true triggers "sensible defaults" mode
             { bg: '#888', opacity: .5, z:99 }:
             cfg || {}
       );

@@ -463,7 +463,7 @@
                 tabSel:   'ul',
                 tabTempl: '<li><a href="#%{id}">%{title}</a></li>',
                 makeTab:  function(tabPane, conf){
-                              var tabHtml = $.inject(conf.tabTempl, {id: $.aquireId(this),  title: $(conf.titleSel, this).html()});
+                              var tabHtml = $.inject(conf.tabTempl, {id: $.aquireId(tabPane),  title: $(conf.titleSel, tabPane).html()});
                               return  $(tabHtml);
                             }
               }, conf);
