@@ -10,6 +10,8 @@
     cfg = jQuery.extend({
             fadeInSpeed : 250, // set 1 for almost no animation
             fadeOutSpeed : 250, // set 1 for almost no animation
+            curtainColor : '#000000',
+            curtainOpacity : '0.9',
             easeIn : 'swing',
             easeOut : 'swing'
           }, cfg );
@@ -79,15 +81,17 @@
         _popup.css('top', _ypos).hide();
 
         if(!_isOpen) {
-          _curtain.fadeIn(cfg.fadeInSpeed, function(){ 
-              _popup
-                  .fadeIn(cfg.fadeInSpeed, cfg.easeIn)
-                  .find('div.ipopup-container-wrapper')
-                      .bind('click', function(e) {
-                          e.stopPropagation();
-                        })
-                  .setFocus();
-            }, cfg.easeIn); // animate in
+          _curtain
+              .css({'background-color' : cfg.curtainColor, opacity : '0', 'display' : 'block' })
+              .animate({ opacity : cfg.curtainOpacity }, cfg.fadeInSpeed, cfg.easeIn, function(){ 
+                  _popup
+                      .fadeIn(cfg.fadeInSpeed, cfg.easeIn)
+                      .find('div.ipopup-container-wrapper')
+                          .bind('click', function(e) {
+                              e.stopPropagation();
+                            })
+                      .setFocus();
+                }); // animate in
           _isOpen = true;
         } else {
           _curtain.show();
