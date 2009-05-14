@@ -11,7 +11,7 @@
             fadeInSpeed : 250, // set 1 for almost no animation
             fadeOutSpeed : 250, // set 1 for almost no animation
             curtainColor : '#000000',
-            curtainOpacity : '0.9',
+            curtainOpacity : '0.7',
             easeIn : 'swing',
             easeOut : 'swing'
           }, cfg );
@@ -69,22 +69,16 @@
           .append(_curtain)
           .append(_popup);
 
-        if(!_isOpen) {
-          _curtain
-              .css('opacity', _curtain.css('opacity'))
-              .hide();
 
+        _popup.hide();
+
+        if(!_isOpen) {
           _ypos = $(document).scrollTop() + $(_popup).offset().top;
-
-        }
-
-        _popup.css('top', _ypos).hide();
-
-        if(!_isOpen) {
           _curtain
               .css({'background-color' : cfg.curtainColor, opacity : '0', 'display' : 'block' })
               .animate({ opacity : cfg.curtainOpacity }, cfg.fadeInSpeed, cfg.easeIn, function(){ 
                   _popup
+                      .css('top', _ypos)
                       .fadeIn(cfg.fadeInSpeed, cfg.easeIn)
                       .find('div.ipopup-container-wrapper')
                           .bind('click', function(e) {
@@ -94,8 +88,8 @@
                 }); // animate in
           _isOpen = true;
         } else {
-          _curtain.show();
-          _popup.show();
+          _curtain.css({ 'background-color' : cfg.curtainColor, opacity : cfg.curtainOpacity }).show();
+          _popup.css('top', _ypos).show();
         }
 
         // next/prev buttons
@@ -135,7 +129,7 @@
           
         $(window).keypress( function(e) {
             if( e.keyCode == 27 ) {
-                _curtain.trigger('click');
+                _curtain.trigger('click'); // close on esc
             }
         });
           
