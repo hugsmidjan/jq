@@ -55,6 +55,7 @@
 
       statusLabel       : 'Viewing results:',
       jumpLabel         : 'Pages:',
+      ofTotalSeparator  : ' of ', 
       labelNext         : 'Next',
       labelPrev         : 'Previous',
       titleNext         : 'Page forward',
@@ -342,6 +343,7 @@
       if (c.inputPager)
       {
         c.pager   = $( c.pagerTemplate ).appendTo( j );
+        j.append( c.ofTotalSeparator );
         var total = $( c.totalTemplate ).appendTo( j );
         c.pager.bind( 'change', c, inputChange ).val( page +1 );
         total.text( l );
