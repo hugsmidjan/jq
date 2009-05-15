@@ -31,6 +31,7 @@
       aspect            : 'auto',     // auto|horizontal|vertical
       paging            : false,
       inputPager        : false,
+      statusPager       : false,
       
       initCallback      : function () {},
       moveCallback      : function () {},
@@ -50,6 +51,7 @@
       jumpLabelTemplate : '<strong></strong>',
       jumpWrapTemplate  : '<span></span>',
       jumpBtnTemplate   : '<a href="#"></a>',
+      statusTemplate    : '<i></i>',
       totalTemplate     : '<b></b>',
       pagerTemplate     : '<input type="text" value="" size="2" />',
 
@@ -273,6 +275,10 @@
     {
       c.pager.val( Math.ceil(c.index / c.stepSize) + 1 );
     }
+    else if ( c.status )
+    {
+      c.status.text( Math.ceil(c.index / c.stepSize) + 1 );
+    }
 
   }
 
@@ -347,6 +353,12 @@
         var total = $( c.totalTemplate ).appendTo( j );
         c.pager.bind( 'change', c, inputChange ).val( page +1 );
         total.text( l );
+      } else if ( c.statusPager )
+      {
+        var jTemp = $( c.jumpWrapTemplate ).appendTo( j );
+        c.status   = $( c.totalTemplate ).appendTo( jTemp );
+        var total = $( c.statusTemplate ).appendTo( jTemp );
+        total.text(c.ofTotalSeparator + l );
       }
       // buttons
       else {
