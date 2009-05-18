@@ -46,16 +46,16 @@
       pagingTopClass    : 'paging-top',
       pagingBottomClass : 'paging-bottom',
 
-      pagingTemplate    : '<div class="paging"><ul class="stepper"></ul></div>',
-      nextBtnTemplate   : '<li class="next"><a href="#"></a></li>',
-      prevBtnTemplate   : '<li class="prev"><a href="#"></a></li>',
-      jumpTemplate      : '<li class="jump"></li>',
-      jumpLabelTemplate : '<strong></strong>',
-      jumpWrapTemplate  : '<span></span>',
-      jumpBtnTemplate   : '<a href="#"></a>',
-      statusTemplate    : '<i></i>',
-      totalTemplate     : '<b></b>',
-      pagerTemplate     : '<input type="text" value="" size="2" />',
+      pagingTemplate    : '<div class="paging"><ul class="stepper"/></div>',
+      nextBtnTemplate   : '<li class="next"><a href="#"/></li>',
+      prevBtnTemplate   : '<li class="prev"><a href="#"/></li>',
+      jumpTemplate      : '<li class="jump"/>',
+      jumpLabelTemplate : '<strong/>',
+      jumpWrapTemplate  : '<span/>',
+      jumpBtnTemplate   : '<a href="#"/>',
+      statusTemplate    : '<i/>',
+      totalTemplate     : '<b/>',
+      pagerTemplate     : '<input type="text" value="" size="2"/>',
 
       statusLabel       : 'Viewing results:',
       jumpLabel         : 'Pages:',
@@ -461,7 +461,7 @@
     if(c.autoScrollDelay)
     {
       function nexttrigger ( e ) {
-        setPos( c, c.index + c.stepSize );
+        _block.find('.next a').click();
       }
       scrollInterval = setInterval( nexttrigger, c.autoScrollDelay);
       _block
