@@ -33,6 +33,8 @@
       inputPager        : false,
       statusPager       : false,
       
+      autoScrollDelay   : 0, //Timeout in ms for autoscroll
+      
       initCallback      : function () {},
       moveCallback      : function () {},
 
@@ -443,6 +445,7 @@
       {
         _outer.after( buildControls( c, _lang ).addClass( c.pagingBottomClass ) );
       }
+      
     }
 
     if ( c.aspect == 'auto' )
@@ -454,6 +457,22 @@
     _outer.addClass( c.classPrefix + '-' + c.aspect );
 
     setPos( c, c.startPos || 0, true );
+    
+    if(c.autoScrollDelay)
+    {
+      function nexttrigger ( e ) {
+        setPos( c, c.index + c.stepSize );
+      }
+      scrollInterval = setInterval( nexttrigger, c.autoScrollDelay);
+      _block
+          .bind('mouseenter', function() {
+              clearInterval( scrollInterval );
+            })
+          .bind('mouseleave', function() {
+              scrollInterval = setInterval( nexttrigger, c.autoScrollDelay);
+            });
+    }
+
   }
   
   

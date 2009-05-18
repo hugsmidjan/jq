@@ -7,7 +7,7 @@
 
   $.fn.imgPopper = function ( cfg ) {
       
-    cfg = jQuery.extend({
+    cfg = $.extend({
             fadeInSpeed : 250, // set 1 for almost no animation
             fadeOutSpeed : 250, // set 1 for almost no animation
             curtainColor : '#000000',
