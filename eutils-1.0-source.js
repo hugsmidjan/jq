@@ -177,6 +177,21 @@
     },
 
 
+    // Finds and returns a collection of the (first) deepest child element...
+    // Useful when you want to emulate .wrap() and .wrapAll(), without cloning...
+    deepest: function ()
+    {
+      return this.map(function(){
+          var elem = this;
+          while ( elem.firstChild )
+          {
+            elem = elem.firstChild;
+          }
+          return elem;
+        });
+    },
+
+
     // run a function once.
     // (similar to .each(function) that always returns false - except that inside the function this == the jQuery collection.)
     run: function (func, args)
