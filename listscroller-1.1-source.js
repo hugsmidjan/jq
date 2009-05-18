@@ -277,23 +277,20 @@
       }, c.speed || 1);
     }
 
-    // mark paging link if needed
+    var newIndex = Math.ceil(c.index / c.stepSize);
+    // mark paging/status/ element if needed
     if ( c.jumps )
     {
       c.jumps
         .removeClass( c.currentPageClass )
-        .eq( Math.ceil(c.index / c.stepSize) )
+        .eq( newIndex )
           .addClass( c.currentPageClass )
     }
-    else if ( c.pager )
+    if ( c.status  ||  c.pager )
     {
-      c.pager.val( Math.ceil(c.index / c.stepSize) + 1 );
+      c.status.text( newIndex+1 );
+      c.pager.val( newIndex+1 );
     }
-    else if ( c.status )
-    {
-      c.status.text( Math.ceil(c.index / c.stepSize) + 1 );
-    }
-
   }
 
   function movePrev ( e )
