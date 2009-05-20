@@ -546,10 +546,10 @@ var Cufon = (function() {
 	};
 	
 	var separators = {
-		words: /\s+/,
+		words: /[^\S\u00a0]+/,
 		characters: ''
 	};
-	
+
 	api.now = function() {
 		DOM.ready();
 		return api;
@@ -575,9 +575,10 @@ var Cufon = (function() {
 		fonts[family].add(font);
 		return api.set('fontFamily', '"' + family + '"');
 	};
-	
+
 	api.replace = function(elements, options, ignoreHistory) {
 		options = merge(defaultOptions, options);
+		if (options.autoDetect) { delete options.fontFamily; }
 		if (!options.engine) return api; // there's no browser support so we'll just stop here
 		if (typeof options.textShadow == 'string')
 			options.textShadow = CSS.textShadow(options.textShadow);
@@ -676,6 +677,8 @@ Cufon.registerEngine('canvas', (function() {
 		
 		var redraw = (text === null);
 		
+		if (redraw) text = node.alt;
+		
 		var viewBox = font.viewBox;
 		
 		var size = style.getSize('fontSize', font.baseSize);
@@ -698,19 +701,25 @@ Cufon.registerEngine('canvas', (function() {
 			}
 		}
 		
-		var chars = Cufon.CSS.textTransform(redraw ? node.alt : text, style).split('');
+		var chars = Cufon.CSS.textTransform(text, style).split(''), chr;
 		
-		var width = 0, lastWidth = null;
+		var glyphs = font.glyphs, glyph, kerning, k;
+		var width = 0, advance, jumps = [];
 		
-		for (var i = 0, l = chars.length; i < l; ++i) {
-			var glyph = font.glyphs[chars[i]] || font.missingGlyph;
+		for (var i = 0, j = 0, l = chars.length; i < l; ++i) {
+			glyph = glyphs[chr = chars[i]] || font.missingGlyph;
 			if (!glyph) continue;
-			width += lastWidth = Number(glyph.w || font.w) + letterSpacing;
+			if (kerning) {
+				width -= k = kerning[chr] || 0;
+				jumps[j - 1] -= k;
+			}
+			width += advance = jumps[j++] = ~~(glyph.w || font.w) + letterSpacing;
+			kerning = glyph.k;
 		}
 		
-		if (lastWidth === null) return null; // there's nothing to render
+		if (advance === undefined) return null; // there's nothing to render
 		
-		expandRight += (viewBox.width - lastWidth);
+		expandRight += viewBox.width - advance;
 		expandLeft += viewBox.minX;
 		
 		var wrapper, canvas;
@@ -790,8 +799,8 @@ Cufon.registerEngine('canvas', (function() {
 		
 		function renderText() {
 			g.scale(roundingFactor, 1);
-			for (var i = 0, l = chars.length; i < l; ++i) {
-				var glyph = font.glyphs[chars[i]] || font.missingGlyph;
+			for (var i = 0, j = 0, l = chars.length; i < l; ++i) {
+				var glyph = glyphs[chars[i]] || font.missingGlyph;
 				if (!glyph) continue;
 				if (glyph.d) {
 					g.beginPath();
@@ -799,7 +808,7 @@ Cufon.registerEngine('canvas', (function() {
 					else glyph.code = generateFromVML('m' + glyph.d, g);
 					g.fill();
 				}
-				g.translate(Number(glyph.w || font.w) + letterSpacing, 0);
+				g.translate(jumps[j++], 0);
 			}
 			g.restore();
 		}
@@ -963,19 +972,26 @@ Cufon.registerEngine('vml', (function() {
 		var textDecoration = options.enableTextDecoration ? Cufon.CSS.textDecoration(el, style) : {};
 		
 		var color = style.get('color');
-		var chars = Cufon.CSS.textTransform(text, style).split('');
+		var chars = Cufon.CSS.textTransform(text, style).split(''), chr;
 		
-		var width = 0, offsetX = 0, advance = null;
+		var glyphs = font.glyphs, glyph, kerning, k;
+		var width = 0, jumps = [], offsetX = 0, advance;
 		
-		var glyph, shape, shadows = options.textShadow;
+		var shape, shadows = options.textShadow;
 		
 		// pre-calculate width
-		for (var i = 0, k = 0, l = chars.length; i < l; ++i) {
-			glyph = font.glyphs[chars[i]] || font.missingGlyph;
-			if (glyph) width += advance = ~~(glyph.w || font.w) + letterSpacing;
+		for (var i = 0, j = 0, l = chars.length; i < l; ++i) {
+			glyph = glyphs[chr = chars[i]] || font.missingGlyph;
+			if (!glyph) continue;
+			if (kerning) {
+				width -= k = kerning[chr] || 0;
+				jumps[j - 1] -= k;
+			}
+			width += advance = jumps[j++] = ~~(glyph.w || font.w) + letterSpacing;
+			kerning = glyph.k;
 		}
 		
-		if (advance === null) return null;
+		if (advance === undefined) return null;
 		
 		var fullWidth = -minX + width + (viewBox.width - advance);
 	
@@ -986,15 +1002,15 @@ Cufon.registerEngine('vml', (function() {
 		
 		var fill = options.textGradient && gradientFill(options.textGradient);
 		
-		for (i = 0; i < l; ++i) {
+		for (i = 0, j = 0; i < l; ++i) {
 			
-			glyph = font.glyphs[chars[i]] || font.missingGlyph;
+			glyph = glyphs[chars[i]] || font.missingGlyph;
 			if (!glyph) continue;
 			
 			if (redraw) {
 				// some glyphs may be missing so we can't use i
-				shape = canvas.childNodes[k];
-				if (shape.firstChild) shape.removeChild(shape.firstChild); // shadow, fill
+				shape = canvas.childNodes[j];
+				while (shape.firstChild) shape.removeChild(shape.firstChild); // shadow, fill
 			}
 			else { 
 				shape = document.createElement('cvml:shape');
@@ -1034,10 +1050,7 @@ Cufon.registerEngine('vml', (function() {
 				shape.appendChild(shadow);
 			}
 			
-			offsetX += ~~(glyph.w || font.w) + letterSpacing;
-			
-			++k;
-			
+			offsetX += jumps[j++];
 		}
 		
 		wStyle.width = Math.max(Math.ceil(size.convert(width * roundingFactor)), 0);
