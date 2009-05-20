@@ -856,7 +856,7 @@ Cufon.registerEngine('vml', (function() {
 	if (!check.coordsize) return; // VML isn't supported
 	check = null;
 	
-	document.write('<style type="text/css">' +
+	document.write(('<style type="text/css">' +
 		'.cufon-vml-canvas{text-indent:0}' +
 		'@media screen{' + 
 			'cvml\\:shape,cvml\\:fill,cvml\\:shadow{behavior:url(#default#VML);display:block;antialias:true;position:absolute}' +
@@ -869,7 +869,7 @@ Cufon.registerEngine('vml', (function() {
 			'.cufon-vml *{display:none}' +
 			'.cufon-vml .cufon-alt{display:inline}' +
 		'}' +
-	'</style>'.replace(/([;}])/g, ' !important$1'));
+	'</style>').replace(/([;}])/g, ' !important$1'));
 
 	function getFontSizeInPixels(el, value) {
 		return getSizeInPixels(el, /(?:em|ex|%)$/i.test(value) ? '1em' : value);
