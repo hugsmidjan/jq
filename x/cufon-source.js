@@ -617,25 +617,24 @@ Cufon.registerEngine('canvas', (function() {
 	
 	// Firefox 2 w/ non-strict doctype (almost standards mode)
 	var HAS_BROKEN_LINEHEIGHT = !HAS_INLINE_BLOCK && (document.compatMode == 'BackCompat' || /frameset|transitional/i.test(document.doctype.publicId));
-	
-	var styleSheet = document.createElement('style');
+
+  var styleSheet = document.createElement('style'),
+      i = ' !important';
 	styleSheet.type = 'text/css';
 	styleSheet.appendChild(document.createTextNode(
-		'.cufon-canvas{text-indent:0}' +
+		'.cufon-canvas{text-indent:0'+i+'}' +
 		'@media screen,projection{' +
-			'.cufon-canvas{display:inline;display:inline-block;position:relative;vertical-align:middle' + 
+			'.cufon-canvas{display:inline'+i+';display:inline-block'+i+';position:relative'+i+';vertical-align:middle'+i+ 
 			(HAS_BROKEN_LINEHEIGHT
 				? ''
-				: ';font-size:1px;line-height:1px') +
-			'}.cufon-canvas .cufon-alt{display:-moz-inline-box;display:inline-block;width:0;height:0;overflow:hidden}' +
-			(HAS_INLINE_BLOCK
-				? '.cufon-canvas canvas{position:relative}'
-				: '.cufon-canvas canvas{position:absolute}') +
+				: ';font-size:1px'+i+';line-height:1px'+i) +
+			'}.cufon-canvas .cufon-alt{display:-moz-inline-box'+i+';display:inline-block'+i+';width:0'+i+';height:0'+i+';overflow:hidden'+i+'}'+
+      '.cufon-canvas canvas{position:' + (HAS_INLINE_BLOCK? 'relative': 'absolute') +i+'}'+
 		'}' +
 		'@media print{' +
-			'.cufon-canvas{padding:0 !important}' +
-			'.cufon-canvas canvas{display:none}' +
-			'.cufon-canvas .cufon-alt{display:inline}' +
+			'.cufon-canvas{padding:0'+i+'}' +
+			'.cufon-canvas canvas{display:none'+i+'}' +
+			'.cufon-canvas .cufon-alt{display:inline'+i+'}' +
 		'}'
 	));
 	document.getElementsByTagName('head')[0].appendChild(styleSheet);
@@ -856,20 +855,21 @@ Cufon.registerEngine('vml', (function() {
 	if (!check.coordsize) return; // VML isn't supported
 	check = null;
 	
-	document.write(('<style type="text/css">' +
-		'.cufon-vml-canvas{text-indent:0}' +
+  var i = ' !important';
+	document.write('<style type="text/css">' +
+		'.cufon-vml-canvas{text-indent:0'+i+'}' +
 		'@media screen{' + 
-			'cvml\\:shape,cvml\\:fill,cvml\\:shadow{behavior:url(#default#VML);display:block;antialias:true;position:absolute}' +
-			'.cufon-vml-canvas{position:absolute;text-align:left}' +
-			'.cufon-vml{display:inline-block;position:relative;vertical-align:middle}' +
-			'.cufon-vml .cufon-alt{position:absolute;left:-10000in;font-size:1px}' +
-			'a .cufon-vml{cursor:pointer}' +
+			'cvml\\:shape,cvml\\:fill,cvml\\:shadow{behavior:url(#default#VML);display:block'+i+';antialias:true'+i+';position:absolute'+i+'}' +
+			'.cufon-vml-canvas{position:absolute'+i+';text-align:left'+i+'}' +
+			'.cufon-vml{display:inline-block'+i+';position:relative'+i+';vertical-align:middle'+i+'}' +
+			'.cufon-vml .cufon-alt{position:absolute'+i+';left:-10000in;font-size:1px'+i+'}' +
+			'a .cufon-vml{cursor:pointer'+i+'}' +
 		'}' +
 		'@media print{' + 
-			'.cufon-vml *{display:none}' +
-			'.cufon-vml .cufon-alt{display:inline}' +
+			'.cufon-vml *{display:none'+i+'}' +
+			'.cufon-vml .cufon-alt{display:inline'+i+'}' +
 		'}' +
-	'</style>').replace(/([;}])/g, ' !important$1'));
+	'</style>');
 
 	function getFontSizeInPixels(el, value) {
 		return getSizeInPixels(el, /(?:em|ex|%)$/i.test(value) ? '1em' : value);
