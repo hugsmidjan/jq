@@ -1,7 +1,7 @@
 // encoding: utf-8
 jQuery.fn.roundCorners = function (cfg)
 {
-  var prefix = cfg.prefix || 'c_ c_',
+  var prefix = (cfg && cfg.prefix) || 'c_ c_',
       opts = jQuery.extend({
               tag : 'span',
               //out: false,  // out:true, inserts the corner elements *outside* the element.
