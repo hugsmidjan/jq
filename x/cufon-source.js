@@ -618,8 +618,8 @@ Cufon.registerEngine('canvas', (function() {
 	// Firefox 2 w/ non-strict doctype (almost standards mode)
 	var HAS_BROKEN_LINEHEIGHT = !HAS_INLINE_BLOCK && (document.compatMode == 'BackCompat' || /frameset|transitional/i.test(document.doctype.publicId));
 
-  var styleSheet = document.createElement('style'),
-      i = ' !important';
+	var styleSheet = document.createElement('style');
+	var i = ' !important';
 	styleSheet.type = 'text/css';
 	styleSheet.appendChild(document.createTextNode(
 		'.cufon-canvas{text-indent:0'+i+'}' +
@@ -627,7 +627,7 @@ Cufon.registerEngine('canvas', (function() {
 			'.cufon-canvas{display:inline'+i+';display:inline-block'+i+';position:relative'+i+';vertical-align:middle'+i+ 
 			(HAS_BROKEN_LINEHEIGHT ? '' : ';font-size:1px'+i+';line-height:1px'+i) +
 			'}.cufon-canvas .cufon-alt{display:-moz-inline-box'+i+';display:inline-block'+i+';width:0'+i+';height:0'+i+';overflow:hidden'+i+'}'+
-      '.cufon-canvas canvas{position:' + (HAS_INLINE_BLOCK? 'relative': 'absolute') +i+'}'+
+			'.cufon-canvas canvas{position:' + (HAS_INLINE_BLOCK? 'relative': 'absolute') +i+'}'+
 		'}' +
 		'@media print{' +
 			'.cufon-canvas{padding:0'+i+'}' +
@@ -853,7 +853,7 @@ Cufon.registerEngine('vml', (function() {
 	if (!check.coordsize) return; // VML isn't supported
 	check = null;
 	
-  var i = ' !important';
+	var i = ' !important';
 	document.write('<style type="text/css">' +
 		'.cufon-vml-canvas{text-indent:0'+i+'}' +
 		'@media screen{' + 
