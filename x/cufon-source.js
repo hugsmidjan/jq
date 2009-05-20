@@ -624,10 +624,8 @@ Cufon.registerEngine('canvas', (function() {
 	styleSheet.appendChild(document.createTextNode(
 		'.cufon-canvas{text-indent:0'+i+'}' +
 		'@media screen,projection{' +
-			'.cufon-canvas{display:inline'+i+';display:inline-block'+i+';position:relative'+i+';vertical-align:middle'+i+ 
-			(HAS_BROKEN_LINEHEIGHT
-				? ''
-				: ';font-size:1px'+i+';line-height:1px'+i) +
+			'.cufon-canvas{display:inline'+i+';display:inline-block'+i+';position:relative'+i+';background-color:#f00 !important;vertical-align:middle'+i+ 
+			(HAS_BROKEN_LINEHEIGHT ? '' : ';font-size:1px'+i+';line-height:1px'+i) +
 			'}.cufon-canvas .cufon-alt{display:-moz-inline-box'+i+';display:inline-block'+i+';width:0'+i+';height:0'+i+';overflow:hidden'+i+'}'+
       '.cufon-canvas canvas{position:' + (HAS_INLINE_BLOCK? 'relative': 'absolute') +i+'}'+
 		'}' +
