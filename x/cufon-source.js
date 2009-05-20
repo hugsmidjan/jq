@@ -869,7 +869,7 @@ Cufon.registerEngine('vml', (function() {
 			'.cufon-vml *{display:none}' +
 			'.cufon-vml .cufon-alt{display:inline}' +
 		'}' +
-	'</style>');
+	'</style>'.replace(/([;}])/g, ' !important$1'));
 
 	function getFontSizeInPixels(el, value) {
 		return getSizeInPixels(el, /(?:em|ex|%)$/i.test(value) ? '1em' : value);
