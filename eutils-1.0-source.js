@@ -74,6 +74,7 @@
   };
 
 
+
   if (!_msie)
   {
     // Implement cross-browser `focusin` and `focusout` events (i.e. `focus` and `blur` that bubbles!)
@@ -190,6 +191,14 @@
           return elem;
         });
     },
+
+
+
+    hoverClass: function (hoverClass)
+    {
+      return this.bind('mouseenter mouseleave', function (e) { $(this).toggleClass(hoverClass, e.type=='mouseenter'); });
+    },
+
 
 
     // run a function once.
