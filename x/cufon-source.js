@@ -368,6 +368,27 @@ var Cufon = (function() {
 		
 	}
 	
+	function ReplaceHistory() {
+		
+		var list = [], map = {};
+		
+		function filter(keys) {
+			var values = [], key;
+			for (var i = 0; key = keys[i]; ++i) values[i] = list[map[key]];
+			return values;
+		}
+		
+		this.add = function(key, args) {
+			map[key] = list.push(args) - 1;
+		};
+		
+		this.repeat = function() {
+			var snapshot = arguments.length ? filter(arguments) : list, args;
+			for (var i = 0; args = snapshot[i++];) api.replace(args[0], args[1], true);
+		};
+		
+	}
+	
 	function Storage() {
 		
 		var map = {}, at = 0;
@@ -518,7 +539,7 @@ var Cufon = (function() {
 	
 	var sharedStorage = new Storage();
 	var hoverHandler = new HoverHandler();
-	var replaceHistory = [];
+	var replaceHistory = new ReplaceHistory();
 	
 	var engines = {}, fonts = {}, defaultOptions = {
 		enableTextDecoration: false,
@@ -556,10 +577,7 @@ var Cufon = (function() {
 	};
 	
 	api.refresh = function() {
-		var currentHistory = replaceHistory.splice(0, replaceHistory.length);
-		for (var i = 0, l = currentHistory.length; i < l; ++i) {
-			api.replace.apply(null, currentHistory[i]);
-		}
+		replaceHistory.repeat.apply(replaceHistory, arguments);
 		return api;
 	};
 	
@@ -584,7 +602,7 @@ var Cufon = (function() {
 			options.textShadow = CSS.textShadow(options.textShadow);
 		if (typeof options.color == 'string' && /^-/.test(options.color))
 			options.textGradient = CSS.gradient(options.color);
-		if (!ignoreHistory) replaceHistory.push(arguments);
+		if (!ignoreHistory) replaceHistory.add(elements, arguments);
 		if (elements.nodeType || typeof elements == 'string') elements = [ elements ];
 		CSS.ready(function() {
 			for (var i = 0, l = elements.length; i < l; ++i) {
@@ -619,22 +637,25 @@ Cufon.registerEngine('canvas', (function() {
 	var HAS_BROKEN_LINEHEIGHT = !HAS_INLINE_BLOCK && (document.compatMode == 'BackCompat' || /frameset|transitional/i.test(document.doctype.publicId));
 
 	var styleSheet = document.createElement('style');
-	var i = ' !important';
 	styleSheet.type = 'text/css';
-	styleSheet.appendChild(document.createTextNode(
-		'.cufon-canvas{text-indent:0'+i+'}' +
+	styleSheet.appendChild(document.createTextNode((
+		'.cufon-canvas{text-indent:0;}' +
 		'@media screen,projection{' +
-			'.cufon-canvas{display:inline'+i+';display:inline-block'+i+';position:relative'+i+';vertical-align:middle'+i+ 
-			(HAS_BROKEN_LINEHEIGHT ? '' : ';font-size:1px'+i+';line-height:1px'+i) +
-			'}.cufon-canvas .cufon-alt{display:-moz-inline-box'+i+';display:inline-block'+i+';width:0'+i+';height:0'+i+';overflow:hidden'+i+'}'+
-			'.cufon-canvas canvas{position:' + (HAS_INLINE_BLOCK? 'relative': 'absolute') +i+'}'+
+			'.cufon-canvas{display:inline;display:inline-block;position:relative;vertical-align:middle;' + 
+			(HAS_BROKEN_LINEHEIGHT
+				? ''
+				: 'font-size:1px;line-height:1px;') +
+			'}.cufon-canvas .cufon-alt{display:-moz-inline-box;display:inline-block;width:0;height:0;overflow:hidden;}' +
+			(HAS_INLINE_BLOCK
+				? '.cufon-canvas canvas{position:relative;}'
+				: '.cufon-canvas canvas{position:absolute;}') +
 		'}' +
 		'@media print{' +
-			'.cufon-canvas{padding:0'+i+'}' +
-			'.cufon-canvas canvas{display:none'+i+'}' +
-			'.cufon-canvas .cufon-alt{display:inline'+i+'}' +
+			'.cufon-canvas{padding:0;}' +
+			'.cufon-canvas canvas{display:none;}' +
+			'.cufon-canvas .cufon-alt{display:inline;}' +
 		'}'
-	));
+	).replace(/;/g, '!important;')));
 	document.getElementsByTagName('head')[0].appendChild(styleSheet);
 
 	function generateFromVML(path, context) {
@@ -853,21 +874,20 @@ Cufon.registerEngine('vml', (function() {
 	if (!check.coordsize) return; // VML isn't supported
 	check = null;
 	
-	var i = ' !important';
-	document.write('<style type="text/css">' +
-		'.cufon-vml-canvas{text-indent:0'+i+'}' +
+	document.write(('<style type="text/css">' +
+		'.cufon-vml-canvas{text-indent:0;}' +
 		'@media screen{' + 
-			'cvml\\:shape,cvml\\:fill,cvml\\:shadow{behavior:url(#default#VML);display:block'+i+';antialias:true'+i+';position:absolute'+i+'}' +
-			'.cufon-vml-canvas{position:absolute'+i+';text-align:left'+i+'}' +
-			'.cufon-vml{display:inline-block'+i+';position:relative'+i+';vertical-align:middle'+i+'}' +
-			'.cufon-vml .cufon-alt{position:absolute'+i+';left:-10000in;font-size:1px'+i+'}' +
-			'a .cufon-vml{cursor:pointer'+i+'}' +
+			'cvml\\:shape,cvml\\:fill,cvml\\:shadow{behavior:url(#default#VML);display:block;antialias:true;position:absolute;}' +
+			'.cufon-vml-canvas{position:absolute;text-align:left;}' +
+			'.cufon-vml{display:inline-block;position:relative;vertical-align:middle;}' +
+			'.cufon-vml .cufon-alt{position:absolute;left:-10000in;font-size:1px;}' +
+			'a .cufon-vml{cursor:pointer}' + // ignore !important here
 		'}' +
 		'@media print{' + 
-			'.cufon-vml *{display:none'+i+'}' +
-			'.cufon-vml .cufon-alt{display:inline'+i+'}' +
+			'.cufon-vml *{display:none;}' +
+			'.cufon-vml .cufon-alt{display:inline;}' +
 		'}' +
-	'</style>');
+	'</style>').replace(/;/g, '!important;'));
 
 	function getFontSizeInPixels(el, value) {
 		return getSizeInPixels(el, /(?:em|ex|%)$/i.test(value) ? '1em' : value);
