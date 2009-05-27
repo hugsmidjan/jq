@@ -1,13 +1,19 @@
 // encoding: utf-8
 (function($){
 
-  $.fn.mapPopulizer = function ( cfg ) {
+  $.fn.mapPopulizor = function ( cfg ) {
 
     cfg = $.extend({
-            listCont:         '<ul class="itemlist" />', // or element
-            activeClass:      'maplist-active',  // container clas
-            mappoints :       [],
-            itemselector:     'div.item',
+            listCont:          '<ul class="itemlist" />', // or element
+            activeClass:       'maplist-active',  // container clas
+            mappoints:         {},
+            getXY:             function (bubbleBox, cfg) {
+                                  // try to pull the item's id from it's link
+                                  var link   = bubbleBox.find( 'h3 > a, span.more a').eq(0),
+                                      itemId = link.length && link.attr('href').replace(/^.*\/(\d+)(\/|$)/, '$1');
+                                  return cfg.mappoints[itemId] || { x:0, y:0 };
+                                },
+            itemselector:      'div.item',
             markerActiveClass: 'marker-active',
             liActiveClass:     'marker-active',
 
@@ -27,11 +33,11 @@
 
             // FIXME: find a more elegant way of doing this.
             // if `listCont` is selector then scope within mapContainer
-            listCont = (typeof listCont == 'string' && listCont.indexOf('<')!=-1) ?
+            listCont = (typeof listCont == 'string'  &&  listCont.indexOf('<')==-1) ?
                             $(listCont, mapcontainer):
                             $(listCont);
 
-            if (!listCont.parent().length)
+            if (!listCont.closest('html').length) // FIXME: revert to simple `.parent().length` when jQuery fixes .parentNode for newly created elements. Ack!
             {
               listCont.appendTo(this);
             }
@@ -39,21 +45,13 @@
             $( cfg.itemselector , mapcontainer ).hide().each(function () {
                 var bubbleBox = $( this );
                 var title  = $.trim( bubbleBox.find( 'h3' ).eq( 0 ).text() );
-                var link   = bubbleBox.find( 'h3 > a, span.more a').eq(0);
-                var listItem = $( '<li><a href="#">' + title + '</a></li>' ).appendTo(listCont);   // should link to bubbleBox -> id  // FIXME: more efficient to collect `listItem`s into an Array and append them all at once later
+                var link   = bubbleBox.find( 'h3 > a, span.more a')[0];
+                var listItem = $( '<li><a href="'+ link.href +'">' + title + '</a></li>' ).appendTo(listCont);   // should link to bubbleBox -> id  // FIXME: more efficient to collect `listItem`s into an Array and append them all at once later
                 var marker = $( '<a href="#" class="marker"><span /><i><b>' + title + '</b></i></a>' );
                 var close  = $( '<a href="#" title="Loka" class="close">x</a>' );
-                // try to pull the item's id from it's link
-                var nr = '';
-                if (link.length) {
-                  nr = link.attr('href').replace(/^.*?\/nr\/(\d+)($|\/.*$)/, 'nr_$1');
-                }
-                if ( !nr || nr == 'nr_' ) { // still nothing? - find ID by title
-                  for (var h in cfg.mappoints) { if ( cfg.mappoints[h].label == title ) { nr = h; break; } }
-                }
-                if ( nr ) {
+                var c = cfg.getXY(bubbleBox, cfg);
+                if ( c ) {
 
-                  var c = cfg.mappoints[ nr ] || { x:0, y:0 };
                   // remove links of headings
                   bubbleBox.find( 'h3' ).html( '<span>'+title+'</span>' );
                   $([ marker[0], bubbleBox.find('h3 span')[0], listItem.find('a')[0], close[0] ])
