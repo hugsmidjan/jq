@@ -72,7 +72,7 @@
 
   $.fn.mapPopulizor = function ( cfg ) {
 
-    cfg = $.extend($.mapPopulizor.defaults, cfg );
+    cfg = $.extend({}, $.mapPopulizor.defaults, cfg );
 
 
     this
