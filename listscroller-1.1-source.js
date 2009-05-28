@@ -286,11 +286,8 @@
         .eq( newIndex )
           .addClass( c.currentPageClass )
     }
-    if ( c.status  ||  c.pager )
-    {
-      c.status.text( newIndex+1 );
-      c.pager.val( newIndex+1 );
-    }
+    c.status  &&  c.status.text( newIndex+1 );
+    c.pager  &&  c.pager.val( newIndex+1 );
   }
 
   function movePrev ( e )
