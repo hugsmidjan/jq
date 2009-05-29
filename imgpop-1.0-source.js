@@ -73,7 +73,7 @@
         _popup.hide();
 
         if(!_isOpen) {
-          _ypos = $(document).scrollTop() + $(_popup).offset().top;
+          _ypos = $(document).scrollTop();
           _curtain
               .css({'background-color' : cfg.curtainColor, opacity : '0', 'display' : 'block' })
               .animate({ opacity : cfg.curtainOpacity }, cfg.fadeInSpeed, cfg.easeIn, function(){ 
