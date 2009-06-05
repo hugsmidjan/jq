@@ -173,7 +173,7 @@
     zap: function ()
     {
       return this.each(function(){
-          $(this).children().insertBefore(this);
+          $(this.childNodes).insertBefore(this);
         }).remove();
     },
 
@@ -467,6 +467,27 @@
       return parseInt(str, radix||10);
     },
 
+
+
+/**
+    // Convert queryString type String into a neat object.
+    parseParams: function (paramString)
+    {
+      paramString = paramString || document.location.search;
+      var params = paramString.split('?').reverse()[0].split('&'),
+          i = params.length,
+          map = {}, pair;
+      while (i--)
+      {
+        pair = (params[i]||'').split('=');
+        if (pair[0])
+        {
+          params[pair[0]] = pair[1];
+        }
+      }
+      return map;
+    },
+/**/
 
 
 
