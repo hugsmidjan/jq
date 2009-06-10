@@ -114,6 +114,9 @@
                         left: c.x + cfg.dotOffset[0],
                         top: c.y + cfg.dotOffset[1]
                       })
+                    .find('i')
+                        .hide()
+                    .end()
                     .bind('mouseenter mouseleave', function (e) {
                         $( 'i', this )
                             .stop()
