@@ -47,7 +47,6 @@
                                       url:   this.getLinkUrl(bubbleBox) || '#',
                                       label: this.getLabel(bubbleBox)
                                     };
-                                    ;;;window.console&&console.log( props.label );
                               return $( $.inject(this.itemTempl, props) );
                             },
 
@@ -64,7 +63,8 @@
       x_flip:              1000,         // relative x-coodinate where 
       markerFlipClass:    'marker-flip',
       bubbleFlipClass:    'bubble-flip',
-      dotOffset:          [0,0]          // x,y pixel offsets for marker placement (typically half the marker size)
+      dotOffset:          [0,0],          // x,y pixel offsets for marker placement (typically half the marker size)
+      fadeSpeed:          [400, 400]      // fadein, fadeout speed
     }
   };
 
@@ -73,8 +73,6 @@
   $.fn.mapPopulizor = function ( cfg ) {
 
     cfg = $.extend({}, $.mapPopulizor.defaults, cfg );
-
-
     this
         .addClass( cfg.activeClass)
         .each(function(){
@@ -90,18 +88,17 @@
                     c = cfg.getXY( bubbleBox );
 
                 if ( c ) {
-
                   $([ marker[0], bubbleBox.find('h3')[0], listItem.find('a')[0], close[0] ])
                       .bind('click', function (e){
                           if (bubbleBox.is(':visible')) {
-                            bubbleBox.stop().fadeOut(function (){ 
+                            bubbleBox.stop().fadeOut(cfg.fadeSpeed[1], function (){ 
                               $( this ).css( 'opacity', '' );  // FIXME: check and see if this is still needed in 1.3.* 
                               listItem.removeClass(cfg.liActiveClass);
                             });
                             marker.removeClass(cfg.markerActiveClass);
                           }
                           else {
-                            bubbleBox.stop().fadeIn(function () {
+                            bubbleBox.stop().fadeIn(cfg.fadeSpeed[0], function () {
                               $( this ).css( 'opacity', '' );  // FIXME: check and see if this is still needed in 1.3.*
                               marker.addClass(cfg.markerActiveClass);
                             });
@@ -120,7 +117,7 @@
                     .bind('mouseenter mouseleave', function (e) {
                         $( 'i', this )
                             .stop()
-                            [e.type=='mouseenter'? 'fadeIn' : 'fadeOut'](function(){
+                            [e.type=='mouseenter'? 'fadeIn' : 'fadeOut']( e.type=='mouseenter' ? cfg.fadeSpeed[0] : cfg.fadeSpeed[1], function(){
                                 $( this ).css( 'opacity', '' ); // FIXME: check and see if this is still needed in 1.3.*
                               });
                       });
