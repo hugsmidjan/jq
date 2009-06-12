@@ -98,6 +98,7 @@
                             marker.removeClass(cfg.markerActiveClass);
                           }
                           else {
+                            mapcontainer.find('a.marker-active').trigger('click').blur();
                             bubbleBox.stop().fadeIn(cfg.fadeSpeed[0], function () {
                               $( this ).css( 'opacity', '' );  // FIXME: check and see if this is still needed in 1.3.*
                               marker.addClass(cfg.markerActiveClass);
