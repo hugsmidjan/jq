@@ -472,10 +472,11 @@
                  'horizontal';  // final fallback
     }
     _outer.addClass( c.classPrefix + '-' + c.aspect );
-    
+
+    //randomize starting position
     if ( c.startPos == 'random' )
     {
-      c.startPos = Math.ceil( _items.length * Math.random() ) - 1;
+      c.startPos = Math.floor( _items.length * Math.random() );
     }
 
     setPos( c, c.startPos || 0, true );
@@ -483,7 +484,7 @@
     if(c.autoScrollDelay)
     {
       function nexttrigger ( e ) {
-        _block.find('.next a').click();
+        setPos( c, c.index + c.stepSize );
       }
       scrollInterval = setInterval( nexttrigger, c.autoScrollDelay);
       _block
@@ -505,7 +506,8 @@
     if ( (config && config.item) || dc.item )
     {
       this.each(function () {
-        var c = $.extend( {}, dc, config ), b = $( this );
+        var c = $.extend( {}, dc, config ), 
+            b = $( this );
         initScroller( c, b, b.find( c.item ) );
       });
     }

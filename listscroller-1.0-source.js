@@ -461,7 +461,7 @@
     if(c.autoScrollDelay)
     {
       function nexttrigger ( e ) {
-        _block.find('.next a').click();
+        setPos( c, c.index + c.stepSize );
       }
       scrollInterval = setInterval( nexttrigger, c.autoScrollDelay);
       _block
