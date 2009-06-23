@@ -2,19 +2,19 @@
 (function($){
 
 
-  // turn someth
-  var elementize = function ( something, container )
+  // turn something into an element
+  var elementize = function ( something, defaultContainer)
   {
-    if (container)
+    if (defaultContainer)
     {
       // FIXME: find a more elegant way of doing this.
       // if the `something` is a selector then scope within `container`
       var element = (typeof something == 'string'  &&  something.indexOf('<')==-1) ?
-                        $(something, container):
+                        $(something, defaultContainer):
                         $(something);
       if (!element.closest('html').length) // FIXME: revert to simple `.parent().length` when jQuery fixes .parentNode for newly created elements. Ack!
       {
-        element.appendTo(container);
+        element.appendTo(defaultContainer);
       }
       return element;
     }
@@ -98,7 +98,7 @@
                             marker.removeClass(cfg.markerActiveClass);
                           }
                           else {
-                            mapcontainer.find('a.marker-active').trigger('click').blur();
+                            mapcontainer.find('a.marker-active').trigger('click').trigger('mouseleave').blur();
                             bubbleBox.stop().fadeIn(cfg.fadeSpeed[0], function () {
                               $( this ).css( 'opacity', '' );  // FIXME: check and see if this is still needed in 1.3.*
                               marker.addClass(cfg.markerActiveClass);
@@ -119,6 +119,7 @@
                         $( 'i', this )
                             .stop()
                             [e.type=='mouseenter'? 'fadeIn' : 'fadeOut']( e.type=='mouseenter' ? cfg.fadeSpeed[0] : cfg.fadeSpeed[1], function(){
+                                if($.browser.msie && $.browser.version <= 7) { e.type=='mouseenter' ? $('body').addClass('hovering') : $('body').removeClass('hovering'); } // IE6 & 7 kicktrick for z-index correction
                                 $( this ).css( 'opacity', '' ); // FIXME: check and see if this is still needed in 1.3.*
                               });
                       });

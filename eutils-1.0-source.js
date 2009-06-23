@@ -157,7 +157,7 @@
 
     pause: function (speed, callback)
     {
-      return this.animate({ smu:0 }, speed||800, callback);
+      return this.animate({ smu:0 }, (speed||speed===0)?speed:800, callback);
     },
 
 
@@ -205,7 +205,7 @@
     // (similar to .each(function) that always returns false - except that inside the function this == the jQuery collection.)
     run: function (func, args)
     {
-      this.length  &&  func.apply(this, args||[]);
+      func.apply(this, args||[]);
       return this;
     },
 
@@ -281,7 +281,7 @@
       var F = function () {};
       F.prototype = proto;
       var instance = new F();
-      return props ? $.extend(instance,props) : instance;
+      return props ? $.extend(instance, props) : instance;
     },
 
 

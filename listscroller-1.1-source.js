@@ -15,7 +15,7 @@
                         
       windowSize        : 3,   // how many unmarked items
       stepSize          : 1,   // how many items to move at a time
-      startPos          : 0,
+      startPos          : 0,   // number or 'random'
                         
       hideClass         : 'overflow',
       topClass          : 'at-top',
@@ -472,6 +472,11 @@
                  'horizontal';  // final fallback
     }
     _outer.addClass( c.classPrefix + '-' + c.aspect );
+    
+    if ( c.startPos == 'random' )
+    {
+      c.startPos = Math.ceil( _items.length * Math.random() ) - 1;
+    }
 
     setPos( c, c.startPos || 0, true );
     
