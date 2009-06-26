@@ -10,6 +10,8 @@
     cfg = $.extend({
             fadeInSpeed : 250, // set 1 for almost no animation
             fadeOutSpeed : 250, // set 1 for almost no animation
+            disableIeFading : 0,
+            setContainerWidth :0, //apply img outerwidth to the container-wrapper
             curtainColor : '#000000',
             curtainOpacity : '0.7',
             easeIn : 'swing',
@@ -48,6 +50,13 @@
               '</div>' +
             '</div>' +
           '</div>';
+      
+    if(cfg.disableIeFading && $.browser.msie && parseInt($.browser.version,10) < 9) {
+      cfg.fadeInSpeed = 0;
+      cfg.fadeOutSpeed = 0;
+    };
+    
+
 
 
     _hrefElms.bind('click', function (e) {
@@ -63,8 +72,20 @@
               }),
 
             _popup = $(_makeHTML),
-            _curtain = $(_curtainTemp);
-
+            _curtain = $(_curtainTemp),
+            
+            setWidth = function() {
+              if(cfg.setContainerWidth) {
+                var popupImg = _popup.find('img');
+                popupImg.each(function() {
+                    $(this).bind('load readystatechange', function() {
+                        _popup.find('div.ipopup-container-wrapper').css('width', popupImg.outerWidth());
+                      });
+                    this.src += '';
+                  })
+              }
+            };
+            
         $('body')
           .append(_curtain)
           .append(_popup);
@@ -76,7 +97,7 @@
           _ypos = $(document).scrollTop();
           _curtain
               .css({'background-color' : cfg.curtainColor, opacity : '0', 'display' : 'block' })
-              .animate({ opacity : cfg.curtainOpacity }, cfg.fadeInSpeed, cfg.easeIn, function(){ 
+              .animate({ opacity : cfg.curtainOpacity }, cfg.fadeInSpeed, cfg.easeIn, function(){
                   _popup
                       .css('top', _ypos)
                       .fadeIn(cfg.fadeInSpeed, cfg.easeIn)
@@ -85,11 +106,13 @@
                               e.stopPropagation();
                             })
                       .setFocus();
+                  setWidth();
                 }); // animate in
           _isOpen = true;
         } else {
           _curtain.css({ 'background-color' : cfg.curtainColor, opacity : cfg.curtainOpacity }).show();
           _popup.css('top', _ypos).show();
+          setWidth();
         }
 
         // next/prev buttons
