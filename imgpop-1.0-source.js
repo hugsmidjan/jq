@@ -15,7 +15,8 @@
             curtainColor : '#000000',
             curtainOpacity : '0.7',
             easeIn : 'swing',
-            easeOut : 'swing'
+            easeOut : 'swing',
+            imgClose : false
           }, cfg );
     
     var _navSelectors = 'li.next, li.prev',
@@ -103,7 +104,9 @@
                       .fadeIn(cfg.fadeInSpeed, cfg.easeIn)
                       .find('div.ipopup-container-wrapper')
                           .bind('click', function(e) {
-                              e.stopPropagation();
+                              if(!cfg.imgClose) {
+                                e.stopPropagation();
+                              }
                             })
                       .setFocus();
                   setWidth();
