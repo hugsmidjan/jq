@@ -10,13 +10,13 @@
     cfg = $.extend({
             fadeInSpeed : 250, // set 1 for almost no animation
             fadeOutSpeed : 250, // set 1 for almost no animation
-            disableIeFading : 0,
+            disableIeFading : 0, //disable fading in IE6, 7 & 8 to remove the animate opacity + png24 alpha bug
             setContainerWidth :0, //apply img outerwidth to the container-wrapper
             curtainColor : '#000000',
             curtainOpacity : '0.7',
             easeIn : 'swing',
             easeOut : 'swing',
-            imgClose : false
+            imgClose : false  //close popup when image is clicked
           }, cfg );
     
     var _navSelectors = 'li.next, li.prev',
@@ -82,7 +82,7 @@
                     $(this).bind('load readystatechange', function() {
                         _popup.find('div.ipopup-container-wrapper').css('width', popupImg.outerWidth());
                       });
-                    this.src += '';
+                    this.src += ''; //IE force readystate hack
                   })
               }
             };

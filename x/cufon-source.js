@@ -53,7 +53,11 @@ var Cufon = (function() {
 				else complete ? listener() : queue.push(listener);
 			};
 			
-		})()
+		})(),
+		
+		root: function() {
+			return document.documentElement || document.body;
+		}
 		
 	};
 
@@ -78,6 +82,11 @@ var Cufon = (function() {
 
 		},
 		
+		addClass: function(el, className) {
+			el.className = (el.className && ' ') + className;
+			return el;
+		},
+		
 		color: cached(function(value) {
 			var parsed = {};
 			parsed.color = value.replace(/^rgba\((.*?),\s*([\d.]+)\)/, function($0, $1, $2) {
@@ -85,6 +94,23 @@ var Cufon = (function() {
 				return 'rgb(' + $1 + ')';
 			});
 			return parsed;
+		}),
+		
+		// has no direct CSS equivalent.
+		// @see http://msdn.microsoft.com/en-us/library/system.windows.fontstretches.aspx
+		fontStretch: cached(function(value) {
+			if (typeof value == 'number') return value;
+			if (/%$/.test(value)) return parseFloat(value) / 100;
+			return {
+				'ultra-condensed': 0.5,
+				'extra-condensed': 0.625,
+				condensed: 0.75,
+				'semi-condensed': 0.875,
+				'semi-expanded': 1.125,
+				expanded: 1.25,
+				'extra-expanded': 1.5,
+				'ultra-expanded': 2
+			}[value] || 1;
 		}),
 	
 		getStyle: function(el) {
@@ -116,16 +142,26 @@ var Cufon = (function() {
 		}),
 		
 		recognizesMedia: cached(function(media) {
-			var el = document.createElement('style'), container, supported;
+			var el = document.createElement('style'), sheet, container, supported;
 			el.type = 'text/css';
 			el.media = media;
+			try { // this is cached anyway
+				el.appendChild(document.createTextNode('/**/'));
+			} catch (e) {}
 			container = elementsByTagName('head')[0];
 			container.insertBefore(el, container.firstChild);
-			supported = !!(el.sheet || el.styleSheet);
+			sheet = (el.sheet || el.styleSheet);
+			supported = sheet && !sheet.disabled;
 			container.removeChild(el);
 			return supported;
 		}),
-
+		
+		removeClass: function(el, className) {
+			var re = RegExp('(?:^|\\s+)' + className +  '(?=\\s|$)', 'g');
+			el.className = el.className.replace(re, '');
+			return el;
+		},
+		
 		supports: function(property, value) {
 			var checker = document.createElement('span').style;
 			if (checker[property] === undefined) return false;
@@ -168,7 +204,8 @@ var Cufon = (function() {
 			while (result = re.exec(value)) {
 				if (result[0] == ',') {
 					shadows.push(currentShadow);
-					currentShadow = {}, offCount = 0;
+					currentShadow = {};
+					offCount = 0;
 				}
 				else if (result[1]) {
 					currentShadow.color = result[1];
@@ -181,12 +218,25 @@ var Cufon = (function() {
 			return shadows;
 		}),
 		
-		textTransform: function(text, style) {
-			return text[{
-				uppercase: 'toUpperCase',
-				lowercase: 'toLowerCase'
-			}[style.get('textTransform')] || 'toString']();
-		},
+		textTransform: (function() {
+			var map = {
+				uppercase: function(s) {
+					return s.toUpperCase();
+				},
+				lowercase: function(s) {
+					return s.toLowerCase();
+				},
+				capitalize: function(s) {
+					return s.replace(/\b./g, function($0) {
+						return $0.toUpperCase();
+					});
+				}
+			};
+			return function(text, style) {
+				var transform = map[style.get('textTransform')];
+				return transform ? transform(text) : text;
+			};
+		})(),
 		
 		whiteSpace: (function() {
 			var ignore = {
@@ -214,19 +264,53 @@ var Cufon = (function() {
 			for (var fn; fn = queue.shift(); fn());
 		};
 		
-		var linkElements = elementsByTagName('link'), watch = {
-			stylesheet: 1
-		};
+		var links = elementsByTagName('link'), styles = elementsByTagName('style');
+		
+		function isContainerReady(el) {
+			return el.disabled || isSheetReady(el.sheet, el.media || 'screen');
+		}
+		
+		function isSheetReady(sheet, media) {
+			// in Opera sheet.disabled is true when it's still loading,
+			// even though link.disabled is false. they stay in sync if
+			// set manually.
+			if (!CSS.recognizesMedia(media || 'all')) return true;
+			if (!sheet || sheet.disabled) return false;
+			try {
+				var rules = sheet.cssRules, rule;
+				if (rules) {
+					// needed for Safari 3 and Chrome 1.0.
+					// in standards-conforming browsers cssRules contains @-rules.
+					// Chrome 1.0 weirdness: rules[<number larger than .length - 1>]
+					// returns the last rule, so a for loop is the only option.
+					search: for (var i = 0, l = rules.length; rule = rules[i], i < l; ++i) {
+						switch (rule.type) {
+							case 2: // @charset
+								break;
+							case 3: // @import
+								if (!isSheetReady(rule.styleSheet, rule.media.mediaText)) return false;
+								break;
+							default:
+								// only @charset can precede @import
+								break search;
+						}
+					}
+				}
+			}
+			catch (e) {} // probably a style sheet from another domain
+			return true;
+		}
 		
 		function allStylesLoaded() {
-			var sheet, i, link;
-			for (i = 0; link = linkElements[i]; ++i) {
-				if (link.disabled || !watch[link.rel.toLowerCase()] || !CSS.recognizesMedia(link.media || 'screen')) continue;
-				sheet = link.sheet || link.styleSheet;
-				// in Opera sheet.disabled is true when it's still loading,
-				// even though link.disabled is false. they stay in sync if
-				// set manually.
-				if (!sheet || sheet.disabled) return false;
+			// Internet Explorer's style sheet model, there's no need to do anything
+			if (document.createStyleSheet) return true;
+			// standards-compliant browsers
+			var el, i;
+			for (i = 0; el = links[i]; ++i) {
+				if (el.rel.toLowerCase() == 'stylesheet' && !isContainerReady(el)) return false;
+			}
+			for (i = 0; el = styles[i]; ++i) {
+				if (!isContainerReady(el)) return false;
 			}
 			return true;
 		}
@@ -264,7 +348,7 @@ var Cufon = (function() {
 				maxX: parseInt(parts[2], 10),
 				maxY: parseInt(parts[3], 10)
 			};
-			box.width = box.maxX - box.minX,
+			box.width = box.maxX - box.minX;
 			box.height = box.maxY - box.minY;
 			box.toString = function() {
 				return [ this.minX, this.minY, this.width, this.height ].join(' ');
@@ -540,12 +624,14 @@ var Cufon = (function() {
 	var sharedStorage = new Storage();
 	var hoverHandler = new HoverHandler();
 	var replaceHistory = new ReplaceHistory();
+	var initialized = false;
 	
 	var engines = {}, fonts = {}, defaultOptions = {
 		enableTextDecoration: false,
 		engine: null,
 		//fontScale: 1,
 		//fontScaling: false,
+		forceHitArea: false,
 		hover: false,
 		hoverables: {
 			a: true
@@ -560,6 +646,7 @@ var Cufon = (function() {
 			||	(window.$$ && function(query) { return $$(query); })
 			||	(window.$ && function(query) { return $(query); })
 			||	(document.querySelectorAll && function(query) { return document.querySelectorAll(query); })
+			||	(window.Ext && Ext.query)
 			||	elementsByTagName
 		),
 		separate: 'words', // 'none' and 'characters' are also accepted
@@ -570,7 +657,7 @@ var Cufon = (function() {
 		words: /[^\S\u00a0]+/,
 		characters: ''
 	};
-
+	
 	api.now = function() {
 		DOM.ready();
 		return api;
@@ -593,11 +680,20 @@ var Cufon = (function() {
 		fonts[family].add(font);
 		return api.set('fontFamily', '"' + family + '"');
 	};
-
+	
 	api.replace = function(elements, options, ignoreHistory) {
 		options = merge(defaultOptions, options);
-		if (options.autoDetect) { delete options.fontFamily; }
 		if (!options.engine) return api; // there's no browser support so we'll just stop here
+		if (!initialized) {
+			CSS.addClass(DOM.root(), 'cufon-active cufon-loading');
+			CSS.ready(function() {
+				// fires before any replace() calls, but it doesn't really matter
+				CSS.removeClass(DOM.root(), 'cufon-loading');
+			});
+			initialized = true;
+		}
+		if (options.hover) options.forceHitArea = true;
+		if (options.autoDetect) { delete options.fontFamily; }
 		if (typeof options.textShadow == 'string')
 			options.textShadow = CSS.textShadow(options.textShadow);
 		if (typeof options.color == 'string' && /^-/.test(options.color))
@@ -635,7 +731,7 @@ Cufon.registerEngine('canvas', (function() {
 	
 	// Firefox 2 w/ non-strict doctype (almost standards mode)
 	var HAS_BROKEN_LINEHEIGHT = !HAS_INLINE_BLOCK && (document.compatMode == 'BackCompat' || /frameset|transitional/i.test(document.doctype.publicId));
-
+	
 	var styleSheet = document.createElement('style');
 	styleSheet.type = 'text/css';
 	styleSheet.appendChild(document.createTextNode((
@@ -645,7 +741,7 @@ Cufon.registerEngine('canvas', (function() {
 			(HAS_BROKEN_LINEHEIGHT
 				? ''
 				: 'font-size:1px;line-height:1px;') +
-			'}.cufon-canvas .cufon-alt{display:-moz-inline-box;display:inline-block;width:0;height:0;overflow:hidden;}' +
+			'}.cufon-canvas .cufon-alt{display:-moz-inline-box;display:inline-block;width:0;height:0;overflow:hidden;text-indent:-10000in;}' +
 			(HAS_INLINE_BLOCK
 				? '.cufon-canvas canvas{position:relative;}'
 				: '.cufon-canvas canvas{position:absolute;}') +
@@ -768,9 +864,18 @@ Cufon.registerEngine('canvas', (function() {
 		var height = size.convert(viewBox.height);
 		var roundedHeight = Math.ceil(height);
 		var roundingFactor = roundedHeight / height;
+		var stretchFactor = roundingFactor * Cufon.CSS.fontStretch(style.get('fontStretch'));
+		var stretchedWidth = width * stretchFactor;
 		
-		canvas.width = Math.ceil(size.convert(width * roundingFactor + expandRight - expandLeft));
-		canvas.height = Math.ceil(size.convert(viewBox.height - expandTop + expandBottom));
+		var canvasWidth = Math.ceil(size.convert(stretchedWidth + expandRight - expandLeft));
+		var canvasHeight = Math.ceil(size.convert(viewBox.height - expandTop + expandBottom));
+		
+		canvas.width = canvasWidth;
+		canvas.height = canvasHeight;
+		
+		// needed for WebKit and full page zoom
+		cStyle.width = canvasWidth + 'px';
+		cStyle.height = canvasHeight + 'px';
 		
 		// minY has no part in canvas.height
 		expandTop += viewBox.minY;
@@ -778,7 +883,7 @@ Cufon.registerEngine('canvas', (function() {
 		cStyle.top = Math.round(size.convert(expandTop - font.ascent)) + 'px';
 		cStyle.left = Math.round(size.convert(expandLeft)) + 'px';
 		
-		var wrapperWidth = Math.ceil(size.convert(width * roundingFactor)) + 'px';
+		var wrapperWidth = Math.ceil(size.convert(stretchedWidth)) + 'px';
 		
 		if (HAS_INLINE_BLOCK) {
 			wStyle.width = wrapperWidth;
@@ -816,7 +921,7 @@ Cufon.registerEngine('canvas', (function() {
 		if (textDecoration.overline) line(font.ascent, textDecoration.overline);
 		
 		function renderText() {
-			g.scale(roundingFactor, 1);
+			g.scale(stretchFactor, 1);
 			for (var i = 0, j = 0, l = chars.length; i < l; ++i) {
 				var glyph = glyphs[chars[i]] || font.missingGlyph;
 				if (!glyph) continue;
@@ -874,12 +979,18 @@ Cufon.registerEngine('vml', (function() {
 	if (!check.coordsize) return; // VML isn't supported
 	check = null;
 	
+	var HAS_BROKEN_LINEHEIGHT = (document.documentMode || 0) < 8;
+	
 	document.write(('<style type="text/css">' +
 		'.cufon-vml-canvas{text-indent:0;}' +
 		'@media screen{' + 
-			'cvml\\:shape,cvml\\:fill,cvml\\:shadow{behavior:url(#default#VML);display:block;antialias:true;position:absolute;}' +
+			'cvml\\:shape,cvml\\:rect,cvml\\:fill,cvml\\:shadow{behavior:url(#default#VML);display:block;antialias:true;position:absolute;}' +
 			'.cufon-vml-canvas{position:absolute;text-align:left;}' +
-			'.cufon-vml{display:inline-block;position:relative;vertical-align:middle;}' +
+			'.cufon-vml{display:inline-block;position:relative;vertical-align:' +
+			(HAS_BROKEN_LINEHEIGHT
+				? 'middle'
+				: 'text-bottom') +
+			';}' +
 			'.cufon-vml .cufon-alt{position:absolute;left:-10000in;font-size:1px;}' +
 			'a .cufon-vml{cursor:pointer}' + // ignore !important here
 		'}' +
@@ -890,7 +1001,7 @@ Cufon.registerEngine('vml', (function() {
 	'</style>').replace(/;/g, '!important;'));
 
 	function getFontSizeInPixels(el, value) {
-		return getSizeInPixels(el, /(?:em|ex|%)$/i.test(value) ? '1em' : value);
+		return getSizeInPixels(el, /(?:em|ex|%)$|^[a-z-]+$/i.test(value) ? '1em' : value);
 	}
 	
 	// Original by Dead Edwards.
@@ -899,7 +1010,7 @@ Cufon.registerEngine('vml', (function() {
 		if (/px$/i.test(value)) return parseFloat(value);
 		var style = el.style.left, runtimeStyle = el.runtimeStyle.left;
 		el.runtimeStyle.left = el.currentStyle.left;
-		el.style.left = value;
+		el.style.left = value.replace('%', 'em');
 		var result = el.style.pixelLeft;
 		el.style.left = style;
 		el.runtimeStyle.left = runtimeStyle;
@@ -979,6 +1090,7 @@ Cufon.registerEngine('vml', (function() {
 		
 		var height = size.convert(viewBox.height), roundedHeight = Math.ceil(height);
 		var roundingFactor = roundedHeight / height;
+		var stretchFactor = roundingFactor * Cufon.CSS.fontStretch(style.get('fontStretch'));
 		var minX = viewBox.minX, minY = viewBox.minY;
 		
 		cStyle.height = roundedHeight;
@@ -1013,7 +1125,7 @@ Cufon.registerEngine('vml', (function() {
 		
 		var fullWidth = -minX + width + (viewBox.width - advance);
 	
-		var shapeWidth = size.convert(fullWidth * roundingFactor), roundedShapeWidth = Math.round(shapeWidth);
+		var shapeWidth = size.convert(fullWidth * stretchFactor), roundedShapeWidth = Math.round(shapeWidth);
 		
 		var coordSize = fullWidth + ',' + viewBox.height, coordOrigin;
 		var stretch = 'r' + coordSize + 'ns';
@@ -1071,7 +1183,49 @@ Cufon.registerEngine('vml', (function() {
 			offsetX += jumps[j++];
 		}
 		
-		wStyle.width = Math.max(Math.ceil(size.convert(width * roundingFactor)), 0);
+		// addresses flickering issues on :hover
+		
+		var cover = shape.nextSibling, coverFill, vStyle;
+		
+		if (options.forceHitArea) {
+			
+			if (!cover) {
+				cover = document.createElement('cvml:rect');
+				cover.stroked = 'f';
+				cover.className = 'cufon-vml-cover';
+				coverFill = document.createElement('cvml:fill');
+				coverFill.opacity = 0;
+				cover.appendChild(coverFill);
+				canvas.appendChild(cover);
+			}
+			
+			vStyle = cover.style;
+			
+			vStyle.width = roundedShapeWidth;
+			vStyle.height = roundedHeight;
+			
+		}
+		else if (cover) canvas.removeChild(cover);
+		
+		wStyle.width = Math.max(Math.ceil(size.convert(width * stretchFactor)), 0);
+		
+		if (HAS_BROKEN_LINEHEIGHT) {
+			
+			var yAdjust = style.computedYAdjust;
+			
+			if (yAdjust === undefined) {
+				var lineHeight = style.get('lineHeight');
+				if (lineHeight == 'normal') lineHeight = '1em';
+				else if (!isNaN(lineHeight)) lineHeight += 'em'; // no unit
+				style.computedYAdjust = yAdjust = 0.5 * (getSizeInPixels(el, lineHeight) - parseFloat(wStyle.height));
+			}
+			
+			if (yAdjust) {
+				wStyle.marginTop = Math.ceil(yAdjust) + 'px';
+				wStyle.marginBottom = yAdjust + 'px';
+			}
+			
+		}
 		
 		return wrapper;
 		
