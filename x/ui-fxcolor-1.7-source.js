@@ -72,7 +72,7 @@ function getColor(elem, attr) {
     } while ( elem = elem.parentNode );
 
     return getRGB(color);
-};
+}
 
 // Some named colors to work with
 // From Interface by Stefan Petre
