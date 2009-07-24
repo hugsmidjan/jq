@@ -201,13 +201,13 @@
 
 
 
-    // run a function once.
-    // (similar to .each(function) that always returns false - except that inside the function this == the jQuery collection.)
-    run: function (func, args)
+    // Call any function as an "insta-plugin".
+    run: function (func, argsArray)
     {
-      func.apply(this, args||[]);
-      return this;
+      var ret = func.apply( this, argsArray||[] );
+      return ret !== undefined ? ret : this;
     },
+
 
     // enforces DOM-ids on all items in the collection
     // and returns the id of the first item.
