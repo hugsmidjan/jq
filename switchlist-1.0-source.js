@@ -50,7 +50,7 @@
                     /* END: þetta ætti að vera stillanlegra/meira módúlar */
                       .bind('mouseenter', function (e) {
                           var _thisHeadline = this;
-                          if (!_headlinelist.queue().length)
+                          if (!_headlinelist.queue().length && _visibleIndex != _thisHeadline.listIndex)
                           {
                             _switchHlTimeout = setTimeout(function () {
                                 var _visibleIndexAtStart = _visibleIndex;
