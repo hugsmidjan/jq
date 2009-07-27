@@ -168,7 +168,7 @@
           _lastSetFragment = _currentFragment;
         }
       },
-    
+
       startFragmentMonitoring = function () {
         
       };
@@ -457,15 +457,18 @@
   $.fn.makeTabbox = function ( conf )
   {
     conf =  $.extend({
-                titleSel: 'h1, h2, h3',
-                min:      2,
-                boxTempl: '<div class="tab-box"><ul class="tabs" /></div>',
-                tabSel:   'ul',
-                tabTempl: '<li><a href="#%{id}">%{title}</a></li>',
-                makeTab:  function(tabPane, conf){
-                              var tabHtml = $.inject(conf.tabTempl, {id: $.aquireId(tabPane),  title: $(conf.titleSel, tabPane).html()});
-                              return  $(tabHtml);
-                            }
+                titleSel:   'h1, h2, h3',
+                min:        2,
+                boxTempl:   '<div class="tab-box"><ul class="tabs" /></div>',
+                tabContSel: 'ul',
+                tabTempl:   '<li><a href="#%{id}" title="%{title}">%{title}</a></li>',
+                makeTab:    function(tabPane, conf){
+                                var tabHtml = $.inject(conf.tabTempl, {
+                                                  id: $.aquireId(tabPane),
+                                                  title: $(conf.titleSel, tabPane).html(),
+                                                });
+                                return  $(tabHtml);
+                              }
               }, conf);
 
     var tabBox = [],
@@ -473,12 +476,22 @@
     if (tabPanes.length >= conf.min)
     {
       tabBox = $( conf.boxTempl );
-      var tabList = $(conf.tabSel, tabBox);
+      var tabList = $(conf.tabContSel, tabBox),
+          paneParent = tabPanes.eq(0).parent(),
+          refLang = paneParent.closest('[lang]').attr('lang') || '';
 
+      paneParent.attr('lang', refLang);  // to speed up lookup of paneLang later.
+ 
       tabPanes
           .each(function(){
-              tabList
-                  .append( conf.makeTab(this, conf) );
+              var newTab = conf.makeTab(this, conf),
+                  paneLang = $(this).closest('[lang]');
+              if (paneLang != refLang)
+              {
+                newTab.attr('lang', paneLang);
+              }
+              newTab
+                  .appendTo( tabList );
             })
           .eq(0)
               .before( tabBox );
