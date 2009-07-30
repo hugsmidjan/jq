@@ -29,6 +29,7 @@
         _prevText = _langIs ? 'Fyrri' : 'Previous',
         _closeText = _langIs ? 'Loka' : 'Close',
         _imageText = _langIs ? 'Mynd' : 'Image',
+        _ofTotalText = _langIs ? 'af' : 'of',
         _curtainTemp = '<div class="ipopup-curtain"></div>',
         _popupTemp = '<div class="ipopup-container">' +
             '<div class="ipopup-container-wrapper">' +
@@ -41,7 +42,7 @@
               '<div class="paging">' +
                 '<div class="status">' +
                   '<strong>' + _imageText + '</strong> ' +
-                  '<span><b>%{num}</b> of %{total}</span>' +
+                  '<span><b>%{num}</b> ' + _ofTotalText + ' %{total}</span>' +
                 '</div>' +
                 '<ul class="stepper">' +
                   '<li class="next"><a href="#">' + _nextText + '</a></li>' +
