@@ -24,6 +24,9 @@
       // a counter that should be incremented with each use.
       _guid = 1,
 
+      // used by $.beget()
+      _F = function(){},
+
       _injectRegExpCache = {}, // used by $.inject(); to store regexp objects.
       _RegExpEscape = function(s) { return s.replace(/([\\\^\$*+[\]?{}.=!:(|)])/g, '\\$1'); };
 
@@ -274,14 +277,11 @@
 
   $.extend({
 
-
     // prototypal inheritence under jquery
-    beget : function (proto, props)
-    {
-      var F = function () {};
-      F.prototype = proto;
-      var instance = new F();
-      return props ? $.extend(instance, props) : instance;
+    beget: function (proto, props)
+    { 
+      _F.prototype = proto; 
+      return props ? $.extend(new _F, props) : new _F; 
     },
 
 
