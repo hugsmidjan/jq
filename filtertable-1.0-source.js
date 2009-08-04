@@ -415,8 +415,8 @@
         },
       //matchCase:        false,
       substrSearch:     true,
-      delay:            200,
-      minChars:         1
+      delay:            300,
+      //minChars:         2 //NOT IMPLEMENTED YET
     };
 
 })(jQuery);
