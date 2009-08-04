@@ -31,7 +31,9 @@
       _RegExpEscape = function(s) { return s.replace(/([\\\^\$*+[\]?{}.=!:(|)])/g, '\\$1'); };
 
 
-  // The :childof() and :descof() selector expressions make .is(), .parents() 
+  // FIXME: REDUNDANT as of jQuery 1.3 - jQuery 1.3 supports complex selectors for .is(), .closest(), etc.
+  //
+  // The :childof() and :descof() selector expressions make .is(), .closest(), .parents() 
   // and other such methods sooo much more interesting...!
   // these work wonders when combined with $.delegate() (see below)
   // Example:
@@ -122,7 +124,7 @@
 
 
 
-  if (!$.fn.detach) // this method is on the jQuery Road Map, so until then...
+  if (!$.fn.detach) // this method will be part of jQuery 1.3.3, so until then...
   {
     // Simply pull elements out of the DOM without killing their events or data...
     // (This is how most jQuery newbies expect .remove() to work.)
@@ -199,7 +201,10 @@
 
     hoverClass: function (hoverClass)
     {
-      return this.bind('mouseenter mouseleave', function (e) { $(this).toggleClass(hoverClass, e.type=='mouseenter'); });
+      return this.hover(
+                      function () { $(this).addClass(hoverClass); },
+                      function () { $(this).removeClass(hoverClass); }
+                    );
     },
 
 
