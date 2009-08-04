@@ -4,7 +4,7 @@
 // Depends on:
 //  - eutils 1.0+ :  $.fn.deepest()
 (function ($){
-
+  
   $.listscroller = {
 
     version : 1.0,
@@ -64,21 +64,34 @@
       statusWrapTempl   : '<span/>',
       statusCurrTempl   : '<b/>',
       statusTotalTempl  : '<i/>',
-      inputPagerTempl   : '<input type="text" value="" size="2"/>',
-
-
-      labelNext         : 'Next',
-      labelPrev         : 'Previous',
-      titleNext         : 'Page forward',
-      titlePrev         : 'Page back',
-
-      jumpLabel         : 'Pages:',
-
-      statusLabel       : 'Page:',
-      ofTotalSeparator  : ' of '
+      inputPagerTempl   : '<input type="text" value="" size="2"/>'
     },
 
-    i18n : function ( txt, lang ) { return txt; },
+
+    i18n: {
+      en: {
+          labelNext         : 'Next',
+          labelPrev         : 'Previous',
+          titleNext         : 'Page forward',
+          titlePrev         : 'Page back',
+
+          jumpLabel         : 'Pages:',
+
+          statusLabel       : 'Page:',
+          ofTotalSeparator  : ' of '
+        },
+      en: {
+          labelNext         : 'Næsta',
+          labelPrev         : 'Fyrri',
+          titleNext         : 'Fletta áfram',
+          titlePrev         : 'Fletta til baka',
+
+          jumpLabel         : 'Síður:',
+
+          statusLabel       : 'Síða:',
+          ofTotalSeparator  : ' af '
+        }
+    },
 
     animate : {
       none : function ( l, c ) {},
@@ -320,24 +333,24 @@
     return false;
   }
 
-  function buildControls ( c, _lang )
+
+  function buildControls ( c )
   {
 
     var n = $( c.nextBtnTemplate ),
         p = $( c.prevBtnTemplate ),
         j,
-        status,
-        i18n = $.listscroller.i18n;
+        status;
 
     n.find( 'a' ).andSelf().eq(0)
       .bind( 'click', c, moveNext )
-      .attr( 'title', i18n( c.titleNext, _lang ) )
-      .text( i18n( c.labelNext, _lang ) );
+      .attr( 'title', c.titleNext )
+      .text( c.labelNext );
 
     p.find( 'a' ).andSelf().eq(0)
       .bind( 'click', c, movePrev )
-      .attr( 'title', i18n( c.titlePrev, _lang ) )
-      .text( i18n( c.labelPrev, _lang ) );
+      .attr( 'title', c.titlePrev )
+      .text( c.labelPrev );
 
 
     if ( c.paging )
@@ -382,7 +395,7 @@
         if ( c.jumpLabelTemplate )
         {
           $( c.jumpLabelTemplate )
-            .text( i18n( c.jumpLabel, _lang ) )
+            .text( c.jumpLabel )
             .appendTo( j );
         }
         // make buttons
@@ -451,16 +464,14 @@
     // create and display control-links
     if ( c.controls !== 'none' && _items.length > 0 )
     {
-      var _lang = _items.parents( '[lang]' ).attr( 'lang' ) || 'en';
-      
       if ( /^(above|both)$/.test( c.controls ) )
       {
-        _outer.before( buildControls( c, _lang ).addClass( c.pagingTopClass ) );
+        _outer.before( buildControls( c ).addClass( c.pagingTopClass ) );
       }
 
       if ( /^(below|both)$/.test( c.controls ) )
       {
-        _outer.after( buildControls( c, _lang ).addClass( c.pagingBottomClass ) );
+        _outer.after( buildControls( c ).addClass( c.pagingBottomClass ) );
       }
       
     }
@@ -501,19 +512,27 @@
   
   $.fn.listscroller = function ( config )
   {
-
     var dc = $.listscroller.defaultConfig;
     if ( (config && config.item) || dc.item )
     {
       this.each(function () {
-        var c = $.extend( {}, dc, config ), 
-            b = $( this );
-        initScroller( c, b, b.find( c.item ) );
-      });
+          var b = $( this )
+              _lang = b.closest( '[lang]' ).attr( 'lang' ) || '',
+              i18n = $.listscroller.i18n,
+              txts = i18n[_lang.toLowerCase()] || i18n[_lang.substr(0,2)] || i18n.en,
+              cfg = $.extend({}, dc, txts,  config );
+          initScroller(
+              cfg,
+              b,
+              typeof cfg.item == 'string' ?
+                  b.find( cfg.item ):
+                  cfg.item
+            );
+        });
     }
     else if (this.length)
     {
-      initScroller( $.extend( {}, dc, config ),  this.eq(0).parent(), this );
+      this.eq(0).parent().listscroller( $.extend( {}, config, { item: this }) );
     }
     return this;
     
