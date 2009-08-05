@@ -71,7 +71,7 @@
 
 
       _clearFilterInput = function (e) {
-          ;;;window.console&&console.log( [asdfasdf] );
+          ;;;window.console&&console.log( ['asdfasdf'] );
           $(this)
               .data(_data_keyName).input
                   .val('')
