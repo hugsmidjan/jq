@@ -366,8 +366,8 @@
                                   idx:  i,
                                   btn:  newClearBtn
                                 }),
-                              cellPrototype = ( refTH.filter(cfg.includeCols/*||''*/).length  || isTHeadEmpty ) ?  protoFilterCell : protoCell,
-                              newInput = cellPrototype.clone(TRUE)
+                              newCell = ( ( refTH.filter(cfg.includeCols/*||''*/).length  || isTHeadEmpty ) ?  protoFilterCell : protoCell ).clone(TRUE),
+                              newInput = newCell
                                             .appendTo(filterRow)
                                             .find('input')
                                                 .data(_data_keyName, inputData)
@@ -377,8 +377,22 @@
 
                   protoData.allInputs = filterRow.find('input');
 
-
                   filterRow.appendTo(thead);
+
+                  if (cfg.fixColWidths)
+                  {
+                    var colW = [],
+                        W = 0;
+                    filterRow.find('>*')
+                        .each(function(i){
+                            var w = parseInt( $(this).css('width'), 10 );
+                            colW[i] = w;
+                            W += w;
+                          })
+                        .each(function(i){
+                            $(this).width( (100*colW[i]/W)+'%' );
+                          });
+                  }
 
                   ;;; if (debugMode) {
                   ;;;   table.addClass('tablefilters-debug');
@@ -393,6 +407,7 @@
     };
 
   $.fn.filterTable.defaults = {
+      fixColWidths:     true,
       filterRow:        '<tr class="filters" />',
       filterCell:       '<td>&nbsp;</td>',
       inputField:       '<input />',
