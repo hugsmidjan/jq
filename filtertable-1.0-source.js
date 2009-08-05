@@ -2,8 +2,6 @@
 
 (function($, undefined){
 
-  $.fn.log = function(){ window.console&&console.log( this ); return this; };
-  var log = function(param){ window.console && console.log(param); return param; };
 
 
 /*
@@ -73,7 +71,7 @@
 
 
       _clearFilterInput = function (e) {
-          ;;;window.console&&console.log( [this] );
+          ;;;window.console&&console.log( [asdfasdf] );
           $(this)
               .data(_data_keyName).input
                   .val('')
@@ -83,12 +81,11 @@
         },
 
       _selectAll = function (e) {
-          ;;;window.console&&console.log( [this, e.type] );
           this.select();
         },
       _setFocusClass = function (e) {
           var input = $(this);
-          input.closest('td, th').toggleClass( log(input.data(_data_keyName).cfg.fieldFocusClass), e.type=='focus' );
+          input.closest('td, th').toggleClass( input.data(_data_keyName).cfg.fieldFocusClass, e.type=='focus' );
         },
 
 
@@ -385,7 +382,7 @@
                         W = 0;
                     filterRow.find('>*')
                         .each(function(i){
-                            var w = parseInt( $(this).css('width'), 10 );
+                            var w = parseInt( $(this).width(), 10 );
                             colW[i] = w;
                             W += w;
                           })
@@ -430,8 +427,8 @@
         },
       //matchCase:        false,
       substrSearch:     true,
-      delay:            300,
-      //minChars:         2 //NOT IMPLEMENTED YET
+      //minChars:         2, //NOT IMPLEMENTED YET
+      delay:            300
     };
 
 })(jQuery);
