@@ -115,7 +115,15 @@
           _isOpen = true;
         } else {
           _curtain.css({ 'background-color' : cfg.curtainColor, opacity : cfg.curtainOpacity }).show();
-          _popup.css('top', _ypos).show();
+          _popup
+              .css('top', _ypos)
+              .show()
+              .find('div.ipopup-container-wrapper')
+                  .bind('click', function(e) {
+                      if(!cfg.imgClose) {
+                        e.stopPropagation();
+                      }
+                    });
           setWidth();
         }
 
