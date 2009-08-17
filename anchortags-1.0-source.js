@@ -4,12 +4,11 @@
   Runs through all the links in a webpage an adds class tags
   to links notifying on their role.
 
-  * Semi-Resestant to re-running
-  * Optionally takes an array of (local) domains (parameter1) / regular expressions allowed
-
   FIXME:
    * Consider using linkElm.hostname, linkelm.port, linkElm.protocol, etc. to make checks faster.
-     * Seems to be very well supported except (at least) Opera reports linkElm.hostname as 'localhost' when other browsers report ''
+     * Seems to be well supported except 
+        * Opera (at least) reports linkElm.hostname as 'localhost' when other browsers report ''
+        * IE (6-8 at least) report linkElm.port on *all* urls with protocol set (i.e. http://www.foo.com/ has port==':80').
 
 */
 
@@ -36,7 +35,7 @@
         config.patterns = patterns;
         localDomains = (localDomains.charAt ? localDomains.split(/\s*,\s*/) : localDomains).concat(cfg.baseDomains);
 
-        _freg = _freg || new RegExp( "^("+location.href.replace(/^https?:/, 'https?:').split('#')[0]+")?#.", 'i' ); // fragments or this
+        _freg = _freg || new RegExp( "^("+location.toString().replace(/^https?:/, 'https?:').split('#')[0].replace( /\./g,'\.' )+")?#.", 'i' );
         _locreg = new RegExp( '^([a-z]{3,12}):\/\/('+ localDomains.join('|').replace( /\./g,'\.' ).replace( /\\\\\./g, '.' ) + ')(/|$)', 'i' );
         while (i--)
         {
@@ -45,40 +44,35 @@
               _href = linkElm.href,
               _isExternal = 0;
 
+
           if (linkElm.protocol == 'mailto:') // mailto links
           {
             link.addClass(cfg.emailClass);
           }
           else
           {
-            if (/^[a-z]{3,12}:\/\//i.test(_href)) // has protocol?
+            if (linkElm.protocol) // has protocol?
             {
               var _isHttps = linkElm.protocol == 'https:';
                   _isHttp = linkElm.protocol == 'http:';
-              if (_isHttp || _isHttps)
+              // secure http protocol
+              if (_isHttps)
               {
-                // secure http protocol
-                if (_isHttps)
-                {
-                  link.addClass(cfg.secureClass);
-                }
-                // external links
-                if ( !_locreg.test(_href))
-                {
-                  link.addClass(cfg.externalClass);
-                  _isExternal = 1;
-                }
+                link.addClass(cfg.secureClass);
               }
-              // different protocol == external link.
-              // (except assume that when both protocols are equal they're "file:" and page is being developed locally)
-              else if ( location.protocol != linkElm.protocol ) 
+              if (cfg.externalClass  &&  (
+                  // is http(s) and doesn't match the defined localDomains
+                  ((_isHttp || _isHttps) && !_locreg.test(_href))  ||
+                  // non http(s) protocol == external link. (Except we assume that when both protocols are equal they're "file:" and page is being developed locally)
+                  (!_isHttp && !_isHttps  &&  location.protocol != linkElm.protocol )
+                 ))
               {
                 link.addClass(cfg.externalClass);
                 _isExternal = 1;
               }
             }
             // internal/same-page fragment links
-            if (!_isExternal && _freg.test(_href))
+            if (!_isExternal && cfg.internalClass && _freg.test(_href))
             {
               link.addClass(cfg.internalClass);
             }
@@ -105,6 +99,7 @@
         return this;
       }
     };
+
 
   anchorTags.config = {
       baseDomains:   hostname ? [hostname+(port? ':'+port: '')] : [],
