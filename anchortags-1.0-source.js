@@ -16,7 +16,6 @@
 (function($){
 
   var _freg,
-      _anyProtocol = '^([a-z]{3,12}):\/\/(',
       location = document.location,
       hostname = location.hostname,
       port = location.port;
@@ -28,7 +27,7 @@
       {
         var cfg = $.extend({ patterns:{} }, anchorTags.config),
             localDomains = config.localDomains,
-            _xreg,
+            _locreg,
             patterns = config.patterns;
 
         delete config.patterns;
@@ -37,8 +36,8 @@
         config.patterns = patterns;
         localDomains = (localDomains.charAt ? localDomains.split(/\s*,\s*/) : localDomains).concat(cfg.baseDomains);
 
-        _freg = _freg || new RegExp( "^("+location.toString().replace(/^https?:/, 'https?:').replace(/#.*$/, '')+")?#.", 'i' ); // fragments or this
-        _xreg = new RegExp( _anyProtocol+ localDomains.join('|').replace( /\./g,'\.' ).replace( /\\\\\./g, '.' ) + ')', 'i' );
+        _freg = _freg || new RegExp( "^("+location.href.replace(/^https?:/, 'https?:').split('#')[0]+")?#.", 'i' ); // fragments or this
+        _locreg = new RegExp( '^([a-z]{3,12}):\/\/('+ localDomains.join('|').replace( /\./g,'\.' ).replace( /\\\\\./g, '.' ) + ')(/|$)', 'i' );
         while (i--)
         {
           var linkElm = links[i],
@@ -54,21 +53,25 @@
           {
             if (/^[a-z]{3,12}:\/\//i.test(_href)) // has protocol?
             {
-              if (/^https?:/i.test(_href)) // is http(s)
+              var _isHttps = linkElm.protocol == 'https:';
+                  _isHttp = linkElm.protocol == 'http:';
+              if (_isHttp || _isHttps)
               {
                 // secure http protocol
-                if (_href.charAt(4) == 's') // only works until we allow for more protocols
+                if (_isHttps)
                 {
                   link.addClass(cfg.secureClass);
                 }
                 // external links
-                if (!_xreg.test(_href))
+                if ( !_locreg.test(_href))
                 {
                   link.addClass(cfg.externalClass);
                   _isExternal = 1;
                 }
               }
-              else if ( location.protocol != 'file:'  ||  !/^file:/.test(_href) ) // different protocol == external link (except for file:// when developing locally)
+              // different protocol == external link.
+              // (except assume that when both protocols are equal they're "file:" and page is being developed locally)
+              else if ( location.protocol != linkElm.protocol ) 
               {
                 link.addClass(cfg.externalClass);
                 _isExternal = 1;
@@ -104,7 +107,7 @@
     };
 
   anchorTags.config = {
-      baseDomains:   hostname ? [hostname+(port? '(:'+port+')': '')] : [],
+      baseDomains:   hostname ? [hostname+(port? ':'+port: '')] : [],
     /*
       patterns:      {
           className: /\.(foo|bar|baz)(#|$|\?)/i,
