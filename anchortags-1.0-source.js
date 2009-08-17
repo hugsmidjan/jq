@@ -35,7 +35,6 @@
         config.patterns = patterns;
         localDomains = (localDomains.charAt ? localDomains.split(/\s*,\s*/) : localDomains).concat(cfg.baseDomains);
 
-        _freg = _freg || new RegExp( "^("+location.toString().replace(/^https?:/, 'https?:').split('#')[0].replace( /\./g,'\.' )+")?#.", 'i' );
         _locreg = new RegExp( '^([a-z]{3,12}):\/\/('+ localDomains.join('|').replace( /\./g,'\.' ).replace( /\\\\\./g, '.' ) + ')(/|$)', 'i' );
         while (i--)
         {
@@ -72,9 +71,10 @@
               }
             }
             // internal/same-page fragment links
-            if (!_isExternal && cfg.internalClass && _freg.test(_href))
+            if (!_isExternal && cfg.internalClass)
             {
-              link.addClass(cfg.internalClass);
+              _freg = _freg || new RegExp( "^("+location.toString().replace(/^https?:/, 'https?:').split('#')[0].replace( /\./g,'\.' )+")?#.", 'i' );
+              _freg.test(_href)  &&  link.addClass(cfg.internalClass);
             }
 
             for (var k in cfg.patterns)
