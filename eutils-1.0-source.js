@@ -50,6 +50,10 @@
         }
       }
       return false;
+    },
+
+    target: function (a, h) {
+      return ( a.id  &&  (h = _doc.location.hash)  &&  h == '#'+a.id );
     }
 
   });
