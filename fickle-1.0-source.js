@@ -68,11 +68,16 @@
               cfg.opener = (extras && extras.opener) || cfg.opener;
               if (_wasEventSuccessful(this, fickle+'open', { cfg: cfg }))
               {
-                this.queue(function(){ $(this).show().setFocus().dequeue(); });  // to allow event handlers to perform fadeIns and things...
                 $(_document).bind('focusin', data._confirmFocusLeave);
                 cfg.closeOnEsc && $(_document).bind('keydown', data._listenForEsc);
                 data._isOpen = !1;// false
-                this.trigger({ type:fickle+'opened', cfg: cfg });
+                this.queue(function(){  // to allow event handlers to perform fadeIns and things...
+                    $(this)
+                        .show()
+                        .setFocus()
+                        .dequeue()
+                        .trigger({ type:fickle+'opened', cfg: cfg });
+                  });
               }
             },
           close: function (data/*, extras */) {
@@ -82,9 +87,13 @@
                 $(_document).unbind('keydown', data._listenForEsc);
                 $(_document).unbind('focusin', data._confirmFocusLeave);
                 $(cfg.opener||_document.body).setFocus();
-                this.queue(function(){ $(this).hide().dequeue(); });  // to allow event handlers to perform fadeOuts and things...
                 data._isOpen = !0;// true
-                this.trigger({ type:fickle+'closed', cfg: cfg });
+                this.queue(function(){  // to allow event handlers to perform fadeOuts and things...
+                    $(this)
+                        .hide()
+                        .dequeue()
+                        .trigger({ type:fickle+'closed', cfg: cfg });
+                  });
               }
             },
           isOpen: function(data/*, extras */){
