@@ -32,7 +32,8 @@
         var cfg = $.extend({ patterns:{} }, anchorTags.config),
             localDomains = config.localDomains||[],
             _locreg,
-            patterns = config.patterns;
+            patterns = config.patterns,
+            defaultPatterns = anchorTags.patterns;
 
         delete config.patterns;
         $.extend(cfg, config);
@@ -40,13 +41,13 @@
         {
           // pull in the user-specified patterns only
           $.each(cfg.usePatterns, function(i, name){
-              cfg.patterns[name] = anchorTags.patterns[name];
+              defaultPatterns[name] && (cfg.patterns[name] = defaultPatterns[name]);
             });
         }
         else
         {
           // use all default patterns.
-          $.extend(cfg.patterns, anchorTags.patterns);
+          $.extend(cfg.patterns, defaultPatterns);
         }
         $.extend(cfg.patterns, patterns);
         config.patterns = patterns;
