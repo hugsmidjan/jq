@@ -30,7 +30,7 @@
       if (i)
       {
         var cfg = $.extend({ patterns:{} }, anchorTags.config),
-            localDomains = config.localDomains,
+            localDomains = config.localDomains||[],
             _locreg,
             patterns = config.patterns;
 
@@ -50,7 +50,7 @@
         }
         $.extend(cfg.patterns, patterns);
         config.patterns = patterns;
-        localDomains = (localDomains.charAt ? localDomains.split(/\s*,\s*/) : localDomains).concat(cfg.baseDomains);
+        localDomains = localDomains.concat(cfg.baseDomains);
 
         _locreg = new RegExp( '^([a-z]{3,12}):\/\/('+ localDomains.join('|').replace( /\./g,'\.' ).replace( /\\\\\./g, '.' ) + ')(/|$)', 'i' );
         while (i--)
@@ -102,7 +102,7 @@
 
               if (_className || _check.test(_href))
               {
-                link.addClass( _patternObj.tag  ||  (_className && _className.charAt && _className)  ||  (cfg.patternClassPrefix||'file_') + key );
+                link.addClass( _patternObj.tag  ||  (_className && _className.charAt && _className)  ||  cfg.patternClassPrefix + key );
               }
             }
 
@@ -132,14 +132,14 @@
           foo:           { check: function(linkElm,key){ return true; },          tag: 'myClassName' }
         },
     */
-      localDomains:  [  // Array or Comma-delimeted string. Regular-expression patterns allowd (except with '.' escaping inverted)
+      localDomains:  [  // Regular-expression patterns allowd (except with '.' escaping inverted)
           //'foo.bar.com',
           //'(www\\d?.)?domain.com'  // Matches: domain.com, www.domain.com, www2.domain.com, www.domain3.com, etc.
         ],
       emailClass:    'mailto',
       externalClass: 'external',
       internalClass: 'withinpage',
-      //patternClassPrefix: 'file_',
+      patternClassPrefix: 'file_',
       secureClass:   'secure'
     };
 
