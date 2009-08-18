@@ -20,10 +20,10 @@
 
     Events:
 
-      popupopen:    fires before the popup is opened. Cancelable with event.preventDefault()/return false;
-      popupclose:   fires before the popup is closed. Cancelable with event.preventDefault()/return false;
-      popupopened:  fires *after* the popup is opened. Uncancelable.
-      popupclosed:  fires *after* the popup is closed. Uncancelable.
+      fickleopen:    fires before the popup is opened. Cancelable with event.preventDefault()/return false;
+      fickleclose:   fires before the popup is closed. Cancelable with event.preventDefault()/return false;
+      fickleopened:  fires *after* the popup is opened. Uncancelable.
+      fickleclosed:  fires *after* the popup is closed. Uncancelable.
 
 
     Methods:
@@ -60,25 +60,25 @@
           open: function (data, extras) {
               var cfg = data.c;
               cfg.opener = (extras && extras.opener) || cfg.opener;
-              if (_wasEventSuccessful(this, 'popupopen', { cfg: cfg }))
+              if (_wasEventSuccessful(this, 'fickleopen', { cfg: cfg }))
               {
                 this.queue(function(){ $(this).show().setFocus().dequeue(); });  // to allow event handlers to perform fadeIns and things...
                 $(_document).bind('focusin', data._confirmFocusLeave);
                 cfg.closeOnEsc && $(_document).bind('keydown', data._listenForEsc);
                 data._isOpen = !1;// false
-                this.trigger({ type:'popupopened', cfg: cfg });
+                this.trigger({ type:'fickleopened', cfg: cfg });
               }
             },
           close: function (data/*, extras */) {
               var cfg = data.c;
-              if (_wasEventSuccessful(this, 'popupclose', { cfg: cfg }))
+              if (_wasEventSuccessful(this, 'fickleclose', { cfg: cfg }))
               {
                 $(_document).unbind('keydown', data._listenForEsc);
                 $(_document).unbind('focusin', data._confirmFocusLeave);
                 $(cfg.opener||_document.body).setFocus();
                 this.queue(function(){ $(this).hide().dequeue(); });  // to allow event handlers to perform fadeOuts and things...
                 data._isOpen = !0;// true
-                this.trigger({ type:'popupclosed', cfg: cfg });
+                this.trigger({ type:'fickleclosed', cfg: cfg });
               }
             },
           isOpen: function(data/*, extras */){
@@ -130,7 +130,8 @@
                 data = {
                     c: $.beget(cfg),
                     _listenForEsc: function (e) {
-                        return (e.which != 27 /* ESC */) ||  _this.fickle('close') && false;
+                        // return true on non-ESC keypresses, but envoke fickle('close') and return false on ESC.
+                        return (e.which != 27 /* ESC */)  ||  _this.fickle('close') && false;
                       },
                     _confirmFocusLeave: function (e) {
                         var popupElm = _this[0];
