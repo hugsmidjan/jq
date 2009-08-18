@@ -1,29 +1,37 @@
 /*
+  jQuery.fn.curtain (and jQuery.curtain)
+  
+  Applies basic curtain behaviour to an element. Adheres to the "do less principle". :-)
+   * Positioning: position: absolute;  top: 0;  left: 0;
+   * Dimensions: width & height cover the whole <body> (or window) whichever is larger
+   * Updates dimensions on window resize
+
+
   Requires:  jQuery 1.3
 
   Usage:
 
     jQuery.curtain();                // returns a basic curtain jQuery object ('<div class="curtain-overlay" />')
-    jQuery.curtain(myElement);       // applies basic curtain behavior to myElement (and returns it).
+    jQuery.curtain(myCurtainElm);    // applies basic curtain behavior to myElement (and returns it).
 
     jQuery.curtain('myclassname');   // same as above, but replacing the default className with 'myclassname'
-    jQuery.curtain(true);            // applies default color and opacity to the curtain element
+    jQuery.curtain(true);            // quick-n-dirty mode. applies default color and opacity to the curtain element  bgcol:#888, opacity:.5, zindex:99 
 
     jQuery.curtain({                 // applies options to the curtain element.
-        className: String,           //  * element class-name
-        bg:        CssColorValue,    //  * inline CSS background-color value
-        opacity:   Float [0...1],    //  * inline CSS opacity value
-        z:         Integer           //  * inline CSS z-index value
+        className: String,           //  * CSS class-name                     // default: 'curtain-overlay'
+        bg:        CssColorValue,    //  * inline CSS background-color value  // default: none
+        opacity:   Float [0...1],    //  * inline CSS opacity value           // default: none
+        z:         Integer           //  * inline CSS z-index value           // default: none
       });
 
 
     jQuery('#mycurtain').curtain(options);  // applies basic curtain behavior to #mycurtain
                                             // (same options as for jQuery.curtain() above )
-    jQuery.curtain(options, myElement);     // applies curtain behavior, with options, to myElement.
+    jQuery.curtain(options, myCurtainElm);  // applies curtain behavior, with options, to myElement.
 
 
     jQuery('#mycurtain').curtain('destroy');   // removes the curtain and unbinds the window.onresize event handler.
-    jQuery.curtain('destroy', myElement);      // removes the curtain and unbinds the window.onresize event handler.
+    jQuery.curtain('destroy', myCurtainElm);   // removes the curtain and unbinds the window.onresize event handler.
 
 
 */
@@ -55,26 +63,26 @@
       }
 
       cfg = $.extend({
-          className: 'curtain-overlay',
-          container: (elm && elm.parentNode) || document.body
-        },
-        typeof(cfg)=='string' ?  // cfg == 'myCurtainClassName'
-            { className: cfg }:
-        typeof(cfg)=='boolean'&&cfg ? // cfg === true triggers "sensible defaults" mode
-            { bg: '#888', opacity: .5, z:99 }:
-            cfg || {}
-      );
+            className: 'curtain-overlay'
+          },
+          typeof(cfg)=='string' ?  // cfg == 'myCurtainClassName'
+              { className: cfg }:
+          typeof(cfg)=='boolean'&&cfg ? // cfg === true triggers "sensible defaults" mode
+              { bg: '#888', opacity: .5, z:99 }:
+              cfg || {}
+        );
 
-      var _curtain = $(elm || '<div />');
-      _curtain
-              .addClass( cfg.className )
-              .appendTo( cfg.container )
-              .css({ position: 'absolute', top: 0, left: 0 })
-              .hide()
-              .bind('click', function(e){ e.stopPropagation(); return false; });
+      var _curtain = $(elm || '<div />')
+                          .hide()
+                          .addClass( cfg.className )
+                          .css({ position: 'absolute', top: 0, left: 0 });
+      if (!elm || !elm.parentNode)
+      {
+        _curtain
+            .appendTo( document.body );
+      }
 
-      // TODO remove this block as soon as the IE opacity bug is fixed in jQuery 1.3
-      // (http://dev.jquery.com/ticket/3981)
+      // FIXME: remove this IE hack as soon as jQuery 1.3.3 has been released (http://dev.jquery.com/ticket/3981)
       if ( !$.support.opacity && _curtain.css('opacity') == 1 ) {
         _curtain.css('opacity', _curtain.css('filter').match(/opacity=(\d+)/) ? RegExp.$1/100 : 1);
       }
@@ -82,8 +90,9 @@
 
       _curtainlist.push(_curtain[0]);
 
+      b = b || $('body'); // delayed assignment to save memory
       w.bind('resize', _resizeCurtains);
-      _resizeCurtains('init');
+      _resizeCurtains(1);
 
       if ( cfg.bg || cfg.opacity || cfg.z )
       {
@@ -100,18 +109,17 @@
     _curtainlist = curtain.list = [],
 
     w = $(window),
-    b,
+    b,// = $('body');
 
     _resizeCurtains = function (e) {
         var i = _curtainlist.length,
             W = -1,
             H = -1;
-        b = b || $('body');
 
         while (i--)
         {
           var elm = _curtainlist[i];
-          if ( elm  &&  ( (elm.parentNode  &&  $(elm).is(':visible'))  ||  e == 'init' ) )
+          if ( elm  &&  ( (elm.parentNode  &&  $(elm).is(':visible'))  ||  e == 1 ) )
           {
             // only calculate window+body dimensions once and only if _curtainlist.length>0
             W = W!=-1 ? W : Math.max( w.width(),  b.innerWidth() );
