@@ -1,3 +1,4 @@
+// encoding: utf-8
 // todo : set position to list element / page that reports focus (BT: WTF does that even mean?)
 // todo : automove => slideshow, marquee
 // todo : callback function when animation finishes ( no hold, pending use )
@@ -80,7 +81,7 @@
           statusLabel       : 'Page:',
           ofTotalSeparator  : ' of '
         },
-      en: {
+      is: {
           labelNext         : 'Næsta',
           labelPrev         : 'Fyrri',
           titleNext         : 'Fletta áfram',
