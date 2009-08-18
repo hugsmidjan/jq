@@ -10,12 +10,17 @@
       $('<div class="mypopup">Content</div>').fickle( options );
     
     defaultOptions: {
-      focusTarget: '<a href="#" class="focustarget">.</a>',
+      focusTarget: '<a href="#" class="focustarget">.</a>',  // may be element or selector - gets prepended to the popup element to receive keyboard focus
       activeClass: 'fickle-active',
       closeOnEsc:  true,
       closeDelay:  100,
       startOpen:   false
       opener:      element/collection/selector,
+
+      onOpen:      null,     // shorthand for .bind('fickleopen', handlerFunc);
+      onOpened:    null,     // shorthand for .bind('fickleopened', handlerFunc);
+      onClose:     null,     // shorthand for .bind('fickleclose', handlerFunc);
+      onClosed:    null,     // shorthand for .bind('fickleclosed', handlerFunc);
     }
 
     Events:
@@ -46,6 +51,7 @@
         },
 
       _document = document,
+      fickle = 'fickle',
 
       _popuplock,
       _doClosePopup,
@@ -60,25 +66,25 @@
           open: function (data, extras) {
               var cfg = data.c;
               cfg.opener = (extras && extras.opener) || cfg.opener;
-              if (_wasEventSuccessful(this, 'fickleopen', { cfg: cfg }))
+              if (_wasEventSuccessful(this, fickle+'open', { cfg: cfg }))
               {
                 this.queue(function(){ $(this).show().setFocus().dequeue(); });  // to allow event handlers to perform fadeIns and things...
                 $(_document).bind('focusin', data._confirmFocusLeave);
                 cfg.closeOnEsc && $(_document).bind('keydown', data._listenForEsc);
                 data._isOpen = !1;// false
-                this.trigger({ type:'fickleopened', cfg: cfg });
+                this.trigger({ type:fickle+'opened', cfg: cfg });
               }
             },
           close: function (data/*, extras */) {
               var cfg = data.c;
-              if (_wasEventSuccessful(this, 'fickleclose', { cfg: cfg }))
+              if (_wasEventSuccessful(this, fickle+'close', { cfg: cfg }))
               {
                 $(_document).unbind('keydown', data._listenForEsc);
                 $(_document).unbind('focusin', data._confirmFocusLeave);
                 $(cfg.opener||_document.body).setFocus();
                 this.queue(function(){ $(this).hide().dequeue(); });  // to allow event handlers to perform fadeOuts and things...
                 data._isOpen = !0;// true
-                this.trigger({ type:'fickleclosed', cfg: cfg });
+                this.trigger({ type:fickle+'closed', cfg: cfg });
               }
             },
           isOpen: function(data/*, extras */){
@@ -90,7 +96,7 @@
         },
 
       _defaultConfig = {
-          activeClass: 'fickle-active',
+          activeClass: fickle+'-active',
           closeOnEsc:  true,
           closeDelay:  300,
           //startOpen:   false,
@@ -98,7 +104,7 @@
           focusTarget: '<a href="#" class="focustarget">.</a>'
         },
 
-      _dataId = 'fickle-'+$.aquireId();  // obfuscate/privatize fickle datas...
+      _dataId = fickle+'-'+$.aquireId();  // obfuscate/privatize fickle datas...
 
 
 
@@ -124,8 +130,8 @@
       {
         cfg = $.beget(_defaultConfig, cfg);
 
-
-        this.each(function(){
+        var _popups = this;
+        _popups.each(function(){
             var _this = $(this),
                 data = {
                     c: $.beget(cfg),
@@ -169,7 +175,6 @@
                     }
                   });
 
-
             if (document.body == _this.closest('body')[0])
             {
               // FIXME: this is an ugly hack. let's find a more elegant solution to this.
@@ -187,12 +192,19 @@
               }
             }
 
-            if (cfg.startOpen)
+            if (cfg.startOpen) 
             {
+              // NOTE: _this has already been toggled visible above - so fadeIn() fickleopen events will not show.
+              // We need, however, to envoke proper .fickle('open') to set the appropriate flags and run the events.
               _this.fickle('open')
             }
 
           });
+
+        $.each(['Open','Opened','Close','Closed'], function (i, type) {
+            cfg['on'+type] && _popups.bind(fickle+type.toLowerCase(), cfg['on'+type]);
+          })
+
       }
 
 
