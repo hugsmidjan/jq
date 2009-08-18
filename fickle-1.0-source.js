@@ -148,7 +148,7 @@
 
             _this
                 .data(_dataId, data)
-                .toggle( cfg.startOpen )
+                .toggle( !!cfg.startOpen )
                 .addClass( cfg.activeClass )
                 // accessibility aid
                 .prepend( cfg.focusTarget )
