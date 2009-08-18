@@ -4,11 +4,16 @@
   Runs through all the links in a webpage an adds class tags
   to links notifying on their role.
 
-  FIXME:
-   * Consider using linkElm.hostname, linkelm.port, linkElm.protocol, etc. to make checks faster.
-     * Seems to be well supported except 
-        * Opera (at least) reports linkElm.hostname as 'localhost' when other browsers report ''
-        * IE (6-8 at least) report linkElm.port on *all* urls with protocol set (i.e. http://www.foo.com/ has port==':80').
+ ---------------------------------------------------------------------------
+  NOTE TO THE FUTURE:
+  We considered the extensive use of linkElm.host, linkElm.hostname, 
+  linkelm.port, linkElm.protocol, etc. to make checks faster.
+  We then ran into the following problems:
+    * Opera (at least) reports linkElm.hostname as 'localhost' when 
+      other browsers report ''
+    * IE (6-8 at least) report linkElm.port on *all* urls with protocol 
+      set (i.e. http://www.foo.com/ has port==':80').
+ ---------------------------------------------------------------------------
 
 */
 
@@ -31,7 +36,19 @@
 
         delete config.patterns;
         $.extend(cfg, config);
-        $.extend(cfg.patterns, anchorTags.patterns, patterns);
+        if (cfg.usePatterns)
+        {
+          // pull in the user-specified patterns only
+          $.each(cfg.usePatterns, function(i, name){
+              cfg.patterns[name] = anchorTags.patterns[name];
+            });
+        }
+        else
+        {
+          // use all default patterns.
+          $.extend(cfg.patterns, anchorTags.patterns);
+        }
+        $.extend(cfg.patterns, patterns);
         config.patterns = patterns;
         localDomains = (localDomains.charAt ? localDomains.split(/\s*,\s*/) : localDomains).concat(cfg.baseDomains);
 
@@ -77,18 +94,15 @@
               _freg.test(_href)  &&  link.addClass(cfg.internalClass);
             }
 
-            for (var k in cfg.patterns)
+            for (var key in cfg.patterns)
             {
-              var _extRegexp = cfg.patterns[k],
-                  _classNameFunc;
-              if (_extRegexp.splice) // is array
+              var _patternObj = cfg.patterns[key] || {},
+                  _check = _patternObj.check || _patternObj;
+                  _className = $.isFunction(_check) ? _check(linkElm, key) : null;
+
+              if (_className || _check.test(_href))
               {
-                _extRegexp = _extRegexp[0];
-                _classNameFunc = _extRegexp[1];
-              }
-              if (_extRegexp && _extRegexp.test(_href))
-              {
-                link.addClass( _classNameFunc ? _classNameFunc(linkElm, _extRegexp, k) : k );
+                link.addClass( _patternObj.tag  ||  (_className && _className.charAt && _className)  ||  (cfg.patternClassPrefix||'file_') + key );
               }
             }
 
@@ -103,11 +117,20 @@
 
   anchorTags.config = {
       baseDomains:   hostname ? [hostname+(port? ':'+port: '')] : [],
+      //usePatterns: ['pdf', 'doc', 'xsl'],  // list of keys to use from `$.fn.anchorTags.patterns` 
+                                             // `null`/`undefined` defaults to using all patterns.
     /*
       patterns:      {
-          className: /\.(foo|bar|baz)(#|$|\?)/i,
-          blah:      [ /\.(foo|bar|baz)(#|$|\?)/i, function(linkElm, regexp, key){ jQuery(linkElm).addClass( 'file_' + regexp.match(linkElm.href)[2] ); }]
-        }
+        // shorthand:
+          'classSuffix': myRegExp,
+          'classSuffix': function(linkElm,key){ return true; },
+          foo:           function(linkElm,key){ return 'myClassName'; },
+        // full syntax
+          'classSuffix': { check: myRegExp                                                           },
+          foo:           { check: myRegExp,                                       tag: 'myClassName' },
+          foo:           { check: function(linkElm,key){ return 'myClassName'; }                     },
+          foo:           { check: function(linkElm,key){ return true; },          tag: 'myClassName' }
+        },
     */
       localDomains:  [  // Array or Comma-delimeted string. Regular-expression patterns allowd (except with '.' escaping inverted)
           //'foo.bar.com',
@@ -116,15 +139,17 @@
       emailClass:    'mailto',
       externalClass: 'external',
       internalClass: 'withinpage',
+      //patternClassPrefix: 'file_',
       secureClass:   'secure'
     };
 
   anchorTags.patterns = {
-      file_image: /\.(jpe?g|png|gif)($|#|\?)/i,
-      file_audio: /\.(mp3|ogg|wav)($|#|\?)/i,
-      file_video: /\.(m(ov|pg)|avi|wmv)($|#|\?)/i,
-      file_pdf:   /\.(pdf)($|#|\?)/i,
-      file_doc:   /\.(docx?|rtf|wri)(#|$|\?)/i
+      image: { check: /\.(jpe?g|png|gif)($|#|\?)/i },
+      audio: { check: /\.(mp3|wav|aac|wma|flac|ogg)($|#|\?)/i },
+      video: { check: /\.(m(ov|pe?g|p4)|avi|wmv)($|#|\?)/i },
+      pdf:   { check: /\.(pdf)($|#|\?)/i },
+      doc:   { check: /\.(docx?|rtf|wri|odt|sxw)(#|$|\?)/i },
+      xls:   { check: /\.(xlsx?|csv|ods|sxc)(#|$|\?)/i }
     };
 
 
