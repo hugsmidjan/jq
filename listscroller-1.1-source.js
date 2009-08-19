@@ -1,11 +1,11 @@
 // encoding: utf-8
-// todo : set position to list element / page that reports focus (BT: WTF does that even mean?)
+// todo : set position to list element / page that receives 'focusin'
 // todo : automove => slideshow, marquee
-// todo : callback function when animation finishes ( no hold, pending use )
+// todo : callback function when animation finishes ( on hold, pending use )
 // Depends on:
 //  - eutils 1.0+ :  $.fn.deepest()
 (function ($){
-  
+
   $.listscroller = {
 
     version : 1.0,
@@ -13,20 +13,20 @@
     defaultConfig : {
 
       item              : '',
-                        
+
       windowSize        : 3,   // how many unmarked items
       stepSize          : 1,   // how many items to move at a time
       startPos          : 0,   // number or 'random'
-                        
+
       hideClass         : 'overflow',
       topClass          : 'at-top',
       bottomClass       : 'at-bottom',
 
       wrap              : 'both',   // none|start|end|both|loop|random
-      overflow          : 'hidden',  // visible|hidden 
-                        
+      overflow          : 'visible',  // visible|hidden  // 'hidden' means that there's never empty space on the last "page"
+
       controls          : 'below',   // none|both|above|below
-                        
+
       animation         : 'none',     // none|carousel|crossfade|accordion, or custom function
       easing            : 'swing',
       speed             : 600,
@@ -36,9 +36,10 @@
       jumpPager         : true,    // Kicks in if paging is set to `true`
       inputPager        : false,
       statusPager       : false,
-      
+      itemStatusPager:   false,
+
       autoScrollDelay   : 0, //Timeout in ms for autoscroll
-      
+
       initCallback      : function () {},
       moveCallback      : function () {},
 
@@ -78,7 +79,7 @@
 
           jumpLabel         : 'Pages:',
 
-          statusLabel       : 'Page:',
+          statusLabel       : 'Page: ',
           ofTotalSeparator  : ' of ',
           statusLabelAfter  : ''
         },
@@ -90,7 +91,7 @@
 
           jumpLabel         : 'Síður:',
 
-          statusLabel       : 'Síða:',
+          statusLabel       : 'Síða: ',
           ofTotalSeparator  : ' af ',
           statusLabelAfter  : ''
         }
@@ -99,7 +100,7 @@
     animate : {
       none : function ( l, c ) {},
       carousel : function ( l, c ) {
-        var p, 
+        var p,
             w = l.eq(0).closest( '.' + c.classPrefix + '-wrapper'),
             z = l.eq( l.length -1 ),
             last = l.length - c.stepSize,
@@ -110,7 +111,7 @@
         w.stop();
         p = l.eq( c.index ).position();
         conf[prop] = p.left;
-        
+
         if ( c.wrap == 'loop' && c.lastIndex == 0 && c.index == last )
         {
           w[prop]( z.position().left + z[dimp]() );
@@ -139,8 +140,8 @@
           else if ( !nw && c.lastIndex == null ) // init
           {
             $(this).stop().hide();
-          }        
-          else if ( !nw && ow )  // hide 
+          }
+          else if ( !nw && ow )  // hide
           {
             $(this).stop().show().fadeOut( c.speed );
           }
@@ -173,37 +174,38 @@
         });
       }
     },
-    
+
     wrap : {
-      none : function ( i, l, c ) {
+      // foo: function ( index, list, cfg ) { return 1; }
+      none: function ( i, l, c ) {
         return Math.max( Math.min( i, max( l, c ) ), 0 );
       },
-      start : function ( i, l, c ) {
+      start: function ( i, l, c ) {
         var m = max( l, c );
         if ( i < 0 ) { return (c.index == 0) ? m : 0; }
         if ( i > m ) { return m; }
         return i;
       },
-      end : function ( i, l, c ) {
+      end: function ( i, l, c ) {
         var m = max( l, c );
         if ( i < 0 ) { return 0; }
         if ( i > m ) { return (c.index == m) ? 0 : m; }
         return i;
       },
-      both : function ( i, l, c ) {
+      both: function ( i, l, c ) {
         var m = max( l, c );
         if ( i < 0 ) { return (c.index == 0) ? m : 0; }
         if ( i > m ) { return (c.index == m) ? 0 : m; }
         return i;
       },
-      random : function ( i, l, c ) {
+      random: function ( i, l, c ) {
         return Math.floor( Math.random() * l.length );
       },
-      loop : function ( i, l, c ) {
-        return ( (l.length + i) % l.length );
+      loop: function ( i, l, c ) {
+        return i % l.length;
       }
     },
-    
+
     aspectDefaults : {
       none      : 'vertical',
       carousel  : 'horizontal',
@@ -213,29 +215,30 @@
 
   };
 
-  // detect list aspect 
+  // detect list aspect
   function detectAspect ( _items )
   {
-    var ret, 
+    var ret,
         i2 = _items.eq( 1 );
         p1 = _items.eq( 0 ).offset(),
         p2 = i2.offset();
     // usable second item?
     if ( p2 && i2.is(':visible') )
     {
-      return ( Math.abs( p2.top - p1.top ) <= Math.abs( p2.left - p1.left ) ) 
-              ? 'horizontal' 
+      return ( Math.abs( p2.top - p1.top ) <= Math.abs( p2.left - p1.left ) )
+              ? 'horizontal'
               : 'vertical';
     }
     // indeterminate
     return false;
   }
 
-  function max ( l, c )
+  function max ( list, cfg )
   {
-    return (c.overflow == 'visible') 
-        ? Math.floor( l.length / c.stepSize ) * c.stepSize
-        : l.length - c.windowSize;
+    var maxVal = (cfg.overflow == 'visible') ?
+                      list.length - (list.length % cfg.stepSize || cfg.stepSize):
+                      list.length - cfg.windowSize;
+    return maxVal;
   }
 
   function setPos ( c, _newIndex, _noflash )
@@ -293,17 +296,27 @@
       }, c.speed || 1);
     }
 
-    var newIndex = Math.ceil(c.index / c.stepSize);
+    var newWinIndex = Math.ceil(c.index / c.stepSize);
     // mark paging/status/ element if needed
     if ( c.jumps )
     {
       c.jumps
         .removeClass( c.currentPageClass )
-        .eq( newIndex )
+        .eq( newWinIndex )
           .addClass( c.currentPageClass )
     }
-    c.status  &&  c.status.text( newIndex+1 );
-    c.pager  &&  c.pager.val( newIndex+1 );
+
+    var newSatusIndex = c.itemStatusPager ?  c.index : newWinIndex;
+    c.inputPager  &&  c.inputPager.val( newWinIndex+1 );
+    c.status  &&  c.status.text( newSatusIndex+1 );
+
+    if (c.status  &&  c.itemStatusPager  &&  c.windowSize > 1)
+    {
+      var lastIdx = newSatusIndex + c.windowSize;
+      lastIdx = ( lastIdx > list.length ) ? list.length : lastIdx;
+       c.status.append( '-' + lastIdx );
+    }
+
   }
 
   function movePrev ( e )
@@ -322,7 +335,7 @@
 
   function movePage ( e )
   {
-    var c = e.data, 
+    var c = e.data,
         p = (parseInt( $( this ).text(), 10 ) -1) || 0;
     setPos( c, p * c.stepSize );
     return false;
@@ -330,104 +343,107 @@
 
   function inputChange ( e )
   {
-    var c = e.data, 
-        p = (parseInt( $( this ).val(), 10 ) -1) || 0;
-    setPos( c, p * c.stepSize );
+    var cfg = e.data,
+        pageIndex = Math.max(0, parseInt('0'+$( this ).val(), 10 )-1)  ||  0,
+        newPos = Math.min(pageIndex*cfg.stepSize, max(cfg.list, cfg) );
+    ;;;window.console&&console.log( [newPos] );
+    setPos( cfg, newPos );
     return false;
   }
 
 
-  function buildControls ( c )
+  function buildControls ( cfg )
   {
 
-    var n = $( c.nextBtnTemplate ),
-        p = $( c.prevBtnTemplate ),
-        j,
+    var nextBtn = $( cfg.nextBtnTemplate ),
+        prevBtn = $( cfg.prevBtnTemplate ),
+        jumpMenu,
         status;
 
-    n.find( 'a' ).andSelf().eq(0)
-      .bind( 'click', c, moveNext )
-      .attr( 'title', c.titleNext )
-      .text( c.labelNext );
+    nextBtn.find( 'a' ).andSelf().eq(0)
+      .bind( 'click', cfg, moveNext )
+      .attr( 'title', cfg.titleNext )
+      .text( cfg.labelNext );
 
-    p.find( 'a' ).andSelf().eq(0)
-      .bind( 'click', c, movePrev )
-      .attr( 'title', c.titlePrev )
-      .text( c.labelPrev );
+    prevBtn.find( 'a' ).andSelf().eq(0)
+      .bind( 'click', cfg, movePrev )
+      .attr( 'title', cfg.titlePrev )
+      .text( cfg.labelPrev );
 
 
-    if ( c.paging )
+    if ( cfg.paging )
     {
-      var jmps = [],
-          page = Math.ceil( c.index / c.stepSize ),
-          l = Math.ceil( c.list.length / c.stepSize );
+      var page = Math.ceil( cfg.index / cfg.stepSize ),
+          numWindows = Math.ceil( cfg.list.length / cfg.stepSize ),
+          statusNumTotal = cfg.itemStatusPager ? cfg.list.length : numWindows;
 
       // input pager
-      if (c.statusPager  ||  c.inputPager)
+      if (cfg.statusPager  ||  cfg.inputPager)
       {
-        status = $( c.statusTempl );
-        $( c.statusLabelTempl )
-            .html( c.statusLabel )
+        status = $( cfg.statusTempl );
+        $( cfg.statusLabelTempl )
+            .html( cfg.statusLabel )
             .appendTo( status );
 
-        var jTemp = $( c.statusWrapTempl )
+        var jTemp = $( cfg.statusWrapTempl )
                         .appendTo( status );
 
-        $( c.statusTotalTempl )
-            .html( c.ofTotalSeparator + l + c.statusLabelAfter )
+        $( cfg.statusTotalTempl )
+            .html( cfg.ofTotalSeparator + statusNumTotal + cfg.statusLabelAfter )
             .appendTo( jTemp );
 
-        if ( c.inputPager )
+        if ( cfg.inputPager )
         {
-          c.pager = $( c.inputPagerTempl )
+          cfg.inputPager = $( cfg.inputPagerTempl )
                         .prependTo( jTemp )
                         .val( page+1 )
-                        .bind( 'change', c, inputChange )
+                        .bind( 'change', cfg, inputChange )
         }
         else
         {
-          c.status =  $( c.statusCurrTempl )
+          cfg.status =  $( cfg.statusCurrTempl )
                           .prependTo( jTemp );
         }
       }
 
       // jump buttons
-      if (c.jumpPager)
+      if (cfg.jumpPager)
       {
-        j = $( c.jumpTemplate );
-        if ( c.jumpLabelTemplate )
+        var jmps = [];
+        jumpMenu = $( cfg.jumpTemplate );
+        if ( cfg.jumpLabelTemplate )
         {
-          $( c.jumpLabelTemplate )
-            .text( c.jumpLabel )
-            .appendTo( j );
+          $( cfg.jumpLabelTemplate )
+            .text( cfg.jumpLabel )
+            .appendTo( jumpMenu );
         }
         // make buttons
-        for (var i=0; i<l; i++)
+        for (var i=0; i<numWindows; i++)
         {
-          var bt = $( c.jumpBtnTemplate ),
+          var bt = $( cfg.jumpBtnTemplate ),
               a = bt.find( 'a' ).andSelf().eq(0)
-                    .text( i + 1 ).bind( 'click', c, movePage );
-          if (c.index == i) { a.addClass( c.currentPageClass ); }
+                    .text( i + 1 ).bind( 'click', cfg, movePage );
+          if (cfg.index == i) { a.addClass( cfg.currentPageClass ); }
           jmps.push( a[0] );
         }
-        c.jumps = $( jmps );
-        $( c.jumpWrapTemplate || [] ).append( c.jumps ).appendTo( j );
+        cfg.jumps = $( jmps );
+        $( cfg.jumpWrapTemplate || [] ).append( cfg.jumps ).appendTo( jumpMenu );
       }
 
     }
 
-    return $( c.pagingTemplate )
+    return $( cfg.pagingTemplate )
                 .deepest()
-                    .append(n, p, j)
+                    .append(nextBtn, prevBtn, jumpMenu)
                 .end()
                 .prepend( status );
   }
 
 
-  
+
   function initScroller ( c, _block, _items )
   {
-    
+
     // test and stop repeat inits
     if ( _block.hasClass( c.classPrefix + '-active' ) )
     {
@@ -452,7 +468,7 @@
     _inner.addClass( c.classPrefix + '-clip' );
     _outer.addClass( c.classPrefix + '-wrapper' );
     _block.addClass( c.classPrefix + '-active' );
-    
+
     _inner.add( _outer ).css( 'position', 'relative' );
     _outer.addClass( c.classPrefix + '-' + c.aspect );
 
@@ -476,7 +492,7 @@
       {
         _outer.after( buildControls( c ).addClass( c.pagingBottomClass ) );
       }
-      
+
     }
 
     if ( c.aspect == 'auto' )
@@ -490,29 +506,30 @@
     //randomize starting position
     if ( c.startPos == 'random' )
     {
-      c.startPos = Math.floor( _items.length * Math.random() );
+      c.startPos = Math.floor(Math.ceil(_items.length / c.stepSize) * Math.random()) * c.stepSize;
     }
 
     setPos( c, c.startPos || 0, true );
-    
+
     if(c.autoScrollDelay)
     {
       function nexttrigger ( e ) {
         setPos( c, c.index + c.stepSize );
       }
       scrollInterval = setInterval( nexttrigger, c.autoScrollDelay);
-      _block
-          .bind('mouseenter', function() {
-              clearInterval( scrollInterval );
-            })
-          .bind('mouseleave', function() {
-              scrollInterval = setInterval( nexttrigger, c.autoScrollDelay);
-            });
+      _block.hover(
+          function() {
+            clearInterval( scrollInterval );
+          },
+          function() {
+            scrollInterval = setInterval( nexttrigger, c.autoScrollDelay);
+          }
+        );
     }
 
   }
-  
-  
+
+
   $.fn.listscroller = function ( config )
   {
     var dc = $.listscroller.defaultConfig;
@@ -524,6 +541,12 @@
               i18n = $.listscroller.i18n,
               txts = i18n[_lang.toLowerCase()] || i18n[_lang.substr(0,2)] || i18n.en,
               cfg = $.extend({}, dc, txts,  config );
+
+          if (cfg.itemStatusPager)
+          {
+            cfg.inputPager = false;
+          }
+
           initScroller(
               cfg,
               b,
@@ -538,7 +561,7 @@
       this.eq(0).parent().listscroller( $.extend( {}, config, { item: this }) );
     }
     return this;
-    
+
   };
-  
+
 })(jQuery);
