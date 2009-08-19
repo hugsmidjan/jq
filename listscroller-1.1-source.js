@@ -79,7 +79,8 @@
           jumpLabel         : 'Pages:',
 
           statusLabel       : 'Page:',
-          ofTotalSeparator  : ' of '
+          ofTotalSeparator  : ' of ',
+          statusLabelAfter  : ''
         },
       is: {
           labelNext         : 'Næsta',
@@ -90,7 +91,8 @@
           jumpLabel         : 'Síður:',
 
           statusLabel       : 'Síða:',
-          ofTotalSeparator  : ' af '
+          ofTotalSeparator  : ' af ',
+          statusLabelAfter  : ''
         }
     },
 
@@ -372,7 +374,7 @@
                         .appendTo( status );
 
         $( c.statusTotalTempl )
-            .html( c.ofTotalSeparator + l )
+            .html( c.ofTotalSeparator + l + c.statusLabelAfter )
             .appendTo( jTemp );
 
         if ( c.inputPager )
