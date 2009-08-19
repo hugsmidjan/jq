@@ -499,6 +499,21 @@
 /**/
 
 
+    cropText: function (str, length, e)
+    {
+      e = e || '...';
+      var newTxt = str = jQuery.trim(str);
+      if (length  &&  str.length >  length+e.length)
+      {
+        var hash = length +'~~'+e,
+            cache = $.cropText.re || ($.cropText.re = {}),
+            re = cache[hash] || (cache[hash] = new RegExp('^(.{0,'+length+'}\\s).{'+e.length+',}$'));
+        newTxt = newTxt.replace(/\s\s+/g, ' ').replace(re, '$1');
+      }
+      return newTxt + (newTxt.length<str.length ? e : '');
+    },
+
+
 
     // Simple String templating (variable injection) that accepts either arrays or hash-maps.
     // Usage:
