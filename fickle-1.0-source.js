@@ -13,9 +13,12 @@
       focusTarget: '<a href="#" class="focustarget">.</a>',  // may be element or selector - gets prepended to the popup element to receive keyboard focus
       activeClass: 'fickle-active',
       closeOnEsc:  true,
-      closeDelay:  100,
+      closeDelay:  300,
       startOpen:   false
       opener:      element/collection/selector,
+
+      fadein:      0,  // ms fadeIn duration  -- shorthand for .bind('fickleopen', function(){ $(this).fadeIn( fadeinMs ) });
+      fadeout:     0,  // ms fadeOut duration -- shorthand for .bind('fickleclose', function(){ $(this).fadeOut( fadeinMs ) });
 
       onOpen:      null,     // shorthand for .bind('fickleopen', handlerFunc);
       onOpened:    null,     // shorthand for .bind('fickleopened', handlerFunc);
@@ -73,7 +76,7 @@
                 data._isOpen = !1;// false
                 this.queue(function(){  // to allow event handlers to perform fadeIns and things...
                     $(this)
-                        .show()
+                        .fadeIn(cfg.fadein||0) // assuming that .fadeIn(0) is equivalient to .show()
                         .setFocus()
                         .dequeue()
                         .trigger({ type:fickle+'opened', cfg: cfg });
@@ -90,7 +93,7 @@
                 data._isOpen = !0;// true
                 this.queue(function(){  // to allow event handlers to perform fadeOuts and things...
                     $(this)
-                        .hide()
+                        .fadeOut(cfg.fadeout||0) // assuming that .fadeOut(0) is equivalient to .hide()
                         .dequeue()
                         .trigger({ type:fickle+'closed', cfg: cfg });
                   });
@@ -105,12 +108,18 @@
         },
 
       _defaultConfig = {
+          focusTarget: '<a href="#" class="focustarget">.</a>',
           activeClass: fickle+'-active',
           closeOnEsc:  true,
           closeDelay:  300,
           //startOpen:   false,
-          //opener:    element/collection/selector,
-          focusTarget: '<a href="#" class="focustarget">.</a>'
+          //opener:      element/collection/selector,
+          //fadein:      0,
+          //fadeout:     0,
+          //onOpen:      null,
+          //onOpened:    null,
+          //onClose:     null,
+          //onClosed:    null,
         },
 
       _dataId = fickle+'-'+$.aquireId();  // obfuscate/privatize fickle datas...
