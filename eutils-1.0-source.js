@@ -33,7 +33,7 @@
 
   // FIXME: REDUNDANT as of jQuery 1.3 - jQuery 1.3 supports complex selectors for .is(), .closest(), etc.
   //
-  // The :childof() and :descof() selector expressions make .is(), .closest(), .parents() 
+  // The :childof() and :descof() selector expressions make .is(), .closest(), .parents()
   // and other such methods sooo much more interesting...!
   // these work wonders when combined with $.delegate() (see below)
   // Example:
@@ -142,7 +142,33 @@
   }
 
 
+  var findUntil = function(collection, expr, collectAll, goBackwards)
+  {
+    var match = [],
+        method = (goBackwards ? 'previous':'next')+'Sibling';
+    collection.each(function(){
+        for (var next = this[method], isElm; next; next = next[method] )
+        {
+          isElm = (next.nodeType == 1);
+          if ( collectAll || isElm )
+          {
+            if (isElm && !$(next).not(expr).length )
+            {
+              break;
+            }
+            match.push( next );
+          }
+        }
+      });
+    return collection.pushStack(match);
+  };
+
+
+
   $.fn.extend({
+
+    nextUntil: function(expr, collectAll) { return findUntil(this, expr, collectAll); },
+    prevUntil: function(expr, collectAll) { return findUntil(this, expr, collectAll, 1); },
 
 
     if_: function (cond)
@@ -161,7 +187,7 @@
 
     // Clones the jQuery object and wipes out the it's `.prevObject` stack, and other instance-properties.
     // This allows the garbage collector to free up memory. (In some cases gobs of it!)
-    fin: function(){ return $(this) }, 
+    fin: function(){ return $(this) },
 
 
     pause: function (speed, callback)
@@ -241,7 +267,7 @@
     },
 
 
-    // Yes this is strictly speaking completely redundant, 
+    // Yes this is strictly speaking completely redundant,
     // but jQuery's fn.scrollLeft and fn.scrollTop methods are so #$% inelegant to use.
     //
     // Usage:
@@ -288,9 +314,9 @@
 
     // prototypal inheritence under jquery
     beget: function (proto, props)
-    { 
-      _F.prototype = proto; 
-      return props ? $.extend(new _F, props) : new _F; 
+    {
+      _F.prototype = proto;
+      return props ? $.extend(new _F, props) : new _F;
     },
 
 
@@ -375,7 +401,7 @@
       var _elm = $('#'+_hash)[0];
       if (_elm)
       {
-        // temporaily defuse the section block's id 
+        // temporaily defuse the section block's id
         _elm.id = '';
         // then insert and position a hidden dummy element to make sure that
         //   a) the hash-change populates the browser's history buffer.
@@ -398,7 +424,7 @@
 
 
 
-    // focus an _element (or it's first focusable _subElm) 
+    // focus an _element (or it's first focusable _subElm)
     // (for screen-reader accessibility)
     setFocus: function (_elm)
     {
@@ -441,7 +467,7 @@
 
 /* Neato tabIndex trick (offered by AOL's accessibility plugin: http://dev.aol.com/axs) but doesn't work on Safari.. ack!
 
-    // focus any _element 
+    // focus any _element
     // (for screen-reader accessibility)
     setFocus: function (_elm)
     {
@@ -609,7 +635,7 @@
             if ( _elm = _parents[_parents.index(_allElms[i])] )
             {
               break;
-            } 
+            }
           }
         }
 */
