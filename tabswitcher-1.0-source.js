@@ -465,7 +465,7 @@
                 makeTab:    function(tabPane, conf){
                                 var tabHtml = $.inject(conf.tabTempl, {
                                                   id: $.aquireId(tabPane),
-                                                  title: $(conf.titleSel, tabPane).text()
+                                                  title: $(conf.titleSel, tabPane).eq(0).text()
                                                 });
                                 return  $(tabHtml);
                               }

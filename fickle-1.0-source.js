@@ -47,10 +47,12 @@
 
 (function($){
 
-  var _wasEventSuccessful = function(collection, type, evExtras){
-         var e = $.extend($.Event(type), evExtras||{});
-         collection.trigger(e);
-         return !e.isDefaultPrevented();
+  var _wasEventSuccessful = function(collection, type, evExtras){  
+          // NOTE: `collection` must only contain one item - otherwise shared-event-object-weirdness ensues.
+          var e = $.Event(type);
+          evExtras && $.extend(e, evExtras);
+          collection.trigger(e); // this will bubble! ...unless handlers call e.stopPropagation()!
+          return !e.isDefaultPrevented();
         },
 
       _document = document,
