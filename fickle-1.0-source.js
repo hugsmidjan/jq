@@ -113,7 +113,7 @@
           focusTarget: '<a href="#" class="focustarget">.</a>',
           activeClass: fickle+'-active',
           closeOnEsc:  true,
-          closeDelay:  300,
+          closeDelay:  300
           //startOpen:   false,
           //opener:      element/collection/selector,
           //fadein:      0,
