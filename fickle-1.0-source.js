@@ -41,6 +41,7 @@
       isOpen   .fickle('isOpen')  // returns boolean value for the first item in the collection
 
   FIXME: 
+    * Fickle element has focus, user switches to another application and then switches back by clicking outside the fickle element.
     * Consider using $.ui.widget() to make code more compact
 
 */
@@ -71,11 +72,11 @@
           open: function (data, extras) {
               var cfg = data.c;
               cfg.opener = (extras && extras.opener) || cfg.opener;
-              if (_wasEventSuccessful(this, fickle+'open', { cfg: cfg }))
+              if ( !data._isOpen  &&  _wasEventSuccessful(this, fickle+'open', { cfg: cfg }) )
               {
                 $(_document).bind('focusin', data._confirmFocusLeave);
-                cfg.closeOnEsc && $(_document).bind('keydown', data._listenForEsc);
-                data._isOpen = !1;// false
+                cfg.closeOnEsc  &&  $(_document).bind('keydown', data._listenForEsc);
+                data._isOpen = !0;// true
                 this.queue(function(){  // to allow event handlers to perform fadeIns and things...
                     $(this)
                         .fadeIn(cfg.fadein||0) // assuming that .fadeIn(0) is equivalient to .show()
@@ -87,12 +88,14 @@
             },
           close: function (data/*, extras */) {
               var cfg = data.c;
-              if (_wasEventSuccessful(this, fickle+'close', { cfg: cfg }))
+              if (!this.height()) { this.height(1) } // FIXME: remove this IE hack for jQuery 1.3.2 show/hide bug when version 1.3.3 is out!
+              if ( data._isOpen  &&  _wasEventSuccessful(this, fickle+'close', { cfg: cfg }) )
               {
-                $(_document).unbind('keydown', data._listenForEsc);
-                $(_document).unbind('focusin', data._confirmFocusLeave);
+                $(_document)
+                    .unbind('focusin', data._confirmFocusLeave)
+                    .unbind('keydown', data._listenForEsc);
                 $(cfg.opener||_document.body).setFocus();
-                data._isOpen = !0;// true
+                data._isOpen = !1;// false
                 this.queue(function(){  // to allow event handlers to perform fadeOuts and things...
                     $(this)
                         .fadeOut(cfg.fadeout||0) // assuming that .fadeOut(0) is equivalient to .hide()
