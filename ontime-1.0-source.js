@@ -19,7 +19,8 @@
                              // * "add"             Adds events, and adds the new timeout interval to the mix. (whichever `stop` occurs first 'cancel's the whole thing!)
     * fn         // Function to call ontime.  Parameters passed: event, iCount
     * end        // Function to call when the timer ends (times/runs out, or gets 'cancel'ed).  Parameters passed: event
-    * unbind     // default: true; // indicates whether event handlers should be unbound when the timer ends
+    * unbind     // default: true;  // indicates whether event handlers should be unbound when the timer ends
+    * bubble     // default: false; // indicates whether events should bubble up the DOM tree.
 
   Events:
     * ontime.{myLabel}      // fires whenever the timeout/interval occurs.  // return false; or e.preventDefault() ends/cancels the timer.
@@ -297,6 +298,7 @@
                   {
                     _data._startLap = (new Date()).getTime();
                     var e = $.Event(ontimeNS+label);
+                    !config.bubble && e.stopPropagation();
                     _this.trigger(e, _counter, _this.data(ontimeNS+label));
                     if (e.isDefaultPrevented()  ||  (config.reps !== 0  &&  ++_counter >= config.reps) )
                     // if the event handler returns `false` the timer should stop
