@@ -254,9 +254,9 @@
       return this.each(function() { $.aquireId(this); }).attr('id');
     },
 
-    setFocus: function ()
+    setFocus: function (rev)
     {
-      $.setFocus(this[0]);
+      $.setFocus.call(null, this[0], rev);
       return this;
     },
 
@@ -426,42 +426,49 @@
 
     // focus an _element (or it's first focusable _subElm)
     // (for screen-reader accessibility)
-    setFocus: function (_elm)
+    setFocus: function (_elm, rev)
     {
       _elm = $(_elm);
-      var _focusable = 'a,input,select,textarea,button,object,area',
+      var _focusable = ',A,INPUT,SELECT,TEXTAREA,BUTTON,OBJECT,AREA,',
           _focusElm = _elm.is(_focusable) && _elm;
 
       if (!_focusElm)
       {
-        $('*', _elm).each(function(){
-            if ( $(this).is(_focusable) )
-            {
-              _focusElm = this;
-              return false;  // break the .each loop
-            }
-          });
+        var elms = $('*', _elm),
+            i = rev ? elms.length : 0,
+            incr = rev ? -1 : 1,
+            elm;
+        while (elm = elms[i+=incr])
+        {
+          if ( _focusable.indexOf(','+elm.tagName+',') > -1 )
+          {
+            _focusElm = elm;
+            break;  // break the .each loop
+          }
+        }
       }
       if (_focusElm)
       {
+        var $$ = $(_doc);
         // Make note of current scroll position
-        var _before = $.scroll();
+        var _before = $$.scrollTop();
 
-        // Put the focus inside the section
-        // (the browser only scrolls the page if the _focusElm is outside the viewport)
+        // Focus the element!
         $(_focusElm).trigger('focus');
+        _msie  &&  $(_focusElm).trigger('focusin'); // OMFG!!!
 
         // make note of new scroll position
-        var _after = $.scroll();
-        if (_after.top != _before.top)  // if the browser jumped to the anchor...
+        var _after = $$.scrollTop();
+        if (_after != _before)  // if the browser jumped to the anchor...  (the browser only scrolls the page if the _focusElm was outside the viewport)
         {
           // ...then scroll the window to place the anchor at the top of the viewport.
           // (NOTE: We do this because most browsers place the artificially .focus()ed link at the *bottom* of the viewport.)
           var _newTop = $(_elm).offset().top - 30;
           if (_newTop < 10) { _newTop = 0; }
-          $.scroll({ top: _newTop });
+          $$.scrollTop(_newTop);
         }
       }
+      //return focusElm;  // <-- Idea: return the focuesed element?
     },
 
 

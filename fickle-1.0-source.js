@@ -77,13 +77,14 @@
                 $(_document).bind('focusin', data._confirmFocusLeave);
                 cfg.closeOnEsc  &&  $(_document).bind('keydown', data._listenForEsc);
                 data._isOpen = !0;// true
-                this.queue(function(){  // to allow event handlers to perform fadeIns and things...
-                    $(this)
-                        .fadeIn(cfg.fadein||0) // assuming that .fadeIn(0) is equivalient to .show()
-                        .setFocus()
-                        .dequeue()
-                        .trigger({ type:fickle+'opened', cfg: cfg });
-                  });
+                this
+                    .fadeIn(cfg.fadein||0) // assuming that .fadeIn(0) is equivalient to .show()
+                    .queue(function(){  // to allow event handlers to perform fadeIns and things...
+                        $(this)
+                            .setFocus()
+                            .trigger({ type:fickle+'opened', cfg: cfg })
+                            .dequeue();
+                      });
               }
             },
           close: function (data/*, extras */) {
@@ -96,12 +97,13 @@
                     .unbind('keydown', data._listenForEsc);
                 $(cfg.opener||_document.body).setFocus();
                 data._isOpen = !1;// false
-                this.queue(function(){  // to allow event handlers to perform fadeOuts and things...
-                    $(this)
-                        .fadeOut(cfg.fadeout||0) // assuming that .fadeOut(0) is equivalient to .hide()
-                        .dequeue()
-                        .trigger({ type:fickle+'closed', cfg: cfg });
-                  });
+                this
+                    .fadeOut(cfg.fadeout||0) // assuming that .fadeOut(0) is equivalient to .hide()
+                    .queue(function(){  // to allow event handlers to perform fadeOuts and things...
+                        $(this)
+                            .trigger({ type:fickle+'closed', cfg: cfg })
+                            .dequeue();
+                      });
               }
             },
           isOpen: function(data/*, extras */){
@@ -116,6 +118,7 @@
           focusTarget: '<a href="#" class="focustarget">.</a>',
           activeClass: fickle+'-active',
           closeOnEsc:  true,
+          //trapFocus:   false,
           closeDelay:  300
           //startOpen:   false,
           //opener:      element/collection/selector,
@@ -167,7 +170,8 @@
                         _doClosePopup = e.target != popupElm  &&  $(e.target).parents().index(popupElm)==-1;
                       }
 
-                  };
+                  },
+                _lastFocusElm;
 
             _this
                 .data(_dataId, data)
@@ -182,19 +186,26 @@
                     _cancelTimeout();
                     //;;;window.console&&console.log( 'focusout' );
                     _doClosePopup = false;
-                    _popuplock = setTimeout(function(){
-                                      _doClosePopup  &&  $(popup).fickle('close');
-                                    }, cfg.closeDelay); // close popup
+                    _popuplock =  setTimeout(function(){
+                                      cfg.trapFocus ?
+                                          // FIXME: consider doing more intelligent sensing of from where the focus left, and return it back
+                                          $.setFocus(_lastFocusElm):                    // Send focus back into the fickle element
+                                          _doClosePopup  &&  $(popup).fickle('close'); // close popup
+                                    }, cfg.trapFocus ? cfg.closeDelay : 0); 
                   })
                 // make the popup sticky
                 .bind('click mousedown focusin', function (e) {
-                    setTimeout(_cancelTimeout, 0);
+                    setTimeout(_cancelTimeout, 0); // because focusout (setting the _popupLock) *might* not fire before this focusin event...?
                     //;;;window.console&&console.log( 'focusin' );
                     if (e.type == 'click')
                     {
                       var popup = $(this);
                       // on 'click' popup looses "focus" so we need to reset the focus once the mouse leaves
-                      popup.one('mouseleave', function(e){ popup.setFocus(); });
+                      popup.one('mouseleave', function(e){ $.setFocus(_lastFocusElm); });
+                    }
+                    else if (e.type == 'focusin')
+                    {
+                      _lastFocusElm = e.target;
                     }
                   });
 
