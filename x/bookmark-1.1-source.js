@@ -117,7 +117,7 @@ function Bookmark() {
 			url: 'http://www.gabbr.com/submit/?bookurl={u}'},
 		'globalgrind': {display: 'Global Grind', icon: 88,
 			url: 'http://globalgrind.com/submission/submit.aspx?url={u}&amp;type=Article&amp;title={t}'},
-		'google': {display: 'Google', icon: 16,
+		'google': {display: 'Google bookmarks', icon: 16,
 			url: 'http://www.google.com/bookmarks/mark?op=edit&amp;bkmk={u}&amp;title={t}'},
 		'gravee': {display: 'Gravee', icon: 89,
 			url: 'http://www.gravee.com/account/bookmarkpop?u={u}&amp;t={t}'},
