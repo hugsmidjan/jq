@@ -416,7 +416,7 @@
       if (_elm)
       {
         _dummyElm[0].id = "";
-//        _dummyElm.remove();
+        //_dummyElm.remove();
         // put the old tab-id back in it's place
         _elm.id = _hash;
       }
@@ -435,7 +435,7 @@
       if (!_focusElm)
       {
         var elms = $('*', _elm),
-            i = rev ? elms.length : 0,
+            i = rev ? elms.length : -1,
             incr = rev ? -1 : 1,
             elm;
         while (elm = elms[i+=incr])

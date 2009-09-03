@@ -15,7 +15,8 @@
     jQuery.curtain(myCurtainElm);    // applies basic curtain behavior to myElement (and returns it).
 
     jQuery.curtain('myclassname');   // same as above, but replacing the default className with 'myclassname'
-    jQuery.curtain(true);            // quick-n-dirty mode. applies default color and opacity to the curtain element  bgcol:#888, opacity:.5, zindex:99 
+    jQuery.curtain(true);            // quick-n-dirty mode. applies some default color and opacity to the curtain element
+                                     //     { bgcol: '#888', opacity: .5, zindex: 99 } 
 
     jQuery.curtain({                 // applies options to the curtain element.
         className: String,           //  * CSS class-name                     // default: 'curtain-overlay'

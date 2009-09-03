@@ -1,12 +1,12 @@
 // encoding: utf-8
 // Requires:
 //  - jQuery 1.2.6 (Runs OK in jQuery 1.3)
-//  - eutils  (uses: $.inject() & $.setFocus() ) 
+//  - eutils  (uses: $.inject() & $.setFocus() )
 
 (function($){
 
   $.fn.imgPopper = function ( cfg ) {
-      
+
     cfg = $.extend({
             fadeInSpeed : 250, // set 1 for almost no animation
             fadeOutSpeed : 250, // set 1 for almost no animation
@@ -18,7 +18,7 @@
             easeOut : 'swing',
             imgClose : false  //close popup when image is clicked
           }, cfg );
-    
+
     var _navSelectors = 'li.next, li.prev',
         _closeSelectors = 'div.ipopup-container li.close a, div.ipopup-curtain, div.ipopup-container',
         _isOpen = false,
@@ -52,12 +52,12 @@
               '</div>' +
             '</div>' +
           '</div>';
-      
+
     if(cfg.disableIeFading && $.browser.msie && parseInt($.browser.version,10) < 9) {
       cfg.fadeInSpeed = 0;
       cfg.fadeOutSpeed = 0;
     };
-    
+
 
 
 
@@ -75,7 +75,7 @@
 
             _popup = $(_makeHTML),
             _curtain = $(_curtainTemp),
-            
+
             setWidth = function() {
               if(cfg.setContainerWidth) {
                 var popupImg = _popup.find('img');
@@ -87,7 +87,7 @@
                   })
               }
             };
-            
+
         $('body')
           .append(_curtain)
           .append(_popup);
@@ -109,7 +109,7 @@
                                 e.stopPropagation();
                               }
                             })
-                      .setFocus();
+                          .setFocus();
                   setWidth();
                 }); // animate in
           _isOpen = true;
@@ -147,7 +147,7 @@
                         });
                 }
               });
-        
+
         // close popup
         $(_closeSelectors)
             .bind('click', function (e) {
@@ -161,17 +161,17 @@
                 _isOpen = false;
                 return false;
               });
-          
+
         $(window).keypress( function(e) {
             if( e.keyCode == 27 ) {
                 _curtain.trigger('click'); // close on esc
             }
         });
-          
+
         return false;
 
       });
     return this;
   };
-  
+
 })(jQuery);
