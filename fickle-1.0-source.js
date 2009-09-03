@@ -11,7 +11,6 @@
     
     defaultOptions: {
       focusTarget: '<a href="#" class="focustarget">.</a>',  // may be element or selector - gets prepended to the popup element to receive keyboard focus
-      activeClass: 'fickle-active',
       closeOnEsc:  true,
       closeDelay:  300,
       startOpen:   false
@@ -116,7 +115,6 @@
 
       _defaultConfig = {
           focusTarget: '<a href="#" class="focustarget">.</a>',
-          activeClass: fickle+'-active',
           closeOnEsc:  true,
           //trapFocus:   false,
           closeDelay:  300
@@ -176,7 +174,6 @@
             _this
                 .data(_dataId, data)
                 .toggle( !!cfg.startOpen )
-                .addClass( cfg.activeClass )
                 // accessibility aid
                 .prepend( cfg.focusTarget )
                 // popup content virkni
