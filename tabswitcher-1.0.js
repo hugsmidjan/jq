@@ -1,9 +1,10 @@
-// TODO: Fix back-navigation jumpyness in IE7 when `monitorFragment=true`
-// 
-// Requires jQuery 1.3 or better (event bubbling)
-// 
-(function($){
+/*
+  TODO: Fix back-navigation jumpyness in IE7 when `monitorFragment=true`
 
+  Requires jQuery 1.3 or better (event bubbling)
+*/
+
+(function($){
 
 /*
   $.event.special.fragment = {
@@ -141,6 +142,7 @@
 
 
       // event delegate monitor that grabs 
+      // FIXME: Finish this comment...
       crossReferenceMonitor = function ( e )
       {
         if (e.target) {
@@ -173,16 +175,15 @@
         
       };
 
+      
 /*
-
       _prepModule = function (e) {
         var _cookie = tabSwitcher.cookieName && cookieU.getValue(tabSwitcher.cookieName);
         if (_cookie) { _cookieTargets = _cookie.split(','); }
         _hashTarget = docLoc.hash.substr(1);
       },
 
-*/
-/*
+
       _finalizeModule = function (e) {
         if ($.tabSwitcher.fixInitScroll) { window.scrollTo(0,0); }
 
@@ -429,11 +430,11 @@
 
     });
 
-    /*
+/*
     if (!Object.isEmpty(_fragmentsToMonitor)) {
       EEvent.add( document, 'fragment', _monitorFragment );
     }
-    */
+*/
 
     // `switchTo` all the tabs that have been scheduled for opening.
     // todo : consider pushing this to next thread

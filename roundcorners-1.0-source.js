@@ -4,7 +4,7 @@ jQuery.fn.roundCorners = function (cfg)
   var prefix = (cfg && cfg.prefix) || 'c_ c_',
       opts = jQuery.extend({
               tag : 'span',
-              //out: false,  // out:true, inserts the corner elements *outside* the element.
+              //out: false,  // Booleanoid: `true` inserts the corner elements *outside* the element.
               tr  : prefix+'tr',
               tl  : prefix+'tl',
               br  : prefix+'br',
