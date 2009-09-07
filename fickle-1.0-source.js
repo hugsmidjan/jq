@@ -11,13 +11,13 @@
     
     defaultOptions: {
       focusTarget: '<a href="#" class="focustarget">.</a>',  // may be element or selector - gets prepended to the popup element to receive keyboard focus
-      closeOnEsc:  true,
-      closeDelay:  300,
-      startOpen:   false
-      opener:      element/collection/selector,
+      closeOnEsc:  true,     // set to false to disable keyboard "Esc" keypress to run  .fickle(`close`)
+      closeDelay:  300,      // Specifies a "grace period" before a `focusout` causes a .fickle(`close`).
+      startOpen:   false     // Instantly shows and `open`s the fickle element.  No fadeIns or any fancy effects.
+      opener:      element/collection/selector,  // the opener receives focus again when `fickleclosed` has been triggered.
 
-      fadein:      0,  // ms fadeIn duration  -- shorthand for .bind('fickleopen', function(){ $(this).fadeIn( fadeinMs ) });
-      fadeout:     0,  // ms fadeOut duration -- shorthand for .bind('fickleclose', function(){ $(this).fadeOut( fadeinMs ) });
+      fadein:      0,        // ms fadeIn duration  -- shorthand for .bind('fickleopen', function(){ $(this).fadeIn( fadeinMs ) });
+      fadeout:     0,        // ms fadeOut duration -- shorthand for .bind('fickleclose', function(){ $(this).fadeOut( fadeinMs ) });
 
       onOpen:      null,     // shorthand for .bind('fickleopen', handlerFunc);
       onOpened:    null,     // shorthand for .bind('fickleopened', handlerFunc);
@@ -25,7 +25,7 @@
       onClosed:    null,     // shorthand for .bind('fickleclosed', handlerFunc);
     }
 
-    Events:
+    Events:  (for all events `event.cfg` contains an extended instance of the original `options` object.)
 
       fickleopen:    fires before the popup is opened. Cancelable with event.preventDefault()/return false;
       fickleclose:   fires before the popup is closed. Cancelable with event.preventDefault()/return false;
@@ -35,9 +35,11 @@
 
     Methods:
 
-      open:    .fickle('open')
-      close:   .fickle('close')
-      isOpen   .fickle('isOpen')  // returns boolean value for the first item in the collection
+      open:    .fickle('open', data)  // Opens (shows) the fickle element and gives it focus.
+                                      // `data` is an object, that may contain `opener` element that overwrites/updates the original `options.opener`
+                                      // Example:   $(fickleElm).fickle('open', { opener: linkElm });
+      close:   .fickle('close')       // Closes (hides) the fickle element, and sends focus back to `options.opener`.
+      isOpen   .fickle('isOpen')      // returns boolean value for the first item in the collection
 
   FIXME: 
     * Fickle element has focus, user switches to another application and then switches back by clicking outside the fickle element.
@@ -155,6 +157,12 @@
         cfg = $.beget(_defaultConfig, cfg);
 
         var _popups = this;
+
+        // Bind onEvent handles specified in cfg.
+        $.each(['Open','Opened','Close','Closed'], function (i, type) {
+            cfg['on'+type] && _popups.bind(fickle+type.toLowerCase(), cfg['on'+type]);
+          })
+
         _popups.each(function(){
             var _this = $(this),
                 data = {
@@ -173,7 +181,7 @@
 
             _this
                 .data(_dataId, data)
-                .toggle( !!cfg.startOpen )
+                .toggle( !!cfg.startOpen )  // hide by default - unless cfg.startOpen is true
                 // accessibility aid
                 .prepend( cfg.focusTarget )
                 // popup content virkni
@@ -214,7 +222,7 @@
               // FIXME: this is an ugly hack. let's find a more elegant solution to this.
               if ( lastFocusableLineage.index(this) > -1 )
               {
-                // Established: The popup contains the document's last Link
+                // Established: The popup contains the document's last Link.
                 // ...which means (at least in FF3 and Chrome) that Keyboard Tabbing out of the popup will place the focus inside the location bar
                 // ...which triggers a document.onblur() (this is identical to what happens when the user Switches away from the browser)
                 // ...which ruins everything!
@@ -225,16 +233,13 @@
 
             if (cfg.startOpen) 
             {
-              // NOTE: _this has already been toggled visible above - so fadeIn() fickleopen events will not show.
+              // NOTE: _this has already been toggled visible (via `.toggle(!!cfg.startOpen)` above)
+              // - so fadeIn() fickleopen events will not show.
               // We need, however, to envoke proper .fickle('open') to set the appropriate flags and run the events.
               _this.fickle('open')
             }
 
           });
-
-        $.each(['Open','Opened','Close','Closed'], function (i, type) {
-            cfg['on'+type] && _popups.bind(fickle+type.toLowerCase(), cfg['on'+type]);
-          })
 
       }
 
