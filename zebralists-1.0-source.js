@@ -29,7 +29,7 @@
 
         _blockElm.find( _sel )
             .each(function (i, _itm) {
-                n++
+                n++;
                 _itm = $(_itm);
 
                 // remove all marker classNames
@@ -58,7 +58,7 @@
       items:       '> tr:visible',
       subItems:    '.subrow',
       //resetItems:  '',
-      oddClass:    'odd',
+      oddClass:    'odd'
       //evenClass:   ''
       //classes:   [oddClass, evenClass(, nthClass)*]
     };
