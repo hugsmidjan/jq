@@ -161,7 +161,7 @@
         // Bind onEvent handles specified in cfg.
         $.each(['Open','Opened','Close','Closed'], function (i, type) {
             cfg['on'+type] && _popups.bind(fickle+type.toLowerCase(), cfg['on'+type]);
-          })
+          });
 
         _popups.each(function(){
             var _this = $(this),
