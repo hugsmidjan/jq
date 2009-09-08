@@ -157,7 +157,7 @@
           }
           else
           {
-            var ac[ap] = nw && !ow ? 'show' : !nw && ow ? 'hide' :  undefined;
+            ac[ap] = (nw && !ow) ?  'show':  (!nw && ow) ?  'hide':  undefined;
             ac[ap]  &&  $(this).stop().animate( ac, c.speed, c.easing, function(){ this.style[ap] = ''; });
           }
         });
@@ -411,7 +411,7 @@
         {
           var bt = $( cfg.jumpBtnTemplate ),
               a = bt.find( 'a' ).andSelf().eq(0)
-                      .text( i + 1 ).bind( 'click', cfg, movePage );
+                      .text( i + 1 ).addClass('p' + (i+1)).bind( 'click', cfg, movePage );
           if (cfg.index == i) { a.addClass( cfg.currentPageClass ); }
           jmps.push( a[0] );
         }
