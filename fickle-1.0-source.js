@@ -4,14 +4,15 @@
       $.beget()
 
   Usage:
-  
+
     Turn any element into a ficle/volatile popup with open/close method (+ events) that will automatically close on focusout.
 
       $('<div class="mypopup">Content</div>').fickle( options );
-    
+
     defaultOptions: {
       focusTarget: '<a href="#" class="focustarget">.</a>',  // may be element or selector - gets prepended to the popup element to receive keyboard focus
       closeOnEsc:  true,     // set to false to disable keyboard "Esc" keypress to run  .fickle(`close`)
+      trapFocus:   false,    // attempts to retain (and return) the keyboard focus within the fickle element.
       closeDelay:  300,      // Specifies a "grace period" before a `focusout` causes a .fickle(`close`).
       startOpen:   false     // Instantly shows and `open`s the fickle element.  No fadeIns or any fancy effects.
       opener:      element/collection/selector,  // the opener receives focus again when `fickleclosed` has been triggered.
@@ -25,12 +26,14 @@
       onClosed:    null,     // shorthand for .bind('fickleclosed', handlerFunc);
     }
 
-    Events:  (for all events `event.cfg` contains an extended instance of the original `options` object.)
+    Events:
 
       fickleopen:    fires before the popup is opened. Cancelable with event.preventDefault()/return false;
       fickleclose:   fires before the popup is closed. Cancelable with event.preventDefault()/return false;
       fickleopened:  fires *after* the popup is opened. Uncancelable.
       fickleclosed:  fires *after* the popup is closed. Uncancelable.
+
+      (Note: for all events `event.cfg` contains an extended instance of the original `options` object.)
 
 
     Methods:
@@ -41,7 +44,7 @@
       close:   .fickle('close')       // Closes (hides) the fickle element, and sends focus back to `options.opener`.
       isOpen   .fickle('isOpen')      // returns boolean value for the first item in the collection
 
-  FIXME: 
+  FIXME:
     * Fickle element has focus, user switches to another application and then switches back by clicking outside the fickle element.
     * Consider using $.ui.widget() to make code more compact
 
@@ -49,7 +52,7 @@
 
 (function($){
 
-  var _wasEventSuccessful = function(collection, type, evExtras){  
+  var _wasEventSuccessful = function(collection, type, evExtras){
           // NOTE: `collection` must only contain one item - otherwise shared-event-object-weirdness ensues.
           var e = $.Event(type);
           evExtras && $.extend(e, evExtras);
@@ -96,7 +99,7 @@
                 $(_document)
                     .unbind('focusin', data._confirmFocusLeave)
                     .unbind('keydown', data._listenForEsc);
-                $(cfg.opener||_document.body).setFocus();
+                $.setFocus(cfg.opener||_document.body);
                 data._isOpen = !1;// false
                 this
                     .fadeOut(cfg.fadeout||0) // assuming that .fadeOut(0) is equivalient to .hide()
@@ -196,7 +199,7 @@
                                           // FIXME: consider doing more intelligent sensing of from where the focus left, and return it back
                                           $.setFocus(_lastFocusElm):                    // Send focus back into the fickle element
                                           _doClosePopup  &&  $(popup).fickle('close'); // close popup
-                                    }, cfg.trapFocus ? cfg.closeDelay : 0); 
+                                    }, cfg.trapFocus ? cfg.closeDelay : 0);
                   })
                 // make the popup sticky
                 .bind('click mousedown focusin', function (e) {
@@ -218,7 +221,7 @@
             {
               // FIXME: this is an ugly hack. let's find a more elegant solution to this.
               var lastFocusableLineage = $('a,input,select,textarea,button,object,area').filter(':last').parents().andSelf();
-                    // check if the 
+                    // check if the
               // FIXME: this is an ugly hack. let's find a more elegant solution to this.
               if ( lastFocusableLineage.index(this) > -1 )
               {
@@ -231,7 +234,7 @@
               }
             }
 
-            if (cfg.startOpen) 
+            if (cfg.startOpen)
             {
               // NOTE: _this has already been toggled visible (via `.toggle(!!cfg.startOpen)` above)
               // - so fadeIn() fickleopen events will not show.

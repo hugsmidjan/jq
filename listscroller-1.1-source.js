@@ -120,9 +120,7 @@
         else if ( c.wrap == 'loop' && c.lastIndex == last && c.index == 0 )
         {
           conf[prop] = z.position().left + z[dimp]();
-          w.animate(conf, c.speed, c.easing, function () {
-            w[prop]( 0 );
-          });
+          w.animate(conf, c.speed, c.easing, function(){ w[prop](0); });
         }
         else
         {
@@ -133,13 +131,13 @@
         l.each(function (i, nw, ow ){
           nw = (i >= c.index && i < c.index + c.windowSize);
           ow = (c.lastIndex == null) || (i >= c.lastIndex && i < c.lastIndex + c.windowSize);
-          if ( nw && !ow ) // show
-          {
-            $(this).stop().hide().fadeIn( c.speed );
-          }
-          else if ( !nw && c.lastIndex == null ) // init
+          if ( !nw && c.lastIndex == null ) // init
           {
             $(this).stop().hide();
+          }
+          else if ( nw && !ow ) // show
+          {
+            $(this).stop().hide().fadeIn( c.speed );
           }
           else if ( !nw && ow )  // hide
           {
@@ -153,23 +151,14 @@
           nw = (i >= c.index && i < c.index + c.windowSize);
           ow = (c.lastIndex == null) || (i >= c.lastIndex && i < c.lastIndex + c.windowSize);
           ac = {};
-          if ( nw && !ow ) // show
-          {
-            ac[ap] = 'show';
-            $(this).stop().animate( ac, c.speed, c.easing, function () {
-              this.style[ap] = '';
-            });
-          }
-          else if ( !nw && c.lastIndex == null )  // init
+          if ( !nw && c.lastIndex == null )  // init
           {
             $(this).stop().hide();
           }
-          else if ( !nw && ow )  // hide
+          else
           {
-            ac[ap] = 'hide';
-            $(this).stop().animate( ac, c.speed, c.easing, function () {
-              this.style[ap] = '';
-            });
+            var ac[ap] = nw && !ow ? 'show' : !nw && ow ? 'hide' :  undefined;
+            ac[ap]  &&  $(this).stop().animate( ac, c.speed, c.easing, function(){ this.style[ap] = ''; });
           }
         });
       }
@@ -250,14 +239,14 @@
     c.index = $.listscroller.wrap[ c.wrap || 'none' ]( _newIndex, list, c );
 
     list
-      .addClass( c.hideClass )
-      .removeClass( c.cursorItemClass )
-      .removeClass( c.currentItemClass )
-      .slice( c.index, c.index + c.windowSize )
-        .addClass( c.currentItemClass )
-        .removeClass( c.hideClass )
-        .eq(0)
-          .addClass( c.cursorItemClass );
+        .addClass( c.hideClass )
+        .removeClass( c.cursorItemClass )
+        .removeClass( c.currentItemClass )
+        .slice( c.index, c.index + c.windowSize )
+            .addClass( c.currentItemClass )
+            .removeClass( c.hideClass )
+            .eq(0)
+                .addClass( c.cursorItemClass );
 
     if ( $.isFunction( c.moveCallback ) )
     {
@@ -291,9 +280,9 @@
     if (!_noflash)
     {
       _block.addClass( c.classPrefix + '-changed' );
-      setTimeout(function () {
-        _block.removeClass( c.classPrefix + '-changed' );
-      }, c.speed || 1);
+      setTimeout(function(){
+          _block.removeClass( c.classPrefix + '-changed' );
+        }, c.speed || 1);
     }
 
     var newWinIndex = Math.ceil(c.index / c.stepSize);
@@ -301,14 +290,14 @@
     if ( c.jumps )
     {
       c.jumps
-        .removeClass( c.currentPageClass )
-        .eq( newWinIndex )
-          .addClass( c.currentPageClass )
+          .removeClass( c.currentPageClass )
+          .eq( newWinIndex )
+              .addClass( c.currentPageClass )
     }
 
     var newSatusIndex = c.itemStatusPager ?  c.index : newWinIndex;
     c.inputPager  &&  c.inputPager.val( newWinIndex+1 );
-    c.status  &&  c.status.text( newSatusIndex+1 );
+    c.status      &&  c.status.text( newSatusIndex+1 );
 
     if (c.status  &&  c.itemStatusPager  &&  c.windowSize > 1)
     {
@@ -361,14 +350,14 @@
         status;
 
     nextBtn.find( 'a' ).andSelf().eq(0)
-      .bind( 'click', cfg, moveNext )
-      .attr( 'title', cfg.titleNext )
-      .text( cfg.labelNext );
+        .bind( 'click', cfg, moveNext )
+        .attr( 'title', cfg.titleNext )
+        .text( cfg.labelNext );
 
     prevBtn.find( 'a' ).andSelf().eq(0)
-      .bind( 'click', cfg, movePrev )
-      .attr( 'title', cfg.titlePrev )
-      .text( cfg.labelPrev );
+        .bind( 'click', cfg, movePrev )
+        .attr( 'title', cfg.titlePrev )
+        .text( cfg.labelPrev );
 
 
     if ( cfg.paging )
@@ -414,15 +403,15 @@
         if ( cfg.jumpLabelTemplate )
         {
           $( cfg.jumpLabelTemplate )
-            .text( cfg.jumpLabel )
-            .appendTo( jumpMenu );
+              .text( cfg.jumpLabel )
+              .appendTo( jumpMenu );
         }
         // make buttons
         for (var i=0; i<numWindows; i++)
         {
           var bt = $( cfg.jumpBtnTemplate ),
               a = bt.find( 'a' ).andSelf().eq(0)
-                    .text( i + 1 ).bind( 'click', cfg, movePage );
+                      .text( i + 1 ).bind( 'click', cfg, movePage );
           if (cfg.index == i) { a.addClass( cfg.currentPageClass ); }
           jmps.push( a[0] );
         }
