@@ -363,6 +363,14 @@
       return el.id;
     },
 
+    
+
+    // Turns $.get/$.ajax responseText HTML document source into a fairly neat <body> element for easy .find()ing
+    // Stripping out all nasty <script>s and such things.
+    getResultBody: function(responseText) {
+        $('body').append( $(responseText).not('script,title,meta,link,style').find('script,style').remove().end() );
+      },
+
 
 
     // Finds and returns the language of an element - caching the results on the element itself.
