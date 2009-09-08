@@ -141,7 +141,7 @@
           }
           else if ( !nw && ow )  // hide
           {
-            $(this).stop().show().fadeOut( c.speed );
+            $(this).stop().show().css({ opacity : 1 }).fadeOut( c.speed );
           }
         });
       },
