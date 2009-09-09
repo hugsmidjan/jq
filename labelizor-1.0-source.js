@@ -10,7 +10,7 @@
     cfg = $.extend({
         //lRe:         /(\*|:[\W\S]*$)/g,     // pattern used to clean the <label> text.
         //lPlace:      '',                    // replacement text/pattern for cfg.lRe
-        //labelFilter: 'i',                   // label sub-selector  (may also be a function - see below)
+        //labelFilter: null,                  // label sub-selector  (may also be a function - see below)
         //labelFilter: function(labelElm){ return $('i', labelElm).text(); },
         //labelText:   'My custom label text'
         blurClass:    b||'labelized',
@@ -26,11 +26,14 @@
 
         var _this = this;
 
-        if (_this.id || _this.title && $(_this).is(':text, textarea'))
+          ;;;window.console&&console.log( _this.id, $('label') );
+        if (_this.id || _this.title  &&  $(_this).is(':text, textarea'))
         {
           var _labelText = cfg.labelText,
-               _label = (_labelText || _hideClass)  &&  $('label[for='+_this.id+']').addClass(_hideClass),
-
+               // use $(this).parents(':last') as scope/context to also .find() <label> inside .detached() document fragments
+               _label = (_labelText || _hideClass)  &&  $(_this).parents(':last').add('html')
+                                                            .find('label[for="'+_this.id+'"]:first')
+                                                            .addClass(_hideClass),
               _removeLabelValue = function (e) {
                   if (_this.value == _labelText) {
                     _this.value = '';
