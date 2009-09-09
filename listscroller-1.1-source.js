@@ -526,7 +526,7 @@
     {
       this.each(function () {
           var b = $( this ),
-              _lang = b.closest( '[lang]' ).attr( 'lang' ) || '',
+              _lang = b.closest('[lang]').attr( 'lang' ) || '',
               i18n = $.listscroller.i18n,
               txts = i18n[_lang.toLowerCase()] || i18n[_lang.substr(0,2)] || i18n.en,
               cfg = $.extend({}, dc, txts,  config );
