@@ -159,8 +159,8 @@
 
       config : function ( ctx, config ) {
 
-        var context = $( ctx );
-        var form    = context.is('form') ? context : $( context.attr('form') || context.parent('form').get(0) );
+        var context = $( ctx ),
+            form = $( context.filter('form')[0]  ||  context.parents('form')[0]  ||  context.find('form')[0] );
 
         if ( config ) { // setting
           form.data( 'av-config', config );
@@ -321,8 +321,9 @@
 
       return this.each(function(){
 
-        var context = $( this );
-        var form = context.is('form') ? context : $( this.form || context.parent('form').get(0) );
+        var context = $( this ),
+            form = $( context.filter('form')[0]  ||  context.parents('form')[0]  ||  context.find('form')[0] );
+        if (!form.length) { return false; }
 
         var conf = $.extend( {}, defaultConfig, config );
         $.av.config( this, conf );
