@@ -198,7 +198,11 @@
 
     log: function ()
     {
-      _win.console && console.log(this);
+      if (_win.console)
+      {
+        arguments.length && console.log.call(console, arguments);
+        console.log(this);
+      }
       return this;
     },
 
@@ -368,7 +372,13 @@
     // Turns $.get/$.ajax responseText HTML document source into a fairly neat <body> element for easy .find()ing
     // Stripping out all nasty <script>s and such things.
     getResultBody: function(responseText) {
-        return $('<body/>').append( $(responseText).not('script,title,meta,link,style').find('script,style').remove().end() );
+        return $('<body/>').append(
+                    $(responseText||[])
+                        .not('script,title,meta,link,style')
+                            .find('script,style')
+                                .remove()
+                            .end()
+                  );
       },
 
 
