@@ -42,6 +42,7 @@
                                       // `data` is an object, that may contain `opener` element that overwrites/updates the original `options.opener`
                                       // Example:   $(fickleElm).fickle('open', { opener: linkElm });
       close:   .fickle('close')       // Closes (hides) the fickle element, and sends focus back to `options.opener`.
+      toggle:  .fickle('toggle'[, doOpen])  // Toggles between 'open'/'close' - Optional: `doOpen` boolean true `open`s, while false `close`s
       isOpen   .fickle('isOpen')      // returns boolean value for the first item in the collection
 
   FIXME:
@@ -50,7 +51,7 @@
 
 */
 
-(function($){
+(function($, undefined){
 
   var _wasEventSuccessful = function(collection, type, evExtras){
           // NOTE: `collection` must only contain one item - otherwise shared-event-object-weirdness ensues.
@@ -72,7 +73,7 @@
 
       _notImplemented = function(/* data, extras */){ alert('method not implemented yet.'); },
 
-      methods = {
+      methods = { // inside method functions `this` is the fickle element jQuery collection.
           open: function (data, extras) {
               var cfg = data.c;
               cfg.opener = (extras && extras.opener) || cfg.opener;
@@ -109,6 +110,14 @@
                             .dequeue();
                       });
               }
+            },
+          toggle: function(data, extras){
+              var doOpen =  typeof extras == 'boolean' ?
+                                extras:
+                            extras.doOpen !== undefined? 
+                                extras.doOpen:
+                                !data._isOpen;
+              methods[doOpen?'open':'close'].call(this, data, extras);
             },
           isOpen: function(data/*, extras */){
               return data._isOpen;
@@ -149,8 +158,8 @@
         {
           return (cfg == 'isOpen') ?
                       methd( this.data(_dataId)/*, extras */ ):
-                      this.each(function(){
-                          var _this = $(this);
+                      this.each(function(i, _this){
+                          _this = $(_this);
                           methd.call(_this, _this.data(_dataId), extras);
                         });
         }
