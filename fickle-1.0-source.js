@@ -10,6 +10,9 @@
       $('<div class="mypopup">Content</div>').fickle( options );
 
     defaultOptions: {
+      fickle:      true      // by default the element is "fickle" and auto-closes as soon as the user clicks elsewhere,
+                             // or moves the keyboard-focus out of the element. Set this to false to disable any "auto-closing" behaviour...
+                             // A Non-fickle element has only advanced open/close/toggle methods, but no super-special "fickle" properties.
       focusTarget: '<a href="#" class="focustarget">.</a>',  // may be element or selector - gets prepended to the popup element to receive keyboard focus
       closeOnEsc:  true,     // set to false to disable keyboard "Esc" keypress to run  .fickle(`close`)
       trapFocus:   false,    // attempts to retain (and return) the keyboard focus within the fickle element.
@@ -79,7 +82,7 @@
               cfg.opener = (extras && extras.opener) || cfg.opener;
               if ( !data._isOpen  &&  _wasEventSuccessful(this, fickle+'open', { cfg: cfg }) )
               {
-                $(_document).bind('focusin', data._confirmFocusLeave);
+                cfg.fickle && $(_document).bind('focusin', data._confirmFocusLeave);
                 cfg.closeOnEsc  &&  $(_document).bind('keydown', data._listenForEsc);
                 data._isOpen = !0;// true
                 this
@@ -128,8 +131,9 @@
         },
 
       _defaultConfig = {
+          fickle:      !0,// true
           focusTarget: '<a href="#" class="focustarget">.</a>',
-          closeOnEsc:  true,
+          closeOnEsc:  !0,// true
           //trapFocus:   false,
           closeDelay:  300
           //startOpen:   false,
@@ -195,51 +199,57 @@
                 .data(_dataId, data)
                 .toggle( !!cfg.startOpen )  // hide by default - unless cfg.startOpen is true
                 // accessibility aid
-                .prepend( cfg.focusTarget )
-                // popup content virkni
-                // close popup
-                .bind('focusout', function (e) {
-                    var popup = this;
-                    _cancelTimeout();
-                    //;;;window.console&&console.log( 'focusout' );
-                    _doClosePopup = false;
-                    _popuplock =  setTimeout(function(){
-                                      cfg.trapFocus ?
-                                          // FIXME: consider doing more intelligent sensing of from where the focus left, and return it back
-                                          $.setFocus(_lastFocusElm):                    // Send focus back into the fickle element
-                                          _doClosePopup  &&  $(popup).fickle('close'); // close popup
-                                    }, cfg.trapFocus ? cfg.closeDelay : 0);
-                  })
-                // make the popup sticky
-                .bind('click mousedown focusin', function (e) {
-                    setTimeout(_cancelTimeout, 0); // because focusout (setting the _popupLock) *might* not fire before this focusin event...?
-                    //;;;window.console&&console.log( 'focusin' );
-                    if (e.type == 'click')
-                    {
-                      var popup = $(this);
-                      // on 'click' popup looses "focus" so we need to reset the focus once the mouse leaves
-                      popup.one('mouseleave', function(e){ $.setFocus(_lastFocusElm); });
-                    }
-                    else if (e.type == 'focusin')
-                    {
-                      _lastFocusElm = e.target;
-                    }
-                  });
-
-            if (document.body == _this.closest('body')[0])
+                .prepend( cfg.focusTarget );
+            
+            // if cfg.fickle is set to false, the element becomes a very simple "open/close" window without any "fickly" properties to make it special.
+            if (cfg.fickle)
             {
-              // FIXME: this is an ugly hack. let's find a more elegant solution to this.
-              var lastFocusableLineage = $('a,input,select,textarea,button,object,area').filter(':last').parents().andSelf();
-                    // check if the
-              // FIXME: this is an ugly hack. let's find a more elegant solution to this.
-              if ( lastFocusableLineage.index(this) > -1 )
+              // popup content virkni
+              // close popup
+              _this
+                  .bind('focusout', function (e) {
+                      var popup = this;
+                      _cancelTimeout();
+                      //;;;window.console&&console.log( 'focusout' );
+                      _doClosePopup = false;
+                      _popuplock =  setTimeout(function(){
+                                        cfg.trapFocus ?
+                                            // FIXME: consider doing more intelligent sensing of from where the focus left, and return it back
+                                            $.setFocus(_lastFocusElm):                    // Send focus back into the fickle element
+                                            _doClosePopup  &&  $(popup).fickle('close'); // close popup
+                                      }, cfg.trapFocus ? cfg.closeDelay : 0);
+                    })
+                  // make the popup sticky
+                  .bind('click mousedown focusin', function (e) {
+                      setTimeout(_cancelTimeout, 0); // because focusout (setting the _popupLock) *might* not fire before this focusin event...?
+                      //;;;window.console&&console.log( 'focusin' );
+                      if (e.type == 'click')
+                      {
+                        var popup = $(this);
+                        // on 'click' popup looses "focus" so we need to reset the focus once the mouse leaves
+                        popup.one('mouseleave', function(e){ $.setFocus(_lastFocusElm); });
+                      }
+                      else if (e.type == 'focusin')
+                      {
+                        _lastFocusElm = e.target;
+                      }
+                    });
+
+              if (document.body == _this.closest('body')[0])
               {
-                // Established: The popup contains the document's last Link.
-                // ...which means (at least in FF3 and Chrome) that Keyboard Tabbing out of the popup will place the focus inside the location bar
-                // ...which triggers a document.onblur() (this is identical to what happens when the user Switches away from the browser)
-                // ...which ruins everything!
-                // Henche, we append a hidden link to the document (for the lack of a better idea for a workaround).
-                $('body').append('<a href="#" style="position:fixed;_position:absolute;left:-9999px;overflow:hidden;width:1px;height:1px;">.</a>');
+                // FIXME: this is an ugly hack. let's find a more elegant solution to this.
+                var lastFocusableLineage = $('a,input,select,textarea,button,object,area').filter(':last').parents().andSelf();
+                      // check if the
+                // FIXME: this is an ugly hack. let's find a more elegant solution to this.
+                if ( lastFocusableLineage.index(this) > -1 )
+                {
+                  // Established: The popup contains the document's last Link.
+                  // ...which means (at least in FF3 and Chrome) that Keyboard Tabbing out of the popup will place the focus inside the location bar
+                  // ...which triggers a document.onblur() (this is identical to what happens when the user Switches away from the browser)
+                  // ...which ruins everything!
+                  // Henche, we append a hidden link to the document (for the lack of a better idea for a workaround).
+                  $('body').append('<a href="#" style="position:fixed;_position:absolute;left:-9999px;overflow:hidden;width:1px;height:1px;">.</a>');
+                }
               }
             }
 
