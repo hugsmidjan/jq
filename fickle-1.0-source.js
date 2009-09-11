@@ -114,7 +114,7 @@
           toggle: function(data, extras){
               var doOpen =  typeof extras == 'boolean' ?
                                 extras:
-                            extras.doOpen !== undefined? 
+                            extras && extras.doOpen !== undefined? 
                                 extras.doOpen:
                                 !data._isOpen;
               methods[doOpen?'open':'close'].call(this, data, extras);
