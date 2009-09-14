@@ -4,53 +4,56 @@
     * $.ontime( config );
     * $('#myid').ontime( config );
 
-  NOTE: $.ontime() is equal to $(document).ontime();
-  NOTE: all callbacks/functions fed into the .ontime method are event-handlers, and receive an event object as a first parameter.
+    Note: $.ontime() is equal to $(document).ontime();
+
 
   Config properties:
-    * label      // String: ^[0-9a-zA-Z-_]+$ . defaults to a static string ("ontime")
-    * interval   // defaults to '10ms'  // Accepts Date()s (converted to "milliseconds into the future"), Integers (ms), or Strings (both absolute: "18:50"/"9:07:30" or relative: "1sec"/"2min 15sec"/"1h10m45s")
-    * start      // Starting time for the timer. Defaults to `interval`.  (Accepts the same formats as the "interval" property).
-    * stop       // Specifies number of milliseconds until 'end'ing the timer. (Accepts the same formats as the "interval" property)
-    * reps       // number of repeats before . Default: `0` (infinity) - unless the user specifies `start` and no `interval` in which case the default is `1`
-    * collide    // Decides what happens if another timer with the same label is present. Options:
-                             // * "replace" (Default) Cancels the previous timer and events, replacing it with the current ones.
-                             // * "yield"             Leaves the existing timer and events untouched. (Does nothing!)
-                             // * "updatetimer"       Replaces the existing timer with the new one. Leaves the previous handlers still bound and adds new events, if any, to the mix 
-                             // * "yieldtimer"        Adds new events, but leaves the existing timer untouched (ignores the new timer).
-                             // * "overlay"           Adds events and the new timeout interval to the mix. (Allows complex, out-of-phase timer combos. Whichever `stop` occurs first 'End's the whole thing!)
-    * fn         // Function to call ontime.  Parameters passed: event, iCount
-    * end        // Function to call when the timer ends (times/runs out, or gets 'cancel'ed).  Parameters passed: event
-    * bubble     // default: false; // indicates whether events should be able to bubble up the DOM tree. If set to true, event bubbling may be cancelled on case by case basis via event.stopPropagation();
-    * unbind     // default: true;  // indicates whether event handlers should be unbound when the timer ends
+    * label      'ontime'  // Alphanumerical id string: ^[a-zA-Z][0-9a-zA-Z-_]+$.
+    * interval   10        // defaults to '10ms'  // Accepts Date()s (converted to "milliseconds into the future"), Integers (ms), or Strings (both absolute: "18:50"/"9:07:30" or relative: "1sec"/"2min 15sec"/"1h10m45s")
+    * start      null      // Starting time for the timer. Defaults to `interval`.  (Accepts the same formats as the "interval" property).
+    * stop       null      // Specifies number of milliseconds until 'end'ing the timer. (Accepts the same formats as the "interval" property)
+    * reps       0         // number of repeats before 'end'ing the timer. Default: `0` (infinity) - unless the user specifies `start` and no `interval` in which case the default is `1`
+    * collide    'replace' // Decides what happens if another timer with the same label is present. Options:
+                                 // * "replace" (Default) Cancels the previous timer and events, replacing it with the current ones.
+                                 // * "yield"             Leaves the existing timer and events untouched. (Does nothing!)
+                                 // * "updatetimer"       Replaces the existing timer with the new one. Leaves the previous handlers still bound and adds new events, if any, to the mix 
+                                 // * "yieldtimer"        Adds new events, but leaves the existing timer untouched (ignores the new timer).
+                                 // * "overlay"           Adds events and the new timeout interval to the mix. (Allows complex, out-of-phase timer combos. Whichever `stop` occurs first 'End's the whole thing!)
+    * fn         null      // Function to call ontime.  Parameters passed: event, iCount
+    * end        null      // Function to call when the timer ends (times/runs out, or gets 'cancel'ed).  Parameters passed: event
+    * bubble     true      // indicates whether events should be able to bubble up the DOM tree. If set to true, event bubbling may be cancelled on case by case basis via event.stopPropagation();
+    * unbind     true      // indicates whether event handlers should be unbound when the timer ends
 
 
   Events:
-    * ontime.{myLabel}      // fires whenever the timeout/interval occurs.  // return false; or e.preventDefault() ends/cancels the timer.
+    All callbacks/functions fed into the .ontime method are event-handlers, and receive an event object as a first parameter.
+
+    * ontime.{myLabel}      // fires whenever the timeout/interval occurs.  // return false; or e.preventDefault(); ends/cancels the timer.
                             // handler params: [ event, iCount, config ]
                             // `this` is either `document` or the jQuery collection item/Element that .ontime was called upon 
-    * ontimeend.{myLabel}   // fires when the timer times-/runs out, or gets `canceled`
+    * ontimeend.{myLabel}   // fires when the timer times-/runs out, or gets `end`ed or `cancel`ed.
                             // handler params: [ event, config ]
                             // `this` is either `document` or the jQuery collection item/Element that .ontime was called upon 
 
 
   External access to the config object:
+
     * var myCfg = $.ontime().data('ontime.myLabel');
 
 
-
   Shorthand Syntax:
+    Optional shorthand syntax allows a mixture of paramteters in just about any order.
 
-  Optional shorthand syntax allows a mixture of paramteters in just about any order:
+    Here are the shorthand parsing rules:
     * Function is assumed to be an 'ontime.{myLabel}' event handler
     * String is intrepeted as a label (and/or a trickplay command - see below)
     * Number is considered an 'interval'.  (Or 'reps' if there's a second numerical parameter)
     * Object is treated as a 'config' object.
     * Boolean is treated as an noUnbind flag for the 'cancel' trickplay method.
  
-  Examples:
+    Examples of use:
     * $.ontime( config, fn)
-    * $.ontime( label, config );              // (fn contained in config)
+    * $.ontime( label, config );              // (fn contained in config, or previously set via the `.bind()` method )
     * $.ontime( label, config, fn );
     * $.ontime( interval, fn );               // interval must be number (ms)
     * $.ontime( interval, reps, fn );         // interval must be number (ms)
