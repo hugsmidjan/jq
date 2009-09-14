@@ -39,6 +39,10 @@
   // Example:
   $.extend($.expr[':'], {
 
+    is: function (a, i, m) {
+      return $(a).is(m[3]);
+    },
+
     childof: function (a, i, m) {
       return $(a.parentNode).is(m[3]);
     },
