@@ -11,22 +11,27 @@
     * label      // String: ^[0-9a-zA-Z-_]+$ . defaults to a static string ("ontime")
     * interval   // defaults to '10ms'  // Accepts Date()s (converted to "milliseconds into the future"), Integers (ms), or Strings (both absolute: "18:50"/"9:07:30" or relative: "1sec"/"2min 15sec"/"1h10m45s")
     * start      // Starting time for the timer. Defaults to `interval`.  (Accepts the same formats as the "interval" property).
-    * stop       // Specifies number of milliseconds until 'cancelling' the timer. (Accepts the same formats as the "interval" property)
+    * stop       // Specifies number of milliseconds until 'end'ing the timer. (Accepts the same formats as the "interval" property)
     * reps       // number of repeats before . Default: `0` (infinity) - unless the user specifies `start` and no `interval` in which case the default is `1`
     * collide    // Decides what happens if another timer with the same label is present. Options:
-                             // * "yield" (Default) Adds events, but leaves the existing timer untouched.
-                             // * "replace"         Adds events, Cancels the existing timer (leaving the previous handlers still bound) and starts the new timer. 
-                             // * "add"             Adds events, and adds the new timeout interval to the mix. (whichever `stop` occurs first 'cancel's the whole thing!)
+                             // * "replace" (Default) Cancels the previous timer and events, replacing it with the current ones.
+                             // * "yield"             Leaves the existing timer and events untouched. (Does nothing!)
+                             // * "updatetimer"       Replaces the existing timer with the new one. Leaves the previous handlers still bound and adds new events, if any, to the mix 
+                             // * "yieldtimer"        Adds new events, but leaves the existing timer untouched (ignores the new timer).
+                             // * "overlay"           Adds events and the new timeout interval to the mix. (Allows complex, out-of-phase timer combos. Whichever `stop` occurs first 'End's the whole thing!)
     * fn         // Function to call ontime.  Parameters passed: event, iCount
     * end        // Function to call when the timer ends (times/runs out, or gets 'cancel'ed).  Parameters passed: event
+    * bubble     // default: false; // indicates whether events should be able to bubble up the DOM tree. If set to true, event bubbling may be cancelled on case by case basis via event.stopPropagation();
     * unbind     // default: true;  // indicates whether event handlers should be unbound when the timer ends
-    * bubble     // default: false; // indicates whether events should bubble up the DOM tree.
+
 
   Events:
     * ontime.{myLabel}      // fires whenever the timeout/interval occurs.  // return false; or e.preventDefault() ends/cancels the timer.
-                          // handler params: [ event, iCount, config ]
+                            // handler params: [ event, iCount, config ]
+                            // `this` is either `document` or the jQuery collection item/Element that .ontime was called upon 
     * ontimeend.{myLabel}   // fires when the timer times-/runs out, or gets `canceled`
-                          // handler params: [ event, config ]
+                            // handler params: [ event, config ]
+                            // `this` is either `document` or the jQuery collection item/Element that .ontime was called upon 
 
 
   External access to the config object:
@@ -34,14 +39,16 @@
 
 
 
+  Shorthand Syntax:
+
   Optional shorthand syntax allows a mixture of paramteters in just about any order:
-    * a Function is assumed to be an 'ontime.{myLabel}' event handler
-    * a String is intrepeted as a label (and/or a trickplay command - see below)
-    * a Number is considered an 'interval'.  (Or 'reps' if there's a second numerical parameter)
-    * an Object is treated as a 'config' object.
-    * a Boolean is treated as an noUnbind flag for the 'cancel' trickplay method.
+    * Function is assumed to be an 'ontime.{myLabel}' event handler
+    * String is intrepeted as a label (and/or a trickplay command - see below)
+    * Number is considered an 'interval'.  (Or 'reps' if there's a second numerical parameter)
+    * Object is treated as a 'config' object.
+    * Boolean is treated as an noUnbind flag for the 'cancel' trickplay method.
  
-  Shorthand examples:
+  Examples:
     * $.ontime( config, fn)
     * $.ontime( label, config );              // (fn contained in config)
     * $.ontime( label, config, fn );
@@ -55,15 +62,18 @@
     * 'pause'   - Freezes the timer and makes note of how long until the next timeout/interval event is supposed to fire.
     * 'restart' - Resumes from exactly the moment it was 'paused'.
     * 'cancel'  - Clears the timer, removing all timer data and event handlers - unless a boolean `noUnbind` is also supplied.
+    * 'end'     - Fires the 'ontimeend' before clearing the timer and removing all timer data and event handlers.
 
     Default (label: "ontime") timers:
     * $.ontime( "pause" );              
-    * $.ontime( "restart" );            // 
-    * $.ontime( "cancel", !!noUnbind ); // optional `noUnbind` keeps all event handlers bound.
+    * $.ontime( "restart" );
+    * $.ontime( "cancel"[, !!noUnbind] ); // optional `noUnbind` keeps all event handlers bound.
+    * $.ontime( "end"[, !!noUnbind] );
     Labeled timers:
     * $.ontime( "pause", label );
     * $.ontime( "restart", label,  );
-    * $.ontime( "cancel", label, !!noUnbind ); // 
+    * $.ontime( "cancel", label[, !!noUnbind] );
+    * $.ontime( "end", label[, !!noUnbind] );
 
 
   Todo:
@@ -170,11 +180,12 @@
       }
 
 
-      if ( args.s &&  /^(restart|pause|cancel)$/.test(args.s[0]) ) // Capture and perform trickplay
+      if ( args.s &&  /^(cancel|end|pause|restart)$/.test(args.s[0]) ) // Capture and perform trickplay
       {
         var method = args.s[0],
             label = args.s[1] || _defaultLabel,
-            _nowTime = (new Date()).getTime();
+            _nowTime = (new Date()).getTime(),
+            _methodEnd = method=='end';
   
         this.each(function(){
             var _this = $(this),
@@ -211,13 +222,14 @@
                   _data._elapsedTime = _nowTime - _data._startTime; // strictly speaking only ever used when _data._untilRef is defined
                 }
               }
-              if (method=='cancel')
+              if (method=='cancel' || _methodEnd)
               {
                 _labelData.length = 0;
+                _methodEnd  &&  _this.trigger( ontimeEnd+label, _this.data(ontimeNS+label) );
                 _this.removeData( ontimeNS+label );
-                _this.trigger( ontimeEnd+label, _this.data(ontimeNS+label) );
-                // allow the mysterious `noUnbind` paramter to block the default unbinding of event handlers 
-                // (super useful for collision handling when, config.collide='replace')
+                // unBind all handlers
+                // ...but, allow the mysterious `noUnbind` paramter to block the default unbinding of event handlers 
+                // (super useful for collision handling when, config.collide == 'updatetimer')
                 if ( !args.b  ||  !args.b[0] )
                 {
                   _this.unbind( ontimeNS+label );
@@ -265,7 +277,6 @@
         {
           config.start = config.interval;
         }
-        config.unbind = !!config.unbind; // enforce Boolean value
 
         var label = config.label;
 
@@ -273,7 +284,9 @@
         this.each(function(){
             var _this = $(this),
                 _labelData = _this.data(ontimeNS+label+'-data'),
-                _counter = 0;
+                _counter = 0,
+                _collission = !!_labelData,
+                _collideHow = config.collide;
 
             if (!_labelData)
             {
@@ -281,16 +294,30 @@
               _this.data(ontimeNS+label+'-data', _labelData);
             }
 
+            // handle collisions "replace" (default) and "yield"
+            if (_collission)
+            {
+              if (!_collideHow || _collideHow == 'replace')
+              {
+                _this[ontime]('cancel', label);  // by default replace the old timer and events with the new ones!
+              }
+              else if (_collideHow == 'yield')
+              {
+                return; // Return immediately. Add no events or timers. Do nothing!
+              }
+            }
+
             // hook up the events - regardless of yielding options
             config.fn  &&  _this.bind( ontimeNS+label, config.fn );
             config.end  &&  _this.bind( ontimeEnd+label, config.end );
             fn &&  _this.bind( ontimeNS+label, fn );
 
-            if (_labelData.length)
+            // handle collisions "yieldtimer", "updatetimer" and "overlay"
+            if (_collission && _collideHow)
             {
-              if (config.collide == 'replace') { _this[ontime]('cancel', label, true); } // remove the previous timing settings and replace them with the current ones.
-              else if (config.collide != 'add') { return; } // Assume "yield" (default) - which means we stop here and leave the old timers untouched 
-              // collide == 'add' -- means we just continue and add the current timeout interval to the mix (allows complex overlapping out-of-phase timers).
+              if (_collideHow == 'yieldtimer') { return; } // return now to leave the existing timer untouched.
+              else if (_collideHow == 'updatetimer') { _this[ontime]('cancel', label, true); } // remove the previous timer settings (to be replaced with the current ones.)
+              // else assume _collideHow == 'overlay' - which means we just continue and add the new timeout interval to the mix. (Allowing complex overlapping out-of-phase timers!)
             }
 
             var _data = {/* precise: config.precise */},
@@ -303,7 +330,7 @@
                     if (e.isDefaultPrevented()  ||  (config.reps !== 0  &&  ++_counter >= config.reps) )
                     // if the event handler returns `false` the timer should stop
                     {
-                      _this[ontime]('cancel', label, !config.unbind);
+                      _this[ontime]('end', label, !config.unbind);
                     }
                   },
                 _handler = _data._handler = function () {
@@ -321,7 +348,7 @@
             if (config.stop)
             {
               _data._untilMs = config.stop;
-              _data._untilFn = function(){ _this[ontime]('cancel', label, !config.unbind); };
+              _data._untilFn = function(){ _this[ontime]('end', label, !config.unbind); };
               _data._untilRef = setTimeout(_data._untilFn, config.stop);
             }
 
