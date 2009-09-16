@@ -20,7 +20,7 @@ var Cufon = (function() {
 			var queue = [], perform = function() {
 				if (complete) return;
 				complete = true;
-				for (var fn; fn = queue.shift(); fn());
+				for (var fn; fn = queue.shift(); fn()){}
 			};
 
 			// Gecko, Opera, WebKit r26101+
@@ -250,7 +250,7 @@ var Cufon = (function() {
 
 		var queue = [], perform = function() {
 			complete = true;
-			for (var fn; fn = queue.shift(); fn());
+			for (var fn; fn = queue.shift(); fn()){}
 		};
 
 		var links = elementsByTagName('link'), styles = elementsByTagName('style');
