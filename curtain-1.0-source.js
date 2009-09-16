@@ -84,7 +84,7 @@
       }
 
       // FIXME: remove this IE hack as soon as jQuery 1.3.3 has been released (http://dev.jquery.com/ticket/3981)
-      if ( !$.support.opacity && _curtain.css('opacity') == 1 ) {
+      if ( cfg.opacity  &&  !$.support.opacity && _curtain.css('opacity') == 1 ) {
         _curtain.css('opacity', _curtain.css('filter').match(/opacity=(\d+)/) ? RegExp.$1/100 : 1);
       }
 
