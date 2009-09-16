@@ -43,7 +43,7 @@
 
           container.find(cfg.rowSelector).each(function(i, tr){
               tr = $(tr);
-              $(this).find(cfg.togglerSelector)
+              tr.find(cfg.togglerSelector)
                   .bind('click', function(e){
                       if (!cfg.multiOpen)
                       {
