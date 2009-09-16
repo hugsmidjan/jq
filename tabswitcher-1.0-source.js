@@ -477,7 +477,7 @@
     if (tabPanes.length >= conf.min)
     {
       tabBox = $( conf.boxTempl );
-      var tabList = $(conf.tabContSel, tabBox),
+      var tabList = conf.tabContSel ? $(conf.tabContSel, tabBox) : tabBox,
           paneParent = tabPanes.eq(0).parent(),
           refLang = paneParent.closest('[lang]').attr('lang') || '';
 
