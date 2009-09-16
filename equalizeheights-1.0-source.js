@@ -28,27 +28,31 @@
         },
 
       _equalizeHeights = function (_collection, _margins) {
-          var _maxHeight = 0,
-              _paddings = [];
+          if (_collection.filter(':visible').length) // only equalize if at least one of the elements is :visible
+          {
+            var _maxHeight = 0,
+                _paddings = [];
 
-          _collection
-              // find highest 'natural' element-height
-              .each(function ( i ) {
-                  var _this = $( this );
-                  _this.css( _heightAttribute, 0 );
-                  var _totalHeight = _this.outerHeight(!!_margins);
-                  _paddings[i] = _totalHeight - _this.height();
-                  _maxHeight = Math.max( _totalHeight, _maxHeight );
-                })
-              // assign new min-heights to collection
-              .each(function( i ){
-                  $(this).css( _heightAttribute,  _maxHeight - _paddings[i] + .5 ); // Adding .5px seems to fix some sub-pixel float-clearing calculation bugs in Firefox 3+
-                })
-              .triggerHandler('equalizeheights', _maxHeight); // does not bubble!
+            _collection
+                // find highest 'natural' element-height
+                .each(function ( i ) {
+                    var _this = $( this );
+                    _this.css( _heightAttribute, 0 );
+                    var _totalHeight = _this.outerHeight(!!_margins);
+                    _paddings[i] = _totalHeight - _this.height();
+                    _maxHeight = Math.max( _totalHeight, _maxHeight );
+                  })
+                // assign new min-heights to collection
+                .each(function( i ){
+                    $(this).css( _heightAttribute,  _maxHeight - _paddings[i] + .5 ); // Adding .5px seems to fix some sub-pixel float-clearing calculation bugs in Firefox 3+
+                  })
+                .triggerHandler('equalizeheights', _maxHeight); // does not bubble!
 
-          // kick the renderer
-          document.body.className += '';
+            // kick the renderer
+            document.body.className += '';
+          }
         };
+
 
   $.fn.equalizeHeights = function ( cfg ) {
     if (this.length>1)
