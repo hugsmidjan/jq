@@ -9,21 +9,23 @@
 
     cfg = $.extend({
             fadeInSpeed : 250, // set 1 for almost no animation
-            fadeOutSpeed : 250, // set 1 for almost no animation
+            fadeOutSpeed : 200, // set 1 for almost no animation
+            imgFadeSpeed : false, // fadespeed of image, false uses fadeInSpeed, 0 for no animation
             disableIeFading : 0, //disable fading in IE6, 7 & 8 to remove the animate opacity + png24 alpha bug
             setContainerWidth :0, //apply img outerwidth to the container-wrapper
             curtainColor : '#000000',
             curtainOpacity : '0.7',
             easeIn : 'swing',
             easeOut : 'swing',
+            yOffset : 0, // offset from window top
             imgClose : false  //close popup when image is clicked
           }, cfg );
 
     var _navSelectors = 'li.next, li.prev',
         _closeSelectors = 'div.ipopup-container li.close a, div.ipopup-curtain, div.ipopup-container',
         _isOpen = false,
-        _ypos = 0,
         _hrefElms = this,
+        _ypos,
         _langIs = $('html').attr('lang') == 'is',
         _nextText = _langIs ? 'Næsta' : 'Next',
         _prevText = _langIs ? 'Fyrri' : 'Previous',
@@ -73,11 +75,10 @@
                 total  : _hrefElms.length
               }),
 
-            _popup = $(_makeHTML),
-            _curtain = $(_curtainTemp),
+            _popup = $(_makeHTML).hide(),
+            _curtain = $(_curtainTemp).hide(),
 
             setWidth = function() {
-              if(cfg.setContainerWidth) {
                 var popupImg = _popup.find('img');
                 popupImg.each(function() {
                     $(this).bind('load readystatechange', function() {
@@ -85,21 +86,18 @@
                       });
                     this.src += ''; //IE force readystate hack
                   })
-              }
             };
 
-        $('body')
-          .append(_curtain)
-          .append(_popup);
 
-
-        _popup.hide();
 
         if(!_isOpen) {
-          _ypos = $(document).scrollTop();
+          $('body')
+            .append(_curtain)
+            .append(_popup);
+          _ypos = $(document).scrollTop() + cfg.yOffset;
           _curtain
               .css({'background-color' : cfg.curtainColor, opacity : '0', 'display' : 'block' })
-              .animate({ opacity : cfg.curtainOpacity }, cfg.fadeInSpeed, cfg.easeIn, function(){
+              .animate({ opacity : cfg.curtainOpacity }, (cfg.fadeInSpeed / 2), cfg.easeIn, function(){
                   _popup
                       .css('top', _ypos)
                       .fadeIn(cfg.fadeInSpeed, cfg.easeIn)
@@ -110,13 +108,17 @@
                               }
                             })
                           .setFocus();
-                  setWidth();
+                  if(cfg.setContainerWidth) { setWidth() };
                 }); // animate in
           _isOpen = true;
         } else {
-          _curtain.css({ 'background-color' : cfg.curtainColor, opacity : cfg.curtainOpacity }).show();
+          $('body').append(_popup);
           _popup
               .css('top', _ypos)
+              .find('img')
+                  .hide()
+                  .fadeIn(cfg.imgFadeSpeed || cfg.fadeInSpeed)
+              .end()
               .show()
               .find('div.ipopup-container-wrapper')
                   .bind('click', function(e) {
@@ -124,7 +126,7 @@
                         e.stopPropagation();
                       }
                     });
-          setWidth();
+          if(cfg.setContainerWidth) { setWidth() };
         }
 
         // next/prev buttons
@@ -140,7 +142,6 @@
                 {
                   $(this)
                       .bind('click', function (e) {
-                          _curtain.remove();
                           _popup.remove();
                           _hrefElms.eq(idx).trigger('click');
                           return false;
@@ -154,7 +155,7 @@
                 _popup.fadeOut(cfg.fadeOutSpeed, function(){
                     _curtain.fadeOut(cfg.fadeOutSpeed, function(){
                         _popup.remove();
-                        _curtain.remove();
+                        $('.ipopup-curtain').remove();
                         _hrefElms.focus();
                     }, cfg.easeOut);
                   }, cfg.easeOut); // animate out
