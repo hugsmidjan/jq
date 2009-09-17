@@ -123,7 +123,7 @@
               methods[doOpen?'open':'close'].call(this, data, extras);
             },
           isOpen: function(data/*, extras */){
-              return data._isOpen;
+              return !!data._isOpen;
             },
           disable: _notImplemented,
           enable:  _notImplemented,
