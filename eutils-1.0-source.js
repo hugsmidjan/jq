@@ -376,7 +376,8 @@
     // Turns $.get/$.ajax responseText HTML document source into a fairly neat <body> element for easy .find()ing
     // Stripping out all nasty <script>s and such things.
     getResultBody: function(responseText) {
-        return $('<body/>').append(
+        //return $('<body/>').append( // <-- this seems to cause crashes in IE8. (Crash doesn't seem to happen on first run)
+        return $('<div/>').append(
                     $(responseText||[])
                         .not('script,title,meta,link,style')
                             .find('script,style')
