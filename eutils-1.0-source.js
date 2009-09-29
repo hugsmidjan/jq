@@ -215,7 +215,7 @@
     zap: function ()
     {
       return this.each(function(){
-          this.parentNode  &&  $(this.childNodes).insertBefore(this);
+          $(this.childNodes).insertBefore(this);
         }).remove();
     },
 
