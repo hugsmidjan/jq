@@ -217,7 +217,7 @@
                                             // FIXME: consider doing more intelligent sensing of from where the focus left, and return it back
                                             $.setFocus(_lastFocusElm):                    // Send focus back into the fickle element
                                             _doClosePopup  &&  $(popup).fickle('close'); // close popup
-                                      }, cfg.trapFocus ? cfg.closeDelay : 0);
+                                      }, cfg.trapFocus ? 0 : cfg.closeDelay);
                     })
                   // make the popup sticky
                   .bind('click mousedown focusin', function (e) {
