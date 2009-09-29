@@ -15,6 +15,7 @@
   var _dummyElm,  // dummy element used by $.setHash();
       _win = window,
       _doc = document,
+      _location = location,
       _browser = $.browser,
       _msie = _browser.msie,
 
@@ -35,8 +36,6 @@
   //
   // The :childof() and :descof() selector expressions make .is(), .closest(), .parents()
   // and other such methods sooo much more interesting...!
-  // these work wonders when combined with $.delegate() (see below)
-  // Example:
   $.extend($.expr[':'], {
 
     is: function (a, i, m) {
@@ -57,7 +56,7 @@
     },
 
     target: function (a, h) {
-      return ( a.id  &&  (h = _doc.location.hash)  &&  h == '#'+a.id );
+      return ( a.id  &&  (h = _location.hash)  &&  h == '#'+a.id );
     }
 
   });
@@ -146,7 +145,7 @@
   }
 
 
-  var findUntil = function(collection, expr, collectAll, goBackwards)
+  var findUntil = function(collection, expr, inclTextNodes, goBackwards)
   {
     var match = [],
         method = (goBackwards ? 'previous':'next')+'Sibling';
@@ -154,7 +153,7 @@
         for (var next = this[method], isElm; next; next = next[method] )
         {
           isElm = (next.nodeType == 1);
-          if ( collectAll || isElm )
+          if ( inclTextNodes || isElm )
           {
             if (isElm && !$(next).not(expr).length )
             {
@@ -171,8 +170,8 @@
 
   $.fn.extend({
 
-    nextUntil: function(expr, collectAll) { return findUntil(this, expr, collectAll); },
-    prevUntil: function(expr, collectAll) { return findUntil(this, expr, collectAll, 1); },
+    nextUntil: function(expr, inclTextNodes) { return findUntil(this, expr, inclTextNodes); },
+    prevUntil: function(expr, inclTextNodes) { return findUntil(this, expr, inclTextNodes, 1); },
 
 
     if_: function (cond)
@@ -216,7 +215,7 @@
     zap: function ()
     {
       return this.each(function(){
-          $(this.childNodes).insertBefore(this);
+          this.parentNode  &&  $(this.childNodes).insertBefore(this);
         }).remove();
     },
 
@@ -420,11 +419,12 @@
     //   jQuery.setHash('#myid');
     setHash: function (_hash)
     {
-      _hash = _hash.replace(/^#/, '');
-      var _elm = $('#'+_hash)[0];
+      _hash = _hash.replace(/^#?/, '#');
+      // check if there exists an element with .id same as _hash
+      var _elm = $(_hash)[0];
       if (_elm)
       {
-        // temporaily defuse the section block's id
+        // temporaily defuse the element's id
         _elm.id = '';
         // then insert and position a hidden dummy element to make sure that
         //   a) the hash-change populates the browser's history buffer.
@@ -435,7 +435,8 @@
             .css('top', $.scroll().top)
             .appendTo(_doc.body);
       }
-      _doc.location.hash = _hash;  // set the damn hash...
+      _location.hash = _hash;  // set the damn hash...
+      //_location.href = _location.href.replace( /#.*$/, '' ) + _hash;  // set the damn hash... (Note: Safari 3 & Chrome barf if frag === '#'.)
       if (_elm)
       {
         _dummyElm[0].id = "";
