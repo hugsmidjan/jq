@@ -419,9 +419,9 @@
     //   jQuery.setHash('#myid');
     setHash: function (_hash)
     {
-      _hash = _hash.replace(/^#?/, '#');
+      _hash = _hash.replace(/^#/, '');
       // check if there exists an element with .id same as _hash
-      var _elm = $(_hash)[0];
+      var _elm = $('#'+_hash)[0];
       if (_elm)
       {
         // temporaily defuse the element's id

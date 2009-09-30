@@ -12,14 +12,14 @@
   $.event.special.fragment = {
     setup : function () {
       //data = $.extend({ speed: hover.speed, delay: hover.delay, hovered:0 }, data||{} );
-  		//$.event.add( this, "mouseenter mouseleave", hoverHandler, data );
+      //$.event.add( this, "mouseenter mouseleave", hoverHandler, data );
     },
     teardown : function () {
       $.event.remove( this, "mouseenter mouseleave", hoverHandler );
     }
   };
-  
-  
+
+
   fragment: (function(){
     var _lastFragment = _docLoc.hash,
         _fragmentMonitor;
@@ -29,8 +29,8 @@
         if (_isFirst && _object === _doc)
         {
           _fragmentMonitor = setInterval(function(){
-            // NOTE: this only detects forward motion in IE6. 
-            //        Navigating back updates the address in the address bar, 
+            // NOTE: this only detects forward motion in IE6.
+            //        Navigating back updates the address in the address bar,
             //        but doesn't update the document.location object.
             // NOTE: navigating back through fragments in IE7 doesn't update the "forward" history buffer.
             if (_docLoc.hash != _lastFragment)
@@ -47,9 +47,9 @@
       }
     };
   })()
-  
+
 */
-  
+
   // ===  internal variables  ===
 
   var _cookieTargets,
@@ -71,15 +71,15 @@
 
       closePanel = function ( id )
       {
-    
+
         // grab the panel
         var panel = $( '#' + id );
         var data  = panel.data( 'tabswitcher' );
         var c = data.config;
-    
+
         // de-highlight the tab
         data.tab.removeClass( c.currentTabClass );
-    
+
         // unwrap the `currentTabTag` element if it exists
         if ( c.currentTabTag ) {
           var w = data.tab.find( c.currentTabTag );
@@ -89,7 +89,7 @@
             w.remove();
           }
         }
-    
+
         // hide the tabPanel block
         if (c.cssHide) {
           panel.addClass( c.hiddenPaneClass );
@@ -97,10 +97,10 @@
         else {
           panel.hide();
         }
-    
+
         if (c.openTabId == id) { delete c.openTabId; }
         delete _openTabs[id];
-    
+
         data.block.trigger( 'Tabclose', id );
         panel.trigger( 'Panelclose', id );
 
@@ -114,17 +114,17 @@
         var panel = $( '#' + id );
         var data  = panel.data( 'tabswitcher' );
         var c = data.config;
-    
+
         // highlight the tab
         data.tab.addClass( c.currentTabClass );
-    
+
         // add new STRONG to current tab
         // but don't add strong to tabs that already have it
         if ( c.currentTabTag  &&  !$( c.currentTabTag, data.link ).length )
         {
           data.link.wrapInner('<'+ c.currentTabTag +'/>');
         }
-    
+
         // hide the tabPanel block
         if ( c.cssHide ) {
           panel.removeClass( c.hiddenPaneClass );
@@ -132,10 +132,10 @@
         else {
           panel.show();
         }
-        
+
         c.openTabId = id;
         _openTabs[id] = true;
-    
+
         data.block.trigger( 'Tabopen', id );
         panel.trigger( 'Panelopen', id );
 
@@ -143,7 +143,7 @@
 
 
 
-      // event delegate monitor that grabs 
+      // event delegate monitor that grabs
       // FIXME: Finish this comment...
       crossReferenceMonitor = function ( e )
       {
@@ -164,7 +164,7 @@
       // fragment monitoring system
       _lastSetFragment = null,
       _fragmentsToMonitor = {},
-    
+
       monitorFragment = function ( e ) {
         var _currentFragment = document.location.hash.substr(1);
         if ( _lastSetFragment != _currentFragment  &&  _fragmentsToMonitor[_currentFragment] ) {
@@ -174,10 +174,10 @@
       },
 
       startFragmentMonitoring = function () {
-        
+
       };
 
-      
+
 /*
       _prepModule = function (e) {
         var _cookie = tabSwitcher.cookieName && cookieU.getValue(tabSwitcher.cookieName);
@@ -218,20 +218,20 @@
 
 
 */
-  
+
 
   $.extend({
     tabSwitcher : {
-      
+
       version : 1.0,
-      
+
       fixInitScroll : true,
 
       // the tabswitcher keeps the current status of tabs in a 20 minute session if this is set
       cookieName       : 'tabswitcher',    // tabs status cookie state  - setting this to "" will disable it's use
       cookiePath       : '/',              // set to '' to set a unique cookie for each page.
       cookieTTL        : 1200,             // Number of seconds before we forget the tab-satus  (1200 sec / 60 = 20 min)
-      
+
       defaultConfig : {
         tabSelector      : 'li',
         stripActiveClass : 'tabs-active',
@@ -254,14 +254,14 @@
           backLinkText     : 'Back to '
         }
       },
-      
+
       i18n : function ( txt, lang ) { return txt; },
-      
-      
+
+
       // public method for manually setting/swicthing tabs.
       // newTab may be either string or a link element
       switchTo : function ( _newTab, silentSwitch ) {
-        
+
         var id     = getHash( _newTab.href || _newTab ), // accepts: linkElm, URL, DOM-id
             panel  = $( '#' + id ),
             d      = panel.data( 'tabswitcher' ),
@@ -294,7 +294,7 @@
               _lastSetFragment = id;
               $.setHash( id );
             }
-            if (d.focusLink) 
+            if (d.focusLink)
               d.focusLink.trigger('focus');
           }
 
@@ -305,7 +305,7 @@
           });
         }
       }
-      
+
     }
   });
 
@@ -346,7 +346,7 @@
             link.trigger('focus');
             return false;
           };
-        
+
           if (panel.length)
           {
 
@@ -391,19 +391,19 @@
             }
 
             data.link.bind('click', function (e) {
-              $.tabSwitcher.switchTo( this ); 
+              $.tabSwitcher.switchTo( this );
               return false;
             });
             closePanel( id );
 
-            // register all tab id's 
+            // register all tab id's
             _allTabIds[id] = true;
-            
+
             // register tab id's to monitor
             if (_conf.monitorFragment) {
               _fragmentsToMonitor[id] = true;
             }
-            
+
             panel
                 .bind('Tabswitch', function (e){
                     if (e.target !== this) {
@@ -419,7 +419,7 @@
 
       // open and activate
       block.addClass( _conf.stripActiveClass );
-      if (openTabId) 
+      if (openTabId)
       {
         // schedule for opening when _setParentTabTriggers has finished running
         _tabsToOpen[openLevel-1].unshift( openTabId );
@@ -446,7 +446,7 @@
         $.tabSwitcher.switchTo( tabId, true );
       }
     }
-    
+
     return this;
 
   }; // tabswitcher
@@ -484,7 +484,7 @@
           refLang = paneParent.closest('[lang]').attr('lang') || '';
 
       paneParent.attr('lang', refLang);  // to speed up lookup of paneLang later.
- 
+
       tabPanes
           .each(function(){
               var newTab = conf.makeTab(this, conf),
