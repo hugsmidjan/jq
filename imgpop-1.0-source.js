@@ -10,7 +10,7 @@
     cfg = $.extend({
             fadeInSpeed : 250, // set 1 for almost no animation
             fadeOutSpeed : 200, // set 1 for almost no animation
-            imgFadeSpeed : false, // fadespeed of image, false uses fadeInSpeed, 0 for no animation
+            imgFadeSpeed : false, // fadespeed of popup image, false uses fadeInSpeed, 1 for no animation
             disableIeFading : 0, //disable fading in IE6, 7 & 8 to remove the animate opacity + png24 alpha bug
             setContainerWidth :0, //apply img outerwidth to the container-wrapper
             curtainColor : '#000000',
@@ -163,9 +163,15 @@
                 return false;
               });
 
-        $(window).keypress( function(e) {
+        $(window).keyup( function(e) {
             if( e.keyCode == 27 ) {
                 _curtain.trigger('click'); // close on esc
+            }
+            if( e.keyCode == 37 ) {
+                $(_navSelectors, _popup).filter('.prev').trigger('click');  // prev image
+            }
+            if( e.keyCode == 39 ) {
+                $(_navSelectors, _popup).filter('.next').trigger('click');  // next image
             }
         });
 
