@@ -1,7 +1,9 @@
 /*
   TODO: Fix back-navigation jumpyness in IE7 when `monitorFragment=true`
 
-  Requires jQuery 1.3 or better (event bubbling)
+  Requires
+   * jQuery 1.3 or better (event bubbling)
+   * Eutils ($.setHash)
 */
 
 (function($){

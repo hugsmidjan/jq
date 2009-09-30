@@ -15,7 +15,7 @@
   var _dummyElm,  // dummy element used by $.setHash();
       _win = window,
       _doc = document,
-      _location = location,
+      _location = _doc.location,
       _browser = $.browser,
       _msie = _browser.msie,
 

@@ -49,6 +49,7 @@
       isOpen   .fickle('isOpen')      // returns boolean value for the first item in the collection
 
   FIXME:
+    * In MSIE6&7 clicking the scrollbar closes the window.
     * Fickle element has focus, user switches to another application and then switches back by clicking outside the fickle element.
     * Consider using $.ui.widget() to make code more compact
 
