@@ -168,10 +168,10 @@
                 _curtain.trigger('click'); // close on esc
             }
             if( e.keyCode == 37 ) {
-                $(_navSelectors, _popup).filter('.prev').trigger('click');  // prev image
+                $('.paging .prev', _popup).not('.nav-end').trigger('click');  // prev image
             }
             if( e.keyCode == 39 ) {
-                $(_navSelectors, _popup).filter('.next').trigger('click');  // next image
+                $('.paging .next', _popup).not('.nav-end').trigger('click');  // next image
             }
         });
 
