@@ -837,7 +837,7 @@ $.extend($.av.type, {
       }
 
       // insert the cleaned up creditcard number back into the field
-      // $( this ).val( ccNum ); 
+      $( this ).val( ccNum ); 
       var checkSum = 0,
           item,
            i = ccNum.length;
