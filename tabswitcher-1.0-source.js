@@ -57,7 +57,7 @@
       _inEventPhase = false,
       _openTabs = {},  // a list of all currently active tabs
       _allTabIds = {},
-      _tabsToOpen;
+      _tabsToOpen,
 
 
   // ===  internal support functions  ===
@@ -85,7 +85,7 @@
           var w = data.tab.find( c.currentTabTag );
           if ( w.length ) {
             var p = data.link[0];
-            while (w[0].firstChild) { p.appendChild(w[0].firstChild); };
+            while (w[0].firstChild) { p.appendChild(w[0].firstChild); }
             w.remove();
           }
         }
@@ -294,8 +294,9 @@
               _lastSetFragment = id;
               $.setHash( id );
             }
-            if (d.focusLink)
+            if (d.focusLink) {
               d.focusLink.trigger('focus');
+            }
           }
 
           // Note: we always fire the event... even if the new tab was already open
@@ -355,19 +356,21 @@
 
 
             // Accessibility: Add a focusAnchor (+ "return to tab" link) to the top of the _tabPanelElm.
-            if (_conf.focusLinkTemplate)
+            if (_conf.focusLinkTemplate) {
               data.focusLink = $( _conf.focusLinkTemplate )
                                       .attr( 'href', '#'+id )
                                       .attr( 'title', backtxt )
                                       .bind( 'click', returnToTab )
                                       .prependTo( panel );
+            }
             // Add a second "return to tab" link to the bottom of the _tabPanelElm.
-            if (_conf.returnLinkTemplate)
+            if (_conf.returnLinkTemplate) {
               data.returnLink = $( _conf.returnLinkTemplate )
                                       .attr( 'href', '#'+id )
                                       .attr( 'title', backtxt )
                                       .bind( 'click', returnToTab )
                                       .appendTo( panel );
+            }
 
             // DEFAULT: we don't have an id to open and are on the first item -- set that by default
             if (!i  &&  !openTabId  &&  _conf.showFirst) {
@@ -411,7 +414,7 @@
                     }
                   })
                 // todo: ... consider moving this to document
-                .bind('click', crossReferenceMonitor )
+                .bind('click', crossReferenceMonitor );
 
           }
 
