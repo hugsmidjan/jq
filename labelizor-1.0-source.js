@@ -23,21 +23,20 @@
         _labelFilter = cfg.labelFilter;
 
     return this.each(function(){
+        var _this = this,
+            _jQthis = $(_this);
 
-        var _this = this;
-
-          ;;;window.console&&console.log( _this.id, $('label') );
-        if (_this.id || _this.title  &&  $(_this).is(':text, textarea'))
+        if ( _this.id || _this.title  &&  _jQthis.is(':text, textarea') )
         {
           var _labelText = cfg.labelText,
-               // use $(this).parents(':last') as scope/context to also .find() <label> inside .detached() document fragments
-               _label = (_labelText || _hideClass)  &&  $(_this).parents(':last').add('html')
+               // use _jQthis.parents(':last') as scope/context to also .find() <label> inside .detached() document fragments
+               _label = (_labelText || _hideClass)  &&  _jQthis.parents('form:first').add( _jQthis.parents(':last') )
                                                             .find('label[for="'+_this.id+'"]:first')
-                                                            .addClass(_hideClass),
+                                                                .addClass(_hideClass),
               _removeLabelValue = function (e) {
                   if (_this.value == _labelText) {
                     _this.value = '';
-                    $(_this).removeClass(_blurClass);
+                    _jQthis.removeClass(_blurClass);
                   }
                 };
 
@@ -50,7 +49,7 @@
             _labelText = $.trim( (_labelText || _this.title).replace(cfg.lRe||/(\*|:[\W\S]*$)/g, cfg.lPlace||'') );
           }
 
-          $(_this)
+          _jQthis
               .attr('title', _labelText)
               .bind('focus', function (e) {
                   _removeLabelValue();
@@ -58,14 +57,14 @@
               .bind('blur', function (e) {
                   if (!_this.value) {
                     _this.value = _labelText;
-                    $(_this).addClass(_blurClass);
+                    _jQthis.addClass(_blurClass);
                   }
                 });
 
           if (!_this.getAttribute('value')) // note: using _this.value would cause problems when the user leaves the page and then history back/forward.
           {
             _this.value = _labelText;
-            $(_this).addClass(_blurClass);
+            _jQthis.addClass(_blurClass);
           }
               
           $(_this.form).bind('submit', _removeLabelValue);
