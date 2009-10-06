@@ -574,7 +574,6 @@ var Cufon = (function() {
 	function merge() {
 		var merged = {}, arg, key;
 		for (var i = 0, l = arguments.length; arg = arguments[i], i < l; ++i) {
-			if (!arg) continue;
 			for (key in arg) {
 				if (hasOwnProperty(arg, key)) merged[key] = arg[key];
 			}
@@ -702,7 +701,11 @@ var Cufon = (function() {
 	};
 
 	var separators = {
-		words: /[^\S\u00a0]+/,
+		// The first pattern may cause unicode characters above
+		// code point 255 to be removed in Safari 3.0. Luckily enough
+		// Safari 3.0 does not include non-breaking spaces in \s, so
+		// we can just use a simple alternative pattern.
+		words: /\s/.test('\u00a0') ? /[^\S\u00a0]+/ : /\s+/,
 		characters: '',
 		none: /^/
 	};
@@ -744,10 +747,13 @@ var Cufon = (function() {
 		}
 		if (options.hover) options.forceHitArea = true;
 		if (options.autoDetect) delete options.fontFamily;
-		if (typeof options.textShadow == 'string')
+		if (typeof options.textShadow == 'string') {
 			options.textShadow = CSS.textShadow(options.textShadow);
-		if (typeof options.color == 'string' && /^-/.test(options.color))
+		}
+		if (typeof options.color == 'string' && /^-/.test(options.color)) {
 			options.textGradient = CSS.gradient(options.color);
+		}
+		else delete options.textGradient;
 		if (!ignoreHistory) replaceHistory.add(elements, arguments);
 		if (elements.nodeType || typeof elements == 'string') elements = [ elements ];
 		CSS.ready(function() {
@@ -840,7 +846,7 @@ Cufon.registerEngine('canvas', (function() {
 
 		var redraw = (text === null);
 
-		if (redraw) text = node.alt;
+		if (redraw) text = node.getAttribute('alt');
 
 		var viewBox = font.viewBox;
 
@@ -884,7 +890,7 @@ Cufon.registerEngine('canvas', (function() {
 		else {
 			wrapper = document.createElement('cufon');
 			wrapper.className = 'cufon cufon-canvas';
-			wrapper.alt = text;
+			wrapper.setAttribute('alt', text);
 
 			canvas = document.createElement('canvas');
 			wrapper.appendChild(canvas);
