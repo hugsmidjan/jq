@@ -1,3 +1,4 @@
+// $.easing.ease(In|Out|InOut)  -- GPL/MIT Licence
 jQuery.extend(jQuery.easing, {
 
   easeIn: function (x, t, b, c, d) { // easeInQuad from jquery.easing.js

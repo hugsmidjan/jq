@@ -1,5 +1,5 @@
 /*!
- * jQuery JavaScript Library v1.3.2
+ * jQuery JavaScript Library v1.3.2 (with Sizzle.selectors.filters.[visible|hidden] transplanted from the nightlies)
  * http://jquery.com/
  *
  * Copyright (c) 2009 John Resig
@@ -2366,13 +2366,22 @@ jQuery.filter = Sizzle.filter;
 jQuery.expr = Sizzle.selectors;
 jQuery.expr[":"] = jQuery.expr.filters;
 
+
+// BEGIN: Transplant from jQuery nightly
 Sizzle.selectors.filters.hidden = function(elem){
-	return elem.offsetWidth === 0 || elem.offsetHeight === 0;
+	var width = elem.offsetWidth, height = elem.offsetHeight,
+		 force = /^tr$/i.test( elem.nodeName ); // ticket #4512
+	return ( width === 0 && height === 0 && !force ) ?
+		true :
+			( width !== 0 && height !== 0 && !force ) ?
+				false :
+					!!( jQuery.curCSS(elem, "display") === "none" );
 };
 
 Sizzle.selectors.filters.visible = function(elem){
-	return elem.offsetWidth > 0 || elem.offsetHeight > 0;
+	return !Sizzle.selectors.filters.hidden(elem);
 };
+// END: Transplant from jQuery nightly
 
 Sizzle.selectors.filters.animated = function(elem){
 	return jQuery.grep(jQuery.timers, function(fn){

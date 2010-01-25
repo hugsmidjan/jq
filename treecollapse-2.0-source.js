@@ -1,3 +1,12 @@
+// encoding: utf-8
+// ----------------------------------------------------------------------------------
+// jQuery.fn.treeCollapse v 2.0
+// ----------------------------------------------------------------------------------
+// (c) 2009 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+//  written by:
+//   * Már Örlygsson        -- http://mar.anomy.net
+// ----------------------------------------------------------------------------------
+
 // Handle collapse functionality of a navigaion tree.
 //
 // Todo:
@@ -7,8 +16,8 @@
 // version: 2.0.0
 //
 //  Requires:
-//    * $.delegate plugin
-//    * if_ ... else_ plugin
+//    * jQuery 1.3+
+//    * eutils (if_)
 //
 jQuery.fn.treeCollapse = function (cfg)
 {
@@ -56,50 +65,55 @@ jQuery.fn.treeCollapse = function (cfg)
       .addClass(cfg.rootClass)
       .if_(cfg.doSelect)
           .each(function(){ // closure to scope _selBranch for each individual tree
-              var _selBranch = $(this).find(cfg.leaf+'.'+_selectClass).eq(0);
-              $(this)
-                  .delegate(cfg.leaf, 'click', function(e) { // delegated event handling
-                  
-                      var _thisBranch = _branch || '#'+this.id;
-
-                      if (_selBranch.length)
+              var boxElm = $(this),
+                  _selBranch = $(boxElm).find(cfg.leaf+'.'+_selectClass).eq(0);
+              $(boxElm)
+                  .bind('click', function(e) { // delegated event handling
+                      var leaf = $(e.target).closest(cfg.leaf);
+                      if ( leaf[0]  &&  leaf[0] !== _selBranch[0] )
                       {
-                        _selBranch
-                            .removeClass(_selectClass)
-                            .parents(_thisBranch)
-                                .removeClass(_parentClass);
-                      }
-                      _selBranch = $(e.delegate);
-                      _selBranch
-                          .addClass(_selectClass)
-                          .parents(_thisBranch)
-                              .addClass(_parentClass);
+                        var _thisBranch = _branch || '#'+boxElm.id;
 
+                        if (_selBranch.length)
+                        {
+                          _selBranch
+                              .removeClass(_selectClass)
+                              .parents(_thisBranch)
+                                  .removeClass(_parentClass);
+                        }
+                        _selBranch = leaf;
+                        _selBranch
+                            .addClass(_selectClass)
+                            .parents(_thisBranch)
+                                .addClass(_parentClass);
+                      }
                     });
 
             })
       .end()
       .each(function(){
-          var _thisBranch = _branch || '#'+this.id;
-          $(this)
-              .delegate(_thisBranch+' '+cfg.toggler, 'click', function(e) { // delegated event handling
+          var boxElm = this,
+              _thisBranch = _branch || '#'+boxElm.id;
+          $(boxElm)
+              .bind('click', function(e) { // delegated event handling
+                  if ( $(e.target).closest(_thisBranch+' '+cfg.toggler)[0] )
+                  {
+                    var _theBranch = $(e.target).closest(_thisBranch),
+                        _doOpen = _theBranch.hasClass(_closedClass);
 
-                  var _theBranch = $(e.delegate).parents(_thisBranch).eq(0),
-                      _wasClosed = _theBranch.hasClass(_closedClass);
+                    $(this)
+                        .trigger('Branch'+(_doOpen?'Open':'Close'), { branch: _theBranch[0] });
 
-                  $(this)
-                      .trigger('Branch'+(_wasClosed?'Open':'Close'), { branch: _theBranch[0] });
+                    _theBranch
+                        .toggleClasses(_openClass, _closedClass)
+                        .if_(_doTogglers)
+                            .find(_togglerInt)
+                                .text(_doOpen ? _togglerMinus : _togglerPlus );
+                            //.end();
+                        //.end();
 
-                  _theBranch
-                      .toggleClasses(_openClass, _closedClass)
-                      .if_(_doTogglers)
-                          .find(_togglerInt)
-                              .text(_wasClosed ? _togglerMinus : _togglerPlus );
-                              
-                          //.end();
-                      //.end();
-
-                  return false;
+                    return false;
+                  }
                 });
         });
 

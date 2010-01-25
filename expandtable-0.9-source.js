@@ -1,3 +1,14 @@
+// encoding: utf-8
+// ----------------------------------------------------------------------------------
+// jQuery.fn.expandTable v 1.0
+// ----------------------------------------------------------------------------------
+// (c) 2009 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+//  written by:
+//   * Már Örlygsson             -- http://mar.anomy.net
+//   * Borgar Þorsteinsson       -- http://borgar.undraland.com
+//   * Einar Kristján Einarsson  -- einarkristjan (at) gmail.com
+// ----------------------------------------------------------------------------------
+
 // usage:
 //   $('div.persona').expandTable( options );
 // 

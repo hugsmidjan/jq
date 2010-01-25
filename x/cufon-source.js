@@ -356,17 +356,25 @@ var Cufon = (function() {
 		this.height = -this.ascent + this.descent;
 
 		this.spacing = function(chars, letterSpacing, wordSpacing) {
-			var glyphs = this.glyphs, glyph, kerning, k,
-				jumps = [], width = 0,
+			var glyphs = this.glyphs, glyph,
+				kerning, k,
+				jumps = [],
+				width = 0, w,
 				i = -1, j = -1, chr;
 			while (chr = chars[++i]) {
 				glyph = glyphs[chr] || this.missingGlyph;
 				if (!glyph) continue;
 				if (kerning) {
 					width -= k = kerning[chr] || 0;
-					jumps[j - 1] -= k;
+					jumps[j] -= k;
 				}
-				width += jumps[++j] = ~~(glyph.w || this.w) + letterSpacing + (wordSeparators[chr] ? wordSpacing : 0);
+				w = glyph.w;
+				if (isNaN(w)) w = +this.w; // may have been a String in old fonts
+				if (w > 0) {
+					w += letterSpacing;
+					if (wordSeparators[chr]) w += wordSpacing;
+				}
+				width += jumps[++j] = ~~w; // get rid of decimals
 				kerning = glyph.k;
 			}
 			jumps.total = width;
@@ -428,13 +436,19 @@ var Cufon = (function() {
 	function HoverHandler() {
 
 		function contains(node, anotherNode) {
-			if (node.contains) return node.contains(anotherNode);
-			return node.compareDocumentPosition(anotherNode) & 16;
+			try {
+				if (node.contains) return node.contains(anotherNode);
+				return node.compareDocumentPosition(anotherNode) & 16;
+			}
+			catch(e) {} // probably a XUL element such as a scrollbar
+			return false;
 		}
 
 		function onOverOut(e) {
 			var related = e.relatedTarget;
-			if (!related || contains(this, related)) return;
+			// there might be no relatedTarget if the element is right next
+			// to the window frame
+			if (related && contains(this, related)) return;
 			trigger(this, e.type == 'mouseover');
 		}
 
@@ -662,6 +676,7 @@ var Cufon = (function() {
 			head: 1,
 			iframe: 1,
 			map: 1,
+			noscript: 1,
 			optgroup: 1,
 			option: 1,
 			script: 1,
@@ -678,6 +693,7 @@ var Cufon = (function() {
 				window.Sizzle
 			||	(window.jQuery && function(query) { return jQuery(query); }) // avoid noConflict issues
 			||	(window.dojo && dojo.query)
+			||	(window.glow && glow.dom && glow.dom.get)
 			||	(window.Ext && Ext.query)
 			||	(window.YAHOO && YAHOO.util && YAHOO.util.Selector && YAHOO.util.Selector.query)
 			||	(window.$$ && function(query) { return $$(query); })
@@ -797,7 +813,7 @@ Cufon.registerEngine('canvas', (function() {
 			(HAS_BROKEN_LINEHEIGHT
 				? ''
 				: 'font-size:1px;line-height:1px;') +
-			'}cufon cufontext{display:-moz-inline-box;display:inline-block;width:0;height:0;overflow:hidden;text-indent:-10000in;}' +
+			'}cufon cufontext{display:-moz-inline-box;display:inline-block;width:0;height:0;text-indent:-10000in;}' +
 			(HAS_INLINE_BLOCK
 				? 'cufon canvas{position:relative;}'
 				: 'cufon canvas{position:absolute;}') +
@@ -1029,8 +1045,7 @@ Cufon.registerEngine('vml', (function() {
 	// Original by Dead Edwards.
 	// Combined with getFontSizeInPixels it also works with relative units.
 	function getSizeInPixels(el, value) {
-		if (value === '0') return 0;
-		if (/px$/i.test(value)) return parseFloat(value);
+		if (!isNaN(value) || /px$/i.test(value)) return parseFloat(value);
 		var style = el.style.left, runtimeStyle = el.runtimeStyle.left;
 		el.runtimeStyle.left = el.currentStyle.left;
 		el.style.left = value.replace('%', 'em');
@@ -1058,7 +1073,7 @@ Cufon.registerEngine('vml', (function() {
 			fill.type = 'gradient';
 			fill.angle = 180;
 			fill.focus = '0';
-			fill.method = 'sigma';
+			fill.method = 'none';
 			fill.color = stops[0][1];
 			for (var j = 1, k = stops.length - 1; j < k; ++j) {
 				colors.push(stops[j][0] * 100 + '% ' + stops[j][1]);

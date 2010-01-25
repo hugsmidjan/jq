@@ -1,4 +1,14 @@
-// Requires jQuery 1.2.6 or 1.3
+// encoding: utf-8
+// ----------------------------------------------------------------------------------
+// jQuery.fn.zebraLists v 1.0
+// ----------------------------------------------------------------------------------
+// (c) 2009 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+//  written by:
+//   * Már Örlygsson        -- http://mar.anomy.net
+//   * Borgar Þorsteinsson  -- http://borgar.undraland.com
+// ----------------------------------------------------------------------------------
+
+// Requires jQuery 1.2.6 +
 //
 // Add the class "odd" to every other item in selected element lists.
 // Offers a selector for items to exclude and reset the zebra-striping effect.
@@ -65,3 +75,5 @@
 
   
 })(jQuery);
+
+

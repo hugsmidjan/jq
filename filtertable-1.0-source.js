@@ -1,7 +1,13 @@
 // encoding: utf-8
+// ----------------------------------------------------------------------------------
+// jQuery.fn.filterTable v 1.0
+// ----------------------------------------------------------------------------------
+// (c) 2009 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+//  written by:
+//   * Már Örlygsson        -- http://mar.anomy.net
+// ----------------------------------------------------------------------------------
 
 (function($, undefined){
-
 
 
 /*
@@ -329,7 +335,9 @@
 
                   headRows = isTHeadEmpty ? bodyRows.eq(0) : headRows;
                   headRows.each(function(){
-                      var colIdx = 0;
+                      var colIdx = 0,
+                          B = $.browser,
+                          msie67 = B.msie  &&  parseInt(B.version, 10);
                       $('>*', this).each(function(__x__, tCell){
                           while (colHeadRowSpans[colIdx])
                           {
@@ -339,6 +347,8 @@
                           // insert the current column-cell into the list of headers.
                           var span = _getCellSpan(tCell),
                               colspan = span.cols;
+                          // because old MSIEs report incorrect rowspans for cells with rowSpan greater than the number of remaining rows.
+                          msie67  &&  $(tCell).attr('rowspan', span.rows); 
                           colHeaders[colIdx] = tCell; // always enforce first cell
                           while (colspan--)
                           {

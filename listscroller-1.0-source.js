@@ -1,3 +1,14 @@
+// encoding: utf-8
+// ----------------------------------------------------------------------------------
+// jQuery.fn.zebraLists v 1.0
+// ----------------------------------------------------------------------------------
+// (c) 2009 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+//  written by:
+//   * Borgar Þorsteinsson  -- http://borgar.undraland.com
+//   * Már Örlygsson        -- http://mar.anomy.net
+//   * Valur Sverrisson     
+// ----------------------------------------------------------------------------------
+
 // todo : set position to list element / page that reports focus (BT: WTF does that even mean?)
 // todo : automove => slideshow, marquee
 // todo : callback function when animation finishes ( no hold, pending use )

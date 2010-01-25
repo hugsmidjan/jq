@@ -1,6 +1,14 @@
-/*
-  jQuery.fn.anchorTags
+// encoding: utf-8
+// ----------------------------------------------------------------------------------
+// jQuery.fn.anchorTags v 1.0
+// ----------------------------------------------------------------------------------
+// (c) 2009 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+//  written by:
+//   * Már Örlygsson        -- http://mar.anomy.net
+//   * Borgar Þorsteinsson  -- http://borgar.undraland.com
+// ----------------------------------------------------------------------------------
 
+/*
   Runs through all the links in a webpage an adds class tags
   to links notifying on their role.
 
@@ -25,8 +33,8 @@
       port = location.port;
 
   var anchorTags = $.fn.anchorTags = function (config) {
-      var links = this,
-          i = this.length;
+      var links = this.filter('[href]'),
+          i = links.length;
       if (i)
       {
         var cfg = $.extend({ patterns:{} }, anchorTags.config),
@@ -53,46 +61,51 @@
         config.patterns = patterns;
         localDomains = localDomains.concat(cfg.baseDomains);
 
-        _locreg = new RegExp( '^([a-z]{3,12}):\/\/('+ localDomains.join('|').replace( /\./g,'\.' ).replace( /\\\\\./g, '.' ) + ')(/|$)', 'i' );
+        _locreg = new RegExp( '^([a-z]{3,12}):\/\/('+ localDomains.join('|').replace( /\./g,'\.' ).replace( /\\\./g, '.' ) + ')(/|$)', 'i' );
         while (i--)
         {
           var linkElm = links[i],
               link = $(linkElm),
               _href = linkElm.href,
-              _isExternal = 0;
+              _isExternal = 0,
+              _protocol = linkElm.protocol;
 
 
-          if (linkElm.protocol == 'mailto:') // mailto links
+          if (_protocol == 'mailto:') // mailto links
           {
             link.addClass(cfg.emailClass);
           }
           else
           {
-            if (linkElm.protocol) // has protocol?
+            if (!/^(javascript|data):/.test(_protocol)) // javascript: and data: urls are not tagged as either internal or external. Essentially they're in a category of their own...
             {
-              var _isHttps = linkElm.protocol == 'https:';
-                  _isHttp = linkElm.protocol == 'http:';
-              // secure http protocol
-              if (_isHttps)
+              if (_protocol) // has protocol?
               {
-                link.addClass(cfg.secureClass);
+                var _isHttps = _protocol == 'https:',
+                    _isHttp  = _protocol == 'http:';
+
+                // secure http protocol
+                if (_isHttps)
+                {
+                  link.addClass(cfg.secureClass);
+                }
+                if (cfg.externalClass  &&  (
+                    // is http(s) and doesn't match the defined localDomains
+                    ((_isHttp || _isHttps) && !_locreg.test(_href))  ||
+                    // non http(s) protocol == external link. (Except we assume that when both protocols are equal they're "file:" and page is being developed locally)
+                    (!_isHttp && !_isHttps  &&  location.protocol != _protocol )
+                   ))
+                {
+                  link.addClass(cfg.externalClass);
+                  _isExternal = 1;
+                }
               }
-              if (cfg.externalClass  &&  (
-                  // is http(s) and doesn't match the defined localDomains
-                  ((_isHttp || _isHttps) && !_locreg.test(_href))  ||
-                  // non http(s) protocol == external link. (Except we assume that when both protocols are equal they're "file:" and page is being developed locally)
-                  (!_isHttp && !_isHttps  &&  location.protocol != linkElm.protocol )
-                 ))
+              // internal/same-page fragment links
+              if (!_isExternal && cfg.internalClass)
               {
-                link.addClass(cfg.externalClass);
-                _isExternal = 1;
+                _freg = _freg || new RegExp( "^("+location.toString().replace(/^https?:/, 'https?:').split('#')[0].replace( /\./g,'\.' )+")?#.", 'i' );
+                _freg.test(_href)  &&  link.addClass(cfg.internalClass);
               }
-            }
-            // internal/same-page fragment links
-            if (!_isExternal && cfg.internalClass)
-            {
-              _freg = _freg || new RegExp( "^("+location.toString().replace(/^https?:/, 'https?:').split('#')[0].replace( /\./g,'\.' )+")?#.", 'i' );
-              _freg.test(_href)  &&  link.addClass(cfg.internalClass);
             }
 
             for (var key in cfg.patterns)
@@ -111,8 +124,8 @@
 
         } // end while
 
-        return this;
       }
+      return this;
     };
 
 

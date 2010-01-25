@@ -1,3 +1,12 @@
+// encoding: utf-8
+// ----------------------------------------------------------------------------------
+// jQuery.fn.fickle v 1.0
+// ----------------------------------------------------------------------------------
+// (c) 2009 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+//  written by:
+//   * Már Örlygsson        -- http://mar.anomy.net
+// ----------------------------------------------------------------------------------
+
 /*
   Depends on eutils:
       $.fn.setFocus()
@@ -57,11 +66,12 @@
 
 (function($, undefined){
 
-  var _wasEventSuccessful = function(collection, type, evExtras){
+  var _triggerEvent = function(collection, type, cfg){
           // NOTE: `collection` must only contain one item - otherwise shared-event-object-weirdness ensues.
-          var e = $.Event(type);
-          evExtras && $.extend(e, evExtras);
-          collection.trigger(e); // this will bubble! ...unless handlers call e.stopPropagation()!
+          var e = $.Event(fickle+type);
+          e.cfg = cfg;
+          e.stopPropagation();
+          collection.trigger(e);
           return !e.isDefaultPrevented();
         },
 
@@ -75,43 +85,48 @@
           clearTimeout(_popuplock);
         },
 
-      _notImplemented = function(/* data, extras */){ alert('method not implemented yet.'); },
+    /**
+      _notImplemented = function(data, extras){ alert('method not implemented yet.'); },
+    /**/
 
       methods = { // inside method functions `this` is the fickle element jQuery collection.
           open: function (data, extras) {
               var cfg = data.c;
               cfg.opener = (extras && extras.opener) || cfg.opener;
-              if ( !data._isOpen  &&  _wasEventSuccessful(this, fickle+'open', { cfg: cfg }) )
+              if ( !data._isOpen  &&  _triggerEvent(this, 'open', cfg) )
               {
-                cfg.fickle && $(_document).bind('focusin', data._confirmFocusLeave);
+                data._gotFocus = undefined;
+                cfg.fickle  &&  $(_document).bind('focusin', data._confirmFocusLeave);
                 cfg.closeOnEsc  &&  $(_document).bind('keydown', data._listenForEsc);
                 data._isOpen = !0;// true
+                cfg.fadein  &&  this.fadeIn(cfg.fadein); // because .fadeIn(0) !== .show()
                 this
-                    .fadeIn(cfg.fadein||0) // assuming that .fadeIn(0) is equivalient to .show()
                     .queue(function(){  // to allow event handlers to perform fadeIns and things...
-                        $(this)
-                            .setFocus()
-                            .trigger({ type:fickle+'opened', cfg: cfg })
-                            .dequeue();
+                        var pop = $(this);
+                        pop.show();
+                        _triggerEvent(pop, 'opened', cfg);
+                        data._gotFocus || pop.setFocus();
+                        pop.dequeue();
                       });
               }
             },
           close: function (data/*, extras */) {
               var cfg = data.c;
               if (!this.height()) { this.height(1) } // FIXME: remove this IE hack for jQuery 1.3.2 show/hide bug when version 1.3.3 is out!
-              if ( data._isOpen  &&  _wasEventSuccessful(this, fickle+'close', { cfg: cfg }) )
+              if ( data._isOpen  &&  _triggerEvent(this, 'close', cfg) )
               {
                 $(_document)
                     .unbind('focusin', data._confirmFocusLeave)
                     .unbind('keydown', data._listenForEsc);
                 $.setFocus(cfg.opener||_document.body);
                 data._isOpen = !1;// false
+                cfg.fadeout  &&  this.fadeOut(cfg.fadeout); // because .fadeOut(0) !== .hide()
                 this
-                    .fadeOut(cfg.fadeout||0) // assuming that .fadeOut(0) is equivalient to .hide()
                     .queue(function(){  // to allow event handlers to perform fadeOuts and things...
-                        $(this)
-                            .trigger({ type:fickle+'closed', cfg: cfg })
-                            .dequeue();
+                        var pop = $(this);
+                        pop.hide();
+                        _triggerEvent(pop, 'closed', cfg);
+                        pop.dequeue();
                       });
               }
             },
@@ -125,10 +140,12 @@
             },
           isOpen: function(data/*, extras */){
               return !!data._isOpen;
-            },
+            }
+        /**
           disable: _notImplemented,
           enable:  _notImplemented,
           destroy: _notImplemented
+        /**/
         },
 
       _defaultConfig = {
@@ -200,7 +217,10 @@
                 .data(_dataId, data)
                 .toggle( !!cfg.startOpen )  // hide by default - unless cfg.startOpen is true
                 // accessibility aid
-                .prepend( cfg.focusTarget );
+                .prepend( cfg.focusTarget )
+                .bind('focusin focusout', function (e) { // keeps track of whether the fickle element has focus. Determines whether .setFocus() is needed on `fickleopened` (see above)
+                    data._gotFocus = e.type=='focusin';
+                  });
             
             // if cfg.fickle is set to false, the element becomes a very simple "open/close" window without any "fickly" properties to make it special.
             if (cfg.fickle)

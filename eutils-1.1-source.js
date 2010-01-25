@@ -1,14 +1,16 @@
 // encoding: utf-8
 // ----------------------------------------------------------------------------------
-// Miscellaneous jQuery utilities collection v 1.0
+// Miscellaneous jQuery utilities collection v 1.1
 // ----------------------------------------------------------------------------------
-// (c) 2009 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+// (c) 2010 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
 //  written by:
 //   * Már Örlygsson        -- http://mar.anomy.net
 // ----------------------------------------------------------------------------------
 
 (function($, undefined){
 
+  // depends on jQuery 1.3
+  
 /*
  TODO:
 
@@ -40,68 +42,64 @@
       _RegExpEscape = function(s) { return s.replace(/([\\\^\$*+[\]?{}.=!:(|)])/g, '\\$1'); };
 
 
-  // FIXME: REDUNDANT as of jQuery 1.3 - jQuery 1.3 supports complex selectors for .is(), .closest(), etc.
-  //
-  // The :childof() and :descof() selector expressions make .is(), .closest(), .parents()
-  // and other such methods sooo much more interesting...!
+
   $.extend($.expr[':'], {
 
-    is: function (a, i, m) {
-      return $(a).is(m[3]);
-    },
-
-    childof: function (a, i, m) {
-      return $(a.parentNode).is(m[3]);
-    },
-
-    descof: function (a, i, m) {
-      while ((a = a.parentNode)  &&  a !== _doc) {
-        if ($(a).is(m[3])) {
-          return true;
-        }
-      }
-      return false;
-    },
-
-    target: function (a, h) {
-      return ( a.id  &&  (h = _location.hash)  &&  h == '#'+a.id );
-    }
-
-  });
-
-
-
-
-  // does not work in MSIE<=7
-  var _RigUpDOMEventAsEventPlugin = function (_type, _DOMtype, _useCapture, _triggerFunc)
-  {
-    if (!_msie)
-    {
-      _triggerFunc = function (e) {
-        e = $.event.fix(e);
-        e.type = _type;
-        return $.event.handle.call(this, e);
-      };
-      $.event.special[_type] = {
-        setup: function () {
-          this.addEventListener( _DOMtype, _triggerFunc, !!_useCapture );
+      is: function (a, i, m) {
+          return $(a).is(m[3]);
         },
-        teardown: function () {
-          this.removeEventListener( _DOMtype, _triggerFunc, !!_useCapture );
+
+      childof: function (a, i, m) {
+          return $(a.parentNode).is(m[3]);
+        },
+
+      descof: function (a, i, m) {
+          while ((a = a.parentNode)  &&  a !== _doc) {
+            if ($(a).is(m[3])) {
+              return true;
+            }
+          }
+          return false;
+        },
+
+      target: function (a, h) {
+          return ( a.id  &&  (h = _location.hash)  &&  h == '#'+a.id );
+        }
+
+    });
+
+
+
+
+  // jQuery 1.4 supports focusin/focusout events
+  if (!_msie  &&  !$.event.special.focusin)
+  {
+    // does not work in MSIE<=7
+    var _RigUpDOMEventAsEventPlugin = function (_type, _DOMtype, _useCapture, _triggerFunc) {
+        if (!_msie)
+        {
+          _triggerFunc = function (e) {
+              e = $.event.fix(e);
+              e.type = _type;
+              return $.event.handle.call(this, e);
+            };
+          $.event.special[_type] = {
+              setup: function () {
+                  this.addEventListener( _DOMtype, _triggerFunc, !!_useCapture );
+                },
+              teardown: function () {
+                  this.removeEventListener( _DOMtype, _triggerFunc, !!_useCapture );
+                }
+            };
         }
       };
-    }
-  };
 
-
-
-  if (!_msie)
-  {
     // Implement cross-browser `focusin` and `focusout` events (i.e. `focus` and `blur` that bubbles!)
     var _isFF = _browser.mozilla; // Firefox (as of version 3.0) doesn't support DOMFocus[In|Out]
                                    // so we resort to nasty capture events.  ...Run to the hills and expect the worst!!
-    _RigUpDOMEventAsEventPlugin('focusin',  _isFF?'focus':'DOMFocusIn',   _isFF);
-    _RigUpDOMEventAsEventPlugin('focusout', _isFF?'blur' :'DOMFocusOut',  _isFF);
+    _RigUpDOMEventAsEventPlugin( 'focusin',  _isFF?'focus':'DOMFocusIn',   _isFF );
+    _RigUpDOMEventAsEventPlugin( 'focusout', _isFF?'blur' :'DOMFocusOut',  _isFF );
+
   }
 
 
@@ -122,62 +120,57 @@
   // TODO: allow binding to elements other than just window/body
   $.event.special.fontresize = {
     setup: function () {
-      if (this == _win  || this == _doc.body) {
-        _body = $('body');
-        _lastSize = _body.css('fontSize');
-        _fontresizeInterval = setInterval(_monitorFontSize, 500);
-      }
-    },
+        if (this == _win  || this == _doc.body) {
+          _body = $('body');
+          _lastSize = _body.css('fontSize');
+          _fontresizeInterval = setInterval(_monitorFontSize, 500);
+        }
+      },
     teardown: function () {
-      if (this == _win  ||  this == _doc.body) {
-        clearTimeout( _fontresizeInterval );
+        if (this == _win  ||  this == _doc.body) {
+          clearTimeout( _fontresizeInterval );
+        }
       }
-    }
   };
 
 
 
 
 
-  if (!$.fn.detach) // this method will be part of jQuery 1.3.3, so until then...
-  {
-    // Simply pull elements out of the DOM without killing their events or data...
-    // (This is how most jQuery newbies expect .remove() to work.)
-    $.fn.detach = function ()
-    {
+  // this method is part of jQuery 1.4
+  $.fn.detach = $.fn.detach || function () {
       return this.each(function(){
           var parent = this.parentNode;
           parent  &&  parent.nodeType==1  &&  parent.removeChild(this);
         });
-    }
-  }
+    };
 
 
-  var findUntil = function(collection, expr, inclTextNodes, goBackwards)
-  {
-    var match = [],
-        method = (goBackwards ? 'previous':'next')+'Sibling';
-    collection.each(function(){
-        for (var next = this[method], isElm; next; next = next[method] )
-        {
-          isElm = (next.nodeType == 1);
-          if ( inclTextNodes || isElm )
+
+  var findUntil = function(collection, expr, inclTextNodes, goBackwards) {
+      var match = [],
+          method = (goBackwards ? 'previous':'next')+'Sibling';
+      collection.each(function(){
+          for (var next = this[method], isElm; next; next = next[method] )
           {
-            if (isElm && !$(next).not(expr).length )
+            isElm = (next.nodeType == 1);
+            if ( inclTextNodes || isElm )
             {
-              break;
+              if (isElm && !$(next).not(expr).length )
+              {
+                break;
+              }
+              match.push( next );
             }
-            match.push( next );
           }
-        }
-      });
-    return collection.pushStack(match);
-  };
-
+        });
+      return collection.pushStack(match);
+    };
 
 
   $.fn.extend({
 
+    // different from the built-in jQuery 1.4 methods, because it (optionally) also collects textNodes as well as Elements
     nextUntil: function(expr, inclTextNodes) { return findUntil(this, expr, inclTextNodes); },
     prevUntil: function(expr, inclTextNodes) { return findUntil(this, expr, inclTextNodes, 1); },
 
@@ -203,7 +196,9 @@
 
     pause: function (speed, callback)
     {
-      return this.animate({ smu:0 }, (speed||speed===0)?speed:800, callback);
+      return callback||!$.fn.delay ?
+                this.animate({ smu:0 }, (speed||speed===0)?speed:800, callback):
+                this.delay(speed);
     },
 
 
@@ -273,12 +268,6 @@
     {
       this[0]  &&  $.setFocus.call(null, this[0], rev);
       return this;
-    },
-
-
-    delegate: function(subselector, type, handler, data)
-    {
-      return this.bind(type, data, $.delegate(subselector, handler));
     },
 
 
@@ -640,89 +629,7 @@
         }
       }
       return _theString;
-    },
-
-
-
-    // Transforms normal selectors into "reversed" ones
-    // (Super useful for event delegation and passing user-defined selectors into `.is()` and `.parents()`):
-    //   * 'p a'        -->  'a:descof(p)'
-    //   * 'p > a'      -->  'a:childof(p)'
-    //   * 'div p > a'  -->  'a:childof(p:descof(div))'
-    //
-    // Note: We're not handling 'a ~ span' or 'a + span'  (at least for now)
-    //
-    invSelectors: function (selector)
-    {
-      selector = $.trim(selector)
-                  .replace(/  +/, ' ')
-                  .replace(/ ?> ?/g, '>')
-                  .replace(/ \)/g, ')')
-                  .replace(/\( /g, '(');
-      var _selectors = [];
-      $.each(selector.split(/ ?, ?/), function(j, _sel){
-        var _newSel = '',
-            i=0;
-        _sel = _sel.replace(/^>/g, '');
-        while (_sel = _sel.replace(/(^| |>)([^ >]*)$/, function(all, p1, p2){
-            _newSel += p2 + ((p1==' ') ? ':descof(' : (p1=='>') ? ':childof(' : '');
-            i++;
-            return '';
-          })
-        ) {}
-
-        _selectors[j] = _newSel + (new Array(i)).join(')');
-      });
-      return _selectors.join(',');
-    },
-
-
-
-    delegate: function (selector, handler)
-    {
-      selector = $.invSelectors(selector);
-/*
-      var _isSimpleSelector = !/ /.test( selector );
-*/
-
-      return function (event) {
-        var _target = $(event.target),
-            _allParents = _target.add(_target.parents()), // include the event target itself.
-            _elm = _allParents.slice(0, _allParents.index(this)).filter(selector)[0];
-/*
-            _parents = _allParents.slice(0, $.inArray(this, _allParents)),
-            _elm;
-
-        if (_isSimpleSelector)
-        {
-          _elm = _parents.filter(selector)[0];
-        }
-        else // Warning complex selectors (such as 'p > a.foo span') do not scale AT ALL for a large DOM tree.
-        {
-          // eeek! inefficient!
-          var _allElms = $(selector, this),
-              i = _allElms.length;
-          // loop backwars to find the innermost matching element
-          while (i--)
-          {
-            if ( _elm = _parents[_parents.index(_allElms[i])] )
-            {
-              break;
-            }
-          }
-        }
-*/
-
-        if (_elm)
-        {
-          event.delegate = _elm;
-          return handler.call(this, event);
-        }
-
-      }
     }
-
-
 
 
 

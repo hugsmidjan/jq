@@ -1,3 +1,13 @@
+// encoding: utf-8
+// ----------------------------------------------------------------------------------
+// jQuery.fn.equalizeHeights v 1.0
+// ----------------------------------------------------------------------------------
+// (c) 2009 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+//  written by:
+//   * Már Örlygsson        -- http://mar.anomy.net
+//   * Borgar Þorsteinsson  -- http://borgar.undraland.com
+// ----------------------------------------------------------------------------------
+
 // TODO:
 //  - Maybe?: create a "destroy" method that purges the jQuery collection/elements and _config from the cache and unbinds the 'resize' event handler.
 //  - remove reliance on $.browser and use $.support instead

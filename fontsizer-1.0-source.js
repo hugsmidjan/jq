@@ -1,3 +1,13 @@
+// encoding: utf-8
+// ----------------------------------------------------------------------------------
+// jQuery.fn.fontsizer v 1.0
+// ----------------------------------------------------------------------------------
+// (c) 2009 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+//  written by:
+//   * Már Örlygsson        -- http://mar.anomy.net
+//   * Borgar Þorsteinsson  -- http://borgar.undraland.com
+// ----------------------------------------------------------------------------------
+
 (function ($) {
 
   var _body = null,

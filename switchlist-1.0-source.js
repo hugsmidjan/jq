@@ -1,3 +1,13 @@
+// encoding: utf-8
+// ----------------------------------------------------------------------------------
+// jQuery.fn.switchlist v 1.0
+// ----------------------------------------------------------------------------------
+// (c) 2009 HugsmiÃ°jan ehf  -- http://www.hugsmidjan.is
+//  written by:
+//   * MÃ¡r Ã–rlygsson        -- http://mar.anomy.net
+//   * Valur Sverrisson     
+// ----------------------------------------------------------------------------------
+
 (function($) {
 
   var _defaultConfig = {
@@ -5,12 +15,12 @@
           contClass:     'switchlist-active',
           activeClass:   'active',
           listClass:     'newsheadlinelist itemlist',
-        /* BEGIN: sleppa þessu og/eða gera þetta meira módúlar */
+        /* BEGIN: sleppa Ã¾essu og/eÃ°a gera Ã¾etta meira mÃ³dÃºlar */
           inclmeta:      true,
           incltitle:     true,
           topwrap:       false,
           bottomwrap:    false,
-        /* END: sleppa þessu og/eða gera þetta meira módúlar */
+        /* END: sleppa Ã¾essu og/eÃ°a gera Ã¾etta meira mÃ³dÃºlar */
           switchdelay:   350,
           fadeoutspeed:  125,
           fadeoutease:   '',
@@ -42,12 +52,12 @@
                   _newsheadline = $('<li>')
                       .addClass( this.className.replace(/(^| )((item|itm\d*|firstitem)( |$))+/g, '$1') )
                       .addClass( i===0 ? _config.activeClass:'' )
-                    /* BEGIN: þetta ætti að vera stillanlegra/meira módúlar */
+                    /* BEGIN: Ã¾etta Ã¦tti aÃ° vera stillanlegra/meira mÃ³dÃºlar */
                       .append( _config.topwrap ? '<i class="top" />' : '' )
                       .append( _config.inclmeta ? _this.find('span.meta').clone() : '' )
                       .append( _config.incltitle ? _this.find('h3 > a').clone() : '' )
                       .append( _config.bottomwrap ? '<i class="bottom" />' : '' )
-                    /* END: þetta ætti að vera stillanlegra/meira módúlar */
+                    /* END: Ã¾etta Ã¦tti aÃ° vera stillanlegra/meira mÃ³dÃºlar */
                       .bind('mouseenter', function (e) {
                           var _thisHeadline = this;
                           if (!_headlinelist.queue().length && _visibleIndex != _thisHeadline.listIndex)

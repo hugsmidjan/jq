@@ -1,3 +1,12 @@
+// encoding: utf-8
+// ----------------------------------------------------------------------------------
+// jQuery.fn.zebraLists v 1.0
+// ----------------------------------------------------------------------------------
+// (c) 2009 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+//  written by:
+//   * Már Örlygsson        -- http://mar.anomy.net
+// ----------------------------------------------------------------------------------
+
 // Requires: jquery 1.3
 /*
   Basic usage with config object:
@@ -63,23 +72,24 @@
 
   Trickplay Methods:
     * 'pause'   - Freezes the timer and makes note of how long until the next timeout/interval event is supposed to fire.
-    * 'restart' - Resumes from exactly the moment it was 'paused'.
+    * 'resume'  - Resumes from exactly the moment it was 'paused'.
     * 'cancel'  - Clears the timer, removing all timer data and event handlers - unless a boolean `noUnbind` is also supplied.
     * 'end'     - Fires the 'ontimeend' before clearing the timer and removing all timer data and event handlers.
 
     Default (label: "ontime") timers:
     * $.ontime( "pause" );              
-    * $.ontime( "restart" );
+    * $.ontime( "resume" );
     * $.ontime( "cancel"[, !!noUnbind] ); // optional `noUnbind` keeps all event handlers bound.
     * $.ontime( "end"[, !!noUnbind] );
     Labeled timers:
     * $.ontime( "pause", label );
-    * $.ontime( "restart", label,  );
+    * $.ontime( "resume", label,  );
     * $.ontime( "cancel", label[, !!noUnbind] );
     * $.ontime( "end", label[, !!noUnbind] );
 
 
   Todo:
+   * add 'resume' method and a 'ontimestart' event.
    * review + cleanup (if needed) the $(elm).data() structure to simplify and avoid memory leaks/footprint.
   Ideas:
    * for extra precision we should use setTimeout() - instead of setInterval() - and recalculate/recalibrate the delay each time.
@@ -183,7 +193,7 @@
       }
 
 
-      if ( args.s &&  /^(cancel|end|pause|restart)$/.test(args.s[0]) ) // Capture and perform trickplay
+      if ( args.s &&  /^(cancel|end|pause|resume)$/.test(args.s[0]) ) // Capture and perform trickplay
       {
         var method = args.s[0],
             label = args.s[1] || _defaultLabel,
@@ -202,7 +212,7 @@
               {
                 _type = _data._hasStarted ? 'Interval' : 'Timeout';
 
-                if (method=='restart')
+                if (method=='resume')
                 {
                   _data._ref = window['set'+_type](_data._handler, _data._nextMs-_data._elapsedLap);
                   if (_data._untilFn)
@@ -329,7 +339,7 @@
                     _data._startLap = (new Date()).getTime();
                     var e = $.Event(ontimeNS+label);
                     !config.bubble && e.stopPropagation();
-                    _this.trigger(e, _counter, _this.data(ontimeNS+label));
+                    _this.trigger( e, [_counter, _this.data(ontimeNS+label)] );
                     if (e.isDefaultPrevented()  ||  (config.reps !== 0  &&  ++_counter >= config.reps) )
                     // if the event handler returns `false` the timer should stop
                     {
@@ -366,4 +376,4 @@
   };
 
 
-})(jQuery, 'ontime')
+})(jQuery, 'ontime');

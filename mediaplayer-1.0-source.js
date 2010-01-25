@@ -1,3 +1,13 @@
+// encoding: utf-8
+// ----------------------------------------------------------------------------------
+// jQuery.fn.zebraLists v 1.0
+// ----------------------------------------------------------------------------------
+// (c) 2009 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+//  written by:
+//   * Már Örlygsson        -- http://mar.anomy.net
+//   * Andri Sigurðsson     
+// ----------------------------------------------------------------------------------
+
 // Attach click event to mp3 files to open in flash media player
 (function ($) {
   

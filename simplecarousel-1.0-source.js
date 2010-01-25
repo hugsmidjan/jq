@@ -1,5 +1,13 @@
 // encoding: utf-8
-// simpleCarousel 1.0
+// ----------------------------------------------------------------------------------
+// jQuery.fn.simpleCarousel v 1.0
+// ----------------------------------------------------------------------------------
+// (c) 2009 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+//  written by:
+//   * Borgar Þorsteinsson  -- http://borgar.undraland.com
+//   * Már Örlygsson        -- http://mar.anomy.net
+// ----------------------------------------------------------------------------------
+
 (function($){
 
   var defaults = {

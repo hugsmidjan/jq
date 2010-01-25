@@ -1,9 +1,19 @@
+// encoding: utf-8
+// ----------------------------------------------------------------------------------
+// jQuery.fn.tabSwitcher/.makeTabbox  v 1.0
+// ----------------------------------------------------------------------------------
+// (c) 2009 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+//  written by:
+//   * Már Örlygsson        -- http://mar.anomy.net
+//   * Borgar Þorsteinsson  -- http://borgar.undraland.com
+// ----------------------------------------------------------------------------------
+
 /*
   TODO: Fix back-navigation jumpyness in IE7 when `monitorFragment=true`
 
   Requires
    * jQuery 1.3 or better (event bubbling)
-   * Eutils ($.setHash)
+   * Eutils ($.setFrag)
 */
 
 (function($){
@@ -59,22 +69,16 @@
       _allTabIds = {},
       _tabsToOpen,
 
+      _tabswitcherData = 'tabswitcher', // to save bytes
 
   // ===  internal support functions  ===
-
-  // get fragment id from URL
-      getHash = function ( url )
-      {
-        return (''+url).replace( /^.*#/, '' );
-      },
 
 
       closePanel = function ( id )
       {
-
         // grab the panel
         var panel = $( '#' + id );
-        var data  = panel.data( 'tabswitcher' );
+        var data  = panel.data( _tabswitcherData );
         var c = data.config;
 
         // de-highlight the tab
@@ -112,7 +116,7 @@
       {
 
         var panel = $( '#' + id );
-        var data  = panel.data( 'tabswitcher' );
+        var data  = panel.data( _tabswitcherData );
         var c = data.config;
 
         // highlight the tab
@@ -147,17 +151,34 @@
       // FIXME: Finish this comment...
       crossReferenceMonitor = function ( e )
       {
-        if (e.target) {
-          // nested tabs are causing recursion overflow
-          var l = (e.target.tagName == 'A') ? $( e.target ) : $( e.target ).parents('a');
-          if (l.length && l[0].href && l[0].href.indexOf('#')) {
-            var id = getHash( l.attr('href') );
-            if (_allTabIds[id]) {
-              $.tabSwitcher.switchTo( id, true );
-              return false;
-            }
+        var l = $(e.target).closest('a[href*="#"]')[0];
+        if ( l )
+        {
+          var id = $.getFrag( l.href );
+          if (id  &&  _allTabIds[id]  &&  !$(l).data( _tabswitcherData+'Link' ) )
+          {
+            $.tabSwitcher.switchTo( id );
+            e.preventDefault();
           }
         }
+      },
+
+      switchToFragmentPanel = function (e)
+      {
+        $.tabSwitcher.switchTo( this );
+        e.preventDefault();
+      },
+
+      returnToTab = function (e)
+      {
+        $(this).parent().data( _tabswitcherData ).tab.setfocus();
+        return false; // no bubbling!
+      },
+
+
+      detectNestedTabswitch = function (e)
+      {
+        e.target !== this  &&  $.tabSwitcher.switchTo( this.id, true );
       },
 
 
@@ -166,7 +187,7 @@
       _fragmentsToMonitor = {},
 
       monitorFragment = function ( e ) {
-        var _currentFragment = document.location.hash.substr(1);
+        var _currentFragment = $.getFrag();
         if ( _lastSetFragment != _currentFragment  &&  _fragmentsToMonitor[_currentFragment] ) {
           tabSwitcher.switchTo(_currentFragment, true);
           _lastSetFragment = _currentFragment;
@@ -182,7 +203,6 @@
       _prepModule = function (e) {
         var _cookie = tabSwitcher.cookieName && cookieU.getValue(tabSwitcher.cookieName);
         if (_cookie) { _cookieTargets = _cookie.split(','); }
-        _hashTarget = docLoc.hash.substr(1);
       },
 
 
@@ -261,10 +281,9 @@
       // public method for manually setting/swicthing tabs.
       // newTab may be either string or a link element
       switchTo : function ( _newTab, silentSwitch ) {
-
-        var id     = getHash( _newTab.href || _newTab ), // accepts: linkElm, URL, DOM-id
+        var id     = _newTab.href ? $.getFrag(_newTab.href) : _newTab, // accepts: linkElm, URL, DOM-id
             panel  = $( '#' + id ),
-            d      = panel.data( 'tabswitcher' ),
+            d      = panel.data( _tabswitcherData ),
             c      = d.config,
             from   = c.openTabId;
 
@@ -292,10 +311,10 @@
           if ( !silentSwitch ) {
             if ( c.setFragment ) {
               _lastSetFragment = id;
-              $.setHash( id );
+              $.setFrag( id );
             }
             if (d.focusLink) {
-              d.focusLink.trigger('focus');
+              $.setFocus( d.focusLink );
             }
           }
 
@@ -316,6 +335,8 @@
   $.fn.tabSwitcher = function ( conf )
   {
 
+    var _hashTarget = $.getFrag();
+
     // todo : detect usage of id, or index to set tab index => switchto
 
     _tabsToOpen = [[],[],[],[]];
@@ -324,29 +345,23 @@
       var block     = $( this ),
           _conf     = $.extend( {}, $.tabSwitcher.defaultConfig, conf ),
           tabs      = $( _conf.tabSelector, this ),
+          _allHashLinks,
           openTabId = '',
           openLevel = 0;
 
       _conf.tabs = {};
       _conf.tabBlock = this;
       tabs.each(function ( i, t ) {
+          _allHashLinks = _allHashLinks || $('a[href*="#"]');
 
-          var data    = { tab : $(t) };
-          data.link   = (t.tagName == 'A') ? data.tab : $( 'a', t );
-          data.lang   = data.link.add(data.link.parents()).filter('[lang]').attr('lang') || 'en';
+          var data    = { tab : $(t) },
+              link    = data.link   = (t.tagName == 'A') ? data.tab : $( 'a', t );
+          data.lang   = link.closest('[lang]').attr('lang') || 'en';
           data.config = _conf;
           data.block  = block;
-          var id      = getHash( data.link.attr('href') ),
-                 panel   = $( '#' + id );
-          panel.data( 'tabswitcher', data );
-
-          var returnToTab = function (e) {
-            var id = getHash( $( this ).attr('href') );
-            var link = $( '#'+id ).data('tabswitcher').link;
-            // $.setHash( link.aquireId() );  // --- WTF?
-            link.trigger('focus');
-            return false;
-          };
+          var id      = $.getFrag( link.attr('href') ),
+              panel   = $(id ? '#'+id : []);
+          panel.data( _tabswitcherData, data );
 
           if (panel.length)
           {
@@ -358,7 +373,6 @@
             // Accessibility: Add a focusAnchor (+ "return to tab" link) to the top of the _tabPanelElm.
             if (_conf.focusLinkTemplate) {
               data.focusLink = $( _conf.focusLinkTemplate )
-                                      .attr( 'href', '#'+id )
                                       .attr( 'title', backtxt )
                                       .bind( 'click', returnToTab )
                                       .prependTo( panel );
@@ -366,7 +380,6 @@
             // Add a second "return to tab" link to the bottom of the _tabPanelElm.
             if (_conf.returnLinkTemplate) {
               data.returnLink = $( _conf.returnLinkTemplate )
-                                      .attr( 'href', '#'+id )
                                       .attr( 'title', backtxt )
                                       .bind( 'click', returnToTab )
                                       .appendTo( panel );
@@ -389,14 +402,13 @@
             }
             // HASH: is the index element marked current? -- trumps all
             if (openLevel < 4  &&  _hashTarget == id) {
+              $(window).scrollTop(0);
               openTabId = id;
               openLevel = 4; // HASH;
             }
 
-            data.link.bind('click', function (e) {
-              $.tabSwitcher.switchTo( this );
-              return false;
-            });
+            data.tab.bind('click', function (e) { return false; /* cancel the bubble! */ });
+
             closePanel( id );
 
             // register all tab id's
@@ -407,14 +419,14 @@
               _fragmentsToMonitor[id] = true;
             }
 
+            // Detect bubbling TabSwitch events (from nested tab-panes) and switch to the current tabpane
             panel
-                .bind('Tabswitch', function (e){
-                    if (e.target !== this) {
-                      $.tabSwitcher.switchTo( this.id, true );
-                    }
-                  })
-                // todo: ... consider moving this to document
-                .bind('click', crossReferenceMonitor );
+                .bind('Tabswitch', detectNestedTabswitch);
+
+            _allHashLinks.filter('[href$="#'+ id +'"]') // this includes the current tab `link`
+                .data( _tabswitcherData+'Link', 1 )
+                .bind('click', switchToFragmentPanel );
+
 
           }
 
@@ -450,6 +462,7 @@
       }
     }
 
+    $(document).bind('click', crossReferenceMonitor );
     return this;
 
   }; // tabswitcher
@@ -463,17 +476,18 @@
   $.fn.makeTabbox = function ( conf )
   {
     conf =  $.extend({
-                titleSel:   'h1, h2, h3',
                 min:        2,
-                boxTempl:   '<div class="tab-box"><ul class="tabs" /></div>',
+                defaultId:  'tab1',
                 tabContSel: 'ul',
+                titleSel:   'h1, h2, h3',
+                boxTempl:   '<div class="tab-box"><ul class="tabs" /></div>',
                 tabTempl:   '<li><a href="#%{id}" title="%{title}">%{title}</a></li>',
                 makeTab:    function(tabPane, conf){
-                                var tabHtml = $.inject(conf.tabTempl, {
-                                                  id: $.aquireId(tabPane),
-                                                  title: $(conf.titleSel, tabPane).eq(0).text()
-                                                });
-                                return  $(tabHtml);
+                                return $(  $.inject(conf.tabTempl, {
+                                                id:    tabPane[0].id,
+                                                title: tabPane.find(conf.titleSel).eq(0).text()
+                                              })
+                                          );
                               }
               }, conf);
 
@@ -490,14 +504,11 @@
 
       tabPanes
           .each(function(){
-              var newTab = conf.makeTab(this, conf),
-                  paneLang = $(this).closest('[lang]');
-              if (paneLang != refLang)
-              {
-                newTab.attr('lang', paneLang);
-              }
-              newTab
-                  .appendTo( tabList );
+              var tabPane = $(this);
+              tabPane.aquireId(conf.defaultId);
+              var newTab = conf.makeTab(tabPane, conf).appendTo( tabList ),
+                  paneLang = tabPane.closest('[lang]');
+              paneLang != refLang  &&  newTab.attr('lang', paneLang);
             })
           .eq(0)
               .before( tabBox );

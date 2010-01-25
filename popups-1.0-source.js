@@ -1,4 +1,12 @@
 // encoding: utf-8
+// ----------------------------------------------------------------------------------
+// jQuery.fn.popUps v 1.0
+// ----------------------------------------------------------------------------------
+// (c) 2008 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+//  written by:
+//   * Már Örlygsson        -- http://mar.anomy.net
+// ----------------------------------------------------------------------------------
+
 // Gereric Popup window script ** version 1.0 **
 // requires jQuery 1.2
 // works with jQuery 1.3

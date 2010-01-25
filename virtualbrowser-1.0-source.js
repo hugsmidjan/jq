@@ -1,4 +1,12 @@
 // encoding: utf-8
+// ----------------------------------------------------------------------------------
+// jQuery.fn.virtualBrowser v 1.0
+// ----------------------------------------------------------------------------------
+// (c) 2009 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+//  written by:
+//   * Már Örlygsson        -- http://mar.anomy.net
+// ----------------------------------------------------------------------------------
+
 /*
   jQuery.fn.virtualBrowser();
     Turns any element into a virtual browser window (or iframe), attempting to
@@ -8,6 +16,7 @@
 
   Requires:
     * jQuery 1.3.3+
+    * eutils 1.0     ( $.getResultBody() )
 
 
   Usage/Init:
@@ -20,8 +29,9 @@
     * params:        null,                      // Object/String: Request data (as in $.get(url, data, callback) )
     * onBeforeload:  null,                      // Function: Shorthand for .bind('VBbeforeload' handler);
     * onLoad:        null,                      // Function: Shorthand for .bind('VBload', handler);
+    * onLoaded:      null,                      // Function: Shorthand for .bind('VBloaded', handler);
     * loadmsgElm:    '<div class="loading" />'  // String/Element: Template for a loading message displayed while loading a URL
-    * loadmsgMode:   'none',                    // String: Options: (none|overlay|replace)
+    * loadmsgMode:   'none',                    // String: Options: (none|overlay|replace)  // none == no load message; overlay == overlays the old content with the loadmsg; replace == removes the old content before displaying the loadmsg
 
   Localization:
     * jQuery.fn.virtualBrowser.i18n['lang'] = {
@@ -39,6 +49,7 @@
                                        //   elm:  // jQuery collection containing (when applicable) the link (or form element) that was clicked/submitted
                                        // }
                               // Cancellable via e.preventDefault()
+                              // cancel caching of the request by setting `request.noCache == true;`
                               // e.passThrough = true;  // Instructs the virtualBrowser to disable any click events and pass the click through to the web browser
                             });
     * 'VBload'         // .bind('VBload', function (e, request) {
@@ -53,6 +64,16 @@
                               // Cancellable via e.preventDefault()
                             });
 
+    * 'VBloaded'         // .bind('VBloaded', function (e, request) {
+                              this  // the virtualBrowser body element
+                              $(this).data('virtualBrowser').cfg // config object
+                              request  // Object: {
+                                       //   url:  // String the URL that was just loaded
+                                       //   elm:  // jQuery collection containing (when applicable) the link (or form element) that was clicked/submitted
+                                       // }
+                              // Uncancellable!
+                            });
+
 
   Methods:
     * 'load'     // .virtualBrowser('load', url);  // loads an url. Triggers the normal 'vbrowserpreload' and 'vbrowserload' events
@@ -60,6 +81,8 @@
 
 
   TODO/ideas:
+    * Offer the onLoad handlers a cleaned DOM (stripped of <scripts/>, <link/>, etc).
+    * Remove dependency on eutils.
     * History buffer
        * Add 'back' (and 'forward'?) methods
     * Consider adding 'reload' method
@@ -68,7 +91,7 @@
 
 (function($, undefined){
 
-  // FIXME: remove this when
+  // FIXME: remove this when jQuery 1.4 is out
   $.fn.detach = $.fn.detach || function(){
       return this.each(function(){
           var parent = this.parentNode;
@@ -78,11 +101,16 @@
 
 
 
-  var _virtualBrowser = 'virtualBrowser',  // ...to save bandwidth
-      _VBbeforeload   = 'VBbeforeload',    // ...to save bandwidth
-      _VBload         = 'VBload',          // ...to save bandwidth
-      _replace        = 'replace',         // ...to save bandwidth
-      _protocolSlash  = /^(https?:)?\/\//,
+  var _docLoc            = document.location,
+      _isDefaultPrevented = 'isDefaultPrevented',  // ...to save bandwidth
+      _stopPropagation    = 'stopPropagation',     // ...to save bandwidth
+      _passThrough        = 'passThrough',         // ...to save bandwidth
+      _virtualBrowser     = 'virtualBrowser',      // ...to save bandwidth
+      _VBbeforeload       = 'VBbeforeload',        // ...to save bandwidth
+      _VBload             = 'VBload',              // ...to save bandwidth
+      _VBloaded           = 'VBloaded',            // ...to save bandwidth
+      _replace            = 'replace',             // ...to save bandwidth
+      _protocolSlash      = /^(https?:)?\/\//,
 
 
 
@@ -91,48 +119,51 @@
               var elm = typeof url != 'string' ? $(url) : undefined,
                   body = $(this),
                   config = body.data(_virtualBrowser).cfg,
-                  ev1 = jQuery.Event(_VBbeforeload),
+                  evBeforeload = $.Event(_VBbeforeload), 
+                  evLoad, evLoaded,
                   loadmsgMode = config.loadmsgMode,
                   request = { elm: elm };
 
-              url = request.url = elm ?
-                                (elm.attr('href') || elm.attr('action') || ''):
-                                url;
+              if (elm)
+              {
+                url = elm.attr('href');
+                url = url === undefined ? elm.attr('action') : url;
+              }
+              // Correctly resolve relative empty-string URLs (like <form action="">)
+              url = request.url = url === '' ? _docLoc.href : url;
+
               if (url)
               {
-                body.trigger(ev1, request);
+                evBeforeload[_stopPropagation]();
+                body.trigger(evBeforeload, request);
                 // trap external (non-AJAXable) URLs or links targeted at another window and set .passThrough as true
                 if (  // if passThrough is already set, then there's not need for further checks, and...
-                      !ev1.passThrough &&
+                      !evBeforeload[_passThrough] &&
                       (
                         (
                           // if event handler hasn't explicitly set passThrough to false
-                          ev1.passThrough === undefined  &&  
+                          evBeforeload[_passThrough] === undefined  &&  
                           // and elm is defined, and is `target`ted at an external window  // IDEA: allow named virtualBrowsers to target and trigger 'open' actions on eachother
                           elm  &&  elm[0].target  &&  elm[0].target != window.name
                         ) 
                           || // ...or...
                         (
-                          /^([a-z]{3,12}:|\/\/)/i.test(url)  &&  // the URL starts with a protocol (as well as relative protocol URLs (//host.com/).)
+                          /^([a-z]{3,12}:|\/\/)/i.test(url)  &&  // the URL starts with a protocol (as well as "protocol-neutral" URLs (//host.com/).)
                           // and the URL doesn't start with the same hostName and portNumber as the current page.
-                          !url.toLowerCase()[_replace](_protocolSlash, '').indexOf( location.href.toLowerCase()[_replace](_protocolSlash, '').split('/')[0] ) == 0
+                          !url.toLowerCase()[_replace](_protocolSlash, '').indexOf( _docLoc.href.toLowerCase()[_replace](_protocolSlash, '').split('/')[0] ) == 0
                         )
                       )
                     )
                 {
-                  ev1.passThrough = true;
+                  evBeforeload[_passThrough] = true;
                 }
                 // virtualBrowser should not handle .passThrough events.
-                ev1.passThrough  &&  ev1.preventDefault();
+                evBeforeload[_passThrough]  &&  evBeforeload.preventDefault();
 
-                if ( !ev1.isDefaultPrevented() )
+                if ( !evBeforeload[_isDefaultPrevented]() )
                 {
-                  if (loadmsgMode && loadmsgMode != 'none')
-                  {
-                    config.loadmsgMode == 'replace'  &&  body.empty();
-                    body.append(config.loadmsgElm);
-                  }
                   var params = config.params,
+                      cache = request.noCache,
                       method;
                   if (elm && elm.is('form'))
                   {
@@ -140,60 +171,81 @@
                     method = elm.attr('method')||'GET';
                   }
                   $.ajax({
-                      url: request.url,
+                      url: request.url.split('#')[0],  // in case jQuery (or the Browser) chops this off before sending the request...
                       data: params,
                       type: method,
+                      cache: cache !== undefined ? cache : !config.noCache,
                       complete:  function (xhr) {
                                     // Example: request.url == 'http://foo.com/path/file?bar=1#anchor'
-                                    var fileUrl = request.url.split('#')[0],  // 'http://foo.com/path/file?bar=1'
-                                        pathPrefix = fileUrl.split('?')[0][_replace](/(.*\/).*/, '$1'),  // 'http://foo.com/path/'
-                                        hasQuery = /\?/.test(fileUrl),  // fileUrl contains a queryString
+                                    var fileUrl = request.url.split('#')[0],                              // 'http://foo.com/path/file?bar=1'
+                                        filePart = fileUrl[_replace](/([^?]*\/)?(.*)/, '$2'),              // file?bar=1
+                                        pathPrefix = fileUrl.split('?')[0][_replace](/(.*\/)?.*/, '$1'),  // 'http://foo.com/path/'
+                                        hasQuery = /\?/.test(fileUrl),                                     // fileUrl contains a queryString
                                         txt = xhr.responseText;
                                     hasQuery  &&  ( txt = txt[_replace](/(['"])\?/gi, '$1¨<<`>>') ); // Escape "? and '? (potential urls starting with a queryString)
-                                    txt =  txt[_replace](/(<[^>]+ (href|src|action)=["'])(["'#¨])/gi, '$1'+fileUrl+'$3'); // prepend all empty/localpage urls with fileUrl
+                                    txt =  txt[_replace](/(<[^>]+ (href|src|action)=["'])(["'#¨])/gi, '$1'+filePart+'$3'); // prepend all empty/localpage urls with filePart
                                     hasQuery  &&  ( txt =  txt[_replace](/(['"])¨<<`>>/gi, '$1?') // Unescape all unaffected "? and '? pairs back to normal
                                                               [_replace](/¨<<`>>/gi, '&amp;') );  // Transform affected (all other) ? symbols into &amp;
                                     txt =  txt[_replace](/http:\/\//gi, '^<<`>>')  // Escape all "http://" (potential URLs) for easy, cross-browser RegExp detection 
                                               [_replace](/https:\/\//gi, '`<<`>>') // Escape all "https://" (potential URLs) for easy, cross-browser RegExp detection 
-                                              [_replace](/(<[^>]+ (href|src|action)=["'])([^\/`\^])/gi, '$1'+pathPrefix+'$3') // prepend pathPrefix to all relative URLs (not starting with /, `(https://) or ^(http://)
-                                              [_replace](/\^<<`>>/g, 'http://')  // Unescape "http://" back to normal
+                                              [_replace](/(<[^>]+ (href|src|action)=["'])([^\/`\^])/gi, '$1'+pathPrefix+'$3') // prepend pathPrefix to all relative URLs (not starting with `/`, `//`, `(https://) or ^(http://)
+                                              [_replace](/\^<<`>>/g, 'http://')    // Unescape "http://" back to normal
+                                              [_replace](/\^<<`>>/g, 'http://')    // Unescape "http://" back to normal
                                               [_replace](/`<<`>>/g,  'https://');  // Unescape "https://" back to normal
                                     request.result = txt;
-                                    var ev2 = jQuery.Event(_VBload);
-                                    body.trigger(ev2, request);
-                                    if ( !ev2.isDefaultPrevented() )
+                                    evLoad = $.Event(_VBload);
+                                    evLoad[_stopPropagation]();
+                                    body.trigger(evLoad, request);
+                                    if ( !evLoad[_isDefaultPrevented]() )
                                     {
+                                      evLoaded = $.Event(_VBloaded);
+                                      evLoaded[_stopPropagation]();
                                       config.loadmsgElm.detach();
                                       body
                                           .empty()
-                                          .append( request.resultDOM || $.getResultBody(request.result) )
+                                          .append( request.resultDOM || $.getResultBody(request.result)[0].childNodes )
+                                          .trigger(evLoaded, { url: request.url, elm: request.elm })
+                                          // Depend on 'click' events bubbling up to the virtualBrowser `body` to allow event-delegation and click-bubbling within the `body`
+                                          // Thus, we assume that any clicks who's bubbling were cancelled should not be handled by VB.
+                                          .bind('click', _handleClickOnBody)
                                           .find('form')
+                                              // NOTE for next version: by requiring jQuery 1.4 we could depend on 'submit' events bubbling up to the `body`
                                               .data(_virtualBrowser+'Elm', body)
-                                              .bind('submit', _handleRequest);
+                                              .bind('submit', _handleRequestOnElm);
                                     }
                                   }
                       });
+                  if (loadmsgMode && loadmsgMode != 'none')
+                  {
+                    config.loadmsgMode == 'replace'  &&  body.empty();
+                    body.append(config.loadmsgElm);
+                  }
                 }
               }
-              return ev1;
+              return evBeforeload;
             }
 
         },
 
-
-
-      _handleRequest = function (e) {
-          var elm = e.type=='submit' ?
-                        e.target:  // <form />
-                        $(e.target).closest('[href]')[0];  // link!
-          if (elm)
+      _handleClickOnBody = function (e) {
+          var link = $(e.target).closest('[href]');
+          if (link[0])
           {
-            var body = $(this).data(_virtualBrowser+'Elm') || this;
-                bfloadEv = _methods['load'].call(body, elm);
-            bfloadEv.isPropagationStopped()  &&  e.stopPropagation();
-            !bfloadEv.passThrough && e.preventDefault();
+            e.VBbody = this;
+            _handleRequestOnElm.call(link, e);
           }
-        };
+        },
+
+      _handleRequestOnElm = function (e) {
+          if ( !e[_isDefaultPrevented]() )
+          {
+            var elm = this,
+                VBbody = e.VBbody || $(elm).data(_virtualBrowser+'Elm') || this;
+                bfloadEv = _methods['load'].call(VBbody, elm);
+            bfloadEv.isPropagationStopped()  &&  e[_stopPropagation]();
+            !bfloadEv[_passThrough] && e.preventDefault();
+          }
+        },
 
 
 
@@ -211,18 +263,20 @@
             config = $.extend(
                     {
                       //url:         null,                      // String: Initial URL for the frame
+                      //noCache:     false,                     // Controls the $.ajax() cache option 
                       //params:      null,                      // Object/String: Request data (as in $.get(url, data, callback) )
-                      //onBeforeload:   null,                   // Function: Shorthand for .bind('VBbeforeload' handler);
+                      //onBeforeload: null,                     // Function: Shorthand for .bind('VBbeforeload' handler);
                       //onLoad:      null,                      // Function: Shorthand for .bind('VBload' handler);
+                      //onLoaded:    null,                      // Function: Shorthand for .bind('VBloaded' handler);
                       //loadmsgElm:  '<div class="loading" />'  // String/Element: Template for a loading message displayed while loading a URL
                       loadmsgMode:    'none'                    // String: available: "none", "overlay" & "replace"
                     },
                     config || {}
                   );
             args && (config.url = args);
-            var body = $(this),
+            var body = this,
                 loadmsgElm = config.loadmsgElm || '<div class="loading" />',
-                loadmsg = (fnVB.i18n[body.closest('[lang]').attr('lang')] || {}).loading || fnVB.i18n.en.loading;;
+                loadmsg = (fnVB.i18n[body.closest('*[lang]').attr('lang')] || {}).loading || fnVB.i18n.en.loading;
 
             if (loadmsgElm.charAt)
             {
@@ -235,10 +289,10 @@
             }
 
             body
-                .data(_virtualBrowser, { cfg: config })
-                .bind('click', _handleRequest);
+                .data(_virtualBrowser, { cfg: config });
 
             config.onLoad && body.bind(_VBload, config.onLoad);
+            config.onLoaded && body.bind(_VBloaded, config.onLoaded);
             config.onBeforeload && body.bind(_VBbeforeload, config.onBeforeload);
             config.params =  typeof config.params == 'string' ?
                               config.params:

@@ -1,4 +1,14 @@
 // encoding: utf-8
+// ----------------------------------------------------------------------------------
+// jQuery.fn.listscroller v 1.1
+// ----------------------------------------------------------------------------------
+// (c) 2009 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+//  written by:
+//   * Már Örlygsson        -- http://mar.anomy.net
+//   * Borgar Þorsteinsson  -- http://borgar.undraland.com
+//   * Valur Sverrisson     
+// ----------------------------------------------------------------------------------
+
 // todo : set position to list element / page that receives 'focusin'
 // todo : automove => slideshow, marquee
 // todo : callback function when animation finishes ( on hold, pending use )
@@ -8,92 +18,92 @@
 
   $.listscroller = {
 
-    version : 1.0,
+    version: 1.0,
 
-    defaultConfig : {
+    defaultConfig: {
 
-      item              : '',
+      item:              '',
 
-      windowSize        : 3,   // how many unmarked items
-      stepSize          : 1,   // how many items to move at a time
-      startPos          : 0,   // number or 'random'
+      windowSize:        3,   // how many unmarked items
+      stepSize:          1,   // how many items to move at a time
+      startPos:          0,   // number or 'random'
 
-      hideClass         : 'overflow',
-      topClass          : 'at-top',
-      bottomClass       : 'at-bottom',
+      hideClass:         'overflow',
+      topClass:          'at-top',
+      bottomClass:       'at-bottom',
 
-      wrap              : 'both',   // none|start|end|both|loop|random
-      overflow          : 'visible',  // visible|hidden  // 'hidden' means that there's never empty space on the last "page"
+      wrap:              'both',   // none|start|end|both|loop|random
+      overflow:          'visible',  // visible|hidden  // 'hidden' means that there's never empty space on the last "page"
 
-      controls          : 'below',   // none|both|above|below
+      controls:          'below',   // none|both|above|below
 
-      animation         : 'none',     // none|carousel|crossfade|accordion, or custom function
-      easing            : 'swing',
-      speed             : 600,
+      animation:         'none',     // none|carousel|crossfade|accordion, or custom function
+      easing:            'swing',
+      speed:             600,
 
-      aspect            : 'auto',     // auto|horizontal|vertical
-      paging            : false,
-      jumpPager         : true,    // Kicks in if paging is set to `true`
-      inputPager        : false,
-      statusPager       : false,
+      aspect:            'auto',     // auto|horizontal|vertical
+      paging:            false,
+      jumpPager:         true,    // Kicks in if paging is set to `true`
+      inputPager:        false,
+      statusPager:       false,
       itemStatusPager:   false,
 
-      autoScrollDelay   : 0, //Timeout in ms for autoscroll
+      autoScrollDelay:   0, //Timeout in ms for autoscroll
 
-      initCallback      : function () {},
-      moveCallback      : function () {},
+      initCallback:      function () {},
+      moveCallback:      function () {},
 
-      classPrefix       : 'listscroller',
-      currentPageClass  : 'current',
-      currentItemClass  : 'visible',
-      cursorItemClass   : 'current',
+      classPrefix:       'listscroller',
+      currentPageClass:  'current',
+      currentItemClass:  'visible',
+      cursorItemClass:   'current',
 
-      pagingTopClass    : 'paging-top',
-      pagingBottomClass : 'paging-bottom',
+      pagingTopClass:    'paging-top',
+      pagingBottomClass: 'paging-bottom',
 
 
-      pagingTemplate    : '<div class="paging"><ul class="stepper"/></div>',
-      nextBtnTemplate   : '<li class="next"><a href="#"/></li>',
-      prevBtnTemplate   : '<li class="prev"><a href="#"/></li>',
+      pagingTemplate:    '<div class="paging"><ul class="stepper"/></div>',
+      nextBtnTemplate:   '<li class="next"><a href="#"/></li>',
+      prevBtnTemplate:   '<li class="prev"><a href="#"/></li>',
 
-      jumpTemplate      : '<li class="jump"/>',
-      jumpLabelTemplate : '<strong/>',
-      jumpWrapTemplate  : '<span/>',
-      jumpBtnTemplate   : '<a href="#"/>',
+      jumpTemplate:      '<li class="jump"/>',
+      jumpLabelTemplate: '<strong/>',
+      jumpWrapTemplate:  '<span/>',
+      jumpBtnTemplate:   '<a href="#"/>',
 
-      statusTempl       : '<div class="status"/>',
-      statusLabelTempl  : '<strong/>',
-      statusWrapTempl   : '<span/>',
-      statusCurrTempl   : '<b/>',
-      statusTotalTempl  : '<i/>',
-      inputPagerTempl   : '<input type="text" value="" size="2"/>'
+      statusTempl:       '<div class="status"/>',
+      statusLabelTempl:  '<strong/>',
+      statusWrapTempl:   '<span/>',
+      statusCurrTempl:   '<b/>',
+      statusTotalTempl:  '<i/>',
+      inputPagerTempl:   '<input type="text" value="" size="2"/>'
     },
 
 
     i18n: {
       en: {
-          labelNext         : 'Next',
-          labelPrev         : 'Previous',
-          titleNext         : 'Page forward',
-          titlePrev         : 'Page back',
+          labelNext:         'Next',
+          labelPrev:         'Previous',
+          titleNext:         'Page forward',
+          titlePrev:         'Page back',
 
-          jumpLabel         : 'Pages:',
+          jumpLabel:         'Pages:',
 
-          statusLabel       : 'Page: ',
-          ofTotalSeparator  : ' of ',
-          statusLabelAfter  : ''
+          statusLabel:       'Page: ',
+          ofTotalSeparator:  ' of ',
+          statusLabelAfter:  ''
         },
       is: {
-          labelNext         : 'Næsta',
-          labelPrev         : 'Fyrri',
-          titleNext         : 'Fletta áfram',
-          titlePrev         : 'Fletta til baka',
+          labelNext:         'Næsta',
+          labelPrev:         'Fyrri',
+          titleNext:         'Fletta áfram',
+          titlePrev:         'Fletta til baka',
 
-          jumpLabel         : 'Síður:',
+          jumpLabel:         'Síður:',
 
-          statusLabel       : 'Síða: ',
-          ofTotalSeparator  : ' af ',
-          statusLabelAfter  : ''
+          statusLabel:       'Síða: ',
+          ofTotalSeparator:  ' af ',
+          statusLabelAfter:  ''
         }
     },
 
@@ -104,23 +114,25 @@
             w = l.eq(0).closest( '.' + c.classPrefix + '-wrapper'),
             z = l.eq( l.length -1 ),
             last = l.length - c.stepSize,
-            prop = (c.aspect === 'horizontal') ? 'scrollLeft' : 'scrollTop',
-            dimp = (c.aspect === 'horizontal') ? 'outerWidth' : 'outerHeight',
+            isHoriz = (c.aspect === 'horizontal'),
+            scrollProp = isHoriz ? 'scrollLeft' : 'scrollTop',
+            posProp = isHoriz ? 'left' : 'top',
+            dimp = isHoriz ? 'outerWidth' : 'outerHeight',
             conf = {};
 
         w.stop();
         p = l.eq( c.index ).position();
-        conf[prop] = p.left;
+        conf[scrollProp] = p[posProp];
 
         if ( c.wrap == 'loop' && c.lastIndex == 0 && c.index == last )
         {
-          w[prop]( z.position().left + z[dimp]() );
+          w[scrollProp]( z.position()[posProp] + z[dimp]() );
           w.animate( conf, c.speed, c.easing );
         }
         else if ( c.wrap == 'loop' && c.lastIndex == last && c.index == 0 )
         {
-          conf[prop] = z.position().left + z[dimp]();
-          w.animate(conf, c.speed, c.easing, function(){ w[prop](0); });
+          conf[scrollProp] = z.position()[posProp] + z[dimp]();
+          w.animate(conf, c.speed, c.easing, function(){ w[scrollProp](0); });
         }
         else
         {
@@ -335,7 +347,6 @@
     var cfg = e.data,
         pageIndex = Math.max(0, parseInt('0'+$( this ).val(), 10 )-1)  ||  0,
         newPos = Math.min(pageIndex*cfg.stepSize, max(cfg.list, cfg) );
-    ;;;window.console&&console.log( [newPos] );
     setPos( cfg, newPos );
     return false;
   }

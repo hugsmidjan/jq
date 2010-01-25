@@ -1,4 +1,12 @@
 // encoding: utf-8
+// ----------------------------------------------------------------------------------
+// jQuery.fn.roundCorners v 1.0
+// ----------------------------------------------------------------------------------
+// (c) 2009 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+//  written by:
+//   * Már Örlygsson        -- http://mar.anomy.net
+// ----------------------------------------------------------------------------------
+
 jQuery.fn.roundCorners = function (cfg)
 {
   var prefix = (cfg && cfg.prefix) || 'c_ c_',

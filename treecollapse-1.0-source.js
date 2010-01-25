@@ -1,3 +1,12 @@
+// encoding: utf-8
+// ----------------------------------------------------------------------------------
+// jQuery.fn.treeCollapse v 1.0
+// ----------------------------------------------------------------------------------
+// (c) 2009 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+//  written by:
+//   * Már Örlygsson        -- http://mar.anomy.net
+// ----------------------------------------------------------------------------------
+
 // Handle collapse functionality of a navigaion tree.
 //
 // Todo:

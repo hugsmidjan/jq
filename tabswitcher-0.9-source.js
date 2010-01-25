@@ -1,15 +1,16 @@
-/* // encoding: utf-8
+// encoding: utf-8
+// ----------------------------------------------------------------------------------
+/*
+  jQuery tabSwitcher Plugin
 
-jQuery tabSwitcher Plugin
-
-	* Version 0.9
-	* URL: N/A
-	* Description: Privides basic tab functionality in minimal code.
-	* Author: Borgar Þorsteinsson
-	* Copyright: Copyright (c) 2008 Borgar Þorsteinsson under dual MIT/GPL license.
+  * Version 0.9
+  * URL: N/A
+  * Description: Privides basic tab functionality in minimal code.
+  * Author: Borgar Þorsteinsson
+  * Copyright: Copyright (c) 2008 Borgar Þorsteinsson under dual MIT/GPL license.
 
 *//*global
-		jQuery
+  jQuery
 */
 
 (function ($) {

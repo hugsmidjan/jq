@@ -1,4 +1,14 @@
 // encoding: utf-8
+// ----------------------------------------------------------------------------------
+// jQuery.fn.imgPopper v 1.0
+// ----------------------------------------------------------------------------------
+// (c) 2009 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+//  written by:
+//   * Valur Sverrisson          
+//   * Einar Kristján Einarsson  -- einarkristjan (at) gmail.com
+//   * Már Örlygsson             -- http://mar.anomy.net
+// ----------------------------------------------------------------------------------
+
 // Requires:
 //  - jQuery 1.2.6 (Runs OK in jQuery 1.3)
 //  - eutils  (uses: $.inject() & $.setFocus() )
@@ -59,24 +69,23 @@
       cfg.fadeInSpeed = 0;
       cfg.fadeOutSpeed = 0;
     };
-
-
+    
+    var _curtain = $(_curtainTemp).hide();
 
 
     _hrefElms.bind('click', function (e) {
         var i = _hrefElms.index(this),
-            _img = $('img', this)[0],
+            _img = $(this).find('img').length ? $('img', this)[0] : '',
 
             _makeHTML = $.inject(_popupTemp, /* html to inject into */ {
                 img    : $(this).attr('href'),
-                title  : _img.title,
-                alt    : _img.alt,
+                title  : _img.title || '',
+                alt    : _img.alt || '',
                 num    : i+1,
                 total  : _hrefElms.length
               }),
 
             _popup = $(_makeHTML).hide(),
-            _curtain = $(_curtainTemp).hide(),
 
             setWidth = function() {
                 var popupImg = _popup.find('img');
@@ -143,6 +152,7 @@
                   $(this)
                       .bind('click', function (e) {
                           _popup.remove();
+                          $(window).unbind('keyup', keynav);
                           _hrefElms.eq(idx).trigger('click');
                           return false;
                         });
@@ -154,30 +164,41 @@
             .bind('click', function (e) {
                 _popup.fadeOut(cfg.fadeOutSpeed, function(){
                     _curtain.fadeOut(cfg.fadeOutSpeed, function(){
-                        _popup.remove();
-                        $('.ipopup-curtain').remove();
+                        $('body > div.ipopup-curtain, body > div.ipopup-container').remove();
+                        $(window).unbind('keyup', keynav);
                         _hrefElms.focus();
-                    }, cfg.easeOut);
+                      }, cfg.easeOut);
                   }, cfg.easeOut); // animate out
                 _isOpen = false;
                 return false;
               });
 
-        $(window).keyup( function(e) {
-            if( e.keyCode == 27 ) {
-                _curtain.trigger('click'); // close on esc
+
+        var keynav = function(e) {
+            var keycode = e.keyCode;
+            if ( keycode == 27 )
+            {
+              _curtain.trigger('click'); // close on esc
             }
-            if( e.keyCode == 37 ) {
-                $('.paging .prev', _popup).not('.nav-end').trigger('click');  // prev image
+            if ( keycode == 37 )
+            {
+              var prevTrigger = $('.paging .prev', _popup);
+              prevTrigger.is('.nav-end') ? _curtain.trigger('click') : prevTrigger.trigger('click');  // prev image
             }
-            if( e.keyCode == 39 ) {
-                $('.paging .next', _popup).not('.nav-end').trigger('click');  // next image
+            if ( keycode == 39 )
+            {
+              var nextTrigger = $('.paging .next', _popup);
+              nextTrigger.is('.nav-end') ? _curtain.trigger('click') : nextTrigger.trigger('click');  // next image
             }
-        });
+          };
+        $(window).bind('keyup', keynav);
+
 
         return false;
 
       });
+
+
     return this;
   };
 
