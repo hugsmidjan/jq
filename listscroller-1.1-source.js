@@ -203,7 +203,7 @@
         return Math.floor( Math.random() * l.length );
       },
       loop: function ( i, l, c ) {
-        return i % l.length;
+        return (l.length+i) % l.length;
       }
     },
 
