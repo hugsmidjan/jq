@@ -15,7 +15,7 @@
           //  * Add more elegant handling of locale strings http://tools.ietf.org/html/rfc4646
           //    ...i.e. add support for 3 and 4 letter language subtags
           //  * Cache/optimize the retrieval of language codes for HTML Elements...
-          lang = (typeof lang == 'string' ?  lang :  $(lang).closest('[lang]').attr('lang').toLowerCase()) || 'en';
+          lang = (typeof lang == 'string' ?  lang : $(lang||'body').closest('[lang]').attr('lang')).toLowerCase() || 'en';
           var t = _tokens[lang];
           if (!t)
           {
@@ -56,7 +56,24 @@
 
   $.prettyNum = {
 
+    /*
+      Returns a prettified numerical string
+      Usage:
+        $.prettyNum.make( [Number|String|Element], [String|Element], ?Boolean );
+        $.prettyNum.make( [Number|String|Element], ?Boolean );
+    */
       make: function( val, lang, keepTrailingFraction ) {
+          if (arguments.length<3 && typeof lang == 'boolean')
+          {
+            keepTrailingFraction = lang;
+            lang = null;
+          }
+          if (val.jquery || val.nodeName)
+          {
+            var elm = $(val);
+            val = elm.val() || elm.text();
+            lang = lang || elm;
+          }
           var tok = _getTokens(lang);
           // normalize field.value
           val = (typeof val == 'number') ? 
@@ -90,7 +107,19 @@
           return val;
         },
 
+    /*
+      Parses a prettified numerical string and returns a plain Number
+      Usage:
+        $.prettyNum.read( [Number|String|Element], [String|Element] );
+        $.prettyNum.read( [Number|String|Element] );
+    */
       read: function( val, lang ){
+          if (val.jquery || val.nodeName)
+          {
+            var elm = $(val);
+            val = elm.val() || elm.text();
+            lang = lang || elm;
+          }
           var tok = _getTokens(lang);
           val = parseFloat(
                     $.prettyNum.make(val, lang)
