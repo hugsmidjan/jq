@@ -507,8 +507,8 @@
               var tabPane = $(this);
               tabPane.aquireId(conf.defaultId);
               var newTab = conf.makeTab(tabPane, conf).appendTo( tabList ),
-                  paneLang = tabPane.closest('[lang]');
-              paneLang != refLang  &&  newTab.attr('lang', paneLang);
+                  paneLang = tabPane.closest('[lang]').attr('lang');
+              paneLang  &&  paneLang != refLang  &&  newTab.attr('lang', paneLang);
             })
           .eq(0)
               .before( tabBox );

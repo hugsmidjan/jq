@@ -250,18 +250,18 @@
 
 
     // Call any function as an "insta-plugin".
-    run: function (func, argsArray)
+    run: function (func, argsArray, continueChain) // continueChain forces the plugin to return the collection instead of the return value of func
     {
       var ret = func.apply( this, argsArray||[] );
-      return ret !== undefined ? ret : this;
+      return (continueChain || ret === undefined) ? this : ret;
     },
 
 
     // enforces DOM-ids on all items in the collection
     // and returns the id of the first item.
-    aquireId: function (prefDefault)
+    aquireId: function (prefDefaultId)
     {
-      return this.each(function() { $.aquireId(this, prefDefault); }).attr('id');
+      return this.each(function() { $.aquireId(this, prefDefaultId); }).attr('id');
     },
 
     setFocus: function (rev)
@@ -353,26 +353,34 @@
 
 
     // Usage:
-    // jQuery.aquireId();    // returns a valid unique DOM id string that can be safely assigned to an element.
-    // jQuery.aquireId(elm); // returns the value of elm.id -- automatically assigning a unique id first, if needed.
+    // jQuery.aquireId();                         // returns a valid unique DOM id string that can be safely assigned to an element.
+    // jQuery.aquireId(prefDefaultIdString);      // returns a valid unique DOM id based on `prefDefaultIdString` (appending/autoincrementing a trailing integer if needed)
+    // jQuery.aquireId(elm);                      // returns the value of elm.id -- automatically assigning a unique id first, if needed.
+    // jQuery.aquireId(elm, prefDefaultIdString); // returns the value of elm.id -- if needed automatically assigning a unique id based on `prefDefaultIdString`.
     //
-    aquireId: function (el, prefDefault) // el is an optional parameter.
+    aquireId: function (el, prefDefaultId) // el is an optional parameter.
     {
+      if (typeof el == 'string')
+      {
+        prefDefaultId = el;
+        el = undefined;
+      }
+      el = $(el||[])[0]; // if `el` is a jQuery collection $.aquireId only uses the first item...
       if (!el || !el.id)
       {
-        var id = prefDefault  ||  _guidPrefix + _guid++;
-        if (prefDefault)
+        var id = prefDefaultId  ||  _guidPrefix + _guid++;
+        if (prefDefaultId)
         {
-          var m = prefDefault.match(/\d+$/),
+          var m = prefDefaultId.match(/\d+$/),
               c = m ? $.toInt(m[0]) : 1;
           while ( $('#'+id)[0] )
           {
             if (m)
             {
-              prefDefault = prefDefault.replace(/\d+$/, '');
+              prefDefaultId = prefDefaultId.replace(/\d+$/, '');
               m = undefined;
             }
-            id = prefDefault+(c++);
+            id = prefDefaultId+(c++);
           }
         }
         if (!el) { return id; }
