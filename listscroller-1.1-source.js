@@ -13,7 +13,7 @@
 // todo : automove => slideshow, marquee
 // todo : callback function when animation finishes ( on hold, pending use )
 // Depends on:
-//  - eutils 1.0+ :  $.fn.deepest()
+//  - eutils 1.0+ :  $.fn.deepest() og  $.fn.setFocus()
 (function ($){
 
   $.listscroller = {
@@ -258,7 +258,8 @@
             .addClass( c.currentItemClass )
             .removeClass( c.hideClass )
             .eq(0)
-                .addClass( c.cursorItemClass );
+                .addClass( c.cursorItemClass )
+                .setFocus();
 
     if ( $.isFunction( c.moveCallback ) )
     {
