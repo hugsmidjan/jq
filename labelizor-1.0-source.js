@@ -43,7 +43,7 @@
         var _this = this,
             _jQthis = $(_this);
 
-        if ( (_this.id || _this.title)  &&  _jQthis.is('input:text, textarea') )
+        if ( (_this.id || _this.title)  &&  _jQthis.is(':text, :password, textarea') )
         {
           var _labelText = cfg.labelText,
                // use _jQthis.parents(':last') as scope/context to also .find() <label> inside .detached() document fragments

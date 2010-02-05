@@ -53,10 +53,10 @@
 
 (function($){
 
-  var _curtain = 'curtain',
+  var _strCurtain = 'curtain',
       _opacity = 'opacity',
 
-      curtain = $[_curtain] = function (cfg, elm) {
+      curtain = $[_strCurtain] = function (cfg, elm) {
 
           if (cfg == 'destroy')
           {
@@ -78,7 +78,7 @@
           }
 
           cfg = $.extend({
-                className: _curtain+'-overlay'
+                className: _strCurtain+'-overlay'
               },
               typeof(cfg)=='string' ?  // cfg == 'myCurtainClassName'
                   { className: cfg }:
@@ -122,12 +122,12 @@
           return _curtain;
         };
 
-  $.fn[_curtain] = function (cfg) {
-      return this.each(function(){  $[_curtain](cfg, this);  });
+  $.fn[_strCurtain] = function (cfg) {
+      return this.each(function(){  $[_strCurtain](cfg, this);  });
     };
 
 
-  var _curtainlist = curtain.list = [],
+  var _curtainlist = [],
 
       w = $(window),
       b,// = $('body');
