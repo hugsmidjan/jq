@@ -423,12 +423,17 @@
         {
           var bt = $( cfg.jumpBtnTemplate ),
               a = bt.find( 'a' ).andSelf().eq(0)
-                      .text( i + 1 ).addClass('p' + (i+1)).bind( 'click', cfg, movePage );
+                      .text( i + 1 )
+                      .attr('title', cfg.statusLabel + (i + 1) )
+                      .addClass('p' + (i+1))
+                      .bind( 'click', cfg, movePage );
           if (cfg.index == i) { a.addClass( cfg.currentPageClass ); }
           jmps.push( a[0] );
         }
         cfg.jumps = $( jmps );
-        $( cfg.jumpWrapTemplate || [] ).append( cfg.jumps ).appendTo( jumpMenu );
+        $( cfg.jumpWrapTemplate || [] )
+            .append( cfg.jumps )
+            .appendTo( jumpMenu );
       }
 
     }
@@ -477,8 +482,12 @@
     if ( c.wrap == 'loop' )
     {
       // generate flipover items
-      c.flipover = _items.slice( 0, c.windowSize ).clone( true );
-      _items.parent().append( c.flipover );
+      c.flipover = _items
+                      .slice( 0, c.windowSize )
+                          .clone( true );
+      _items
+          .parent()
+              .append( c.flipover );
     }
 
     // create and display control-links
@@ -486,12 +495,16 @@
     {
       if ( /^(above|both)$/.test( c.controls ) )
       {
-        _outer.before( buildControls( c ).addClass( c.pagingTopClass ) );
+        _outer
+            .before( buildControls( c )
+            .addClass( c.pagingTopClass ) );
       }
 
       if ( /^(below|both)$/.test( c.controls ) )
       {
-        _outer.after( buildControls( c ).addClass( c.pagingBottomClass ) );
+        _outer
+            .after( buildControls( c )
+            .addClass( c.pagingBottomClass ) );
       }
 
     }
@@ -559,7 +572,11 @@
     }
     else if (this.length)
     {
-      this.eq(0).parent().listscroller( $.extend( {}, config, { item: this }) );
+      this.eq(0)
+          .parent()
+              .listscroller(
+                  $.extend( {}, config, { item: this })
+                );
     }
     return this;
 

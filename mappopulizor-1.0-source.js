@@ -43,7 +43,7 @@
       getXY:              function (bubbleBox) { // try to pull the item's id from it's link
                               var url = this.getLinkUrl(bubbleBox),
                                   itemId = url  &&  url.replace(/^.*\/(\d+)(\/|$)/, '$1');
-                              return this.mappoints[itemId] || { x:0, y:0 };
+                              return this.mappoints[itemId] || { x:0, y:0, f:1 }; // f: false marker, no id match
                             },
 
       markerTempl:        '<a href="#" class="marker"><span /><i><b>%{label}</b></i></a>',
@@ -117,6 +117,10 @@
                           }
                           return false;
                         });
+                  if( c.f )
+                  {
+                    marker.addClass('marker-false');
+                  }
                   marker
                     .css({
                         left: c.x + cfg.dotOffset[0],
