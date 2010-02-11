@@ -45,25 +45,28 @@ jQuery.fn.mailtoEnabler = function (_cfg)
           $('img', _link).each(function(){ $(this).replaceWith(this.alt); });
           _linkText = $(_link).text().replace(_mailtoPrefix, '');
         }
-        _linkText = _linkText
-            .replace(_atPattern, '@')
-            .replace(_dotPattern, '.');
+        if (_linkText)
+        {
+          _linkText = _linkText
+              .replace(_atPattern, '@')
+              .replace(_dotPattern, '.');
 
-        _cfg.successClass && $(_link).addClass(_cfg.successClass);
+          _cfg.successClass && $(_link).addClass(_cfg.successClass);
 
-        // create a link inside the element.
-        if (_cfg.createLinks  &&  !_isAnchor)
-        {
-          _link = $(_link).wrapInner('<a />').find('a')[0];
-          _isAnchor = 1;
-        }
-        if (_isAnchor)
-        {
-          _link.href = 'mailto:' + _linkText;
-        }
-        if (_useInnerText)
-        {
-          $(_link).text(_linkText);
+          // create a link inside the element.
+          if (_cfg.createLinks  &&  !_isAnchor)
+          {
+            _link = $(_link).wrapInner('<a />').find('a')[0];
+            _isAnchor = 1;
+          }
+          if (_isAnchor)
+          {
+            _link.href = 'mailto:' + _linkText;
+          }
+          if (_useInnerText)
+          {
+            $(_link).text(_linkText);
+          }
         }
       });
   }
