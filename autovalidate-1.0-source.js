@@ -1,19 +1,13 @@
-// encoding: utf-8
-//
-// jquery.av.core.js
-// jquery.av.lang.is.js
-// jquery.av.extratypes.js
+/// encoding: utf-8
+// ----------------------------------------------------------------------------------
+// jQuery.fn.autoValidate/.defangEnter/.defangReset  v. 1.0
+// ----------------------------------------------------------------------------------
+// (c) 2009 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+//  written by:
+//   * Borgar Þorsteinsson  -- http://borgar.undraland.com
+//   * Már Örlygsson        -- http://mar.anomy.net
+// ----------------------------------------------------------------------------------
 
-// todo/bugs:
-//  - custom error messages don't appear in the error alert() (only inline in the dom)
-
-
-// ====================================================================================
-// ====================================================================================
-
-
-
-// encoding: utf-8
 
 (function($){
 
@@ -40,15 +34,16 @@
     reqErrorClass       : 'reqerror',        // The `className` put on field "container" elements when they trigger a "required" error.
     typeErrorClass      : 'typeerror',       // The className put on field "container" elements that have a "invalid input" error.
 
+    //emulateTab:         false, 
+    //includeDisabled:    false,             // true - means that [disabled] fields are not filtered out.
+    //maxLengthTab:       false
+
     defangReset         : true,              // assign a confirmation dialog to reset buttons to prevent accidental resets
-    defangEnter         : 'auto',            // disable form submitions on enter key.
+    defangEnter         : 'auto'             // disable form submitions on enter key.
                                              // Values are (true|false|auto) where:
                                              //  true  - disables all enter submits,
                                              //  false - doesn't alter bowser defaults,
-                                             //  auto  - disables enter submitions if form has a POST method or >1 submit button
-    emulateTab          : false,
-    maxLengthTab        : false
-
+                                             //  auto  - disables enter submitions if form has more than one submit button
   };
 
 
@@ -122,7 +117,7 @@
 
           // if this element is a group (has named 1+ siblings contained in fieldset wrapper)
           // the groups heading will override the current label text
-          var isGroup = control.is('fieldset:has(input[name=' + input.attr('name') + ']:eq(1))');
+          var isGroup = control.is('fieldset:has(input[name=' + input.attr('name') + ']:odd)');
           if (isGroup) {
             var thd = control.find(':header, legend, p').eq(0).text();  // move to config?
             labelData = (thd) ? $.av.cleanLabelString( thd, conf.maxLabelLength ) : labelData;
@@ -311,7 +306,7 @@
     defangEnter : function () {
       return this.bind('keydown', function(e){
           var target = e.target;
-          return ( e.keyCode != 13  ||  target.tagName != 'INPUT'  ||  /^(button|reset|submit)$/i.test(target.type) );
+          return ( e.which != 13  ||  target.tagName != 'INPUT'  ||  /^(button|reset|submit)$/i.test(target.type) );
         });
     },
 
@@ -418,9 +413,8 @@
 
         var context = $( this ),
             contextInvalids = [],
-            validContext = true;
-
-        conf = $.av.config( this );
+            validContext = true,
+            conf = $.av.config( this );
 
         displayAlert = displayAlert || /both|alertonly/.test( conf.errorMsgType );
 
@@ -429,9 +423,9 @@
         context.find( errMsgSel ).remove();
 
         // find controls that need validation
-        var controls = !context.is(':input') ? context.find(':input') : context;
+        var controls = context.is(':input') ? context : context.find(':input');
 
-        controls.each(function(){
+        controls.not(conf.includeDisabled?'':':disabled').each(function(){
 
           var control = $( this );
           control.removeData( 'av-malformed' );
@@ -469,11 +463,11 @@
           else if (reqchk && typeof(reqchk) === 'string') {
             var m = /^(!)?(.*)$/.exec(reqchk);
             var t = $(':input[name=' + m[2] + ']', this.form);  // use context rather than form?
-            if (t.length && ('checkbox' == t.attr('type') || 'radio' == t.attr('type'))) {
-              required = !m[1] ^ !t.is(':checked');
-            }
-            else if (t.length) {
-              required = !m[1] ^ (t.val() == '');
+            if (t.length)
+            {
+              required = t.is(':checkbox, :radio') ?
+                            !m[1] ^ !t.filter(':checked').length:
+                            !m[1] ^ (t.val() == '');
             }
           }
 
@@ -551,14 +545,6 @@
   });
 
 })(jQuery);
-
-
-
-// ====================================================================================
-// ====================================================================================
-
-
-
 // Icelandic translation
 // encoding: utf-8
 jQuery.av.lang.is = {
@@ -578,12 +564,6 @@ jQuery.av.lang.is = {
   fi_ccnum_noamex : 'American Express kort virka ekki'
 
 };
-
-
-
-// ====================================================================================
-// ====================================================================================
-
 
 
 // encoding: utf-8
@@ -615,7 +595,8 @@ $.extend($.av.lang.en, {
 //           or '' if default error is to be used 
 //
 
-$.extend($.av.type, {
+var avTypes = $.av.type;
+$.extend(avTypes, {
   
 
   fi_kt : function ( v, w, lang ) {
@@ -625,8 +606,8 @@ $.extend($.av.type, {
       $( this ).val( kt );
       // remainder must all be numericals, 10 characters, and the last character must be 0 or 9 
       // kt must not be a robot
-      var robot = /010130[- ]?(2(12|20|39|47|55|63|71|98)|3(01|36)|4(33|92)|506|778)9/.test(kt);
-      if ( !/^\d{9}[90]$/.test(kt) || robot) { 
+      var robot = /010130(2(12|20|39|47|55|63|71|98)|3(01|36)|4(33|92)|506|778)9/.test(kt);
+      if ( robot || !/^\d{9}[90]$/.test(kt) ) {
         return error;
       }
       // Checksum validation
@@ -634,10 +615,10 @@ $.extend($.av.type, {
           _summa = 0,
           i = 9;
       while (i--) { _summa += (x[i] * kt.charAt(i)); }
-      if (_summa % 11) {
+      if (_summa % 11)
+      {
         return error;
       }
-      
     }
     return !!v;
   },
@@ -669,15 +650,15 @@ $.extend($.av.type, {
     if (v) {
       // This function simply removes all *legal* characters from the string
       // and then returns false if there are any left overs afterwards.
-      return !v.replace( /(\s|[-+]|\d)/g, '' ) || '';
+      return !v.replace( /(\s|[-+()]|\d)/g, '' ) || '';
     }
     return false;
   },
 
 
   // Returns true on a valid Icelandic Zip-code ("póstnúmer").
-//    is : "dæmi: 101",
-//    en : "example: 101",
+  //   is : "dæmi: 101",
+  //   en : "example: 101",
   fi_postal_is : function ( v, w, lang ) {
     
     if (v) {
@@ -878,10 +859,7 @@ $.extend($.av.type, {
 });
 
 
+avTypes.fi_pnr = avTypes.fi_postal_is;
 
 
 })(jQuery);
-
-
-// ====================================================================================
-// ====================================================================================
