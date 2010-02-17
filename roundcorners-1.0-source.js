@@ -16,15 +16,13 @@ jQuery.fn.roundCorners = function (cfg)
               tr  : prefix+'tr',
               tl  : prefix+'tl',
               br  : prefix+'br',
-              bl  : prefix+'bl',
-              activeClass : 'roundbox-active'
+              bl  : prefix+'bl'
             }, cfg),
       S = '<'+opts.tag+' class="',
       E = '" />';
 
   this
       .not(':has(>'+opts.tag+'.'+opts.tr+')')
-          .addClass( opts.activeClass )
           [opts.out?'before':'prepend']( S+opts.tr+E  +  S+opts.tl+E )
           [opts.out?'after':'append']( S+opts.bl+E  +  S+opts.br+E );
 
