@@ -242,9 +242,9 @@
     return maxVal;
   }
 
-  function setPos ( c, _newIndex, _noflash )
+  function setPos ( c, _newIndex, opts )
   {
-
+    opts = opts || {};
     var _block = c.block;
     var list   = c.list;
     c.lastIndex = c.index;
@@ -258,8 +258,7 @@
             .addClass( c.currentItemClass )
             .removeClass( c.hideClass )
             .eq(0)
-                .addClass( c.cursorItemClass )
-                .setFocus();
+                .addClass( c.cursorItemClass );
 
     if ( $.isFunction( c.moveCallback ) )
     {
@@ -273,6 +272,12 @@
     else
     {
       $.listscroller.animate[ c.animation||'none' ].call( _block, list, c );
+    }
+    if ( !opts._noFocus )
+    {
+      setTimeout(function(){
+          list.eq( c.index ).setFocus();
+        }, c.speed || 1 );
     }
 
     _block
@@ -290,7 +295,7 @@
     }
 
     // flash the container
-    if (!_noflash)
+    if (!opts._noFlash)
     {
       _block.addClass( c.classPrefix + '-changed' );
       setTimeout(function(){
@@ -523,13 +528,14 @@
       c.startPos = Math.floor(Math.ceil(_items.length / c.stepSize) * Math.random()) * c.stepSize;
     }
 
-    setPos( c, c.startPos || 0, true );
+    // set initial position
+    setPos( c, c.startPos || 0, { _noFlash:true } );
 
     if(c.autoScrollDelay)
     {
-      function nexttrigger ( e ) {
-        setPos( c, c.index + c.stepSize );
-      }
+      var nexttrigger = function ( e ) {
+        setPos( c, c.index + c.stepSize, { _noFocus:true } );
+      };
       scrollInterval = setInterval( nexttrigger, c.autoScrollDelay);
       _block.hover(
           function() {
