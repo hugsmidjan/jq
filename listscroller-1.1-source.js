@@ -14,7 +14,7 @@
 // todo : callback function when animation finishes ( on hold, pending use )
 // Depends on:
 //  - eutils 1.0+ :  $.fn.deepest() og  $.fn.setFocus()
-(function ($){
+(function ($, True, False){
 
   $.listscroller = {
 
@@ -42,11 +42,11 @@
       speed:             600,
 
       aspect:            'auto',     // auto|horizontal|vertical
-      paging:            false,
-      jumpPager:         true,    // Kicks in if paging is set to `true`
-      inputPager:        false,
-      statusPager:       false,
-      itemStatusPager:   false,
+      paging:            False,
+      jumpPager:         True,    // Kicks in if paging is set to `true`
+      inputPager:        False,
+      statusPager:       False,
+      itemStatusPager:   False,
 
       autoScrollDelay:   0, //Timeout in ms for autoscroll
 
@@ -231,7 +231,7 @@
               : 'vertical';
     }
     // indeterminate
-    return false;
+    return False;
   }
 
   function max ( list, cfg )
@@ -330,14 +330,14 @@
   {
     var c = e.data;
     setPos( c, c.index - c.stepSize );
-    return false;
+    return False;
   }
 
   function moveNext ( e )
   {
     var c = e.data;
     setPos( c, c.index + c.stepSize );
-    return false;
+    return False;
   }
 
   function movePage ( e )
@@ -345,7 +345,7 @@
     var c = e.data,
         p = (parseInt( $( this ).text(), 10 ) -1) || 0;
     setPos( c, p * c.stepSize );
-    return false;
+    return False;
   }
 
   function inputChange ( e )
@@ -354,7 +354,7 @@
         pageIndex = Math.max(0, parseInt('0'+$( this ).val(), 10 )-1)  ||  0,
         newPos = Math.min(pageIndex*cfg.stepSize, max(cfg.list, cfg) );
     setPos( cfg, newPos );
-    return false;
+    return False;
   }
 
 
@@ -458,7 +458,7 @@
     // test and stop repeat inits
     if ( _block.hasClass( c.classPrefix + '-active' ) )
     {
-      return false;
+      return False;
     }
 
     c.list = _items;
@@ -489,7 +489,7 @@
       // generate flipover items
       c.flipover = _items
                       .slice( 0, c.windowSize )
-                          .clone( true );
+                          .clone( True );
       _items
           .parent()
               .append( c.flipover );
@@ -529,12 +529,12 @@
     }
 
     // set initial position
-    setPos( c, c.startPos || 0, { _noFlash:true } );
+    setPos( c, c.startPos || 0, { _noFlash:True, _noFocus:True } );
 
     if(c.autoScrollDelay)
     {
       var nexttrigger = function ( e ) {
-        setPos( c, c.index + c.stepSize, { _noFocus:true } );
+        setPos( c, c.index + c.stepSize, { _noFocus:True } );
       };
       scrollInterval = setInterval( nexttrigger, c.autoScrollDelay);
       _block.hover(
@@ -564,7 +564,7 @@
 
           if (cfg.itemStatusPager)
           {
-            cfg.inputPager = false;
+            cfg.inputPager = False;
           }
 
           initScroller(
@@ -588,4 +588,4 @@
 
   };
 
-})(jQuery);
+})(jQuery, !0, !1);
