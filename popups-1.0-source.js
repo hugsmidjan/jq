@@ -12,7 +12,7 @@
 // works with jQuery 1.3
 
 (function($, uscore, blank, undefined, p){
-  // NOTE: `uscore` is a hack to prevent overzealous dean.edwards.name/packer from accidentally handling _top and _blank as "private" variable names
+  // NOTE: `uscore` is a hack to prevent the overzealous dean.edwards.name/packer from accidentally handling _top and _blank as "private" variable names
 
   p = $.fn.popUps = function (cfg) {
 
@@ -99,7 +99,7 @@
         var _elm = this,
             _conf = $(_elm).data(dataKey),
             _target = _elm.target || _conf.target || uscore+blank,
-            _wasBlank = (_target.toLowerCase() == uscore+'blank');
+            _wasBlank = (_target.toLowerCase() == uscore+blank);
 
         if (_wasBlank)
         {
@@ -115,7 +115,7 @@
         {
           _elm.target = _target;  // set it temporarily (while the action is taking place)
           setTimeout(function() { // and then remove/reset it again (after a while)
-            _elm.target = (_wasBlank) ? uscore+'blank' : '';
+            _elm.target = (_wasBlank) ? uscore+blank : '';
           }, 150);
         }
         // return true/undefined because there might be other handlers that'd like to modify the link.href before it's activated,
