@@ -367,35 +367,39 @@
           // $( this ).isValid();
           // what context should the validation be called on?
         }
+
         form.bind('submit', function(e){
-
-          var f = $( this );
-          var c = $.av.config( this );
-
-          // This is a bad idea. User submits form, presses back button, fixes something, and can't resubmit. :-P
-          // A workaround to this problem is removing submittedClass on unload. Are there other cases where this is a bad idea?
-          // Current status: out of scope for the AV, use a custom handler
-          /*
-          if ( f.hasClass( c.submittedClass ) ) {
-            // don't submit the form. it is already submitted
-            return false;
-          }
-          else {*/
-            var valid = f.isValid();
-            if ( valid ) {
-              // mark this form as submitted
-              f.addClass( c.submittedClass );
-            }
-            else
+            var f = $( this );
+            if ( !f.data('av.skip') || f.data('av.disabled') )
             {
-              // neccessary in jQuery 1.2.6 to prevent forms with inline onsubmit="" attributes returning false getting ignored
-              // (not a problem in jQuery 1.3)
-              e.preventDefault(); 
-            }
-            return valid;
-          /*}*/
+              var c = $.av.config( this );
 
-        });
+            // This is a bad idea. User submits form, presses back button, fixes something, and can't resubmit. :-P
+            // A workaround to this problem is removing submittedClass on unload. Are there other cases where this is a bad idea?
+            // Current status: out of scope for the AV, use a custom handler
+            /*
+            if ( f.hasClass( c.submittedClass ) ) {
+              // don't submit the form. it is already submitted
+              return false;
+            }
+            else {*/
+              var valid = f.isValid();
+              if ( valid ) {
+                // mark this form as submitted
+                f.addClass( c.submittedClass );
+              }
+              else
+              {
+                // neccessary in jQuery 1.2.6 to prevent forms with inline onsubmit="" attributes returning false getting ignored
+                // (not a problem in jQuery 1.3)
+                e.preventDefault(); 
+              }
+              return valid;
+            /*}*/
+
+            }
+            f.removeData('av.skip');
+          });
 
       });
 
