@@ -8,6 +8,14 @@
 //   * Már Örlygsson        -- http://mar.anomy.net
 // ----------------------------------------------------------------------------------
 
+/*
+  NOTE:
+
+    Methods for (temporarily) disabling the autoValidation of forms:
+      * `form.data('av.skip', true)`      skips validation on next submit only
+      * `form.data('av.disabled', true)`  disables all validation until further notice
+
+*/
 
 (function($){
 
@@ -212,10 +220,16 @@
         // sort through invalid inputs and build error messages
         $.each(ctrllist, function(i){
 
-          var ctrl  = $( this );
-          var label = $.av.getLabel( ctrl, contexts, conf );
+          var ctrl  = $( this ),
+              label = $.av.getLabel( ctrl, contexts, conf ),
+              errorMsg = ctrl.data('av-error-short');
+          
+          if (errorMsg)
+          {
+            label += ' ('+errorMsg+')'; 
+          }
 
-          if ($(this).is('.' + conf.typeErrorClass)) {  // is it a type error?
+          if ( $(this).is('.' + conf.typeErrorClass) ) {  // is it a type error?
             malformed.push( label );
           }
           else {
@@ -500,12 +514,19 @@
               // context.is('fieldset:has(input[name=' + input.attr('name') + ']:gt(1))');
               //var id = $.av.id( this );
 
-              // returned value was: a string (error message / exception)
-              if ( typeof(res) === 'string' ) {
+              // returned value was: a string (error message / exception) or Object { inline:'...', alert:'...' }
+              if ( res ) {
+                // Message should detail how to complete the field
 
-                // string should detail how to complete the field
+                var shortErr;
+                // handle Object
+                if (typeof(res) != 'string' ) {
+                  shortErr = res.alert;
+                  res = res.inline;
+                }
                 contextInvalids.push( wrap.get(0) );
                 wrap.data( 'av-error', res );
+                wrap.data( 'av-error-short', (typeof shortErr == 'string' ? shortErr : res) );
 
                 // mark wrapper (or control) with error class
                 wrap.removeClass( conf.reqErrorClass );
@@ -562,9 +583,9 @@ jQuery.av.lang.is = {
   inlineNextError : 'Næsta villa',
   resetAlert      : 'Ath: Þú ert í þann mund að afturkalla öll innslegin gildi...',
 
-  fi_email        : 'Vinsamlega sláðu inn rétt netfang (dæmi: notandi@daemi.is)',
-  fi_url          : 'Vinsamlega sláðu inn löggilda vefslóð (dæmi: http://www.example.is)',
-  fi_year         : 'Vinsamlega sláðu inn rétt ártal (dæmi: 1998)',
+  fi_email        : { inline: 'Vinsamlega sláðu inn rétt netfang (dæmi: notandi@daemi.is)',  alert: 'e.g. nafn@domain.is' },
+  fi_url          : { inline: 'Vinsamlega sláðu inn löggilda vefslóð (dæmi: http://www.example.is)',  alert: 'e.g. http://www.domain.is' },
+  fi_year         : { inline: 'Vinsamlega sláðu inn rétt ártal (dæmi: 1998)',  alert: 't.d. 1998' },
   fi_ccnum_noamex : 'American Express kort virka ekki'
 
 };
@@ -575,10 +596,10 @@ jQuery.av.lang.is = {
 
 $.extend($.av.lang.en, {
 
-  fi_email : 'Please provide a valid e-mail address (example: user@example.com)',
-  fi_url   : 'Please provide a valid web address (example: http://www.example.is)',
-  fi_year  : 'Please provide a valid four digit year (example: 1998)',
-  fi_ccnum_noamex: 'American Express cards not accepted'
+  fi_email : { inline: 'Please provide a valid e-mail address (example: user@example.com)',  alert: 'e.g. user@example.com' },
+  fi_url   : { inline: 'Please provide a valid web address (example: http://www.example.is)',  alert: 'e.g. http://www.example.com' },
+  fi_year  : { inline: 'Please provide a valid four digit year (example: 1998)',  alert: 'e.g. 1998' },
+  fi_ccnum_noamex: { inline: 'American Express cards not accepted',  alert:'AmEx not accepted' }
 
 });
 
@@ -811,6 +832,7 @@ $.extend(avTypes, {
 
 
   // Returns true if valid credid card number
+  // Fake Credit Card number for testing: 1234-1234-1234-1238
   fi_ccnum : function ( v, w, lang ) {
     var error = $.av.getError( 'fi_ccnum', lang );
     if (v) {
@@ -839,6 +861,7 @@ $.extend(avTypes, {
   },
 
 
+  // Fake AmEx number for testing: 341-2341-2341-2341
   fi_ccnum_noamex: function ( v, w, lang ) {
     if (v && v.replace(/[ -]/g, '').length == 15 ) {
       return $.av.getError( 'fi_ccnum_noamex', lang );
