@@ -515,12 +515,13 @@
               //var id = $.av.id( this );
 
               // returned value was: a string (error message / exception) or Object { inline:'...', alert:'...' }
-              if ( res ) {
+              var resIsString = typeof res == 'string';
+              if ( res || resIsString) {
                 // Message should detail how to complete the field
 
                 var shortErr;
                 // handle Object
-                if (typeof(res) != 'string' ) {
+                if (!resIsString) {
                   shortErr = res.alert;
                   res = res.inline;
                 }
