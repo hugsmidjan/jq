@@ -193,6 +193,18 @@
     // This allows the garbage collector to free up memory. (In some cases gobs of it!)
     fin: function(){ return $(this) },
 
+    // collection should be .detached() for this to work properly
+    shuffle: function (/* inline */) { // `inline` parameter not supported yet - will update the DOM position of the elements directly.
+        var coll = this,
+            l = coll.length;
+        while (l) {
+          var p = Math.floor( l * Math.random(l--) ),
+              t = coll[l];
+          coll[l] = coll[p];
+          coll[p] = t;
+        }
+        return coll;
+      },
 
     pause: function (speed, callback)
     {
