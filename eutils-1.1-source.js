@@ -27,7 +27,7 @@
       _doc = document,
       _location = _doc.location,
       _browser = $.browser,
-      _msie = _browser.msie,
+      _msie = _browser.msie  &&  parseInt(_browser.version, 10)<9,
 
       // suffix and prefix used to generate temporary @id-values for HTMLelements without an @id
       _guidPrefix = 'tmp_' + (new Date()).getTime() + '_',

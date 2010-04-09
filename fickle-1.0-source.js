@@ -96,7 +96,7 @@
               if ( !data._isOpen  &&  _triggerEvent(this, 'open', cfg) )
               {
                 data._gotFocus = undefined;
-                cfg.fickle  &&  $(_document).bind('focusin', data._confirmFocusLeave);
+                cfg.fickle  &&  $(_document).bind('focusin click', data._confirmFocusLeave);
                 cfg.closeOnEsc  &&  $(_document).bind('keydown', data._listenForEsc);
                 data._isOpen = !0;// true
                 cfg.fadein  &&  this.fadeIn(cfg.fadein); // because .fadeIn(0) !== .show()
@@ -116,7 +116,7 @@
               if ( data._isOpen  &&  _triggerEvent(this, 'close', cfg) )
               {
                 $(_document)
-                    .unbind('focusin', data._confirmFocusLeave)
+                    .unbind('focusin click', data._confirmFocusLeave)
                     .unbind('keydown', data._listenForEsc);
                 $.setFocus(cfg.opener||_document.body);
                 data._isOpen = !1;// false
@@ -139,7 +139,10 @@
               methods[doOpen?'open':'close'].call(this, data, extras);
             },
           isOpen: function(data/*, extras */){
-              return !!data._isOpen;
+              return !!(data || data._isOpen);
+            },
+          isFickle: function (data) {
+              return !!data;
             }
         /**
           disable: _notImplemented,
@@ -171,18 +174,19 @@
 
 
   $.fn.fickle = function (cfg, extras) {
-
+      var candidates = this;
       if (typeof cfg == 'string')
       {
         // Handle "method" calls
         var methd = methods[cfg];
         if (methd)
         {
-          return (cfg == 'isOpen') ?
-                      methd( this.data(_dataId)/*, extras */ ):
-                      this.each(function(i, _this){
+          return ( /^is(Open|Fickle)$/.test(cfg) ) ?
+                      methd( candidates.data(_dataId)/*, extras */ ):
+                      candidates.each(function(i, _this){
                           _this = $(_this);
-                          methd.call(_this, _this.data(_dataId), extras);
+                          var _data = _this.data(_dataId);
+                          _data  &&  methd.call(_this, _data, extras);
                         });
         }
       }
@@ -190,16 +194,16 @@
       {
         cfg = $.beget(_defaultConfig, cfg);
 
-        var _popups = this;
-
+        candidates.each(function(){
+            var _this = $(this);
+            if ( !_this.data(_dataId) )
+            {
         // Bind onEvent handles specified in cfg.
         $.each(['Open','Opened','Close','Closed'], function (i, type) {
-            cfg['on'+type] && _popups.bind(fickle+type.toLowerCase(), cfg['on'+type]);
+                  cfg['on'+type]  &&  _this.bind(fickle+type.toLowerCase(), cfg['on'+type]);
           });
 
-        _popups.each(function(){
-            var _this = $(this),
-                data = {
+              var data = {
                     c: $.beget(cfg),
                     _listenForEsc: function (e) {
                         // return true on non-ESC keypresses, but envoke fickle('close') and return false on ESC.
@@ -282,12 +286,13 @@
               _this.fickle('open')
             }
 
+            }
           });
 
       }
 
 
-      return this;
+      return candidates;
     };
 
 })(jQuery);
