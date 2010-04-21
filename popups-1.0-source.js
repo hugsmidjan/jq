@@ -106,8 +106,8 @@
           _elm.target = '';                          // temporarily disable the _elm.target
           _target = dataKey + i++;  // temporarily set the _target to something 'concrete' - otherwise browsers may open two windows
         }
-        if (_conf.url || _target.indexOf(uscore)!=0 ) {  // don't do window.open for targets '_top', '_parent', '_self', etc.
-                                                         // ...since we're passing the event through (i.e. not stopping it w. `return false;`)
+        if (_conf.url || _target.indexOf(uscore)!=0 )  // don't do window.open for targets '_top', '_parent', '_self', etc.
+        {                                                // ...since we're passing the event through (i.e. not stopping it w. `return false;`)
           var _newWin = window.open(_conf.url || 'about:'+blank, _target, _conf._wSettings);
           setTimeout(function(){ _newWin.focus(); }, 150);
         }
@@ -115,8 +115,8 @@
         {
           _elm.target = _target;  // set it temporarily (while the action is taking place)
           setTimeout(function() { // and then remove/reset it again (after a while)
-            _elm.target = (_wasBlank) ? uscore+blank : '';
-          }, 150);
+              _elm.target = (_wasBlank) ? uscore+blank : '';
+            }, 150);
         }
         // return true/undefined because there might be other handlers that'd like to modify the link.href before it's activated,
         // or in case of form.submit() validation handlers might interpret `false` as an indicator that the form

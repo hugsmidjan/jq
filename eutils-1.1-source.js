@@ -384,7 +384,7 @@
         if (prefDefaultId)
         {
           var m = prefDefaultId.match(/\d+$/),
-              c = m ? $.toInt(m[0]) : 1;
+              c = m ? parseInt(m[0],10) : 1;
           while ( $('#'+id)[0] )
           {
             if (m)
