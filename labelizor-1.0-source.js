@@ -27,7 +27,7 @@
 
         //preferTitle: false,                 // true makes .labelizor favour input's title="" over its <label/>
         //condHide:    false,                 // true causes <label> to only be hidden when it's text is used.
-        useLabel:     true,                   // false makes the script completely ignore the label element.
+        useLabel:     true,                   // false makes the script completely ignore the label element for any purposes.
 
         blurClass:    b||'labelized',
         hideClass:    a||'stream'
@@ -41,15 +41,18 @@
 
     return this.each(function(){
         var _this = this,
-            _jQthis = $(_this);
+            _jQthis = $(_this),
+            _html5support = _this.placeholder,
+            _labelText = _jQthis.attr('placeholder');
 
-        if ( (_this.id || _this.title)  &&  _jQthis.is(':text, :password, textarea') )
+        if ( _labelText  ||  ((_this.id || _this.title )  &&  _jQthis.is(':text, :password, textarea')) )
         {
-          var _labelText = cfg.labelText,
-               // use _jQthis.parents(':last') as scope/context to also .find() <label> inside .detached() document fragments
-               _inpTitle = _this.title,
-               _label =  !_useLabel  &&  _labelText  &&  !_hideClass ?
-                            $([]): // <label> is not needed since we have both _labelText and 
+          _labelText = cfg.labelText || _labelText; // cfg.labelText trumps all other texts...
+
+              // use _jQthis.parents(':last') as scope/context to also .find() <label> inside .detached() document fragments
+          var _inpTitle = _this.title,
+              _label =  !_useLabel  &&  _labelText  &&  !_hideClass ?
+                            $([]): // <label> is not needed since we have both _labelText and we wont use the label and we don't have a hide class...
                             $( _jQthis.parents('form:first, :last').eq(0).find('label[for="'+_this.id+'"]:first') ),
 
               _removeLabelValue = function (e) {
@@ -59,7 +62,7 @@
                   }
                 };
 
-          if (!_labelText)
+          if ( !_labelText )
           {
             _labelText = !_useLabel || !_labelFilter ?
                               // default to using input title=""
@@ -70,31 +73,36 @@
             _labelText = $.trim( _labelText.replace(cfg.lRe||/(\*|:[\W\S]*$)/g, cfg.lPlace||'') );
           }
 
-          if (!cfg.condHide  ||  (_useLabel  &&  (cfg.preferTitle  &&  _labelText != _inpTitle)  &&  !cfg.labelText) )
+          if (_hideClass  &&  (!cfg.condHide  ||  (_useLabel  &&  (cfg.preferTitle  &&  _labelText != _inpTitle)  &&  !cfg.labelText)) )
           {
             _label.addClass(_hideClass);
           }
 
-          _jQthis
-              .attr('title', _inpTitle||_labelText)
-              .bind('focus', _removeLabelValue)
-              .bind('blur', function (e) {
-                  if (!_jQthis.val())
-                  {
-                    _jQthis.val(_labelText).addClass(_blurClass);
-                  }
-                });
-
-          if (_labelText  &&  !_this.getAttribute('value')  &&  (!_this.value || _this.value == _labelText))
+          if ( !_html5support )
           {
             _jQthis
-                .val(_labelText)
-                .addClass(_blurClass);
+                .attr('title', _inpTitle||_labelText)
+                .bind('focus', _removeLabelValue)
+                .bind('blur', function (e) {
+                    if (!_jQthis.val())
+                    {
+                      _jQthis.val(_labelText).addClass(_blurClass);
+                    }
+                  });
+
+            if (_labelText  &&  !_this.getAttribute('value')  &&  (!_this.value || _this.value == _labelText))
+            {
+              _jQthis
+                  .val(_labelText)
+                  .addClass(_blurClass);
+            }
+
+            $(_this.form)
+                .bind('submit', _removeLabelValue);
           }
 
-          $(_this.form)
-              .bind('submit', _removeLabelValue);
         }
+
       });
   };
 

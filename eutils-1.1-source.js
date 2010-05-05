@@ -175,6 +175,18 @@
     prevUntil: function(expr, inclTextNodes) { return findUntil(this, expr, inclTextNodes, 1); },
 
 
+    // The method that officially does nothing! -
+    // useful trick when you wish to conditionally do something in a chain... like
+    //
+    //     jQuery('div')
+    //         .addClass('foo')
+    //         [handler?'bind':null]('click', handler)
+    //         .parent()
+    //             ...etc...
+    //
+    'null': function () {  return this;  },
+
+
     if_: function (cond)
     {
       if ($.isFunction(cond)) { cond = cond.call(this); }

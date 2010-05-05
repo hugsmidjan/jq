@@ -54,7 +54,7 @@
                   })
                 // assign new min-heights to collection
                 .each(function( i ){
-                    $(this).css( _heightAttribute,  _maxHeight - _paddings[i] + 1 ); // Adding 1px seems to fix some sub-pixel float-clearing calculation bugs in Firefox 3+
+                    $(this).css( _heightAttribute,  _maxHeight - _paddings[i] + .5 ); // Adding 1px seems to fix some sub-pixel float-clearing calculation bugs in Firefox 3+
                   })
                 .triggerHandler('equalizeheights', _maxHeight); // does not bubble!
 
