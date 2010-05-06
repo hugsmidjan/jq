@@ -5,7 +5,7 @@
 // (c) 2009 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
 //  written by:
 //   * Már Örlygsson        -- http://mar.anomy.net
-//   * Borgar Þorsteinsson  -- http://borgar.undraland.com
+//   * Borgar Þorsteinsson  -- http://borgar.undraland.com1
 // ----------------------------------------------------------------------------------
 
 // Requires jQuery 1.2.6 +
