@@ -515,8 +515,8 @@
       if (_elm)
       {
         _elm = $(_elm);
-        var _focusable = ',A,INPUT,SELECT,TEXTAREA,BUTTON,OBJECT,AREA,',
-            _focusElm = _elm.is(_focusable) && _elm;
+        var _focusables = ',A,INPUT,SELECT,TEXTAREA,BUTTON,OBJECT,AREA,',
+            _focusElm = _elm[0]  &&  _focusables.indexOf(','+_elm[0].tagName+',');
 
         if (!_focusElm)
         {
@@ -526,7 +526,7 @@
               elm;
           while (elm = elms[i+=incr])
           {
-            if ( _focusable.indexOf(','+elm.tagName+',') > -1 )
+            if ( _focusables.indexOf(','+elm.tagName+',') > -1 )
             {
               _focusElm = elm;
               break;  // break the .each loop
