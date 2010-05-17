@@ -16,26 +16,28 @@
 
   p = $.fn.popUps = function (cfg) {
 
-    cfg = cfg || {};
-
 /* Optional config keys:
         {
-          target:      uscore+blank // This setting does NOT override the element's target="" attribute.
-          url:         ''      //
+          target:      '_blank',      // This setting does NOT override the element's target="" attribute.
+          url:         'about:blank', // URL to load when the window is opened.
+                                      // NOTE: this setting does NOT override the element's href="" (or action="") atribute.
+          window:      window,        // window from which the new window is .open()ed
+                                      // NOTE: this only affects elements with either config.url set, or an explicit target that doesn't start with '_')
           markTitle:   false,  // if true, will add $.fn.popUps.titleSuffix[lang] suffix to the link's title="" atribute
           titleSuffix: {}      // Example: { en:'mytitlesuffix', se:'hurdygurdy' },
           width:       0,      // px
           height:      0,      // px
           minimal:     false,  // true will automatically turn all of the following UI/Chrome options to false.
 
-          location:    false,
-          menubar:     false,
-          resizable:   false,
-          scrollbars:  false,
-          status:      false,
-          toolbar:     false
+          location:    Boolean,
+          menubar:     Boolean,
+          resizable:   Boolean,
+          scrollbars:  Boolean,
+          status:      Boolean,
+          toolbar:     Boolean
         },
 */
+    cfg = cfg || {};
 
     var settings = [];
     if (cfg.width)  { settings.push('width='+cfg.width); }
@@ -97,31 +99,25 @@
       _pop = function (e) 
       {
         var _elm = this,
-            _conf = $(_elm).data(dataKey),
-            _target = _elm.target || _conf.target || uscore+blank,
-            _wasBlank = (_target.toLowerCase() == uscore+blank);
+            cfg = $(_elm).data(dataKey),
+            _target = _elm.target || cfg.target || uscore+blank;
 
-        if (_wasBlank)
-        {
-          _elm.target = '';                          // temporarily disable the _elm.target
-          _target = dataKey + i++;  // temporarily set the _target to something 'concrete' - otherwise browsers may open two windows
-        }
-        if (_conf.url || _target.indexOf(uscore)!=0 )  // don't do window.open for targets '_top', '_parent', '_self', etc.
-        {                                                // ...since we're passing the event through (i.e. not stopping it w. `return false;`)
-          var _newWin = window.open(_conf.url || 'about:'+blank, _target, _conf._wSettings);
+        if (cfg.url || _target.indexOf(uscore)!=0 )  // don't do window.open for targets '_blank', '_top', '_parent', '_self', etc.
+        {                                             // ...since we're passing the event through (i.e. not stopping it w. `return false;`)
+                                                      // if target starts with '_' all window settings are ignored.
+          var _newWin = (cfg.window || window).open(cfg.url || 'about:'+blank, _target, cfg._wSettings);
           setTimeout(function(){ _newWin.focus(); }, 150);
         }
         if (!_elm.target)  // if there's no target attribute on the _elm
         {
           _elm.target = _target;  // set it temporarily (while the action is taking place)
           setTimeout(function() { // and then remove/reset it again (after a while)
-              _elm.target = (_wasBlank) ? uscore+blank : '';
-            }, 150);
+            _elm.target = '';
+          }, 150);
         }
         // return true/undefined because there might be other handlers that'd like to modify the link.href before it's activated,
         // or in case of form.submit() validation handlers might interpret `false` as an indicator that the form
         // is invalid. ...anyway this is the most unobtrusive way to do things.
-        // Only problem is it makes Event.fire(linkElm, 'click') fail, as the popup opens empty.
       },
 
 
@@ -129,17 +125,17 @@
       _popButton = function (e)
       {
         var _Form = $(this.form),
-            _wasFormCfg = _Form.data(dataKey);
+            originalCfg = _Form.data(dataKey);
 
         _Form
             .data( dataKey, $(this).data(dataKey) )
             .bind('submit', _pop);
 
         setTimeout(function(){  // cleanup - unconditionally (not 'on submit') because the submit event might get cancelled for some reason.
-          if (_wasFormCfg)
+          if (originalCfg)
           {
             _Form
-                .data(dataKey, _wasFormCfg);
+                .data(dataKey, originalCfg);
           }
           else
           {
@@ -149,9 +145,6 @@
           }
         }, 150);
       };
-
-
-
 
 
 })(jQuery, '_', 'blank');
