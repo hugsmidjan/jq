@@ -42,11 +42,11 @@
       speed:             600,
 
       aspect:            'auto',     // auto|horizontal|vertical
-      paging:            False,
-      jumpPager:         True,    // Kicks in if paging is set to `true`
-      inputPager:        False,
-      statusPager:       False,
-      itemStatusPager:   False,
+      paging:            False,    // indicates wheather to render `jumpPager` links or `statusPager` info (set below)
+      jumpPager:         True,   // toggles the "Pages: (1) (2) (3) (4)" links - Kicks in if `paging` is set to `true`
+      statusPager:       False,  // toggles the "Page: 1 of 6" status message 
+      inputPager:        False,  // true forces the `statusPager` option to `true` (unless `itemStatusPager` is set to true) and turns the current-page number into a text input field.
+      itemStatusPager:   False,  // true changes statusPager to count items shown rather than "pages" ... e.g. "Displaying: 1-4 of 13 items"
 
       autoScrollDelay:   0, //Timeout in ms for autoscroll
 

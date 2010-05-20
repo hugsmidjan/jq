@@ -9,9 +9,8 @@
 // ----------------------------------------------------------------------------------
 
 // TODO:
-//  - Maybe?: create a "destroy" method that purges the jQuery collection/elements and _config from the cache and unbinds the 'resize' event handler.
 //  - remove reliance on $.browser and use $.support instead
-//  - remove detroyed/ sets and configs from the cache.
+//  - remove destroyed/ sets and configs from the cache.
 
 (function($, undefined){
 
@@ -23,7 +22,7 @@
       _cfgs = [],
       _resetLock,    // ...to keep MSIE from spinning out of control 
       _resetTimerRef, // ...to keep MSIE from spinning out of control
-      _reRun = $.equalizeHeights = function (e) { // ...delayed run of _resetHeights() (to cut MSIE some slack for quickfire events like .onresize)
+      _reRun = function (e) { // ...delayed run of _resetHeights() (to cut MSIE some slack for quickfire events like .onresize)
           if (!_resetLock)
           {
             clearTimeout( _resetTimerRef );
@@ -33,7 +32,11 @@
       _resetHeights = function (e) { // Instantly reset the heights
           _resetLock = 1;
           var i = _sets.length;
-          while (i--) { _equalizeHeights(_sets[i], _cfgs[i].margins); }
+          while (i--)
+          {
+            
+            _equalizeHeights(_sets[i], _cfgs[i].margins);
+          }
           setTimeout(function(){ _resetLock = 0; }, 0);
         },
 
@@ -65,47 +68,85 @@
 
 
   $.fn.equalizeHeights = function ( cfg ) {
-    if (this.length>1)
-    {
-      cfg = (cfg == 'refresh') ? 
-                _cfgs[this.eqh_setsIdx]:
-            (cfg && cfg.$$done) ? 
-                cfg:
-                $.extend({
-                      //margins: false,
-                      //onceOnly: false,
-                      $$done: 1
-                    },
-                    (typeof cfg == 'boolean') ? { margins:cfg } : cfg || {}
-                  );
-
-      if (cfg)
+      var set = this;
+      if ( cfg == 'destroy' )
       {
-        if (!cfg.onceOnly)  // only set reize and fontresize events when cfg.onceOnly is false (default)
+        set.each(function (i) {
+            var elm = $(this),
+                setIdx = elm.data('eqh_setsIdx'),
+                theSet = _sets[ setIdx ];
+            if ( theSet )
+            {
+              var elmIdx = theSet.index(this);
+              if ( elmIdx > -1 )
+              {
+                elm
+                    .removeData('eqh_setsIdx')
+                    .css( _heightAttribute, '');
+                [].splice.call(theSet, elmIdx, 1 );
+                _sets[ setIdx ] = theSet;
+                if ( theSet.length == 1  &&  set[i+1] != theSet[0] )
+                {
+                  theSet.equalizeHeights( 'destroy' );
+                }
+                else if ( !theSet.length )
+                {
+                  _sets = _sets.splice(setIdx,1);
+                  _cfgs = _cfgs.splice(setIdx,1);
+                }
+                if ( !_sets.length )
+                {
+                  $( window ).unbind('.eqh');
+                }
+              }
+            }
+          });
+      }
+      else if (set.length>1)
+      {
         {
-          if (this.eqh_setsIdx === undefined)
-          {
-            this.eqh_setsIdx = setsIdx++; // prevent inifinite loops when looping through the _sets
-            _sets.push( this );
-            _cfgs.push( cfg );
-          }
+          var eqh_setIdx = set.data('eqh_setsIdx');
+          cfg = cfg == 'refresh' ?
+                    _cfgs[ eqh_setIdx ]:
+                cfg && cfg.$$done ? 
+                    cfg:
+                    $.extend({
+                          //margins: false,
+                          //onceOnly: false,
+                          $$done: 1
+                        },
+                        (typeof cfg == 'boolean') ? { margins:cfg } : cfg || {}
+                      );
 
-          if (!_evSet)
+          if ( cfg )
           {
-            _evSet = 1;
-            $( window )
-                .bind( 'resize', _reRun )
-                .bind( 'load fontresize', _resetHeights );
+            if (!cfg.onceOnly)  // only set reize and fontresize events when cfg.onceOnly is false (default)
+            {
+              if ( eqh_setIdx === undefined )
+              {
+                set.data('eqh_setsIdx', setsIdx++); // prevent inifinite loops when looping through the _sets
+                _sets.push( set );
+                _cfgs.push( cfg );
+              }
+
+              if (!_evSet)
+              {
+                _evSet = 1;
+                $( window )
+                    .bind( 'resize.eqh', _reRun )
+                    .bind( 'load fontresize.eqh', _resetHeights );
+              }
+            }
+
+            _equalizeHeights(set, cfg.margins);
           }
         }
-
-        _equalizeHeights(this, cfg.margins);
       }
-    }
 
-    return this;
-  };
+      return set;
+    };
 
+  $.equalizeHeights = _reRun;
 
 })(jQuery);
 
