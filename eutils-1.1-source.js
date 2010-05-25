@@ -516,7 +516,7 @@
       {
         _elm = $(_elm);
         var _focusables = ',A,INPUT,SELECT,TEXTAREA,BUTTON,OBJECT,AREA,',
-            _focusElm = _elm[0]  &&  _focusables.indexOf(','+_elm[0].tagName+',');
+            _focusElm = _focusables.indexOf(','+_elm[0].tagName+',')>-1  &&  _elm[0];
 
         if (!_focusElm)
         {
