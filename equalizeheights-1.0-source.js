@@ -34,7 +34,6 @@
           var i = _sets.length;
           while (i--)
           {
-            
             _equalizeHeights(_sets[i], _cfgs[i].margins);
           }
           setTimeout(function(){ _resetLock = 0; }, 0);
@@ -122,7 +121,7 @@
           {
             if (!cfg.onceOnly)  // only set reize and fontresize events when cfg.onceOnly is false (default)
             {
-              if ( eqh_setIdx === undefined )
+              if ( eqh_setIdx == undefined ) // ==undefined also matches "null"
               {
                 set.data('eqh_setsIdx', setsIdx++); // prevent inifinite loops when looping through the _sets
                 _sets.push( set );
