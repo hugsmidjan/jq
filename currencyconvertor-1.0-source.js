@@ -40,7 +40,7 @@
               decimals: cfg.decimals
             };
       table
-          .delegate( inputSel, 'focus', function (e) {
+          .delegate( inputSel, 'focusin', function (e) {
               $(this).select();
             })
           .delegate( inputSel, 'keyup', function (e) {
@@ -49,17 +49,28 @@
               if (this.value != inputData.V )
               {
                 inputData.V = this.value;
-                var activeNum = $.prettyNum.read( activeInput, lang ) * inputData.F;
-                activeInput.value = $.prettyNum.make( activeInput, lang, { trail: true,  milleSep: cfg.milleSep } );
-                table.find('input').each(function () {
-                    if ( this != activeInput )
-                    {
-                      var data = $(this).data(currencyConvertor);
-                      this.value = $.prettyNum.make( activeNum / data.F, lang, { decimals: data.D,  milleSep: cfg.milleSep } );
-                    }
-                  });
+                var num = $.prettyNum.read( activeInput, lang );
+                if ( num != inputData.v )
+                {
+                  inputData.v = num;
+                  var activeNum = num * inputData.F; 
+                  activeInput.value = $.prettyNum.make( activeInput, { trail: true,  lang: lang,  milleSep: cfg.milleSep } );
+                  table.find('input').each(function () {
+                      if ( this != activeInput )
+                      {
+                        var data = $(this).data(currencyConvertor),
+                            val = data.v = activeNum / data.F;
+                        this.value = data.V = $.prettyNum.make( val, data.PN );
+                      }
+                    });
+                }
               }
             })
+          .delegate( inputSel, 'focusout', function (e) {
+              var data = $(this).data(currencyConvertor);
+              this.value = data.V = $.prettyNum.make( data.v, data.PN );
+            })
+
           .find( 'tr' )
               .each(function () {
                   var trow = $(this);
@@ -81,13 +92,19 @@
                     {
                       var data = {
                               F: factor,
-                              D: factor>=cfg.decimalsThreshold ? cfg.decimals : 0
-                            };
+                              PN: {
+                                  lang: lang,
+                                  decimals: factor>=cfg.decimalsThreshold ? cfg.decimals : 0,
+                                  milleSep: cfg.milleSep
+                                },
+                              v: cfg.startAmount / factor
+                            },
+                          val = data.V = $.prettyNum.make( data.v, data.PN );
                       trow
                           .append( cfg.inputCellTmpl )
                           .find( inputSel )
                               .data( currencyConvertor, data)
-                              .val( $.prettyNum.make( cfg.startAmount / factor, lang, { decimals: data.D,  milleSep: cfg.milleSep } ) );
+                              .val( val );
                     }
                     else
                     {
