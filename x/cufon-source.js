@@ -1,5 +1,5 @@
 /*!
- * Copyright (c) 2009 Simo Kinnunen.
+ * Copyright (c) 2010 Simo Kinnunen.
  * Licensed under the MIT license.
  *
  * @version ${Version}
@@ -210,7 +210,7 @@ var Cufon = (function() {
 					return s.toLowerCase();
 				},
 				capitalize: function(s) {
-					return s.replace(/\b./g, function($0) {
+					return s.replace(/(?:^|\s)./g, function($0) {
 						return $0.toUpperCase();
 					});
 				}
@@ -228,7 +228,8 @@ var Cufon = (function() {
 				'run-in': 1
 			};
 			var wsStart = /^\s+/, wsEnd = /\s+$/;
-			return function(text, style, node, previousElement) {
+			return function(text, style, node, previousElement, simple) {
+				if (simple) return text.replace(wsStart, '').replace(wsEnd, '');
 				if (previousElement) {
 					if (previousElement.nodeName.toLowerCase() == 'br') {
 						text = text.replace(wsStart, '');
@@ -326,7 +327,18 @@ var Cufon = (function() {
 			'\u3000': 1
 		};
 
-		this.glyphs = data.glyphs;
+		this.glyphs = (function(glyphs) {
+			var key, fallbacks = {
+				'\u2011': '\u002d',
+				'\u00ad': '\u2011'
+			};
+			for (key in fallbacks) {
+				if (!hasOwnProperty(fallbacks, key)) continue;
+				if (!glyphs[key]) glyphs[key] = glyphs[fallbacks[key]];
+			}
+			return glyphs;
+		})(data.glyphs);
+
 		this.w = data.w;
 		this.baseSize = parseInt(face['units-per-em'], 10);
 
@@ -617,14 +629,32 @@ var Cufon = (function() {
 	function replaceElement(el, options) {
 		var name = el.nodeName.toLowerCase();
 		if (options.ignore[name]) return;
-		var replace = !options.textless[name];
+		var replace = !options.textless[name], simple = (options.trim === 'simple');
 		var style = CSS.getStyle(attach(el, options)).extend(options);
+		// may cause issues if the element contains other elements
+		// with larger fontSize, however such cases are rare and can
+		// be fixed by using a more specific selector
+		if (parseFloat(style.get('fontSize')) === 0) return;
 		var font = getFont(el, style), node, type, next, anchor, text, lastElement;
+		var isShy = options.softHyphens, anyShy = false, pos, shy, reShy = /\u00ad/g;
 		if (!font) return;
 		for (node = el.firstChild; node; node = next) {
 			type = node.nodeType;
 			next = node.nextSibling;
 			if (replace && type == 3) {
+				if (isShy && el.nodeName.toLowerCase() != TAG_SHY) {
+					pos = node.data.indexOf('\u00ad');
+					if (pos >= 0) {
+						node.splitText(pos);
+						next = node.nextSibling;
+						next.deleteData(0, 1);
+						shy = document.createElement(TAG_SHY);
+						shy.appendChild(document.createTextNode('\u00ad'));
+						el.insertBefore(shy, next);
+						next = shy;
+						anyShy = true;
+					}
+				}
 				// Node.normalize() is broken in IE 6, 7, 8
 				if (anchor) {
 					anchor.appendData(node.data);
@@ -634,8 +664,10 @@ var Cufon = (function() {
 				if (next) continue;
 			}
 			if (anchor) {
+				text = anchor.data;
+				if (!isShy) text = text.replace(reShy, '');
 				el.replaceChild(process(font,
-					CSS.whiteSpace(anchor.data, style, anchor, lastElement),
+					CSS.whiteSpace(text, style, anchor, lastElement, simple),
 					style, options, node, el), anchor);
 				anchor = null;
 			}
@@ -649,14 +681,84 @@ var Cufon = (function() {
 				lastElement = node;
 			}
 		}
+		if (isShy && anyShy) {
+			updateShy(el);
+			if (!trackingShy) addEvent(window, 'resize', updateShyOnResize);
+			trackingShy = true;
+		}
+	}
+
+	function updateShy(context) {
+		var shys, shy, parent, glue, newGlue, next, prev, i;
+		shys = context.getElementsByTagName(TAG_SHY);
+		// unfortunately there doesn't seem to be any easy
+		// way to avoid having to loop through the shys twice.
+		for (i = 0; shy = shys[i]; ++i) {
+			shy.className = C_SHY_DISABLED;
+			glue = parent = shy.parentNode;
+			if (glue.nodeName.toLowerCase() != TAG_GLUE) {
+				newGlue = document.createElement(TAG_GLUE);
+				newGlue.appendChild(shy.previousSibling);
+				parent.insertBefore(newGlue, shy);
+				newGlue.appendChild(shy);
+			}
+			else {
+				// get rid of double glue (edge case fix)
+				glue = glue.parentNode;
+				if (glue.nodeName.toLowerCase() == TAG_GLUE) {
+					parent = glue.parentNode;
+					while (glue.firstChild) {
+						parent.insertBefore(glue.firstChild, glue);
+					}
+					parent.removeChild(glue);
+				}
+			}
+		}
+		for (i = 0; shy = shys[i]; ++i) {
+			shy.className = '';
+			glue = shy.parentNode;
+			parent = glue.parentNode;
+			next = glue.nextSibling || parent.nextSibling;
+			// make sure we're comparing same types
+			prev = (next.nodeName.toLowerCase() == TAG_GLUE) ? glue : shy.previousSibling;
+			if (prev.offsetTop >= next.offsetTop) {
+				shy.className = C_SHY_DISABLED;
+				if (prev.offsetTop < next.offsetTop) {
+					// we have an annoying edge case, double the glue
+					newGlue = document.createElement(TAG_GLUE);
+					parent.insertBefore(newGlue, glue);
+					newGlue.appendChild(glue);
+					newGlue.appendChild(next);
+				}
+			}
+		}
+	}
+
+	function updateShyOnResize() {
+		if (ignoreResize) return; // needed for IE
+		CSS.addClass(DOM.root(), C_VIEWPORT_RESIZING);
+		clearTimeout(shyTimer);
+		shyTimer = setTimeout(function() {
+			ignoreResize = true;
+			CSS.removeClass(DOM.root(), C_VIEWPORT_RESIZING);
+			updateShy(document);
+			ignoreResize = false;
+		}, 100);
 	}
 
 	var HAS_BROKEN_REGEXP = ' '.split(/\s+/).length == 0;
+	var TAG_GLUE = 'cufonglue';
+	var TAG_SHY = 'cufonshy';
+	var C_SHY_DISABLED = 'cufon-shy-disabled';
+	var C_VIEWPORT_RESIZING = 'cufon-viewport-resizing';
 
 	var sharedStorage = new Storage();
 	var hoverHandler = new HoverHandler();
 	var replaceHistory = new ReplaceHistory();
 	var initialized = false;
+	var trackingShy = false;
+	var shyTimer;
+	var ignoreResize = false;
 
 	var engines = {}, fonts = {}, defaultOptions = {
 		autoDetect: false,
@@ -702,6 +804,7 @@ var Cufon = (function() {
 			||	elementsByTagName
 		),
 		separate: 'words', // 'none' and 'characters' are also accepted
+		softHyphens: true,
 		textless: {
 			dl: 1,
 			html: 1,
@@ -713,7 +816,8 @@ var Cufon = (function() {
 			tr: 1,
 			ul: 1
 		},
-		textShadow: 'none'
+		textShadow: 'none',
+		trim: 'simple'
 	};
 
 	var separators = {
@@ -817,6 +921,9 @@ Cufon.registerEngine('canvas', (function() {
 			(HAS_INLINE_BLOCK
 				? 'cufon canvas{position:relative;}'
 				: 'cufon canvas{position:absolute;}') +
+			'cufonshy.cufon-shy-disabled,.cufon-viewport-resizing cufonshy{display:none;}' +
+			'cufonglue{white-space:nowrap;display:inline-block;}' +
+			'.cufon-viewport-resizing cufonglue{white-space:normal;}' +
 		'}' +
 		'@media print{' +
 			'cufon{padding:0;}' + // Firefox 2
@@ -1031,6 +1138,9 @@ Cufon.registerEngine('vml', (function() {
 				: 'text-bottom') +
 			';}' +
 			'cufon cufontext{position:absolute;left:-10000in;font-size:1px;}' +
+			'cufonshy.cufon-shy-disabled,.cufon-viewport-resizing cufonshy{display:none;}' +
+			'cufonglue{white-space:nowrap;display:inline-block;}' +
+			'.cufon-viewport-resizing cufonglue{white-space:normal;}' +
 			'a cufon{cursor:pointer}' + // ignore !important here
 		'}' +
 		'@media print{' +
