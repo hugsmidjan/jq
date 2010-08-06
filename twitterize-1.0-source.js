@@ -2,7 +2,7 @@
 // ----------------------------------------------------------------------------------
 // jquery.twitterize.js  v. 1.0
 // ----------------------------------------------------------------------------------
-// (c) 2010 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+// (c) 2010 HugsmiÃ°jan ehf  -- http://www.hugsmidjan.is
 //  written by:
 //  * Valur Sverrisson
 // ----------------------------------------------------------------------------------
@@ -34,23 +34,23 @@ function relative_time(time_value) {
   delta = delta + (relative_to.getTimezoneOffset() * 60);
 
   if (delta < 60) {
-    return 'Fyrir minna en mínútu síðan';
+    return 'Fyrir minna en mÃ­nÃºtu sÃ­Ã°an';
   } else if(delta < 120) {
-    return 'Fyrir um mínútu síðan';
+    return 'Fyrir um mÃ­nÃºtu sÃ­Ã°an';
   } else if(delta < (60*60)) {
-    return 'Fyrir um' + (parseInt(delta / 60, 10)).toString() + ' mínútum síðan';
+    return 'Fyrir um' + (parseInt(delta / 60, 10)).toString() + ' mÃ­nÃºtum sÃ­Ã°an';
   } else if(delta < (120*60)) {
-    return 'Fyrir um klukkutíma síðan';
+    return 'Fyrir um klukkutÃ­ma sÃ­Ã°an';
   } else if(delta < (24*60*60)) {
-    return 'Fyrir um ' + (parseInt(delta / 3600, 10)).toString() + ' klukkutímum síðan';
+    return 'Fyrir um ' + (parseInt(delta / 3600, 10)).toString() + ' klukkutÃ­mum sÃ­Ã°an';
   } else if(delta < (48*60*60)) {
     return 'Fyrir 1 degi';
   } else {
     var daysago = (parseInt(delta / 86400, 10)).toString();
     if ( daysago.charAt(daysago.length - 1) === '1' ) {
-      return 'Fyrir ' + daysago + ' degi síðan';
+      return 'Fyrir ' + daysago + ' degi sÃ­Ã°an';
     } else {
-      return 'Fyrir ' + daysago + ' dögum síðan';
+      return 'Fyrir ' + daysago + ' dÃ¶gum sÃ­Ã°an';
     }
   }
 }
@@ -83,7 +83,7 @@ function relative_time(time_value) {
   $.fn.twitterize.defaults = {
       userName: null,
       numTweets: 5,
-      loaderText: "Hleður tístum...",
+      loaderText: "HleÃ°ur tÃ­stum...",
       linkToProfile: false
     };
 
