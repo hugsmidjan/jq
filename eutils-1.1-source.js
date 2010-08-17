@@ -306,9 +306,14 @@
     // collection.scroll({ left:xPos, top:yPos });  // scrolls to xPos, yPos
     scroll: function (x, y)
     {
-      if (x == undefined && y == undefined)
+      if ( x == undefined  &&  y == undefined )
       {
         return { left:this.scrollLeft()  , top:this.scrollTop()  };
+      }
+      if ( x  &&  (x.top || x.left) )
+      {
+        y = x.top;
+        x = x.left;
       }
       x!=undefined  &&  this.scrollLeft(x);
       y!=undefined  &&  this.scrollTop(y);
@@ -463,12 +468,15 @@
     //   jQuery.setFrag('#myid');
     //   jQuery.setFrag('Fraîce 18%');
     //   jQuery.setFrag('Fra%C3%AEce%2018%25', true);
+    //   jQuery.setFrag('');    // unset
+    //   jQuery.setFrag(null);  // unset
     setFrag: function (_fragment, _isEncoded)
     {
-      _fragment = _fragment.replace(/^#/, '');
+      _fragment = (_fragment||'').replace(/^#/, '');
       // check if there exists an element with .id same as _fragment
-      var _elm = _fragment  &&  _doc.getElementById(_fragment);
-      if (_elm)
+      var _elm = _fragment  &&  _doc.getElementById(_fragment),
+          _prePos = !_fragment  &&  $.scroll();
+      if ( _elm )
       {
         // temporaily defuse the element's id
         _elm.id = '';
@@ -476,14 +484,19 @@
         //   a) the hash-change populates the browser's history buffer.
         //   b) the viewport doesn't scroll/jump
         // (NOTE: This may be buggy in IE5 - but that's life)
-        _dummyElm = _dummyElm || $('<i style="position:absolute;margin:0;visibility:hidden;" id="'+_fragment+'" />');
+        _dummyElm = _dummyElm || $('<i style="position:absolute;margin:0;visibility:hidden;" />');
         _dummyElm
+            .attr('id', _fragment)
             .css('top', $.scroll().top)
             .appendTo(_doc.body);
       }
       //_location.hash = _fragment;  // set the damn hash...
-      _location.href = _location.href.replace( /#.*$/, '' ) +'#'+ (_isEncoded ? _fragment : $.encodeFrag(_fragment) );  // set the damn hash... (Note: Safari 3 & Chrome barf if frag === '#'.)
-      if (_elm)
+      _location.href = _location.href.split("#")[0] +'#'+ (_isEncoded ? _fragment : $.encodeFrag(_fragment) );  // set the damn hash... (Note: Safari 3 & Chrome barf if frag === '#'.)
+      if ( !_fragment )
+      {
+        $.scroll(_prePos);
+      }
+      if ( _elm )
       {
         _dummyElm[0].id = "";
         //_dummyElm.remove();

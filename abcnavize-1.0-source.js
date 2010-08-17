@@ -11,26 +11,39 @@
 //  * $.fn.detach (jQuery 1.4, or eutils-1.0)
 //  * $.setFrag, $.getFrag, $.encodeFrag   (eutils-1.0)
 //
+// TODO:
+//  * trigger onfilter and onfiltered events
+//
 (function($){
 
 
   var A = $.fn.abcnavize = function (cfg) {
       cfg = $.extend({
-          //startOn: 'A',
-          allBtn: !0 // true
+          menuTmpl:     '<div class="abcnav"><span>%{title}</span> <b /></div>',
+          listSel:      'b',
+          itmTmpl:      '<a href="%{frag}">%{label}</a>',
+          itmSel:       'a',
+          noFoundTmpl:  '<tr class="nothingfound"><td colspan="%{colspan}"><strong>%{msg}</strong></td></tr>',
+          currentClass: 'current',
+          fragmPrefix:  'index:',
+          //startOn:    letter, // Defaults to the first link in the menu
+          allBtn:       !0, // true
+          zebraize:     !0  // true
         }, cfg);
       return this.each(function(){
           var table = $(this),
               tRows = table.find('tbody tr'),
-              fragmPrefix = 'index:',
+              
               txt = txt || A.texts[ table.closest('[lang]').attr('lang') ]  ||  A.texts.en,
               noFoundMsg,
               abcNavClick = function  (e) {
-                  var link = $(e.target).closest('a');
-                  if ( link.is('a:not(.current)') )
+                  var link = $(e.target).closest('a'),
+                      item = link.closest(cfg.itmSel),
+                      currentClass = cfg.activeClass;
+                  if ( !item.is('.'+currentClass) )
                   {
-                    link.addClass('current');
-                    abcNav.find('a').removeClass('current');
+                    abcNav.find(cfg.itmSel+'.'+currentClass).removeClass(currentClass);
+                    item.addClass(currentClass);
                     var fragment = $.getFrag( link.attr('href') );
                     e.type == 'click'  &&  $.setFrag(fragment);
                     var vRows = tRows  // visible rows
@@ -38,36 +51,46 @@
                                     .filter(function(){
                                         return !fragment  ||  $(this).data('abcnav-fragm') == fragment;
                                       })
-                                        .show();
+                                        .css('display', '');
 
                     if (vRows.length)
                     {
                       noFoundMsg && noFoundMsg.detach();
-                      vRows
-                          .removeClass('even')
-                          .filter(':odd')
-                              .addClass('even');
+                      if ( cfg.zebraize )
+                      {
+                        vRows
+                            .removeClass('even')
+                            .filter(':odd')
+                                .addClass('even');
+                      }
                     }
                     else
                     {
-                      noFoundMsg = noFoundMsg || $('<tr class="nothingfound"><td colspan="'+ tRows.eq(0).find('td, th').length +'"><strong>'+ txt.noFoundMsg +'</strong></td></tr>');
+                      noFoundMsg = noFoundMsg || $( cfg.noFoundTmpl
+                                                        .replace( '%{colspan}', tRows.eq(0).find('td, th').length )
+                                                        .replace( '%{msg}', txt.noFoundMsg )
+                                                      );
                       noFoundMsg.insertBefore(tRows[0]);
                     }
                   }
                   return false;
                 },
-              foundLetters = {};
+              foundLetters = {},
           
-          abcNav = $('<div class="abcnav"><span>'+ txt.abcTitle +'</span> <b /></div>')
-                        .bind('click', abcNavClick), 
-          abcNavList = abcNav.find('b'),
-          cfg.allBtn && abcNavList.append('<a href="#">'+ txt.abcAll +'</a>');
+              abcNav = $( cfg.menuTmpl.replace( '%{title}', txt.abcTitle ) )
+                            .bind('click', abcNavClick),
+              abcNavList = abcNav.find(cfg.listSel);
+          
+          if ( cfg.allBtn )
+          {
+            $( cfg.itmTmpl.replace( '%{frag}', '#' ).replace( '%{label}', txt.abcAll ) ).appendTo( abcNavList );
+          }
 
 
           tRows.each(function(){
               var tr = $(this),
                        firstLetter = $.trim( tr.text() ).charAt(0).toUpperCase(),
-                       fragment = fragmPrefix + firstLetter;
+                       fragment = cfg.fragmPrefix + firstLetter;
 
               tr.data('abcnav-fragm',  fragment);
 
@@ -75,13 +98,13 @@
               if ( !foundLetters[fragment] )
               {
                 foundLetters[fragment] = 1;
-                var link = $('<a>'+firstLetter+'</a>').attr('href', '#'+$.encodeFrag(fragment));
+                var link = $( cfg.itmTmpl.replace( '%{frag}', '#'+$.encodeFrag(fragment) ).replace( '%{label}', firstLetter ) );
                 abcNavList.append(' ', link);
               }
 
             });
 
-          var fragment = $.getFrag()  ||  (cfg.startOn && fragmPrefix+cfg.startOn ),
+          var fragment = $.getFrag()  ||  ( cfg.startOn  &&  cfg.fragmPrefix+cfg.startOn ),
               startOnSelector = foundLetters[ fragment ] ?
                                     '[href$="#'+ $.encodeFrag(fragment) +'"]':
                                     '';
@@ -89,6 +112,11 @@
 
           abcNav.insertBefore(table);
           abcNavList = undefined;
+          table
+              .data( 'abcnav', {
+                  menu: abcNav,
+                  cfg:  cfg,
+                });
         });
     };
 

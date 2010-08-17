@@ -7,6 +7,14 @@
 //   * Már Örlygsson        -- http://mar.anomy.net
 // ----------------------------------------------------------------------------------
 
+// TODO:
+//  * trigger a cancellable beforefilter event
+//  * expose "before" value array on filter events
+//  * support a public "filter" method that accepts value array or (input index + single value) 
+//  * expose element.data() object with arrays of inputs and clear buttons.
+//  * noFound message + <tr> template
+//  * minChars support
+
 (function($, undefined){
 
 
@@ -35,7 +43,7 @@
                   var tr = $(this),
                       trTDs = tr.find('td');
                   if ( (tr.find('th').length  &&  (!trTDs.length  ||  i === 0) )  ||  _cellsHaveOnlyBoldText(trTDs) )
-                    {
+                  {
                     tr.appendTo(thead);
                     return; // continue
                   }
@@ -77,7 +85,6 @@
 
 
       _clearFilterInput = function (e) {
-          ;;;window.console&&console.log( ['asdfasdf'] );
           $(this)
               .data(_data_keyName).input
                   .val('')
@@ -424,9 +431,9 @@
       activeColClass:   'filter-col',
       //hideRowClass:     '',     // if falsy - .hide() and .css(display,'') are used.
       includeCols:      function () {  return $(this).is('th') || _cellsHaveOnlyBoldText(this);  }, // selector or filter function
-      //isHideRow:        null,   //  '.notaresult' ...or...  function() { return (this).is('.notaresult'); },  // hide these rows whenever a filter is active - regardless of their content.
-      //isStickyRow:      null,   //  '.staticRow' ...or...  function() { return (this).is('.staticRow'); },    // always display these rows - regardless of filter status/content.
-      //multiFilter:      false,  // not implemented yet
+      //isHideRow:        null,   //  '.notaresult' ...or...  function() { return $(this).is('.notaresult'); },  // hide these rows whenever a filter is active - regardless of their content.
+      //isStickyRow:      null,   //  '.staticRow' ...or...  function() { return $(this).is('.staticRow'); },    // always display these rows - regardless of filter status/content.
+      //multiFilter:      false,
       cellMatches: function (cell, val, data) {
           var text = $(cell).text() || '',
               cfg = data.cfg,
