@@ -24,7 +24,7 @@
           itmTmpl:      '<a href="%{frag}">%{label}</a>',
           itmSel:       'a',
           noFoundTmpl:  '<tr class="nothingfound"><td colspan="%{colspan}"><strong>%{msg}</strong></td></tr>',
-          currentClass: 'current',
+          activeClass: 'current',
           fragmPrefix:  'index:',
           //startOn:    letter, // Defaults to the first link in the menu
           allBtn:       !0, // true
@@ -43,6 +43,7 @@
                   if ( !item.is('.'+currentClass) )
                   {
                     abcNav.find(cfg.itmSel+'.'+currentClass).removeClass(currentClass);
+                    ;;;window.console&&console.log( [currentClass] );
                     item.addClass(currentClass);
                     var fragment = $.getFrag( link.attr('href') );
                     e.type == 'click'  &&  $.setFrag(fragment);
