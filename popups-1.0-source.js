@@ -37,114 +37,115 @@
           toolbar:     Boolean
         },
 */
-    cfg = cfg || {};
+      cfg = cfg || {};
 
-    var settings = [];
-    if (cfg.width)  { settings.push('width='+cfg.width); }
-    if (cfg.height) { settings.push('height='+cfg.height); }
-    cfg.titleSuffix = $.extend( {}, p.titleSuffix, cfg.titleSuffix||{} );
+      var settings = [];
+      if (cfg.width)  { settings.push('width='+cfg.width); }
+      if (cfg.height) { settings.push('height='+cfg.height); }
+      cfg.titleSuffix = $.extend( {}, p.titleSuffix, cfg.titleSuffix||{} );
 
-    $.each(['location','menubar','scrollbars','status','toolbar'], function(i, param){
-      if (cfg[param] !== undefined) { settings.push(param + (cfg[param]?'=yes':'=no') ); }
-      else if (cfg.minimal) { settings.push(param+'=no'); }
-    });
-    // default to resziable=yes (if any settings are present)
-    settings.length && settings.push( 'resizable=' + ((cfg.resizable===undefined || cfg.resizable) ?'yes':'no') );
-    cfg._wSettings = settings.join(',');
+      $.each(['location','menubar','scrollbars','status','toolbar'], function(i, param){
+          if (cfg[param] !== undefined) { settings.push(param + (cfg[param]?'=yes':'=no') ); }
+          else if (cfg.minimal) { settings.push(param+'=no'); }
+        });
+      // default to resziable=yes (if any settings are present)
+      settings.length && settings.push( 'resizable=' + ((cfg.resizable===undefined || cfg.resizable) ?'yes':'no') );
+      cfg._wSettings = settings.join(',');
 
-    return this.each(function(i, _elm){
-        var _Elm = $(_elm);
-        _Elm.data(dataKey, cfg);
+      return this.each(function(i, _elm){
+          var _Elm = $(_elm);
+          _Elm.data(dataKey, cfg);
 
-        if (cfg.markTitle  &&  _elm.tagName != 'FORM')
-        {
-          var _elmLang = ( $.lang && $.lang(_elm) ) || $('html').attr('lang')  || 'en';
-          _elm.title = (_elm.title || _Elm.text() || _elm.value) +' '+ (cfg.titleSuffix[_elmLang] || cfg.titleSuffix.en);
-        }
+          if (cfg.markTitle  &&  _elm.tagName != 'FORM')
+          {
+            var _elmLang = ( $.lang && $.lang(_elm) ) || $('html').attr('lang')  || 'en';
+            _elm.title = (_elm.title || _Elm.text() || _elm.value) +' '+ (cfg.titleSuffix[_elmLang] || cfg.titleSuffix.en);
+          }
 
-        switch(_elm.tagName)
-        {
-          case 'FORM':
-            _Elm.bind('submit', _pop);
-            break;
-          case 'INPUT':
-          case 'BUTTON':
-            _Elm.bind('click', _popButton);
-            break;
-          //case 'A':
-          //case 'AREA':
-          default:
-            _Elm.bind('click', _pop);
-            break;
-        }
+          switch(_elm.tagName)
+          {
+            case 'FORM':
+              _Elm.bind('submit', _pop);
+              break;
+            case 'INPUT':
+            case 'BUTTON':
+              _Elm.bind('click', _popButton);
+              break;
+            //case 'A':
+            //case 'AREA':
+            default:
+              _Elm.bind('click', _pop);
+              break;
+          }
 
-      });
+        });
 
 
-  };
+    };
 
 
   $.extend($.fn.popUps, {
-    v: 1.0,
-    titleSuffix: {
-      is : '(opnast í nýjum glugga)',
-      en : '(opens in a new window)'
-    }
-  });
+      v: 1.0,
+      titleSuffix: {
+          is : '(opnast í nýjum glugga)',
+          en : '(opens in a new window)'
+        }
+    });
 
 
   var dataKey  = 'pop'+(new Date()).getTime(),
        i = 0,
 
-      _pop = function (e) 
-      {
-        var _elm = this,
-            cfg = $(_elm).data(dataKey),
-            _target = _elm.target || cfg.target || uscore+blank;
-
-        if (cfg.url || _target.indexOf(uscore)!=0 )  // don't do window.open for targets '_blank', '_top', '_parent', '_self', etc.
-        {                                             // ...since we're passing the event through (i.e. not stopping it w. `return false;`)
-                                                      // if target starts with '_' all window settings are ignored.
-          var _newWin = (cfg.window || window).open(cfg.url || 'about:'+blank, _target, cfg._wSettings);
-          setTimeout(function(){ _newWin.focus(); }, 150);
-        }
-        if (!_elm.target)  // if there's no target attribute on the _elm
-        {
-          _elm.target = _target;  // set it temporarily (while the action is taking place)
-          setTimeout(function() { // and then remove/reset it again (after a while)
-            _elm.target = '';
-          }, 150);
-        }
-        // return true/undefined because there might be other handlers that'd like to modify the link.href before it's activated,
-        // or in case of form.submit() validation handlers might interpret `false` as an indicator that the form
-        // is invalid. ...anyway this is the most unobtrusive way to do things.
-      },
-
-
-
-      _popButton = function (e)
-      {
-        var _Form = $(this.form),
-            originalCfg = _Form.data(dataKey);
-
-        _Form
-            .data( dataKey, $(this).data(dataKey) )
-            .bind('submit', _pop);
-
-        setTimeout(function(){  // cleanup - unconditionally (not 'on submit') because the submit event might get cancelled for some reason.
-          if (originalCfg)
+      _pop = function (e) {
+          if ( e.isDefaultPrevented  &&  !e.isDefaultPrevented() )
           {
-            _Form
-                .data(dataKey, originalCfg);
+            var _elm = this,
+                cfg = $(_elm).data(dataKey),
+                _target = _elm.target || cfg.target || uscore+blank;
+
+            if (cfg.url || _target.indexOf(uscore)!=0 )  // don't do window.open for targets '_blank', '_top', '_parent', '_self', etc.
+            {                                             // ...since we're passing the event through (i.e. not stopping it w. `return false;`)
+                                                          // if target starts with '_' all window settings are ignored.
+              var _newWin = (cfg.window || window).open(cfg.url || 'about:'+blank, _target, cfg._wSettings);
+              setTimeout(function(){ _newWin.focus(); }, 150);
+            }
+            if (!_elm.target)  // if there's no target attribute on the _elm
+            {
+              _elm.target = _target;  // set it temporarily (while the action is taking place)
+              setTimeout(function() { // and then remove/reset it again (after a while)
+                  _elm.target = '';
+                }, 150);
+            }
+            // return true/undefined because there might be other handlers that'd like to modify the link.href before it's activated,
+            // or in case of form.submit() validation handlers might interpret `false` as an indicator that the form
+            // is invalid. ...anyway this is the most unobtrusive way to do things.
           }
-          else
-          {
-            _Form
-                .removeData(dataKey)
-                .unbind('submit', _pop);
-          }
-        }, 150);
-      };
+        },
+
+
+
+      _popButton = function (e) {
+          var _Form = $(this.form),
+              originalCfg = _Form.data(dataKey);
+
+          _Form
+              .data( dataKey, $(this).data(dataKey) )
+              .bind('submit', _pop);
+
+          setTimeout(function(){  // cleanup - unconditionally (not 'on submit') because the submit event might get cancelled for some reason.
+              if (originalCfg)
+              {
+                _Form
+                    .data(dataKey, originalCfg);
+              }
+              else
+              {
+                _Form
+                    .removeData(dataKey)
+                    .unbind('submit', _pop);
+              }
+            }, 150);
+        };
 
 
 })(jQuery, '_', 'blank');

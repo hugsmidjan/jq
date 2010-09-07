@@ -15,7 +15,7 @@
           //  * Add more elegant handling of locale strings http://tools.ietf.org/html/rfc4646
           //    ...i.e. add support for 3 and 4 letter language subtags
           //  * Cache/optimize the retrieval of language codes for HTML Elements...
-          lang = (typeof lang == 'string' ?  lang : $(lang||'body').closest('[lang]').attr('lang')).toLowerCase() || 'en';
+          lang = (typeof lang == 'string' ?  lang : $(lang||'body').closest('[lang]').attr('lang')||'').toLowerCase().substr(0,2) || 'en';
           var t = _tokens[lang];
           if (!t)
           {
@@ -91,7 +91,9 @@
             cfg = trail;
           }
           trail = cfg ? cfg.trail : trail;
-          cfg = $.extend({ milleSep:true }, cfg);
+          cfg = $.extend({
+                      milleSep:true
+                    }, cfg);
           lang = lang || cfg.lang;
           if (val.jquery || val.nodeName)
           {
