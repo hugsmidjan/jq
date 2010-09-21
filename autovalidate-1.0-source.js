@@ -449,15 +449,14 @@
           control.removeData( 'av-malformed' );
 
           // get this control's types (defaulting to fi_txt for everything except checkboxes)
-          var tests = (this.type == 'checkbox')
-              ? { 'fi_chk' : $.av.type['fi_chk'] }
-                  : { 'fi_txt' : $.av.type['fi_txt'] },
+          var tests =  (this.type == 'checkbox') ?
+                            { 'fi_chk' : $.av.type['fi_chk'] }:
+                            { 'fi_txt' : $.av.type['fi_txt'] },
 
               wrap =      control.parents( '[class^="fi_"], [class*=" fi_"]' ).eq(0),  // jQuery 1.3 way: wrap.closest('[class^="fi_"], [class*=" fi_"]').attr('lang')
 
               lang =      wrap.attr( 'lang' ) || wrap.parents( '[lang]' ).attr( 'lang' ),  // jQuery 1.3 way: wrap.closest('[lang]').attr('lang')
-              required =  wrap.hasClass( conf.reqClassPattern ) || control.hasClass( conf.reqClassPattern ),
-              value =     $.trim( control.val() );
+              required =  wrap.hasClass( conf.reqClassPattern ) || control.hasClass( conf.reqClassPattern );
 
           // purge wrapper of old error notifications
           wrap.removeClass( conf.reqErrorClass );
@@ -476,7 +475,11 @@
           var name = control.attr('name'),
               reqchk = conf.customReqCheck && conf.customReqCheck[name];
           if (reqchk && $.isFunction( reqchk )) {
-            required = reqchk.call( this, value, wrap.get(0) || this, lang );
+            required = reqchk.call( this,
+                                    $.trim( control.val() ),
+                                    wrap.get(0) || this,
+                                    lang
+                                  );
           }
           else if (reqchk && typeof(reqchk) === 'string') {
             var m = /^(!)?(.*)$/.exec(reqchk);
@@ -504,7 +507,11 @@
 
             // rather than doing $.trim( $(this).val() ) within each call...
             // it's out of the loop and into a parameter
-            var res = tests[v].call( this, value, wrap.get(0)||this, lang );
+            var res = tests[v].call( this,
+                                      $.trim( control.val() ), // fetch an updated value each timearound - to allow validation methods to perform normalization/auto-correction.
+                                      wrap.get(0)||this,
+                                      lang
+                                    );
 
             // react to invalid control
             if ( res !== true ) {
@@ -584,6 +591,8 @@ jQuery.av.lang.is = {
   inlineNextError : 'Næsta villa',
   resetAlert      : 'Ath: Þú ert í þann mund að afturkalla öll innslegin gildi...',
 
+  fi_kt_fyrirt    : 'Sláðu inn fyrirtækiskennitölu',
+  fi_kt_einst     : 'Sláðu inn kennitölu einstaklings',
   fi_email        : { inline: 'Vinsamlega sláðu inn rétt netfang (dæmi: notandi@daemi.is)',  alert: 'e.g. nafn@domain.is' },
   fi_url          : { inline: 'Vinsamlega sláðu inn löggilda vefslóð (dæmi: http://www.example.is)',  alert: 'e.g. http://www.domain.is' },
   fi_year         : { inline: 'Vinsamlega sláðu inn rétt ártal (dæmi: 1998)',  alert: 't.d. 1998' },
@@ -597,9 +606,11 @@ jQuery.av.lang.is = {
 
 $.extend($.av.lang.en, {
 
-  fi_email : { inline: 'Please provide a valid e-mail address (example: user@example.com)',  alert: 'e.g. user@example.com' },
-  fi_url   : { inline: 'Please provide a valid web address (example: http://www.example.is)',  alert: 'e.g. http://www.example.com' },
-  fi_year  : { inline: 'Please provide a valid four digit year (example: 1998)',  alert: 'e.g. 1998' },
+  fi_kt_fyrirt:    'Only company \'kennitala\'s allowed',
+  fi_kt_einst:     'Only people\'s \'kennitala\'s allowed',
+  fi_email:        { inline: 'Please provide a valid e-mail address (example: user@example.com)',  alert: 'e.g. user@example.com' },
+  fi_url:          { inline: 'Please provide a valid web address (example: http://www.example.is)',  alert: 'e.g. http://www.example.com' },
+  fi_year:         { inline: 'Please provide a valid four digit year (example: 1998)',  alert: 'e.g. 1998' },
   fi_ccnum_noamex: { inline: 'American Express cards not accepted',  alert:'AmEx not accepted' }
 
 });
@@ -626,9 +637,9 @@ $.extend(avTypes, {
   
 
   fi_kt : function ( v, w, lang ) {
-    var error = $.av.getError( 'fi_kt', lang );
     if (v) {
-      var kt = v.replace(/[\s\-]/g, ''); // Allow "-" and " " as delimiting characters (strip them out).
+      var error = $.av.getError( 'fi_kt', lang ),
+           kt = v.replace(/[\s\-]/g, ''); // Allow "-" and " " as delimiting characters (strip them out).
       $( this ).val( kt );
       // remainder must all be numericals, 10 characters, and the last character must be 0 or 9 
       // kt must not be a robot
@@ -648,6 +659,35 @@ $.extend(avTypes, {
     }
     return !!v;
   },
+
+  fi_kt_einst : function ( v, w, lang ) {
+      var ret = avTypes.fi_kt.call( this, v, w, lang );
+      if ( ret === true )
+      {
+        v = $(this).val(); // refresh as the .fi_kt check function normalizes the value. :)
+        ;;;window.console&&console.log( ['foo', v,  v.substr(0,1), parseInt( v.substr(0,1), 10)] );
+        if ( parseInt( v.substr(0,1), 10) > 3 ) // dd + 40 seems to ben the method for generating company 'kennitala's
+        {
+          ret = $.av.getError( 'fi_kt_einst', lang );
+        }
+      }
+      return ret;
+    },
+
+
+  fi_kt_fyrirt : function ( v, w, lang ) {
+      var ret = avTypes.fi_kt.call( this, v, w, lang );
+      if ( ret === true )
+      {
+        ret = typeof avTypes.fi_kt_einst.call( this, v, w, lang ) == 'string';
+        if ( !ret )
+        {
+          ret = $.av.getError( 'fi_kt_fyrirt', lang );
+        }
+      }
+      return ret;
+    },
+
 
 
   // ====[ internet & communication ]====
