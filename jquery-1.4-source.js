@@ -584,7 +584,11 @@ jQuery.extend({
 		return object;
 	},
 
-	trim: function( text ) {
+	trim: String.trim ? 
+  function ( text ) {
+      return  (text || "").trim();
+    }:
+  function( text ) {
 		return (text || "").replace( rtrim, "" );
 	},
 
