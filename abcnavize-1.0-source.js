@@ -116,7 +116,7 @@
           table
               .data( 'abcnav', {
                   menu: abcNav,
-                  cfg:  cfg,
+                  cfg:  cfg
                 });
         });
     };
