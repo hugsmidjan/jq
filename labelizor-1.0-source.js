@@ -41,64 +41,69 @@
 
     return this.each(function(){
         var _this = this,
-            _jQthis = $(_this),
-            _html5support = _this.placeholder,
-            _labelText = _jQthis.attr('placeholder');
-
-        if ( _labelText  ||  ((_this.id || _this.title )  &&  _jQthis.is(':text, :password, textarea')) )
+            _jQthis = $(_this);
+        if ( !_jQthis.data('labelizor') ) // avoid processing the same input more than once.
         {
-          _labelText = cfg.labelText || _labelText; // cfg.labelText trumps all other texts...
+          var _html5support = _this.placeholder,
+              _labelText = _jQthis.attr('placeholder');
 
-              // use _jQthis.parents(':last') as scope/context to also .find() <label> inside .detached() document fragments
-          var _inpTitle = _this.title,
-              _label =  !_useLabel  &&  _labelText  &&  !_hideClass ?
-                            $([]): // <label> is not needed since we have both _labelText and we wont use the label and we don't have a hide class...
-                            $( _jQthis.parents('form:first, :last').eq(0).find('label[for="'+_this.id+'"]:first') ),
+          _jQthis.data('labelizor', true);
 
-              _removeLabelValue = function (e) {
-                  if (_jQthis.val() == _labelText)
-                  {
-                    _jQthis.val('').removeClass(_blurClass);
-                  }
-                };
-
-          if ( !_labelText )
+          if ( _labelText  ||  ((_this.id || _this.title )  &&  _jQthis.is(':text, :password, textarea')) )
           {
-            _labelText = !_useLabel || !_labelFilter ?
-                              // default to using input title=""
-                              (cfg.preferTitle && _inpTitle) || (_useLabel && _label.text()) || _inpTitle:
-                          $.isFunction(_labelFilter) ?
-                              _labelFilter(_label, _jQthis):
-                              _label.find(_labelFilter).text();
-            _labelText = $.trim( _labelText.replace(cfg.lRe||/(\*|:[\W\S]*$)/g, cfg.lPlace||'') );
-          }
+            _labelText = cfg.labelText || _labelText; // cfg.labelText trumps all other texts...
 
-          if (_hideClass  &&  (!cfg.condHide  ||  (_useLabel  &&  (cfg.preferTitle  &&  _labelText != _inpTitle)  &&  !cfg.labelText)) )
-          {
-            _label.addClass(_hideClass);
-          }
+                // use _jQthis.parents(':last') as scope/context to also .find() <label> inside .detached() document fragments
+            var _inpTitle = _this.title,
+                _label =  !_useLabel  &&  _labelText  &&  !_hideClass ?
+                              $([]): // <label> is not needed since we have both _labelText and we wont use the label and we don't have a hide class...
+                              $( _jQthis.parents('form:first, :last').eq(0).find('label[for="'+_this.id+'"]:first') ),
 
-          if ( !_html5support )
-          {
-            _jQthis
-                .attr('title', _inpTitle||_labelText)
-                .bind('focus', _removeLabelValue)
-                .bind('blur', function (e) {
-                    if (!_jQthis.val())
+                _removeLabelValue = function (e) {
+                    if (_jQthis.val() == _labelText)
                     {
-                      _jQthis.val(_labelText).addClass(_blurClass);
+                      _jQthis.val('').removeClass(_blurClass);
                     }
-                  });
+                  };
 
-            if (_labelText  &&  !_this.getAttribute('value')  &&  (!_this.value || _this.value == _labelText))
+            if ( !_labelText )
             {
-              _jQthis
-                  .val(_labelText)
-                  .addClass(_blurClass);
+              _labelText = !_useLabel || !_labelFilter ?
+                                // default to using input title=""
+                                (cfg.preferTitle && _inpTitle) || (_useLabel && _label.text()) || _inpTitle:
+                            $.isFunction(_labelFilter) ?
+                                _labelFilter(_label, _jQthis):
+                                _label.find(_labelFilter).text();
+              _labelText = $.trim( _labelText.replace(cfg.lRe||/(\*|:[\W\S]*$)/g, cfg.lPlace||'') );
             }
 
-            $(_this.form)
-                .bind('submit', _removeLabelValue);
+            if (_hideClass  &&  (!cfg.condHide  ||  (_useLabel  &&  (cfg.preferTitle  &&  _labelText != _inpTitle)  &&  !cfg.labelText)) )
+            {
+              _label.addClass(_hideClass);
+            }
+
+            if ( !_html5support )
+            {
+              _jQthis
+                  .attr('title', _inpTitle||_labelText)
+                  .bind('focus', _removeLabelValue)
+                  .bind('blur', function (e) {
+                      if (!_jQthis.val())
+                      {
+                        _jQthis.val(_labelText).addClass(_blurClass);
+                      }
+                    });
+
+              if (_labelText  &&  !_this.getAttribute('value')  &&  (!_this.value || _this.value == _labelText))
+              {
+                _jQthis
+                    .val(_labelText)
+                    .addClass(_blurClass);
+              }
+
+              $(_this.form)
+                  .bind('submit', _removeLabelValue);
+            }
           }
 
         }
