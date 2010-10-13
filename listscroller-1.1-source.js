@@ -58,11 +58,11 @@
       currentItemClass:  'visible',
       cursorItemClass:   'current',
 
-      pagingTopClass:    'paging-top',
-      pagingBottomClass: 'paging-bottom',
+      pagingTopClass:    'paging paging-top',
+      pagingBottomClass: 'paging paging-bottom',
 
 
-      pagingTemplate:    '<div class="paging"><ul class="stepper"/></div>',
+      pagingTemplate:    '<div><ul class="stepper"/></div>',
       nextBtnTemplate:   '<li class="next"><a href="#"/></li>',
       prevBtnTemplate:   '<li class="prev"><a href="#"/></li>',
 
