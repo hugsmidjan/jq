@@ -115,8 +115,8 @@
                               if(!cfg.imgClose) {
                                 e.stopPropagation();
                               }
-                            })
-                          .setFocus();
+                            });
+                          //.setFocus();
                   if(cfg.setContainerWidth) { setWidth() };
                 }); // animate in
           _isOpen = true;
@@ -162,13 +162,13 @@
         // close popup
         $(_closeSelectors)
             .bind('click', function (e) {
-                _popup.fadeOut(cfg.fadeOutSpeed, function(){
-                    _curtain.fadeOut(cfg.fadeOutSpeed, function(){
+                _popup.fadeOut(cfg.fadeOutSpeed, cfg.easeOut, function(){
+                    _curtain.fadeOut(cfg.fadeOutSpeed, cfg.easeOut, function(){
                         $('body > div.ipopup-curtain, body > div.ipopup-container').remove();
                         $(window).unbind('keyup', keynav);
-                        _hrefElms.focus();
-                      }, cfg.easeOut);
-                  }, cfg.easeOut); // animate out
+                        //_hrefElms.focus();
+                      });
+                  }); // animate out
                 _isOpen = false;
                 return false;
               });
