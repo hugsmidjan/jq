@@ -84,7 +84,7 @@
                                         _headlinelist.dequeue();
                                         _newsitems
                                             .eq( _thisHeadline.listIndex )
-                                                .fadeIn( _config.fadeinspeed , function() { if( $.browser.msie && $.browser.version < 8 ) { this.style.removeAttribute('filter'); } } , _config.fadeinease );
+                                                .fadeIn( _config.fadeinspeed , _config.fadeinease , function() { if( $.browser.msie && $.browser.version < 8 ) { this.style.removeAttribute('filter'); } }  );
                                       });
 
                               }, _config.switchdelay);
