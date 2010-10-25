@@ -47,7 +47,7 @@
                 list.data('timeout'+dataSuffix,
                     setTimeout(
                         function(){
-                            var activeItem = list.data( 'item'+dataSuffix ),
+                            var activeItem = $( list.data( 'item'+dataSuffix ) ),
                                 remove;
                             if ( activeItem[0] != item[0]  ||  isClick )
                             {
@@ -65,7 +65,7 @@
                             remove  &&  list.removeData( 'item'+dataSuffix );
                           },
                         isClick? 0 : cfg.delay||500
-                      );
+                      )
                   );
               }
             });
