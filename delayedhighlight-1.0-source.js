@@ -9,19 +9,20 @@
 
 /*
   The `delayedHighlight` plugin highlights list items on mouseenter/focusin
-  after a specified delay (and instantly when clicked).
+  after a specified delay (and optionally instantly when clicked).
   Highlight is sticky - and lasts until another item is highligthed
-  (or the current item is clicked again).
+  (or optionally until the current item is clicked again).
 
   ------------------------------------------------------
 
   Usage:
 
       jQuery('ul').delayedHighlight({
-          //delegate:    'li',       // the elements to highlight
-          //className:   'focused',  // for highlighted elements
-          //delay:       500,        // ms, until highlight
-          //cancelOff:   'a, area, :input' // you know, stuff...
+          //delegate:     'li',             // the elements to highlight
+          //className:    'focused',        // for highlighted elements
+          //delay:        500,              // ms, until highlight
+          //clickToggles: false,            // true makes clicks toggle on/off/on/off/etc.
+          //cancelOff:    'a, area, :input' // you know, stuff...
         });
 
 
@@ -57,10 +58,11 @@
 
   $.fn.delayedHighlight = function (cfg) {
       cfg = $.extend({
-            //delegate:    'li',
-            //className:   'focused',
-            //delay:       500,
-            //cancelOff:   'a, area, :input'
+            //delegate:     'li',
+            //className:    'focused',
+            //delay:        500,
+            //clickToggles: false,
+            //cancelOff:    'a, area, :input'
           },
           cfg
         );
@@ -85,7 +87,7 @@
                         function(){
                             var activeItem = $( list.data( 'item'+dataSuffix ) ),
                                 remove;
-                            if ( activeItem[0] != item[0]  ||  isClick )
+                            if ( activeItem[0] != item[0]  ||  (isClick && cfg.clickToggles) )
                             {
                               className  &&  activeItem.removeClass( className );
                               activeItem.trigger( evPrefix+'off' );
