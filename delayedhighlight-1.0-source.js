@@ -2,17 +2,53 @@
 // ----------------------------------------------------------------------------------
 // jQuery.fn.delayedHighlight v 1.0
 // ----------------------------------------------------------------------------------
-// (c) 2010 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+// (c) 2010 HugsmiÃ°jan ehf  -- http://www.hugsmidjan.is
 //  written by:
-//   * Már Örlygsson        -- http://mar.anomy.net
+//   * MÃ¡r Ã–rlygsson        -- http://mar.anomy.net
 // ----------------------------------------------------------------------------------
 
 /*
-  Highlights list items on mouseenter/focusin after a specified delay (and instantly when clicked)
-  Highlight is sticky - and lasts until another item is highligthed (or the current item is clicked again)
-  
+  The `delayedHighlight` plugin highlights list items on mouseenter/focusin
+  after a specified delay (and instantly when clicked).
+  Highlight is sticky - and lasts until another item is highligthed
+  (or the current item is clicked again).
+
+  ------------------------------------------------------
+
+  Usage:
+
+      jQuery('ul').delayedHighlight({
+          //delegate:    'li',       // the elements to highlight
+          //className:   'focused',  // for highlighted elements
+          //delay:       500,        // ms, until highlight
+          //cancelOff:   'a, area, :input' // you know, stuff...
+        });
+
+
+  Each time .delayedHighlight highlights (or dims) an element, the custom events
+  `highlighton` and `highlightoff` are triggered respectively.
+  Those events bubble up to (but no further than) the original
+  element container (the 'ul' in the example code above).
+
+  Handlers for those events can therefore be bound to the container 
+  for custom funcionality, like so:
+
+      jQuery('ul')
+          .delayedHighlight()
+          .bind('highlighton', function (e) {
+              $(e.target).prepend('<img class="icon" src="star.gif" alt=""/>');
+            })
+          .bind('highlightoff', function (e) {
+              $(e.target).find('img.icon').remove();
+            });
+
+
+  ------------------------------------------------------
+
   TODO:
     * add a (default on) 'sticky' option to allow non-sticky highlights
+
+
 */
 (function($){
 
