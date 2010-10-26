@@ -2,11 +2,11 @@
 // ----------------------------------------------------------------------------------
 // jQuery.fn.expandTable v 1.0
 // ----------------------------------------------------------------------------------
-// (c) 2009 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+// (c) 2009 HugsmiÃ°jan ehf  -- http://www.hugsmidjan.is
 //  written by:
-//   * Már Örlygsson             -- http://mar.anomy.net
-//   * Borgar Þorsteinsson       -- http://borgar.undraland.com
-//   * Einar Kristján Einarsson  -- einarkristjan (at) gmail.com
+//   * MÃ¡r Ã–rlygsson             -- http://mar.anomy.net
+//   * Borgar Ãžorsteinsson       -- http://borgar.undraland.com
+//   * Einar KristjÃ¡n Einarsson  -- einarkristjan (at) gmail.com
 // ----------------------------------------------------------------------------------
 
 // usage:
@@ -120,7 +120,7 @@
   var dataKey = 'expandTable.subrow',
       texts = $.fn.expandTable.i18n = {
           is: {
-              loadingMsg:   'Sæki gögn...',
+              loadingMsg:   'SÃ¦ki gÃ¶gn...',
               //closeTooltip: 'Loka',
               closeLabel:   'Loka'
             },
