@@ -24,7 +24,8 @@
           itmTmpl:      '<a href="%{frag}">%{label}</a>',
           itmSel:       'a',
           noFoundTmpl:  '<tr class="nothingfound"><td colspan="%{colspan}"><strong>%{msg}</strong></td></tr>',
-          activeClass: 'current',
+          rowSelector:  'tbody tr',
+          activeClass:  'current',
           fragmPrefix:  'index:',
           //startOn:    letter, // Defaults to the first link in the menu
           allBtn:       !0, // true
@@ -32,7 +33,7 @@
         }, cfg);
       return this.each(function(){
           var table = $(this),
-              tRows = table.find('tbody tr'),
+              tRows = table.find(cfg.rowSelector),
               
               txt = txt || A.texts[ table.closest('[lang]').attr('lang') ]  ||  A.texts.en,
               noFoundMsg,
@@ -43,7 +44,6 @@
                   if ( !item.is('.'+currentClass) )
                   {
                     abcNav.find(cfg.itmSel+'.'+currentClass).removeClass(currentClass);
-                    ;;;window.console&&console.log( [currentClass] );
                     item.addClass(currentClass);
                     var fragment = $.getFrag( link.attr('href') );
                     e.type == 'click'  &&  $.setFrag(fragment);
@@ -67,11 +67,15 @@
                     }
                     else
                     {
-                      noFoundMsg = noFoundMsg || $( cfg.noFoundTmpl
-                                                        .replace( '%{colspan}', tRows.eq(0).find('td, th').length )
-                                                        .replace( '%{msg}', txt.noFoundMsg )
-                                                      );
-                      noFoundMsg.insertBefore(tRows[0]);
+                      if ( !noFoundMsg )
+                      {
+                        noFoundMsg = $( 
+                                        cfg.noFoundTmpl
+                                            .replace( '%{msg}', txt.noFoundMsg )
+                                            .replace( '%{colspan}', tRows.eq(0).children().length ) // needed for tables
+                                      );
+                      }
+                      noFoundMsg.insertBefore( tRows[0] );
                     }
                   }
                   return false;
