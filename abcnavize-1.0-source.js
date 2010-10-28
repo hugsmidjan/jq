@@ -40,10 +40,10 @@
               noFoundMsg,
               abcNavClick = function  (e) {
                   var link = $(e.target).closest('a'),
-                      item = link.closest(cfg.itmSel),
-                      currentClass = cfg.activeClass;
-                  if ( !item.is('.'+currentClass) )
+                      item = link.closest(cfg.itmSel);
+                  if ( link[0]  && !item.is('.'+currentClass) )
                   {
+                    var currentClass = cfg.activeClass;
                     abcNav.find(cfg.itmSel+'.'+currentClass).removeClass(currentClass);
                     item.addClass(currentClass);
                     var fragment = $.getFrag( link.attr('href') );
