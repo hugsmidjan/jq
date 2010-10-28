@@ -27,6 +27,7 @@
           rowSelector:  'tbody tr',
           activeClass:  'current',
           fragmPrefix:  'index:',
+          //startHidden: false, // true hides all rows initially
           //startOn:    letter, // Defaults to the first link in the menu
           allBtn:       !0, // true
           zebraize:     !0  // true
@@ -113,7 +114,14 @@
               startOnSelector = foundLetters[ fragment ] ?
                                     '[href$="#'+ $.encodeFrag(fragment) +'"]':
                                     '';
-          abcNavClick.call(null, { target: abcNav.find('a'+startOnSelector)[0] });
+          if ( startOnSelector )
+          {
+            abcNavClick.call(null, { target: abcNav.find('a'+startOnSelector)[0] });
+          }
+          else if ( !!cfg.startHidden )
+          {
+            tRows.hide();
+          }
 
           abcNav.insertBefore(table);
           abcNavList = undefined;
