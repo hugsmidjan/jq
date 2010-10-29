@@ -33,6 +33,7 @@
       port = location.port;
 
   var anchorTags = $.fn.anchorTags = function (config) {
+      config = config || {};
       var links = this.filter('[href]'),
           i = links.length;
       if (i)
