@@ -12,7 +12,7 @@
 //  * $.setFrag, $.getFrag, $.encodeFrag   (eutils-1.0)
 //
 // TODO:
-//  * trigger onfilter and onfiltered events
+//  * also trigger abcnavfilter event
 //
 (function($){
 
@@ -78,6 +78,11 @@
                       }
                       noFoundMsg.insertBefore( tRows[0] );
                     }
+                    // trigger (bubbling) event on the table
+                    var ev = $.Event('abcnavfiltered');
+                    ev.menuLink = link;
+                    ev.visibleRows = vRows;
+                    table.trigger(ev);
                   }
                   return false;
                 },
