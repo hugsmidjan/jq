@@ -19,7 +19,7 @@
     // also supporting the old `$(':input').labelizor(hideClass, blurClass)` syntax
     var a = cfg && cfg.charAt ? cfg : '';
     cfg = $.extend({
-        //lRe:         /(\*|:[\W\S]*$)/g,     // pattern used to clean the <label> text.
+        lRe:         /(\*|:[\W\S]*$)/g,     // pattern used to clean the <label> text.
         //lPlace:      '',                    // replacement text/pattern for cfg.lRe
         //labelFilter: null,                  // label sub-selector  (may also be a function - see below)
         //labelFilter: function(label, input){ return label.find('i').text() || input.title || label.text(); },
@@ -74,7 +74,7 @@
                             $.isFunction(_labelFilter) ?
                                 _labelFilter(_label, _jQthis):
                                 _label.find(_labelFilter).text();
-              _labelText = $.trim( _labelText.replace(cfg.lRe||/(\*|:[\W\S]*$)/g, cfg.lPlace||'') );
+              _labelText = $.trim( _labelText.replace(cfg.lRe||'', cfg.lPlace||'') );
             }
 
             if (_hideClass  &&  (!cfg.condHide  ||  (_useLabel  &&  (cfg.preferTitle  &&  _labelText != _inpTitle)  &&  !cfg.labelText)) )
