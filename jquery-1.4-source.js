@@ -4194,7 +4194,7 @@ jQuery.fn.extend({
 		for ( i = 0, l = this.length; i < l; i++ ) {
 			cur = this[i];
 
-			while ( cur ) {
+			while ( cur && cur.tagName ) {
 				if ( pos ? pos.index(cur) > -1 : jQuery.find.matchesSelector(cur, selectors) ) {
 					ret.push( cur );
 					break;

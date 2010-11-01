@@ -44,10 +44,26 @@
 
       // Uses all plugins by default:
       jQuery('.articlebody').linkify();
+
       // Use only certain plugins:
-      jQuery('.articlebody').linkify('name1,name2');
+      jQuery('.articlebody').linkify( 'name1,name2' );
       jQuery('.articlebody').linkify({  use: 'name1,name2'  });
       jQuery('.articlebody').linkify({  use: ['name1','name2']  });
+
+      // Explicitly use all plugins:
+      jQuery('.articlebody').linkify('*');
+      jQuery('.articlebody').linkify({  use: '*'  });
+      jQuery('.articlebody').linkify({  use: ['*']  });
+
+      // Use no plugins:
+      jQuery('.articlebody').linkify('');
+      jQuery('.articlebody').linkify({  use: ''  });
+      jQuery('.articlebody').linkify({  use: []  });
+      jQuery('.articlebody').linkify({  use: ['']  });
+
+      // Perfmorm actions on all newly created links:
+      jQuery('.articlebody').linkify( function (links){ links.addClass('linkified'); } );
+      jQuery('.articlebody').linkify({  handleLinks: function (links){ links.addClass('linkified'); }  });
 
 */
 
@@ -64,16 +80,27 @@
 
 
       linkify = $.fn.linkify = function ( cfg ) {
-          cfg = cfg || {};
-          if ( typeof cfg == 'string' )
+          if ( !$.isPlainObject( cfg ) )
           {
-            cfg = { use:cfg };
+            cfg = {
+                use:         (typeof cfg == 'string') ? cfg : undefined,
+                handleLinks: $.isFunction(cfg) ? cfg : arguments[1]
+              };
           }
           var use = cfg.use,
               allPlugins = linkify.plugins || {},
               plugins = [linkifier],
-              tmpCont;
-          if ( use )
+              tmpCont,
+              newLinks = [],
+              callback = cfg.handleLinks;
+          if ( use == undefined ||  use == '*' ) // use === undefined  ||  use === null
+          {
+            for ( var name in allPlugins )
+            {
+              plugins.push( allPlugins[name] );
+            }
+          }
+          else
           {
             use = $.isArray( use ) ? use : $.trim(use).split( / *, */ );
             var plugin,
@@ -88,15 +115,8 @@
               }
             }
           }
-          else
-          {
-            for ( var name in allPlugins )
-            {
-              plugins.push( allPlugins[name] );
-            }
-          }
 
-          return this.each(function () {
+          this.each(function () {
               var childNodes = this.childNodes,
                   i = childNodes.length;
               while ( i-- )
@@ -141,6 +161,13 @@
                       }
                     }
                     html = tmpCont.innerHTML;
+                    if ( callback )
+                    {
+                      html = $('<div/>').html(html);
+                      //newLinks.push.apply( newLinks,  html.find('a').toArray() );
+                      newLinks = newLinks.concat( html.find('a').toArray().reverse() );
+                      html = html.contents();
+                    }
                     htmlChanged  &&  $(n).after(html).remove();
                   }
                 }
@@ -150,6 +177,8 @@
                 }
               };
           });
+          callback  &&  callback( $(newLinks.reverse()) );
+          return this;
         };
 
   linkify.plugins = {};
