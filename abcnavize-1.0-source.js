@@ -32,6 +32,7 @@
           allBtn:       !0, // true
           zebraize:     !0  // true
         }, cfg);
+
       return this.each(function(){
           var table = $(this),
               tRows = table.find(cfg.rowSelector),
@@ -48,6 +49,10 @@
                     item.addClass(currentClass);
                     var fragment = $.getFrag( link.attr('href') );
                     e.type == 'click'  &&  $.setFrag(fragment);
+                    if ( fragment == cfg.fragmPrefix+'all' )
+                    {
+                      fragment = '';
+                    }
                     var vRows = tRows  // visible rows
                                     .hide()
                                     .filter(function(){
@@ -94,7 +99,7 @@
           
           if ( cfg.allBtn )
           {
-            $( cfg.itmTmpl.replace( '%{frag}', '#' ).replace( '%{label}', txt.abcAll ) ).appendTo( abcNavList );
+            $( cfg.itmTmpl.replace( '%{frag}', '#'+ (cfg.startHidden?cfg.fragmPrefix+'all':'') ).replace( '%{label}', txt.abcAll ) ).appendTo( abcNavList );
           }
 
 
@@ -116,7 +121,7 @@
             });
 
           var fragment = $.getFrag()  ||  ( cfg.startOn  &&  cfg.fragmPrefix+cfg.startOn ),
-              startOnSelector = foundLetters[ fragment ] ?
+              startOnSelector = (foundLetters[ fragment ]  ||  fragment == cfg.fragmPrefix+'all') ?
                                     '[href$="#'+ $.encodeFrag(fragment) +'"]':
                                     '';
           if ( startOnSelector )
