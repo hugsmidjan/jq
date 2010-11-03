@@ -33,7 +33,7 @@
           (!cfg || cfg.preset != 'table') ? {} : {
               listElm:   '> tbody',
               items:     '> tr',
-              noneFound: '<tr class="nothingfound"><td colspan="%{colspan}"><strong>%{msg}</strong></td></tr>',
+              noneFound: '<tr class="nothingfound"><td colspan="%{colspan}"><strong>%{msg}</strong></td></tr>'
             },
           cfg
         );
