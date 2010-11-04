@@ -10,19 +10,22 @@
 /*
   The `delayedHighlight` plugin highlights list items on mouseenter/focusin
   after a specified delay (and optionally instantly when clicked).
-  Highlight is sticky - and lasts until another item is highligthed
-  (or optionally until the current item is clicked again).
+  Highlight can be made optionally sticky - lasting until another item is highligthed
+  (and/or optionally until the current item is clicked again).
 
   ------------------------------------------------------
 
   Usage:
 
       jQuery('ul').delayedHighlight({
-          //delegate:     'li',             // the elements to highlight
-          //className:    'focused',        // for highlighted elements
-          //delay:        500,              // ms, until highlight
-          //clickToggles: false,            // true makes clicks toggle on/off/on/off/etc.
-          //cancelOff:    'a, area, :input' // you know, stuff...
+          delegate:     'li',             // the elements to highlight
+          className:    'focused',        // for highlighted elements
+          delay:        500,              // ms, until highlighton
+          delayOut:     300,              // ms, until highlightoff (applies when sticky !== true)
+          sticky:       false,            // when sticky, highlight stays on until a new element is highlighted (unless clickToggles is set)
+          click:        false,            // allow clicks to set highlight on without delay
+          clickToggles: false,            // true makes clicks toggle the highlight on/off/on/off/etc.
+          cancelOff:    'a, area, :input' // exceptions for click-triggered `highlightoff` when `clickToggles` is set
         });
 
 
@@ -54,46 +57,66 @@
 (function($){
 
   var runCount = 0,
-      ts = '.dh'+(new Date()).getTime() +'-';
+      ts = '.dh'+(new Date()).getTime() +'-',
+      evPrefix = 'highlight',
+      inEvs = 'mouseenter focusin',
+      outEvs = 'mouseleave focusout',
+      inEvRe = /(er|in)$/;
 
   $.fn.delayedHighlight = function (cfg) {
       cfg = $.extend({
             //delegate:     'li',
-            //className:    'focused',
-            //delay:        500,
+            className:    'focused',
+            //sticky:       false,
+            delay:        500,
+            delayOut:     300,
             //clickToggles: false,
-            //cancelOff:    'a, area, :input'
+            //click:        false,
+            cancelOff:    'a, area, :input'
           },
           cfg
         );
       var list = this,
           dataSuffix = ts+(runCount++);
-          className =  cfg.className || 'focused',
-          delegate =   cfg.delegate || 'li',
-          evPrefix =   'highlight';
+          className =  cfg.className,
+          delegate =   cfg.delegate  || 'li';
 
       list
           .bind( evPrefix+'on '+evPrefix+'off', false )
-          .delegate(delegate, 'mouseleave focusout', function (e) {
-              clearTimeout( list.data('timeout'+dataSuffix) );
+          .delegate(delegate, outEvs+(cfg.sticky?'':' '+inEvs), function (e) {
+              var inorout = inEvRe.test(e.type) ? 'out' : 'in';
+              clearTimeout( list.data( 'timeout-'+ inorout + dataSuffix ) );
             })
-          .delegate(delegate, 'mouseenter focusin click', function (e) {
+          .delegate(delegate, inEvs+(cfg.sticky?'':' '+outEvs)+(cfg.click?' click':''), function (e) {
               var item = $(this),
                   isClick =  e.type == 'click';
-              if ( !isClick ||  !(item[0]==(list.data( 'item'+dataSuffix )||[])[0]  &&  $(e.target).closest(cfg.cancelOff||'a, area, :input', this)[0]) )
+                  isInEvent = cfg.sticky ? !isClick : inEvRe.test(e.type),
+                  isOutEvent = !isInEvent  &&  !isClick,
+                  inorout = isInEvent ? 'in' : 'out';
+
+              if ( (!isClick  &&  (!cfg.sticky || isInEvent))  ||  // always process if not click (and not sticky or just inEvent)
+                    // In case of a click, process only if...
+                    // ...the item is not currently focued (results in "highlighton")
+                    item[0]!=(list.data( 'item'+dataSuffix )||[])[0]  ||
+                    // ...or .clickToggles is true and the e.target isn't one of the .cancelOff elements... (results in "highlightoff")
+                    (cfg.clickToggles  &&  !$(e.target).closest(cfg.cancelOff||'', this)[0])
+                  )
               {
-                list.data('timeout'+dataSuffix,
+                var timeoutName = 'timeout-'+ inorout + dataSuffix;
+                clearTimeout( list.data( timeoutName ) );
+                list.data( timeoutName,
                     setTimeout(
                         function(){
                             var activeItem = $( list.data( 'item'+dataSuffix ) ),
+                                isActive = activeItem[0] == item[0],
                                 remove;
-                            if ( activeItem[0] != item[0]  ||  (isClick && cfg.clickToggles) )
+                            if ( !isActive  ||  !cfg.sticky  || (isClick && cfg.clickToggles) )
                             {
                               className  &&  activeItem.removeClass( className );
                               activeItem.trigger( evPrefix+'off' );
                               remove = true;
                             }
-                            if ( !isClick  ||  activeItem[0] != item[0] )
+                            if ( !isActive  &&  !isOutEvent )
                             {
                               className && item.addClass( className );
                               item.trigger( evPrefix+'on' );
@@ -102,7 +125,7 @@
                             }
                             remove  &&  list.removeData( 'item'+dataSuffix );
                           },
-                        isClick? 0 : cfg.delay||500
+                        isClick? 0 : isInEvent ? cfg.delay : cfg.delayOut
                       )
                   );
               }
