@@ -87,6 +87,7 @@
                                     elmData._proxyEvents  &&  clonedSection.bind( elmData._proxyEvents, elmData, proxyEvents);
                                     tableClone
                                         .attr( 'summary', 'Skip this table - it\'s for layout purposes only' )
+                                        .append( original.is('thead') ? original.prevAll('caption').clone() : undefined )
                                         .append( clonedSection )
                                         .addClass( tagName+' '+(elmData._cloneClass) )
                                         ['insert'+ (tagName=='thead' ? 'Before' : 'After') ]( elmData.tbWrap )
