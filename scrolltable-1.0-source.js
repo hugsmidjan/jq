@@ -90,30 +90,39 @@
                                         .append( original.is('thead') ? original.prevAll('caption').clone() : undefined )
                                         .append( clonedSection )
                                         .addClass( tagName+' '+(elmData._cloneClass) )
-                                        ['insert'+ (tagName=='thead' ? 'Before' : 'After') ]( elmData.tbWrap )
-                                        // reimplementation of the $.fn.uniquifyIds plugin
-                                        .find('*')
-                                            .andSelf()
-                                                .filter('[id]')
-                                                    .each(function () {
-                                                        var orgId = this.id,
-                                                            newId = $.aquireId( orgId ),
-                                                            elm = $(this).attr( 'id', newId );
-                                                        $.each(
-                                                            {
-                                                              'input, select, textarea': 'label[for',
-                                                              'area':                    'img[usemap'
-                                                            },
-                                                            function ( elmType, selector ) {
-                                                                if ( elm.is(elmType) )
-                                                                {
-                                                                  tableClone.find(selector+'="'+ orgId +'"]')
-                                                                      .attr( selector.split('[')[1], newId );
-                                                                }
-                                                                
-                                                              }
-                                                          );
-                                                      });
+                                        ['insert'+ (tagName=='thead' ? 'Before' : 'After') ]( elmData.tbWrap );
+                                    var allElms = tableClone.find('*').andSelf();
+                                    // reimplementation of the $.fn.uniquifyIds plugin
+                                    // remove onclick attributes to pervent double triggers...
+                                    allElms.filter('[id]')
+                                        .each(function () {
+                                            var orgId = this.id,
+                                                newId = $.aquireId( orgId ),
+                                                elm = $(this).attr( 'id', newId );
+                                            $.each(
+                                                {
+                                                  'input, select, textarea': 'label[for',
+                                                  'area':                    'img[usemap'
+                                                },
+                                                function ( elmType, selector ) {
+                                                    if ( elm.is(elmType) )
+                                                    {
+                                                      tableClone.find(selector+'="'+ orgId +'"]')
+                                                          .attr( selector.split('[')[1], newId );
+                                                    }
+                                                    
+                                                  }
+                                              );
+                                          });
+
+                                    
+                                    if ( elmData._hasEvAttrs )
+                                    {
+                                      // remove oneventtype attributes to pervent double triggers...
+                                      $.each(elmData._proxyEvents.split(/\s+/), function (i, eventtype) {
+                                          allElms.removeAttr( 'on'+eventtype );
+                                        });
+                                    }
                                             
                                     return tableClone[0];
                                   });
@@ -202,6 +211,7 @@
                             _cloneClass:   cfg.cloneClass,
                             _proxyEvents:  cfg.proxyEvents,
                             _proxyEvProps: cfg.proxyEvProps.split(/\s*,\s*/),
+                            _hasEvAttrs:   cfg.hasEvAttrs,
                             _init:         1
                           };
                     if ( cfg.wrap )
@@ -223,6 +233,7 @@
     };
 
   $.fn[scrollTable].defaults = {
+      //hasEvAttrs:   false,           // are event attributes (i.e. `onclick=""`, etc.) likely to be found in the caption/thead/tfoot HTML?  If so, we need to remove them from the cloned elements!
       proxyEvents: 'click focusin focusout mouseup mousedown',
       proxyEvProps: 'pageX pageY which',
       wrap:        '<div class="scrollable" />',  // Wrapper element around the table and it's clones. may be disabled
