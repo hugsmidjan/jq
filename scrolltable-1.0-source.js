@@ -233,12 +233,12 @@
     };
 
   $.fn[scrollTable].defaults = {
-      //hasEvAttrs:   false,           // are event attributes (i.e. `onclick=""`, etc.) likely to be found in the caption/thead/tfoot HTML?  If so, we need to remove them from the cloned elements!
-      proxyEvents: 'click focusin focusout mouseup mousedown',
-      proxyEvProps: 'pageX pageY which',
+      //hasEvAttrs:   false,                        // are event attributes (i.e. `onclick=""`, etc.) likely to be found in the caption/thead/tfoot HTML?  If so, we need to remove them from the cloned elements!
+      proxyEvents: 'click focusin focusout mouseup mousedown',  // Event types that are automatically proxied from the cloned to the actual (but hidden) table sections
+      proxyEvProps: 'pageX pageY which',          // Event object properties that get proxied
       wrap:        '<div class="scrollable" />',  // Wrapper element around the table and it's clones. may be disabled
-      //tbWrap:      '<div class="tbody"/>',        // The element required
-      cloneClass:  'screen-only'
+      //tbWrap:      '<div class="tbody"/>',        // The element that has the scrollbar. Required
+      cloneClass:  'screen-only'                  // extra className that gets added to the cloned tables.
     };
 
 })(jQuery);

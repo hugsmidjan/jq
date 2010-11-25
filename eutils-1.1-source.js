@@ -218,6 +218,10 @@
         return coll;
       },
 
+    unhide: function () {
+        return this.css('display', '');
+      },
+
     pause: function (speed, callback)
     {
       return callback||!$.fn.delay ?
