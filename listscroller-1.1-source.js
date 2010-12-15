@@ -49,6 +49,7 @@
       itemStatusPager:   False,  // true changes statusPager to count items shown rather than "pages" ... e.g. "Displaying: 1-4 of 13 items"
 
       autoScrollDelay:   0, //Timeout in ms for autoscroll
+      setFocus:          True,   // lets setPos trigger() .focus on the first currently visible list element.
 
       initCallback:      function () {},
       moveCallback:      function () {},
@@ -273,7 +274,7 @@
     {
       $.listscroller.animate[ c.animation||'none' ].call( _block, list, c );
     }
-    if ( !opts._noFocus )
+    if ( !opts._noFocus  &&  c.setFocus )
     {
       setTimeout(function(){
           list.eq( c.index ).setFocus();
