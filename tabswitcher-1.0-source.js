@@ -171,7 +171,7 @@
 
       returnToTab = function (e)
       {
-        $(this).parent().data( _tabswitcherData ).tab.setfocus();
+        $(this).parent().data( _tabswitcherData ).tab.setFocus();
         return false; // no bubbling!
       },
 
