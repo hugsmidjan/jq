@@ -54,6 +54,10 @@
 (function($){
 
   var _strCurtain = 'curtain',
+      msie6 = $.browser.msie  &&  parseInt($.browser.version, 10)<7,
+      dimPrefix = !msie6 ? 'min-' : '', // default to min-width/min-height
+      widthProp = dimPrefix+'width',
+      heightProp = dimPrefix+'height',
       _opacity = 'opacity',
 
       curtain = $[_strCurtain] = function (cfg, elm) {
@@ -86,12 +90,7 @@
                   { bg: '#888', opacity: .5, z:99 }:
                   cfg || {}
             );
-          var dimPrefix = 'min-'; // default to min-width/min-height
-          if ( $.browser.msie  &&  parseInt($.browser.version, 10)<7 ) // only in in MSIE6
-          {
-            cfg.fixed = 0; // disable cfg.fixed
-            dimPrefix = '';
-          }
+          msie6 && (cfg.fixed = 0); // disable cfg.fixed in MSIE6
           var _curtain = $(elm || '<div />')
                               .hide()
                               .addClass( cfg.className )
@@ -100,8 +99,8 @@
                                   top: 0,
                                   left: 0
                                 })
-                              .css( dimPrefix+'width',  '100%' )
-                              .css( dimPrefix+'height', '100%' );
+                              .css( widthProp,  '100%' )
+                              .css( heightProp, '100%' );
           // for newly generated (or orphaned elements) auto-append it to document.body
           if (!elm || !elm.parentNode)
           {
@@ -146,16 +145,19 @@
 
           while (i--)
           {
-            var elm = _curtainlist[i];
-            if ( elm  &&  ( (elm.parentNode  &&  $(elm).is(':visible'))  ||  e == 1 ) )
+            var elm = _curtainlist[i],
+                $elm = $(elm);
+            if ( elm  &&  ( (elm.parentNode  &&  $elm.is(':visible'))  ||  e == 1 ) )
             {
               // only calculate window+body dimensions once per _resizeCurtain run, and only if _curtainlist.length>0
-              W = W!=-1 ? W : Math.max( w.width(),  b.innerWidth() );
-              H = H!=-1 ? H : Math.max( w.height(), b.innerHeight() );
-              var s = elm.style;
-              s.width = s.height = '0'; // IE6 buggery workaround
-              s.width  = W+'px';
-              s.height = H+'px';
+              W = (W!=-1) ? W : Math.max( w.width(),  b.innerWidth() );
+              H = (H!=-1) ? H : Math.max( w.height(), b.innerHeight() );
+              msie6  && $elm // silly IE6 workaround
+                            .css( widthProp, 0 )
+                            .css( heightProp, 0 );
+              $elm
+                  .css( widthProp, W )
+                  .css( heightProp, W );              
             }
           }
         };
