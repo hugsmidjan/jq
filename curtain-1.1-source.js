@@ -156,8 +156,8 @@
                             .css( widthProp, 0 )
                             .css( heightProp, 0 );
               $elm
-                  .css( widthProp, W )
-                  .css( heightProp, W );              
+                  .css( widthProp,  W )
+                  .css( heightProp, H );              
             }
           }
         };
