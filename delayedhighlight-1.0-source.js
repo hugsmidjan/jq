@@ -34,7 +34,7 @@
   Those events bubble up to (but no further than) the original
   element container (the 'ul' in the example code above).
 
-  Handlers for those events can therefore be bound to the container 
+  Handlers for those events can therefore be bound to the container
   for custom funcionality, like so:
 
       jQuery('ul')
@@ -54,20 +54,14 @@
 
 
 */
-(function($){
-
-  var runCount = 0,
-      ts = '.dh'+(new Date()).getTime() +'-',
-      evPrefix = 'highlight',
-      inEvs = 'mouseenter focusin',
-      outEvs = 'mouseleave focusout',
-      inEvRe = /(er|in)$/;
+(function($, undefined){
 
   $.fn.delayedHighlight = function (cfg) {
       cfg = $.extend({
             //delegate:     'li',
             className:    'focused',
             //sticky:       false,
+            //noBubble:     false,
             delay:        500,
             delayOut:     300,
             //clickToggles: false,
@@ -77,61 +71,79 @@
           cfg
         );
       var list = this,
-          dataSuffix = ts+(runCount++);
           className =  cfg.className,
-          delegate =   cfg.delegate  || 'li';
+          delegate =   cfg.delegate  || 'li',
+          evPrefix =   'highlight',
+          inTimeout,
+          outTimeout,
+          activeItem,
+          currentHover;
+
+      if ( cfg.noBubble )
+      {
+        list
+            .bind( evPrefix+'on '+evPrefix+'off', false ) // don't have the custom events bubble upwards from the list
+      }
+
+/**/
+      var highlightOn = function (e) {
+              var item = $(this);
+              clearTimeout( outTimeout );
+              (e.type.charAt(0)=='m')  &&  (currentHover = this);
+              inTimeout = setTimeout(function(){
+                  if ( !activeItem  ||  item[0] != activeItem[0] )
+                  {
+                    if ( activeItem )
+                    {
+                      activeItem
+                          .removeClass( className )
+                          .trigger( evPrefix+'off' );
+                    }
+                    activeItem = item;
+                    item
+                        .addClass( className )
+                        .trigger( evPrefix+'on' );
+                  }
+                }, e.delayOut || cfg.delay);
+            },
+
+          highlightOff = function (e) {
+              var isClick = e.type=='click';
+              clearTimeout( inTimeout );
+              if ( !cfg.sticky  ||  isClick )
+              {
+                (e.type.charAt(0)=='m')  &&  (currentHover = undefined);
+                outTimeout = setTimeout(function(){
+                    if ( activeItem  &&  activeItem[0] != currentHover  ||  isClick )
+                    {
+                      activeItem
+                          .removeClass( className )
+                          .trigger( evPrefix+'off' );
+                      activeItem = undefined;
+                    }
+                  }, e.delayOut || cfg.delayOut);
+              }
+            };
 
       list
-          .bind( evPrefix+'on '+evPrefix+'off', false )
-          .delegate(delegate, outEvs+(cfg.sticky?'':' '+inEvs), function (e) {
-              var inorout = inEvRe.test(e.type) ? 'out' : 'in';
-              clearTimeout( list.data( 'timeout-'+ inorout + dataSuffix ) );
-            })
-          .delegate(delegate, inEvs+(cfg.sticky?'':' '+outEvs)+(cfg.click?' click':''), function (e) {
-              var item = $(this),
-                  isClick =  e.type == 'click';
-                  isInEvent = cfg.sticky ? !isClick : inEvRe.test(e.type),
-                  isOutEvent = !isInEvent  &&  !isClick,
-                  inorout = isInEvent ? 'in' : 'out';
-
-              if ( (!isClick  &&  (!cfg.sticky || isInEvent))  ||  // always process if not click (and not sticky or just inEvent)
-                    // In case of a click, process only if...
-                    // ...the item is not currently focued (results in "highlighton")
-                    item[0]!=(list.data( 'item'+dataSuffix )||[])[0]  ||
-                    // ...or .clickToggles is true and the e.target isn't one of the .cancelOff elements... (results in "highlightoff")
-                    (cfg.clickToggles  &&  !$(e.target).closest(cfg.cancelOff||'', this)[0])
-                  )
-              {
-                var timeoutName = 'timeout-'+ inorout + dataSuffix;
-                clearTimeout( list.data( timeoutName ) );
-                list.data( timeoutName,
-                    setTimeout(
-                        function(){
-                            var activeItem = $( list.data( 'item'+dataSuffix ) ),
-                                isActive = activeItem[0] == item[0],
-                                remove;
-                            if ( !isActive  ||  !cfg.sticky  || (isClick && cfg.clickToggles) )
-                            {
-                              className  &&  activeItem.removeClass( className );
-                              activeItem.trigger( evPrefix+'off' );
-                              remove = true;
-                            }
-                            if ( !isActive  &&  !isOutEvent )
-                            {
-                              className && item.addClass( className );
-                              item.trigger( evPrefix+'on' );
-                              list.data( 'item'+dataSuffix, item );
-                              remove = false;
-                            }
-                            remove  &&  list.removeData( 'item'+dataSuffix );
-                          },
-                        isClick? 0 : isInEvent ? cfg.delay : cfg.delayOut
-                      )
-                  );
-              }
+          .delegate(delegate, 'mouseover focusin', highlightOn)
+          .delegate(delegate, 'mouseout focusout', highlightOff);
+      if ( cfg.click )
+      {
+        list
+          .delegate(delegate, 'click', function (e) {
+              var method = ( !activeItem  ||  this != activeItem[0] ) ?
+                                highlightOn:
+                            ( cfg.clickToggles  &&  !$(e.target).closest( cfg.cancelOff||'' )[0]  ) ?
+                                highlightOff:
+                                undefined;
+              method  &&  method.call( this, { type:'click', delayOut: 1 } );
             });
+      }
 
       return this;
+/**/
+
     };
 
 })(jQuery);
