@@ -47,10 +47,6 @@
             });
 
 
-  ------------------------------------------------------
-
-  TODO:
-    * add a (default on) 'sticky' option to allow non-sticky highlights
 
 
 */
