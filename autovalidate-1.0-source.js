@@ -276,8 +276,11 @@
 
   var _defaultCheck      = function ( v/*, w, lang */) { return !!v; },
       _defaultToggleCheck = function ( v/*, w, lang */) {
-          var inp = $(this);
-          return inp.parents('form').find('[name=' + inp.attr('name') + ']').is(':checked');
+          var inp = $(this),
+              checked = inp.parents('form').find('input[name=' + inp.attr('name') + ']:checked');
+          return !!checked[0]  &&  // at least one must be :checked
+                  // and at least one :checked must have a non-empty value
+                  !!checked.filter(function () { return !!$(this).val(); })[0];
         };
 
   // space for types
@@ -451,6 +454,8 @@
           // get this control's types (defaulting to fi_txt for everything except checkboxes)
           var tests =  (this.type == 'checkbox') ?
                             { 'fi_chk' : $.av.type['fi_chk'] }:
+                        (this.type == 'radio') ?
+                            { 'fi_rdo' : $.av.type['fi_rdo'] }:
                             { 'fi_txt' : $.av.type['fi_txt'] },
 
               wrap =      control.parents( '[class^="fi_"], [class*=" fi_"]' ).eq(0),  // jQuery 1.3 way: wrap.closest('[class^="fi_"], [class*=" fi_"]').attr('lang')
