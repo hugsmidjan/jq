@@ -2,9 +2,9 @@
 // ----------------------------------------------------------------------------------
 // jQuery.fn.visualImageMap v 1.0
 // ----------------------------------------------------------------------------------
-// (c) 2010 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+// (c) 2010 HugsmiÃ°jan ehf  -- http://www.hugsmidjan.is
 //  written by:
-//   * Már Örlygsson        -- http://mar.anomy.net
+//   * MÃ¡r Ã–rlygsson        -- http://mar.anomy.net
 // ----------------------------------------------------------------------------------
 
 (function($, visualImageMap, undefined){

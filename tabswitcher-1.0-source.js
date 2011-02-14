@@ -480,7 +480,8 @@
                 defaultId:  'tab1',
                 tabContSel: 'ul',
                 titleSel:   'h1, h2, h3',
-                boxTempl:   '<div class="tab-box"><ul class="tabs" /></div>',
+                boxClass:   'tab-box',
+                boxTempl:   '<div><ul class="tabs" /></div>',
                 tabTempl:   '<li><a href="#%{id}" title="%{title}">%{title}</a></li>',
                 makeTab:    function(tabPane, conf){
                                 return $(  $.inject(conf.tabTempl, {
@@ -495,7 +496,7 @@
         tabPanes = this;
     if (tabPanes.length >= conf.min)
     {
-      tabBox = $( conf.boxTempl );
+      tabBox = $( conf.boxTempl ).addClass( conf.boxClass );
       var tabList = conf.tabContSel ? $(conf.tabContSel, tabBox) : tabBox,
           paneParent = tabPanes.eq(0).parent(),
           refLang = paneParent.closest('[lang]').attr('lang') || '';
