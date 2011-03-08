@@ -90,6 +90,7 @@
     /**/
 
       methods = { // inside method functions `this` is the fickle element jQuery collection.
+
           open: function (data, extras) {
               var cfg = data.c;
               cfg.opener = (extras && extras.opener) || cfg.opener;
