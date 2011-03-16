@@ -7,61 +7,101 @@
 //  * Valur Sverrisson
 // ----------------------------------------------------------------------------------
 
-// Based on http://coda.co.za/content/projects/jquery.twitter/jquery.twitter.js
-//   and uses http://twitter.com/javascripts/blogger.js
+// Uses code from http://twitter.com/javascripts/blogger.js
 
-// BEGIN: http://twitter.com/javascripts/blogger.js
-function twitterCallback2(twitters) {
-  var statusHTML = [];
-  for (var i=0; i<twitters.length; i++){
-    var username = twitters[i].user.screen_name,
-        status = twitters[i].text.replace(/((https?|s?ftp|ssh)\:\/\/[^"\s\<\>]*[^.,;'">\:\s\<\>\)\]\!])/g, function(url) {
-      return '<a href="'+url+'">'+url+'</a>';
-    }).replace(/\B@([_a-z0-9]+)/ig, function(reply) {
-      return  reply.charAt(0)+'<a href="http://twitter.com/'+reply.substring(1)+'">'+reply.substring(1)+'</a>';
-    });
-    statusHTML.push('<li><span>'+status+'</span> <a class="timestamp" href="http://twitter.com/'+username+'/statuses/'+twitters[i].id+'">'+relative_time(twitters[i].created_at)+'</a></li>');
-  }
-  document.getElementById('twitter_update_list').innerHTML = statusHTML.join('');
-}
-
-function relative_time(time_value) {
-  var values = time_value.split(" ");
-  time_value = values[1] + " " + values[2] + ", " + values[5] + " " + values[3];
-  var parsed_date = Date.parse(time_value),
-      relative_to = (arguments.length > 1) ? arguments[1] : new Date(),
-      delta = parseInt((relative_to.getTime() - parsed_date) / 1000, 10);
-  delta = delta + (relative_to.getTimezoneOffset() * 60);
-
-  if (delta < 60) {
-    return 'Fyrir minna en mínútu síðan';
-  } else if(delta < 120) {
-    return 'Fyrir um mínútu síðan';
-  } else if(delta < (60*60)) {
-    return 'Fyrir um' + (parseInt(delta / 60, 10)).toString() + ' mínútum síðan';
-  } else if(delta < (120*60)) {
-    return 'Fyrir um klukkutíma síðan';
-  } else if(delta < (24*60*60)) {
-    return 'Fyrir um ' + (parseInt(delta / 3600, 10)).toString() + ' klukkutímum síðan';
-  } else if(delta < (48*60*60)) {
-    return 'Fyrir 1 degi';
-  } else {
-    var daysago = (parseInt(delta / 86400, 10)).toString();
-    if ( daysago.charAt(daysago.length - 1) === '1' ) {
-      return 'Fyrir ' + daysago + ' degi síðan';
-    } else {
-      return 'Fyrir ' + daysago + ' dögum síðan';
-    }
-  }
-}
-// END: http://twitter.com/javascripts/blogger.js
-
+//create global variables
+window.twitterCallback2 = '';
+window.relative_time = '';
 
 (function($) {
+
+  $.twitterize = {
+    defaults: {
+      userName: null,
+      numTweets: 5,
+      linkToProfile: false,
+      tweetsToDisplay : 'user_timeline' // See: http://dev.twitter.com/doc/get/statuses/
+    },
+    i18n: {
+      is: {
+        loaderText: 'Hleður tístum...',
+        about: 'Fyrir um ',
+        ltmin: 'Fyrir minna en mínútu síðan',
+        minago: 'um mínútu síðan',
+        minsago: ' mínútum síðan',
+        hrago: 'klukkutíma síðan',
+        hrsago: ' klukkutímum síðan',
+        dayago: ' degi síðan',
+        daysago: ' dögum síðan'
+      },
+      en: {
+        loaderText: 'Loading tweets...',
+        about: 'About ',
+        ltmin: 'less than a minute ago',
+        minago: 'a minute ago',
+        minsago: ' minutes ago',
+        hrago: 'an hour ago',
+        hrsago: ' hours ago',
+        dayago: ' day ago',
+        daysago: ' days ago'
+      }
+    }
+  };
+
+  // BEGIN: http://twitter.com/javascripts/blogger.js
+  twitterCallback2 = function(twitters) {
+    var statusHTML = [],
+        i=0;
+    for (i; i<twitters.length; i++){
+      var username = twitters[i].user.screen_name,
+          status = twitters[i].text.replace(/((https?|s?ftp|ssh)\:\/\/[^"\s\<\>]*[^.,;'">\:\s\<\>\)\]\!])/g, function(url) {
+        return '<a href="'+url+'">'+url+'</a>';
+      }).replace(/\B@([_a-z0-9]+)/ig, function(reply) {
+        return  reply.charAt(0)+'<a href="http://twitter.com/'+reply.substring(1)+'">'+reply.substring(1)+'</a>';
+      });
+      statusHTML.push('<li><span>'+status+'</span> <a class="timestamp" href="http://twitter.com/'+username+'/statuses/'+twitters[i].id+'">'+relative_time(twitters[i].created_at)+'</a></li>');
+    }
+    document.getElementById('twitter_update_list').innerHTML = statusHTML.join('');
+  };
+
+  relative_time = function(time_value) {
+    var values = time_value.split(' '),
+        i18n = $.twitterize.i18n[$.lang()] || $.twitterize.en;
+    time_value = values[1] + ' ' + values[2] + ', ' + values[5] + " " + values[3];
+    var parsed_date = Date.parse(time_value),
+        relative_to = (arguments.length > 1) ? arguments[1] : new Date(),
+        delta = parseInt((relative_to.getTime() - parsed_date) / 1000, 10);
+    delta = delta + (relative_to.getTimezoneOffset() * 60);
+
+    if (delta < 60) {
+      return i18n.ltmin;
+    } else if(delta < 120) {
+      return i18n.about + i18n.minago;
+    } else if(delta < (60*60)) {
+      return i18n.about + (parseInt(delta / 60, 10)).toString() + i18n.minsago;
+    } else if(delta < (120*60)) {
+      return i18n.about + i18n.hrago;
+    } else if(delta < (24*60*60)) {
+      return i18n.about + (parseInt(delta / 3600, 10)).toString() + i18n.hrsago;
+    } else if(delta < (48*60*60)) {
+      return i18n.about + '1' + i18n.dayago;
+    } else {
+      var daysago = (parseInt(delta / 86400, 10)).toString();
+      if ( daysago.charAt(daysago.length - 1) === '1' ) {
+        return i18n.about + daysago + i18n.dayago;
+      } else {
+        return i18n.about + daysago + i18n.daysago;
+      }
+    }
+  };
+  // END: http://twitter.com/javascripts/blogger.js
   
+
   $.fn.twitterize = function(o) {
 
-    var o = $.extend({}, $.fn.twitterize.defaults, o);
+    var i18n = $.twitterize.i18n[$.lang()] || $.twitterize.en,
+        dc = $.twitterize.defaults;
+    o = $.extend({}, dc, i18n, o);
 
     return this.each(function() {
         var c = $(this),
@@ -75,16 +115,11 @@ function relative_time(time_value) {
           c.append(profileLinkHTML);
         }
 
-        $.getScript('http://twitter.com/statuses/user_timeline/'+ o.userName +'.json?callback=twitterCallback2&count='+ o.numTweets, function() { preload.remove() });
+        $.getScript('http://twitter.com/statuses/'+ o.tweetsToDisplay +'/'+ o.userName +'.json?callback=twitterCallback2&count='+ o.numTweets, function() { preload.remove(); });
         
       });
   };
 
-  $.fn.twitterize.defaults = {
-      userName: null,
-      numTweets: 5,
-      loaderText: "Hleður tístum...",
-      linkToProfile: false
-    };
+
 
 })(jQuery);
