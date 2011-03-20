@@ -2,7 +2,7 @@
 // ----------------------------------------------------------------------------------
 // jQuery.fn.virtualBrowser v 1.1
 // ----------------------------------------------------------------------------------
-// Copyright 2010
+// Copyright 2011
 //   Hugsmiðjan ehf. (http://www.hugsmidjan.is)  &
 //   Már Örlygsson  (http://mar.anomy.net/)
 //
@@ -30,11 +30,16 @@
     * url:           null,                      // String|linkElm|formElm|collection: Initial URL for the frame (Uses the 'href' or 'action' attributes in case elements were passed.)
     * params:        null,                      // Object/String: Persistent request data (as in $.get(url, data, callback) ) that gets added to *every* 'load' request.
     * noCache:       null,                      // Boolean: Controls the $.ajax() cache option
+    * selector:      '>*',                      // String selector to quickly filter the incoming DOM just before injecting it into the virtualBrowser container/body
+                                                // NOTE: the `selector` is not used if a VBload handler has already populated `request.resultDOM`.
     * onBeforeload:  null,                      // Function: Shorthand for .bind('VBbeforeload' handler);
     * onLoad:        null,                      // Function: Shorthand for .bind('VBload', handler);
     * onLoaded:      null,                      // Function: Shorthand for .bind('VBloaded', handler);
+    * onDisengaged:  null,                      // Function: Shorthand for .bind('VBdisengaged', handler);
     * loadmsgElm:    '<div class="loading" />'  // String/Element: Template for a loading message displayed while loading a URL
     * loadmsgMode:   'none',                    // String: Options: (none|overlay|replace)  // none == no load message; overlay == overlays the old content with the loadmsg; replace == removes the old content before displaying the loadmsg
+    * disengage:     false,                     // Boolean: Sugar method. True triggers the 'disengage' method as soon as the next VBloaded has finished.
+
 
   Localization:
     * jQuery.fn.virtualBrowser.i18n['lang'] = {
@@ -87,12 +92,20 @@
                               // Uncancellable!
                             });
 
+    * 'VBdisengaged'   // Triggered when the 'disengage' method has finished running (only unbinding VBdisengaged events happens after)
+                      //  .bind('VBdisengaged', function (e) {
+                              this  // the virtualBrowser body element
+                              // NOTE: config and other data has been removed at this point.
+                              // Uncancellable!
+                            });
+
 
   Methods:
-    * 'load'    // .virtualBrowser('load', url|linkElm|formElm|collection);  // loads an url (or the 'href' or 'action' attributes of an element) inside the virtualBrwoser 'body' element. Triggers the normal 'vbrowserpreload' and 'vbrowserload' events
-    * 'data'    // syntactic sugar method that returns .data('virtualBrowser') - an object containing:
-                //    cfg:          // the config object for his virtualBrowser
-                //    lastRequest:  // the request object used in the last 'load' action (updated just *before* 'VBloaded' is triggered)
+    * 'load'      // .virtualBrowser('load', url|linkElm|formElm|collection);  // loads an url (or the 'href' or 'action' attributes of an element) inside the virtualBrwoser 'body' element. Triggers the normal 'vbrowserpreload' and 'vbrowserload' events
+    * 'data'      // syntactic sugar method that returns .data('virtualBrowser') - an object containing:
+                  //    cfg:          // the config object for his virtualBrowser
+                  //    lastRequest:  // the request object used in the last 'load' action (updated just *before* 'VBloaded' is triggered)
+    * 'disengage' // .virtualBrowser('disengage');  // Removes all VB* events, removes virtualBrowser data and config, but leaves the DOM otherwise intact.
 
 
   TODO/ideas:
@@ -149,6 +162,7 @@
       _passThrough        = 'passThrough',         // ...to save bandwidth
       _virtualBrowser     = 'virtualBrowser',      // ...to save bandwidth
       _VBbeforeload       = 'VBbeforeload',        // ...to save bandwidth
+      _VBdisengaged       = 'VBdisengaged',        // ...to save bandwidth
       _VBload             = 'VBload',              // ...to save bandwidth
       _VBloaded           = 'VBloaded',            // ...to save bandwidth
       _replace            = 'replace',             // ...to save bandwidth
@@ -157,6 +171,7 @@
 
 
       _methods = {
+
           'load': function (url) {
               var elm = typeof url != 'string' ? $(url) : undefined,
                   body = $(this),
@@ -167,6 +182,11 @@
                   loadmsgMode = config.loadmsgMode,
                   request = { elm: elm };
 
+              if ( VBdata.$$empty )
+              {
+                request.isFirst = true;
+                delete VBdata.$$empty;
+              }
               if (elm)
               {
                 url = elm.attr('href');
@@ -231,6 +251,11 @@
                                     request.result = $.injectBaseHrefToHtml(xhr.responseText, request.url);
                                     request.xhr = xhr;
                                     request.status = status;
+                                    if ( config.selector )
+                                    {
+                                      request.resultDOM = $.getResultBody( request.result ).find( config.selector );
+                                      ;;;alert( request.resultDOM );
+                                    }
                                     evLoad = $.Event(_VBload);
                                     evLoad[_stopPropagation]();
                                     body.trigger(evLoad, request);
@@ -239,7 +264,7 @@
                                       evLoaded = $.Event(_VBloaded);
                                       evLoaded[_stopPropagation]();
                                       config.loadmsgElm.detach();
-                                      request.resultDOM = request.resultDOM || $.getResultBody(request.result).contents();
+                                      request.resultDOM = request.resultDOM  ||  $.getResultBody( request.result ).contents();
                                       body
                                           .empty()
                                           .append( request.resultDOM );
@@ -249,6 +274,10 @@
                                       delete request.resultDOM;
                                       delete request.result;
                                       delete request.xhr;
+                                    }
+                                    if ( config.disengage )
+                                    {
+                                      body[_virtualBrowser]('disengage');
                                     }
                                   }
                       });
@@ -262,11 +291,24 @@
               return evBeforeload;
             },
 
+
           'data': function () {
               return $(this).data(_virtualBrowser);
+            },
+
+          'disengage': function () {
+              var body = $(this);
+              body
+                  .removeData( _virtualBrowser )
+                  .unbind( 'click submit', _handleHttpRequest)
+                  .unbind( _VBload +' '+ _VBloaded +' '+ _VBbeforeload )
+                  .trigger( _VBdisengaged )
+                  .unbind( _VBdisengaged );
             }
 
         },
+
+
 
 
       _handleHttpRequest = function (e) {
@@ -304,15 +346,19 @@
 
 
       fnVB = $.fn[_virtualBrowser] = function (config, args) {
-          var confIsString = typeof config == 'string';
+          var bodies = this,
+              confIsString = typeof config == 'string';
           if (confIsString)
           {
             var method = _methods[config],
                 retValue;
-            method  &&  this.each(function(i){
+            if ( method )
+            {
+              bodies.each(function(i){
                   var methodRet = method.apply( this, [].concat(args) );  // Normalize `args` into an array. ([].concat() does that :-)
                   if (!i) { retValue = methodRet; }
                 });
+            }
             if ( retValue !== undefined )
             {
               return retValue;
@@ -320,37 +366,40 @@
           }
           else
           {
-            config =  $.extend({}, fnVB.defaults, config);
-            args && (config.url = args);
-            var body = this,
-                loadmsgElm = config.loadmsgElm || '<div class="loading" />',
-                // Automatically sniff the document language and choose a loading message accordingly - defaulting on English
-                loadmsg = (fnVB.i18n[body.closest('*[lang]').attr('lang')] || {}).loading || fnVB.i18n.en.loading;
+            bodies
+                .each(function () {
+                    var body = $(this),
+                        cfg = $.extend({}, fnVB.defaults, config);
+                    args && (cfg.url = args);
+                    var loadmsgElm = cfg.loadmsgElm || '<div class="loading" />',
+                        // Automatically sniff the document language and choose a loading message accordingly - defaulting on English
+                        loadmsg = (fnVB.i18n[body.closest('*[lang]').attr('lang')] || {}).loading || fnVB.i18n.en.loading;
 
-            if (loadmsgElm.charAt)
-            {
-              loadmsgElm = loadmsgElm.replace(/%\{msg\}/g, loadmsg);
-            }
-            loadmsgElm = config.loadmsgElm = $(loadmsgElm);
-            if ( !loadmsgElm.text() )
-            {
-              loadmsgElm.append(loadmsg);
-            }
-
-            body
-                .data(_virtualBrowser, { cfg: config })
+                    if (loadmsgElm.charAt)
+                    {
+                      loadmsgElm = loadmsgElm.replace(/%\{msg\}/g, loadmsg);
+                    }
+                    loadmsgElm = cfg.loadmsgElm = $(loadmsgElm);
+                    if ( !loadmsgElm.text() )
+                    {
+                      loadmsgElm.append(loadmsg);
+                    }
+                    body
+                        .data(_virtualBrowser, { cfg: cfg, $$empty:1 })
+                  })
                 // Depend on 'click' events bubbling up to the virtualBrowser element to allow event-delegation
                 // Thus, we assume that any clicks who's bubbling were cancelled should not be handled by virtualBrowser.
                 .bind( 'click submit', _handleHttpRequest);
 
-            config.onLoad  &&  body.bind(_VBload, config.onLoad);
-            config.onLoaded  &&  body.bind(_VBloaded, config.onLoaded);
-            config.onBeforeload  &&  body.bind(_VBbeforeload, config.onBeforeload);
+            config.onLoad        &&  bodies.bind(_VBload,       config.onLoad);
+            config.onLoaded      &&  bodies.bind(_VBloaded,     config.onLoaded);
+            config.onBeforeload  &&  bodies.bind(_VBbeforeload, config.onBeforeload);
+            config.onDisengaged  &&  bodies.bind(_VBdisengaged, config.onDisengaged);
             config.params = typeof config.params == 'string' ?
                                 config.params:
                                 $.param(config.params||{});
 
-            config.url  &&  body[_virtualBrowser]('load', config.url)
+            config.url  &&  bodies[_virtualBrowser]('load', config.url)
           }
           return this;
         };
@@ -360,11 +409,14 @@
       //url:          null,                     // String: Initial URL for the frame
       //noCache:      false,                    // Boolean: Controls the $.ajax() cache option
       //params:       null,                     // Object/String: Persistent request data (as in $.get(url, data, callback) ) that gets added to *every* 'load' request.
+      //selector:     '>*',                     // String selector to quickly filter the incoming DOM before injecting it into the virtualBrowser container/body  
       //onBeforeload: null,                     // Function: Shorthand for .bind('VBbeforeload' handler);
       //onLoad:       null,                     // Function: Shorthand for .bind('VBload' handler);
       //onLoaded:     null,                     // Function: Shorthand for .bind('VBloaded' handler);
+      //onDisengaged:  null,                     // Function: Shorthand for .bind('VBdisengaged' handler);
       //loadmsgElm:  '<div class="loading" />', // String/Element: Template for a loading message displayed while loading a URL
       loadmsgMode:    'none'                    // String: available: "none", "overlay" & "replace"
+      //disengage:    false,                    // Boolean: Sugar method. True triggers the 'disengage' method as soon as the next VBloaded has finished.
     };
 
   fnVB.i18n = {
