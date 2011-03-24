@@ -45,7 +45,7 @@
     cloneFieldset : function ( block, num, cfg ) {
       var _oldIe = $.browser.msie && parseInt($.browser.version, 10) < 8,
           _oldElms = _oldIe && block.find('*'), _newField, /* MSIE 6&7 hack - because of field-cloning expando bug of doom.  (See also: http://www.quirksmode.org/dom/domform.html)  */
-          _new = block.clone(true),
+          _new = block.clone(),
           _elms = _new.find('*'),
           i = 0, _elm, _attr, _newAttr, _nameMatch;
       
