@@ -22,7 +22,8 @@
       addBtnClass      : 'addrow',
       cloneClass       : 'clone',
       rowNameSel       : 'h2,h3,legend', //hægt að nota elements eða attributes
-      showSpeed        : 'fast'          // 'fast', 'slow', integer - 0 for instant
+      showSpeed        : 'fast',          // 'fast', 'slow', integer - 0 for instant
+      afterClone       : function(newBlock) {} // callback funtion with refrence to newly cloned block
     },
     i18n: {
       'en' : {
@@ -137,6 +138,7 @@
                 
                 _cloneBlock.hide().insertAfter(_lastClone).slideDown(_cfg.showSpeed);
                 _lastClone = _cloneBlock;
+                _cfg.afterClone(_cloneBlock);
                 e.preventDefault();
               })
             [_btnPlace](_cloneBlock);
