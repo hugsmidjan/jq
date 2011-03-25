@@ -112,7 +112,7 @@
             for (var key in cfg.patterns)
             {
               var _patternObj = cfg.patterns[key] || {},
-                  _check = _patternObj.check || _patternObj;
+                  _check = _patternObj.check || _patternObj,
                   _className = $.isFunction(_check) ? _check(linkElm, key) : null;
 
               if (_className || _check.test(_href))
