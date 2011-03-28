@@ -36,6 +36,7 @@
     * selector:      '>*',                      // String selector to quickly filter the incoming DOM just before injecting it into the virtualBrowser container/body
                                                 // NOTE: the `selector` is not used if a VBload handler has already populated `request.resultDOM`.
     * onBeforeload:  null,                      // Function: Shorthand for .bind('VBbeforeload' handler);
+    * onError:       null,                      // Function: Shorthand for .bind('VBerror', handler);
     * onLoad:        null,                      // Function: Shorthand for .bind('VBload', handler);
     * onLoaded:      null,                      // Function: Shorthand for .bind('VBloaded', handler);
     * onDisengaged:  null,                      // Function: Shorthand for .bind('VBdisengaged', handler);
@@ -65,6 +66,20 @@
                               // cancel caching of the request by explicitly setting `request.noCache = true;`
                               // e.passThrough = true;  // Instructs the virtualBrowser to disable any click events and pass the click through to the web browser
                             });
+
+    * 'VBerror'       // Triggered when the ajax request returns an error.
+                      //  .bind('VBerror', function (e, request) {
+                              this  // the virtualBrowser body element
+                              $(this).data('virtualBrowser').cfg // config object
+                              $(this).data('virtualBrowser').lastRequest // the *current* request object
+                              request  // Object: {
+                                       // ...all the same properties as the 'VBload' event
+                                       // ...except `result` and `resultDOM` are empty
+                                       // }
+                              // Set request.resultDOM, or request.result with custom error DOM to trigger normal processing by VBload and VBloaded...
+                              // ...otherwise nothing will happen...
+                            });
+
     * 'VBload'        // Triggered after the $.ajax request has completed, *before* any DOM injection has taken place
                       //  .bind('VBload', function (e, request) {
                               this  // the virtualBrowser body element
@@ -95,7 +110,7 @@
                               // Uncancellable!
                             });
 
-    * 'VBdisengaged'   // Triggered when the 'disengage' method has finished running (only unbinding VBdisengaged events happens after)
+    * 'VBdisengaged'  // Triggered when the 'disengage' method has finished running (only unbinding VBdisengaged events happens after)
                       //  .bind('VBdisengaged', function (e) {
                               this  // the virtualBrowser body element
                               // NOTE: config and other data has been removed at this point.
@@ -160,7 +175,7 @@
 
   var _docLoc            = document.location,
       _isDefaultPrevented = 'isDefaultPrevented',  // ...to save bandwidth
-      _preventDefault     = 'preventDefault',     // ...to save bandwidth
+      _preventDefault     = 'preventDefault',      // ...to save bandwidth
       _stopPropagation    = 'stopPropagation',     // ...to save bandwidth
       _passThrough        = 'passThrough',         // ...to save bandwidth
       _virtualBrowser     = 'virtualBrowser',      // ...to save bandwidth
@@ -169,6 +184,8 @@
       _VBload             = 'VBload',              // ...to save bandwidth
       _VBloaded           = 'VBloaded',            // ...to save bandwidth
       _replace            = 'replace',             // ...to save bandwidth
+      _resultDOM          = 'resultDOM',           // ...to save bandwidth
+      _result             = 'result',              // ...to save bandwidth
       _protocolSlash      = /^(https?:)?\/\//,
 
 
@@ -201,7 +218,7 @@
               if (url)
               {
                 evBeforeload[_stopPropagation]();
-                body.trigger(evBeforeload, request);
+                body.trigger(evBeforeload, [request]);
                 // trap external (non-AJAXable) URLs or links targeted at another window and set .passThrough as true
                 if (  // if passThrough is already set, then there's not need for further checks, and...
                       !evBeforeload[_passThrough] &&
@@ -251,7 +268,7 @@
                       }
                       delete VBdata._clicked
                     }
-                    params = params.replace(/^&+/,'');
+                    params = params.replace(/^&+|&+$/g,'');
                     // raise a flag if we need to submit via an iframe...
                     var mp = 'multipart/form-data';
                     evBeforeload._doIframeSubmit =  !!elm.find('input:file')[0]  ||  elm.attr('enctype') == mp  ||  elm.attr('encoding') == mp;
@@ -270,33 +287,45 @@
                           data: params,
                           type: method,
                           cache: !noCache,
-                          complete:  function (xhr, status) {
-                                        request.result = $.injectBaseHrefToHtml(xhr.responseText, request.url);
+                          complete: function (xhr, status) {
                                         request.xhr = xhr;
-                                        request.status = status;
-                                        if ( config.selector )
+                                        request.status = status || 'error';
+                                        var isError = !status || status == 'error';
+                                        if ( isError )
                                         {
-                                          request.resultDOM = $.getResultBody( request.result ).find( config.selector );
+                                          body.trigger('VBerror', [request]);
                                         }
-                                        evLoad = $.Event(_VBload);
-                                        evLoad[_stopPropagation]();
-                                        body.trigger(evLoad, request);
-                                        if ( !evLoad[_isDefaultPrevented]() )
+                                        else
                                         {
-                                          evLoaded = $.Event(_VBloaded);
-                                          evLoaded[_stopPropagation]();
-                                          config.loadmsgElm.detach();
-                                          request.resultDOM = request.resultDOM  ||  $.getResultBody( request.result ).contents();
-                                          body
-                                              .empty()
-                                              .append( request.resultDOM );
-                                          VBdata.lastRequest = request;
-                                          body.trigger(evLoaded, request);
-                                          // Throw out unneccessary properties that we don't want to store. (Saves memory among other things.)
-                                          delete request.resultDOM;
-                                          delete request.result;
-                                          delete request.xhr;
+                                          request[_result] = $.injectBaseHrefToHtml(xhr.responseText||'', request.url);
                                         }
+                                        // allow VBerror handlers to set custom .result(DOM) and then process it normally.
+                                        if ( request[_result]  &&  config.selector )
+                                        {
+                                          request[_resultDOM] = $.getResultBody( request[_result] ).find( config.selector );
+                                        }
+                                        if ( !isError  ||  request[_result]  ||  request[_resultDOM] )
+                                        {
+                                          evLoad = $.Event(_VBload);
+                                          evLoad[_stopPropagation]();
+                                          body.trigger(evLoad, [request]);
+                                          if ( !evLoad[_isDefaultPrevented]() )
+                                          {
+                                            evLoaded = $.Event(_VBloaded);
+                                            evLoaded[_stopPropagation]();
+                                            config.loadmsgElm.detach();
+                                            request[_resultDOM] = request[_resultDOM]  ||  $.getResultBody( request[_result] ).contents();
+                                            body
+                                                .empty()
+                                                .append( request[_resultDOM] );
+                                            VBdata.lastRequest = request;
+                                            body.trigger(evLoaded, [request]);
+                                            // Throw out unneccessary properties that we don't want to store. (Saves memory among other things.)
+                                            delete request[_resultDOM];
+                                            delete request[_result];
+                                          }
+                                        }
+                                        delete request.xhr;
                                         if ( config.disengage )
                                         {
                                           body[_virtualBrowser]('disengage');
@@ -321,13 +350,24 @@
                                 fakeXHR:      'iframe',
                                 responseText: '<html>'+iframe.contents().find('html').html()+'</html>'
                               }, status);
-                            elm.attr('target', oldTarget);
+                            elm.attr({
+                                target: oldTarget,
+                                action: oldAction
+                              });
+                              
                             // timeout allows the "loading" thread to finish.
                             // (Otherwise tab-loading indicator keeps spinning idefinitely (in Firefox at least).)
                             setTimeout(function(){ iframe.remove(); }, 0);
                           },
-                        oldTarget = elm.attr('target');
+                        oldAction = elm.attr('action') || '',
+                        oldTarget = elm.attr('target') || '';
                     elm.attr('target', iframeName);
+                    if ( config.params )
+                    {
+                      elm.attr('action',
+                          oldAction + (/\?/.test(oldAction)?'&':'?') + config.params
+                        );
+                    }
                     iframe.bind('load', triggerComplete);
                   }
                 }
@@ -366,7 +406,31 @@
           {
             if ( !e[_isDefaultPrevented]() )
             {
-              if ( !elm.is('input, button') ) // normal link-click or submit event
+              if ( elm.is('input, button') )
+              {
+                if ( !elm[0].disabled )
+                {
+                  // make note of which submit button was clicked.
+                  var VBdata = $(this).data(_virtualBrowser);
+                  if ( elm.is(':image') )
+                  {
+                    var offs = elm.offset();
+                    VBdata._clicked = {
+                        elm: elm,
+                        X:   e.pageX - offs.left,
+                        Y:   e.pageY - offs.top
+                      };
+                  }
+                  else if ( elm.is('[name]') )
+                  {
+                    VBdata._clicked = { elm: elm };
+                  }
+                  // in case the 'submit' event on the form gets cancelled we need to guarantee that this value gets removed.
+                  // A timeout should (theoretically at least) accomplish that.
+                  setTimeout(function(){ delete VBdata._clicked; }, 0);
+                }
+              }
+              else // normal link-click or submit event
               {
                 var bfloadEv = _methods['load'].call(this, elm);
                 if ( !bfloadEv[_passThrough] )
@@ -374,21 +438,6 @@
                   !bfloadEv._doIframeSubmit  &&  e[_preventDefault]();
                   bfloadEv.isPropagationStopped()  &&  e[_stopPropagation]();
                 }
-              }
-              else if ( !elm[0].disabled )
-              {
-                // make note of which submit button was clicked.
-                var VBdata = $(this).data(_virtualBrowser);
-                    _clicked = VBdata._clicked = { elm:elm };
-                if ( elm.is(':image') )
-                {
-                  var offs = elm.offset();
-                  _clicked.X = e.pageX - offs.left;
-                  _clicked.Y = e.pageY - offs.top;
-                }
-                // in case the 'submit' event on the form gets cancelled we need to guarantee that this value gets removed.
-                // A timeout should (theoretically at least) accomplish that.
-                setTimeout(function(){ delete VBdata._clicked; }, 0);
               }
             }
           }
@@ -417,6 +466,14 @@
           }
           else
           {
+            $.each(['Beforeload','Error','Load','Loaded','Disengage'], function (onType, type) {
+                onType = 'on'+type;
+                config[onType]  &&  bodies.bind( 'VB'+type.toLowerCase(), config[onType] );
+                delete config[onType];
+              });
+            config.params = typeof config.params == 'string' ?
+                                config.params:
+                                $.param(config.params||{});
             bodies
                 .each(function () {
                     var body = $(this),
@@ -441,14 +498,6 @@
                 // Depend on 'click' events bubbling up to the virtualBrowser element to allow event-delegation
                 // Thus, we assume that any clicks who's bubbling were cancelled should not be handled by virtualBrowser.
                 .bind( 'click submit', _handleHttpRequest);
-
-            config.onLoad        &&  bodies.bind(_VBload,       config.onLoad);
-            config.onLoaded      &&  bodies.bind(_VBloaded,     config.onLoaded);
-            config.onBeforeload  &&  bodies.bind(_VBbeforeload, config.onBeforeload);
-            config.onDisengaged  &&  bodies.bind(_VBdisengaged, config.onDisengaged);
-            config.params = typeof config.params == 'string' ?
-                                config.params:
-                                $.param(config.params||{});
 
             config.url  &&  bodies[_virtualBrowser]('load', config.url)
           }
