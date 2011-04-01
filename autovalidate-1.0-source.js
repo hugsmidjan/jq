@@ -279,8 +279,8 @@
           var inp = $(this),
               checked = inp.parents('form').find('input[name=' + inp.attr('name') + ']:checked');
           return !!checked[0]  &&  // at least one must be :checked
-                  // and at least one :checked must have a non-empty value
-                  !!checked.filter(function () { return !!$(this).val(); })[0];
+                  // and if these are :radios, then the :checked must have a non-empty value
+                  (!checked.is(':radio') || !!checked.filter(function () { return !!$(this).val(); })[0]);
         };
 
   // space for types

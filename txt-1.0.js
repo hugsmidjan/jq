@@ -1,0 +1,3 @@
+// encoding: utf-8
+// $.txt 1.0  -- (c) 2011 Hugsmiðjan ehf. 
+(function(b){var d={is:{localeCode:'is_IS'},en:{localeCode:'en_US'}},c=[b('html').attr('lang')||'en'],i=function(a){return a!=1};b.txt=function(a,g){return d[e(g)][a]||d.en[a]||a};b.extend(b.txt,{n:function(a,g,j,h){var k=d[e(h)]||d.en,l=k.isPlural||i,f=l(j),m=f>1?'-'+f:'';return b.txt(arguments[f?1:0]+m,h)},getLang:function(a){if(a){if(typeof a!=='string'){a=((a.closest?a:b(a)).closest('[lang]').attr('lang')||'').substr(0,2)}else if(a.length>2){a=a.substr(0,2)}}return a||c[0]},add:function(a){b.extend(true,d,a)},setLang:function(a){c.unshift(e(a))},unsetLang:function(){if(c[1]){c.shift()}},setDefaultLang:function(a){c[c.length-1]=e(a)}});var e=b.txt.getLang}(jQuery));
