@@ -44,10 +44,11 @@
             _jQthis = $(_this);
         if ( !_jQthis.data('labelizor') ) // avoid processing the same input more than once.
         {
-          var _html5support = _this.placeholder,
-              _labelText = _jQthis.attr('placeholder');
+          var _labelText = _jQthis.attr('placeholder');
 
-          _jQthis.data('labelizor', true);
+          _jQthis
+              .removeAttr('placeholder')
+              .data('labelizor', true);
 
           if ( _labelText  ||  ((_this.id || _this.title )  &&  _jQthis.is(':text, :password, textarea')) )
           {
@@ -81,29 +82,25 @@
             {
               _label.addClass(_hideClass);
             }
+            _jQthis
+                .attr('title', _inpTitle||_labelText)
+                .bind('focus', _removeLabelValue)
+                .bind('blur', function (e) {
+                    if (!_jQthis.val())
+                    {
+                      _jQthis.val(_labelText).addClass(_blurClass);
+                    }
+                  });
 
-            if ( !_html5support )
+            if (_labelText  &&  (!_this.value || _this.value == _labelText))
             {
               _jQthis
-                  .attr('title', _inpTitle||_labelText)
-                  .bind('focus', _removeLabelValue)
-                  .bind('blur', function (e) {
-                      if (!_jQthis.val())
-                      {
-                        _jQthis.val(_labelText).addClass(_blurClass);
-                      }
-                    });
-
-              if (_labelText  &&  !_this.getAttribute('value')  &&  (!_this.value || _this.value == _labelText))
-              {
-                _jQthis
-                    .val(_labelText)
-                    .addClass(_blurClass);
-              }
-
-              $(_this.form)
-                  .bind('submit', _removeLabelValue);
+                  .val(_labelText)
+                  .addClass(_blurClass);
             }
+
+            $(_this.form)
+                .bind('submit', _removeLabelValue);
           }
 
         }
