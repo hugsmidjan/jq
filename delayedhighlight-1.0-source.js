@@ -18,11 +18,13 @@
   Usage:
 
       jQuery('ul').delayedHighlight({
-          delegate:     'li',             // the elements to highlight
+          delegate:     'li',             // the elements to highlight ... 
+                                          // Set `delegate` to `''` or `null` to highlight the collection itself.
           className:    'focused',        // for highlighted elements
           delay:        500,              // ms, until highlighton
           delayOut:     300,              // ms, until highlightoff (applies when sticky !== true)
           sticky:       false,            // when sticky, highlight stays on until a new element is highlighted (unless clickToggles is set)
+          noBubble:     false,            // set to `true` to prevent the custom events from bubbling upwards from the list container
           click:        false,            // allow clicks to set highlight on without delay
           clickToggles: false,            // true makes clicks toggle the highlight on/off/on/off/etc.
           cancelOff:    'a, area, :input' // exceptions for click-triggered `highlightoff` when `clickToggles` is set
@@ -56,19 +58,19 @@
       cfg = $.extend({
             //delegate:     'li',
             className:    'focused',
-            //sticky:       false,
-            //noBubble:     false,
             delay:        500,
             delayOut:     300,
-            //clickToggles: false,
+            //sticky:       false,
+            //noBubble:     false,
             //click:        false,
+            //clickToggles: false,
             cancelOff:    'a, area, :input'
           },
           cfg
         );
       var list = this,
           className =  cfg.className,
-          delegate =   cfg.delegate  || 'li',
+          delegate =   !('delegate' in cfg) ? 'li' : cfg.delegate || '',
           evPrefix =   'highlight',
           inTimeout,
           outTimeout,
@@ -119,6 +121,15 @@
                     }
                   }, e.delayOut || cfg.delayOut);
               }
+            },
+
+          highlingOnClick = function (e) {
+              var method = ( !activeItem  ||  this != activeItem[0] ) ?
+                                highlightOn:
+                            ( cfg.clickToggles  &&  !$(e.target).closest( cfg.cancelOff||'' )[0]  ) ?
+                                highlightOff:
+                                undefined;
+              method  &&  method.call( this, { type:'click', delayOut: 1 } );
             };
 
       list
@@ -126,15 +137,7 @@
           .delegate(delegate, 'mouseout focusout', highlightOff);
       if ( cfg.click )
       {
-        list
-          .delegate(delegate, 'click', function (e) {
-              var method = ( !activeItem  ||  this != activeItem[0] ) ?
-                                highlightOn:
-                            ( cfg.clickToggles  &&  !$(e.target).closest( cfg.cancelOff||'' )[0]  ) ?
-                                highlightOff:
-                                undefined;
-              method  &&  method.call( this, { type:'click', delayOut: 1 } );
-            });
+        list.delegate(delegate, 'click', highlingOnClick);
       }
 
       return this;
