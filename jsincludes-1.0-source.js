@@ -59,12 +59,12 @@
               data = inclElm.data(_jsincludes),
               vbBody = data.vb,
               link = data.link,
-              cfg = data.cfg,
-              idSelector = link[0].href.split('#')[1];
+              idSelector = link[0].href.split('#')[1],
+              cfg = vbBody.data(_virtualBrowser).cfg;
 
-          cfg.selector = (idSelector  &&  '#'+idSelector)  ||
-                          link.attr('data-selectors')  ||
-                          cfg.selector;
+          cfg.selector = link.attr('data-selectors')  ||       // data-selectors="" attribute has highest priority
+                          (idSelector  &&  '#'+idSelector)  || // link url #fragment shorthand comes second.
+                          cfg.selector;                         // fall back to the default selector.
           // set focus on the first focusable element within the injected DOM
           // if the load was triggered by a click
           if ( clickEv )
@@ -98,12 +98,13 @@
             unseenElms.push.apply( unseenElms, batch );
             var i = unseenElms.length,
                 stopAt = i - (batch.length || i),
-                elm,
+                elm, cfg,
                 seenElms = [];
             while ( i-- > stopAt )
             {
               elm = $(unseenElms[i]);
-              if ( elm.offset().top  <  winBottom + (elm.data( _jsincludes ).cfg.unseenBuffer||0) )
+              cfg = elm.data( _jsincludes ).vb.data(_virtualBrowser).cfg;
+              if ( elm.offset().top  <  winBottom + (cfg.unseenBuffer||0) )
               {
                 loadLink.call( elm[0] );
                 unseenElms.splice(i,1);
@@ -163,8 +164,7 @@
                           jsiData = {
                               elm:  elm,
                               link: link,
-                              vb:   vBody,
-                              cfg:  config
+                              vb:   vBody
                             };
 
                       vbBodies.push( vBody[0] );
