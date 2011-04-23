@@ -199,10 +199,10 @@
             var _this = $(this);
             if ( !_this.data(_dataId) )
             {
-        // Bind onEvent handles specified in cfg.
-        $.each(['Open','Opened','Close','Closed'], function (i, type) {
-                  cfg['on'+type]  &&  _this.bind(fickle+type.toLowerCase(), cfg['on'+type]);
-          });
+              // Bind onEvent handles specified in cfg.
+              $.each(['Open','Opened','Close','Closed'], function (i, type) {
+                        cfg['on'+type]  &&  _this.bind(fickle+type.toLowerCase(), cfg['on'+type]);
+                });
 
               var data = {
                     c: $.beget(cfg),
