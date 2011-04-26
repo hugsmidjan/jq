@@ -47,6 +47,7 @@
               type = data.type,
               videoUrl,
               autoplay,
+              useIframe = false,
               vidFinHeight;
 
           cfg.setfragment  &&  !firstrun  &&  $.setFrag(videoHref.replace(/^(https?:)?\/\//i, ''));
