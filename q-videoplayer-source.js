@@ -33,6 +33,11 @@
                       '<embed src="%{vidurl}" type="application/x-shockwave-flash" wmode="transparent" allowscriptaccess="always" allowfullscreen="true" width="%{vidwi}" height="%{vidhe}"></embed>' +
                     '</object>',
 
+      iframeTempl = '<iframe title="YouTube video player" width="%{vidwi}" height="%{vidhe}" src="%{vidurl}" frameborder="0" allowfullscreen></iframe>',
+
+      docLocPC = document.location.protocol,
+      docLocPC = docLocPC == 'file:' ? 'http:' : docLocPC,
+
       playVideo = function(e, firstrun) {
           var item = $(this),
               cfg = item.data('playvideo_cfg'),
@@ -54,12 +59,23 @@
           //youtube suppor.data('playvideo_data')t
           if ( type == 'youtube' )
           {
+            /*
+              urls to handle:
+              http://www.youtube.com/watch?v=nTasT5h0LEg&feature=topvideos
+              http://www.youtube.com/embed/nTasT5h0LEg/
+              http://www.youtube.com/embed/nTasT5h0LEg?rel=0
+              http://www.youtube.com/embed/nTasT5h0LEg
+            */
+            var youtubeId = videoHref.match(/(?:embed\/|watch\/?\?v=)([^&?\/]+)/i)[1];
+
             autoplay = cfg.autostart == 'all' ? autoplay = '&autoplay=1' :
                        cfg.autostart == 'none' ? autoplay = '' :
                        firstrun ? '' : '&autoplay=1';
 
-            videoUrl = 'http://www.youtube.com/v/' + data.youtubeId + '&hl=en_US&fs=1&rel=0' + autoplay;
-            vidFinHeight = cfg.vidHeight + 25;
+            videoUrl = docLocPC + '//www.youtube.com/embed/' + youtubeId + '?rel=0' + autoplay;
+            vidFinHeight = cfg.vidHeight + 30; //add player height to video height
+            useIframe = true;
+            
           }
           else if ( type == 'file' )
           {
@@ -73,24 +89,43 @@
           }
           else if ( type == 'vimeo' )
           {
-            var vimeoId = videoHref.replace('http://vimeo.com/','');
+            /*
+              urls to handle:
+              http://player.vimeo.com/video/3274372
+              http://vimeo.com/3274372/
+              http://vimeo.com/3274372?title=1
+              http://vimeo.com/3274372
+            */
+            var vimeoId = videoHref.match(/\/([0-9a-z]{5,10})\/?(?:[#?]|$)/i)[1];
 
             autoplay = cfg.autostart == 'all' ? autoplay = '&autoplay=1' :
                        cfg.autostart == 'none' ? autoplay = '' :
                        firstrun ? '' : '&autoplay=1';
 
-            videoUrl = 'http://vimeo.com/moogaloop.swf?clip_id='+ vimeoId +'&server=vimeo.com&show_portrait=0&fullscreen=1' + autoplay;
+            videoUrl = docLocPC + '//player.vimeo.com/video/'+ vimeoId +'?title=1&amp;byline=0&amp;portrait=0&fullscreen=1' + autoplay;
             vidFinHeight = cfg.vidHeight;
+            useIframe = true;
           }
 
-          videoTempl.find('.videocontainer')
-              .html(
-                  $.inject(objectTempl, {
+          if (useIframe)
+          {
+            videoTempl.find('.videocontainer')
+                    .html($.inject(iframeTempl, {
                         vidurl : videoUrl,
                         vidwi  : cfg.vidWidth,
                         vidhe  : vidFinHeight
-                      })
-                );
+                      }))
+          } 
+          else 
+          {
+            videoTempl.find('.videocontainer')
+                    .html($.inject(objectTempl, {
+                        vidurl : videoUrl,
+                        vidwi  : cfg.vidWidth,
+                        vidhe  : vidFinHeight
+                      }))
+          }
+
           videoTempl.find('h2')
               .text( item.find('h3 a').text() );
           videoTempl.find('.summary')
@@ -111,9 +146,10 @@
               //thumbnails: false,
               //setfragment: false,
               currentClass: 'current',
-              autostart: 'notfirst', //all, notfirst, none
+              autostart: 'notfirst', //autoplay videos, (supports: all, notfirst, none)
               youtubeImg: 1, //true, 1, false, 0, large (preview image from youtube. large for larger image)
-              defaultImg: 0 //path to default image for mediaplayer (only for 'file')
+              defaultImg: 0, //path to default image for mediaplayer (only for 'file')
+              startOpen:  1  //inject player on load
             }, cfg );
 
       videoTempl.insertBefore( videolist.eq(0) );
@@ -155,8 +191,12 @@
       var fragm = $.getFrag(),
           link = fragm  &&  videolist.find('a[href$="'+fragm+'"]');
 
-      $( link[0]  ||  videolist.filter(':visible').find('.item')[0] )
-          .trigger( 'click', true );
+      if (cfg.startOpen)
+      {
+        $( link[0]  ||  videolist.filter(':visible').find('.item')[0] )
+            .trigger( 'click', true );
+      }
+
     };
 
     return videolist;
