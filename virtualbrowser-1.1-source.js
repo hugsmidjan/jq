@@ -398,7 +398,10 @@
               var body = $(this);
               body
                   .removeData( _virtualBrowser )
-                  .unbind( 'click submit', _handleHttpRequest)
+                  .unbind( 'click', _handleHttpRequest)
+                  .find('form')
+                      .unbind( 'click', _handleHttpRequest)
+                  .end()
                   .unbind( [_VBbeforeload,_VBerror,_VBload,_VBloaded].join(' ') )
                   .trigger( _VBdisengaged )
                   .unbind( _VBdisengaged );
@@ -410,9 +413,9 @@
 
 
       _handleHttpRequest = function (e) {
-          var isSubmit = e.type == 'submit',
+          var vbElm = this,
               elm = $(e.target).closest(
-                          isSubmit ?
+                          (e.type == 'submit') ?
                               'form':                                            // e.type == 'submit'
                               '[href], input:submit, button:submit, input:image' // e.type == 'click'
                         );
@@ -425,7 +428,7 @@
                 if ( !elm[0].disabled )
                 {
                   // make note of which submit button was clicked.
-                  var VBdata = $(this).data(_virtualBrowser);
+                  var VBdata = $(vbElm).data(_virtualBrowser);
                   if ( elm.is(':image') )
                   {
                     var offs = elm.offset();
@@ -446,7 +449,7 @@
               }
               else // normal link-click or submit event
               {
-                var bfloadEv = _methods['load'].call(this, elm);
+                var bfloadEv = _methods['load'].call(vbElm, elm);
                 if ( !bfloadEv[_passThrough] )
                 {
                   !bfloadEv._doIframeSubmit  &&  e[_preventDefault]();
@@ -519,7 +522,13 @@
                   })
                 // Depend on 'click' events bubbling up to the virtualBrowser element to allow event-delegation
                 // Thus, we assume that any clicks who's bubbling were cancelled should not be handled by virtualBrowser.
-                .bind( 'click submit', _handleHttpRequest);
+                .bind( 'click', _handleHttpRequest)
+                // NOTE: We can't rely on bubbling in IE8- because bubbling happens first on the container elements,
+                // and last on the form itself. (at least in jQuery 1.4 and 1.5)
+                // This makes .isDefaultPrevented() checks fail when plugin-users bind (and .preventDefault())
+                // submit events on contained forms directly.
+                .find('form')
+                    .bind('submit', _handleHttpRequest);
 
           }
           return this;
