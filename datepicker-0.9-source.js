@@ -1,5 +1,5 @@
 //encoding: utf-8
-!window.datePicker && (function(){
+!window.datePicker && (function($){
 
   var oldIe = $.browser.msie   &&  parseInt($.browser.version,10)<8,
       _capitalize = function(s) { return s  &&  (s.charAt(0).toUpperCase() + s.substr(1)); },
@@ -691,4 +691,4 @@
   };
 
 
-})();
+})(jQuery);
