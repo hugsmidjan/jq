@@ -52,87 +52,90 @@
 
           cfg.setfragment  &&  !firstrun  &&  $.setFrag(videoHref.replace(/^(https?:)?\/\//i, ''));
 
-          $('#video').remove();
-          $( videoTempl.data('videoopener') ).removeClass( currentClass );
-          item.addClass( currentClass );
-          videoTempl.data( 'videoopener', item );
-
-          //youtube suppor.data('playvideo_data')t
-          if ( type == 'youtube' )
+          if (type !== '')
           {
-            /*
-              urls to handle:
-              http://www.youtube.com/watch?v=nTasT5h0LEg&feature=topvideos
-              http://www.youtube.com/embed/nTasT5h0LEg/
-              http://www.youtube.com/embed/nTasT5h0LEg?rel=0
-              http://www.youtube.com/embed/nTasT5h0LEg
-            */
-            var youtubeId = videoHref.match(/(?:embed\/|watch\/?\?v=)([^&?\/]+)/i)[1];
+            $('#video').remove();
+            $( videoTempl.data('videoopener') ).removeClass( currentClass );
+            item.addClass( currentClass );
+            videoTempl.data( 'videoopener', item );
 
-            autoplay = cfg.autostart == 'all' ? autoplay = '&autoplay=1' :
-                       cfg.autostart == 'none' ? autoplay = '' :
-                       firstrun ? '' : '&autoplay=1';
+            //youtube suppor.data('playvideo_data')t
+            if ( type == 'youtube' )
+            {
+              /*
+                urls to handle:
+                http://www.youtube.com/watch?v=nTasT5h0LEg&feature=topvideos
+                http://www.youtube.com/embed/nTasT5h0LEg/
+                http://www.youtube.com/embed/nTasT5h0LEg?rel=0
+                http://www.youtube.com/embed/nTasT5h0LEg
+              */
+              var youtubeId = videoHref.match(/(?:embed\/|watch\/?\?v=)([^&?\/]+)/i)[1];
 
-            videoUrl = docLocPC + '//www.youtube.com/embed/' + youtubeId + '?rel=0' + autoplay;
-            vidFinHeight = cfg.vidHeight + 30; //add player height to video height
-            useIframe = true;
-            
+              autoplay = cfg.autostart == 'all' ? autoplay = '&autoplay=1' :
+                         cfg.autostart == 'none' ? autoplay = '' :
+                         firstrun ? '' : '&autoplay=1';
+
+              videoUrl = docLocPC + '//www.youtube.com/embed/' + youtubeId + '?rel=0' + autoplay;
+              vidFinHeight = cfg.vidHeight + 30; //add player height to video height
+              useIframe = true;
+              
+            }
+            else if ( type == 'file' )
+            {
+              autoplay = cfg.autostart == 'all' ? autoplay = '&autostart=true' :
+                         cfg.autostart == 'none' ? autoplay = '' :
+                         firstrun ? '' : '&autostart=true';
+
+              var playerImgUrl = cfg.defaultImg ? '&image=' + cfg.defaultImg : '';
+              videoUrl = '/bitar/common/media/mediaplayer.swf?file=' + videoHref + playerImgUrl + autoplay;
+              vidFinHeight = cfg.vidHeight + 20;
+            }
+            else if ( type == 'vimeo' )
+            {
+              /*
+                urls to handle:
+                http://player.vimeo.com/video/3274372
+                http://vimeo.com/3274372/
+                http://vimeo.com/3274372?title=1
+                http://vimeo.com/3274372
+              */
+              var vimeoId = videoHref.match(/\/([0-9a-z]{5,10})\/?(?:[#?]|$)/i)[1];
+
+              autoplay = cfg.autostart == 'all' ? autoplay = '&autoplay=1' :
+                         cfg.autostart == 'none' ? autoplay = '' :
+                         firstrun ? '' : '&autoplay=1';
+
+              videoUrl = docLocPC + '//player.vimeo.com/video/'+ vimeoId +'?title=1&amp;byline=0&amp;portrait=0&fullscreen=1' + autoplay;
+              vidFinHeight = cfg.vidHeight;
+              useIframe = true;
+            }
+
+            if (useIframe)
+            {
+              videoTempl.find('.videocontainer')
+                      .html($.inject(iframeTempl, {
+                          vidurl : videoUrl,
+                          vidwi  : cfg.vidWidth,
+                          vidhe  : vidFinHeight
+                        }))
+            } 
+            else 
+            {
+              videoTempl.find('.videocontainer')
+                      .html($.inject(objectTempl, {
+                          vidurl : videoUrl,
+                          vidwi  : cfg.vidWidth,
+                          vidhe  : vidFinHeight
+                        }))
+            }
+
+            videoTempl.find('h2')
+                .text( item.find('h3 a').text() );
+            videoTempl.find('.summary')
+                .text( item.find('.summary').text() );
+
+            e.preventDefault();
           }
-          else if ( type == 'file' )
-          {
-            autoplay = cfg.autostart == 'all' ? autoplay = '&autostart=true' :
-                       cfg.autostart == 'none' ? autoplay = '' :
-                       firstrun ? '' : '&autostart=true';
-
-            var playerImgUrl = cfg.defaultImg ? '&image=' + cfg.defaultImg : '';
-            videoUrl = '/bitar/common/media/mediaplayer.swf?file=' + videoHref + playerImgUrl + autoplay;
-            vidFinHeight = cfg.vidHeight + 20;
-          }
-          else if ( type == 'vimeo' )
-          {
-            /*
-              urls to handle:
-              http://player.vimeo.com/video/3274372
-              http://vimeo.com/3274372/
-              http://vimeo.com/3274372?title=1
-              http://vimeo.com/3274372
-            */
-            var vimeoId = videoHref.match(/\/([0-9a-z]{5,10})\/?(?:[#?]|$)/i)[1];
-
-            autoplay = cfg.autostart == 'all' ? autoplay = '&autoplay=1' :
-                       cfg.autostart == 'none' ? autoplay = '' :
-                       firstrun ? '' : '&autoplay=1';
-
-            videoUrl = docLocPC + '//player.vimeo.com/video/'+ vimeoId +'?title=1&amp;byline=0&amp;portrait=0&fullscreen=1' + autoplay;
-            vidFinHeight = cfg.vidHeight;
-            useIframe = true;
-          }
-
-          if (useIframe)
-          {
-            videoTempl.find('.videocontainer')
-                    .html($.inject(iframeTempl, {
-                        vidurl : videoUrl,
-                        vidwi  : cfg.vidWidth,
-                        vidhe  : vidFinHeight
-                      }))
-          } 
-          else 
-          {
-            videoTempl.find('.videocontainer')
-                    .html($.inject(objectTempl, {
-                        vidurl : videoUrl,
-                        vidwi  : cfg.vidWidth,
-                        vidhe  : vidFinHeight
-                      }))
-          }
-
-          videoTempl.find('h2')
-              .text( item.find('h3 a').text() );
-          videoTempl.find('.summary')
-              .text( item.find('.summary').text() );
-
-          e.preventDefault();
         }; // end fn
 
 
