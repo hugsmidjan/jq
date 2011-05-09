@@ -24,7 +24,7 @@
 jQuery.fn.query = function ( selector ) {
     var $ = jQuery,
         scopeElms = this,
-        scopeIsDoc = scopeElms.length === 1  &&  scopeElms.is(document),
+        scopeIsDoc = scopeElms.length === 1  &&  scopeElms[0] == document,
         // check for obviously simple selectors.... (needs more elegance)
         isComplexSelector = /\s/.test( selector.replace(/\s*([|~*$\^!]?=|,)\s*/g, '$1') ),
         elms;
