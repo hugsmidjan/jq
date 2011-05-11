@@ -20,7 +20,7 @@ window.relative_time = '';
       userName: null,
       numTweets: 5,
       linkToProfile: false,
-      tweetsToDisplay : 'user_timeline' // See: http://dev.twitter.com/doc/get/statuses/
+      displayRetweets : true
     },
     i18n: {
       is: {
@@ -115,7 +115,8 @@ window.relative_time = '';
           c.append(profileLinkHTML);
         }
 
-        $.getScript('http://twitter.com/statuses/'+ o.tweetsToDisplay +'/'+ o.userName +'.json?callback=twitterCallback2&count='+ o.numTweets, function() { preload.remove(); });
+        $.getScript('https://api.twitter.com/1/statuses/user_timeline.json?screen_name='+ o.userName +'&count='+ o.numTweets + '&include_rts='+ o.displayRetweets +'&callback=twitterCallback2', function() { preload.remove(); });
+        
         
       });
   };
