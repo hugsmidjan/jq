@@ -55,93 +55,95 @@
 (function($, undefined){
 
   $.fn.delayedHighlight = function (cfg) {
-      cfg = $.extend({
-            //delegate:     'li',
-            className:    'focused',
-            delay:        500,
-            delayOut:     300,
-            //sticky:       false,
-            //noBubble:     false,
-            //click:        false,
-            //clickToggles: false,
-            cancelOff:    'a, area, :input'
-          },
-          cfg
-        );
-      var list = this,
-          className =  cfg.className,
-          delegate =   !('delegate' in cfg) ? 'li' : cfg.delegate || '',
-          evPrefix =   'highlight',
-          inTimeout,
-          outTimeout,
-          activeItem,
-          currentHover;
-
-      if ( cfg.noBubble )
+      if ( this.length )
       {
+        cfg = $.extend({
+              //delegate:     'li',
+              className:    'focused',
+              delay:        500,
+              delayOut:     300,
+              //sticky:       false,
+              //noBubble:     false,
+              //click:        false,
+              //clickToggles: false,
+              cancelOff:    'a, area, :input'
+            },
+            cfg
+          );
+        var list = this,
+            className =  cfg.className,
+            delegate =   !('delegate' in cfg) ? 'li' : cfg.delegate || '',
+            evPrefix =   'highlight',
+            inTimeout,
+            outTimeout,
+            activeItem,
+            currentHover;
+
+        if ( cfg.noBubble )
+        {
+          list
+              .bind( evPrefix+'on '+evPrefix+'off', false ) // don't have the custom events bubble upwards from the list
+        }
+
+        var highlightOn = function (e) {
+                var item = $(this);
+                clearTimeout( outTimeout );
+                (e.type.charAt(0)=='m')  &&  (currentHover = this);
+                inTimeout = setTimeout(function(){
+                    if ( !activeItem  ||  item[0] != activeItem[0] )
+                    {
+                      if ( activeItem )
+                      {
+                        activeItem
+                            .removeClass( className )
+                            .trigger( evPrefix+'off' );
+                      }
+                      activeItem = item;
+                      item
+                          .addClass( className )
+                          .trigger( evPrefix+'on' );
+                    }
+                  }, e.delayOut || cfg.delay);
+              },
+
+            highlightOff = function (e) {
+                var isClick = e.type=='click';
+                clearTimeout( inTimeout );
+                if ( !cfg.sticky  ||  isClick )
+                {
+                  (e.type.charAt(0)=='m')  &&  (currentHover = undefined);
+                  outTimeout = setTimeout(function(){
+                      if ( activeItem  &&  activeItem[0] != currentHover  ||  isClick )
+                      {
+                        activeItem
+                            .removeClass( className )
+                            .trigger( evPrefix+'off' );
+                        activeItem = undefined;
+                      }
+                    }, e.delayOut || cfg.delayOut);
+                }
+              },
+
+            highlingOnClick = function (e) {
+                var method = ( !activeItem  ||  this != activeItem[0] ) ?
+                                  highlightOn:
+                              ( cfg.clickToggles  &&  !$(e.target).closest( cfg.cancelOff||'' )[0]  ) ?
+                                  highlightOff:
+                                  undefined;
+                method  &&  method.call( this, { type:'click', delayOut: 1 } );
+              };
+
         list
-            .bind( evPrefix+'on '+evPrefix+'off', false ) // don't have the custom events bubble upwards from the list
-      }
+            .delegate(delegate, 'mouseover focusin', highlightOn)
+            .delegate(delegate, 'mouseout focusout', highlightOff);
+        if ( cfg.click )
+        {
+          list.delegate(delegate, 'click', highlingOnClick);
+        }
 
-/**/
-      var highlightOn = function (e) {
-              var item = $(this);
-              clearTimeout( outTimeout );
-              (e.type.charAt(0)=='m')  &&  (currentHover = this);
-              inTimeout = setTimeout(function(){
-                  if ( !activeItem  ||  item[0] != activeItem[0] )
-                  {
-                    if ( activeItem )
-                    {
-                      activeItem
-                          .removeClass( className )
-                          .trigger( evPrefix+'off' );
-                    }
-                    activeItem = item;
-                    item
-                        .addClass( className )
-                        .trigger( evPrefix+'on' );
-                  }
-                }, e.delayOut || cfg.delay);
-            },
-
-          highlightOff = function (e) {
-              var isClick = e.type=='click';
-              clearTimeout( inTimeout );
-              if ( !cfg.sticky  ||  isClick )
-              {
-                (e.type.charAt(0)=='m')  &&  (currentHover = undefined);
-                outTimeout = setTimeout(function(){
-                    if ( activeItem  &&  activeItem[0] != currentHover  ||  isClick )
-                    {
-                      activeItem
-                          .removeClass( className )
-                          .trigger( evPrefix+'off' );
-                      activeItem = undefined;
-                    }
-                  }, e.delayOut || cfg.delayOut);
-              }
-            },
-
-          highlingOnClick = function (e) {
-              var method = ( !activeItem  ||  this != activeItem[0] ) ?
-                                highlightOn:
-                            ( cfg.clickToggles  &&  !$(e.target).closest( cfg.cancelOff||'' )[0]  ) ?
-                                highlightOff:
-                                undefined;
-              method  &&  method.call( this, { type:'click', delayOut: 1 } );
-            };
-
-      list
-          .delegate(delegate, 'mouseover focusin', highlightOn)
-          .delegate(delegate, 'mouseout focusout', highlightOff);
-      if ( cfg.click )
-      {
-        list.delegate(delegate, 'click', highlingOnClick);
       }
 
       return this;
-/**/
 
     };
 
