@@ -32,7 +32,7 @@ jQuery.fn.query = function ( selector ) {
     if ( scopeIsDoc  ||  isComplexSelector )
     {
       elms = $(selector);
-      if ( scopeElms[0] )
+      if ( !scopeIsDoc )
       {
         elms = elms.filter(function(){
             var i = scopeElms.length;
