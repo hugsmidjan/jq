@@ -72,7 +72,7 @@
           );
         var list = this,
             className =  cfg.className,
-            delegate =   !('delegate' in cfg) ? 'li' : cfg.delegate || '',
+            delegate =   !('delegate' in cfg) ? 'li' : cfg.delegate,
             evPrefix =   'highlight',
             inTimeout,
             outTimeout,
@@ -133,12 +133,27 @@
                 method  &&  method.call( this, { type:'click', delayOut: 1 } );
               };
 
-        list
-            .delegate(delegate, 'mouseover focusin', highlightOn)
-            .delegate(delegate, 'mouseout focusout', highlightOff);
+        // FIXME: this forking shouldn't be neccessary, but current versions of jQuery
+        // perform some weird internal handling of missing `selector` parameters on the `.delegate()` method
+        // falling back on `.live()` and thus failing unexpectedly when the `list` collection has no 
+        // `selector` property (i.e. when it was created via a `$(element)` operation).
+        if ( delegate )
+        {
+          list
+              .delegate(delegate, 'mouseover focusin', highlightOn)
+              .delegate(delegate, 'mouseout focusout', highlightOff);
+        }
+        else
+        {
+          list
+              .bind('mouseover focusin', highlightOn)
+              .bind('mouseout focusout', highlightOff);
+        }
         if ( cfg.click )
         {
-          list.delegate(delegate, 'click', highlingOnClick);
+          delegate ? 
+              list.delegate(delegate, 'click', highlingOnClick):
+              list.bind('click', highlingOnClick);
         }
 
       }
