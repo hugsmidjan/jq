@@ -843,7 +843,7 @@ $.extend(Bookmark.prototype, {
 				if (typeof icon == 'number') {
 					html += '<span title="' + title + '" ' +
 						(settings.iconsStyle ? 'class="' + settings.iconsStyle + '" ' : '') +
-						'style="background: transparent url('+(Req.baseUrl ? Req.baseUrl +'x/bookmarks-1.3-icons.gif':settings.icons)+') no-repeat -' +
+						'style="background: transparent url('+(Req.baseUrl ? Req.baseUrl +'x/bookmarks-1.3-icons.png':settings.icons)+') no-repeat -' +
 						((icon % settings.iconCols) * settings.iconSize) + 'px -' +
 						(Math.floor(icon / settings.iconCols) * settings.iconSize) + 'px;' +
 						($.browser.mozilla && $.browser.version < '1.9' ?
