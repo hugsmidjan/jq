@@ -136,7 +136,7 @@
               addBtnClass:       'addrow',
               cloneClass:        'clone',
               //cloneEvents::      false,
-              rowNameSel:        'h2,h3,legend', //hægt að nota elements eða attributes
+              //rowNameSel:        '' , //hægt að nota selector string, eða attribute-name
               showSpeed:         'fast',          // 'fast', 'slow', integer -- 0 for instant -- >0 for milliseconds
               //addDelBtn:         false,
               //delBtnAppendTo:  sub-selector for cloneBlock - if falsy then appendTo the cloneBlock itself.
@@ -177,7 +177,7 @@
               _rowName = cfg.rowName =
                             ( _fieldset.attr(cfg.rowNameSel) ||
                               _fieldset.find(cfg.rowNameSel).eq(0).text() ||
-                              cfg._rowName )
+                              cfg.rowName )
                                 .replace(/:/g,''),
 
               _cloneBtn = $($.inject( cfg.addBtnTemplate, {
