@@ -137,6 +137,7 @@
         // perform some weird internal handling of missing `selector` parameters on the `.delegate()` method
         // falling back on `.live()` and thus failing unexpectedly when the `list` collection has no 
         // `selector` property (i.e. when it was created via a `$(element)` operation).
+        // See feature request: http://bugs.jquery.com/ticket/9316
         if ( delegate )
         {
           list

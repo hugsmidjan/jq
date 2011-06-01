@@ -195,28 +195,44 @@
 
       _methods = {
 
-          'load': function (url) {
-              var elm = typeof url != 'string' ? $(url) : undefined,
+          'load': function (arg) {
+              var request = {},
+                  elm,
+                  url,
                   body = $(this),
                   VBdata = body.data(_virtualBrowser),
                   config = VBdata.cfg,
                   evBeforeload = $.Event(_VBbeforeload),
                   evLoad, evLoaded,
-                  request = { elm: elm },
                   applyLoadMsg;
+
+              if ( $.isPlainObject(arg) )
+              {
+                $.extend( request, arg );
+                url = request.url;
+                delete request.elm; // incoming request objects don't get to have a URL - it only confuses things.
+              }
+              else if ( typeof arg == 'string' )
+              {
+                url = arg;
+              }
+              else
+              {
+                elm = $(arg);
+                request.elm = elm;
+                url = elm.attr('href');
+                url = url === undefined ? elm.attr('action') : url;
+              }
+              // Correctly resolve relative empty-string URLs (like <form action="">)
+              url = request.url = (url === '') ?
+                                      _docLoc.href:
+                                      url;
 
               if ( VBdata.$$empty )
               {
                 request.isFirst = true;
                 delete VBdata.$$empty;
               }
-              if (elm)
-              {
-                url = elm.attr('href');
-                url = url === undefined ? elm.attr('action') : url;
-              }
-              // Correctly resolve relative empty-string URLs (like <form action="">)
-              url = request.url = url === '' ? _docLoc.href : url;
 
               if (url)
               {
@@ -250,8 +266,8 @@
                 if ( !evBeforeload[_isDefaultPrevented]() )
                 {
                   var noCache = request.noCache =  request.noCache !== undefined ? request.noCache : config.noCache,
-                      params = config.params || '',
                       method = 'GET';
+                  params = params || config.params || '';
                   if ( elm && elm.is('form') )
                   {
                     method = elm.attr('method') || method;
