@@ -1,7 +1,7 @@
 /*!
- * jQuery UI 1.8.5
+ * jQuery UI 1.8.13
  *
- * Copyright 2010, AUTHORS.txt (http://jqueryui.com/about)
+ * Copyright 2011, AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT or GPL Version 2 licenses.
  * http://jquery.org/license
  *
@@ -18,7 +18,7 @@ if ( $.ui.version ) {
 }
 
 $.extend( $.ui, {
-	version: "1.8.5",
+	version: "1.8.13",
 
 	keyCode: {
 		ALT: 18,
@@ -105,8 +105,8 @@ $.fn.extend({
 					// other browsers return a string
 					// we ignore the case of nested elements with an explicit value of 0
 					// <div style="z-index: -10;"><div style="z-index: 0;"></div></div>
-					value = parseInt( elem.css( "zIndex" ) );
-					if ( !isNaN( value ) && value != 0 ) {
+					value = parseInt( elem.css( "zIndex" ), 10 );
+					if ( !isNaN( value ) && value !== 0 ) {
 						return value;
 					}
 				}
@@ -116,11 +116,10 @@ $.fn.extend({
 
 		return 0;
 	},
-	
+
 	disableSelection: function() {
-		return this.bind(
-			"mousedown.ui-disableSelection selectstart.ui-disableSelection",
-			function( event ) {
+		return this.bind( ( $.support.selectstart ? "selectstart" : "mousedown" ) +
+			".ui-disableSelection", function( event ) {
 				event.preventDefault();
 			});
 	},
@@ -159,7 +158,7 @@ $.each( [ "Width", "Height" ], function( i, name ) {
 		}
 
 		return this.each(function() {
-			$.style( this, type, reduce( this, size ) + "px" );
+			$( this ).css( type, reduce( this, size ) + "px" );
 		});
 	};
 
@@ -169,12 +168,33 @@ $.each( [ "Width", "Height" ], function( i, name ) {
 		}
 
 		return this.each(function() {
-			$.style( this, type, reduce( this, size, true, margin ) + "px" );
+			$( this).css( type, reduce( this, size, true, margin ) + "px" );
 		});
 	};
 });
 
 // selectors
+function focusable( element, isTabIndexNotNaN ) {
+	var nodeName = element.nodeName.toLowerCase();
+	if ( "area" === nodeName ) {
+		var map = element.parentNode,
+			mapName = map.name,
+			img;
+		if ( !element.href || !mapName || map.nodeName.toLowerCase() !== "map" ) {
+			return false;
+		}
+		img = $( "img[usemap=#" + mapName + "]" )[0];
+		return !!img && visible( img );
+	}
+	return ( /input|select|textarea|button|object/.test( nodeName )
+		? !element.disabled
+		: "a" == nodeName
+			? element.href || isTabIndexNotNaN
+			: isTabIndexNotNaN)
+		// the element and all of its ancestors must be visible
+		&& visible( element );
+}
+
 function visible( element ) {
 	return !$( element ).parents().andSelf().filter(function() {
 		return $.curCSS( this, "visibility" ) === "hidden" ||
@@ -188,37 +208,20 @@ $.extend( $.expr[ ":" ], {
 	},
 
 	focusable: function( element ) {
-		var nodeName = element.nodeName.toLowerCase(),
-			tabIndex = $.attr( element, "tabindex" );
-		if ( "area" === nodeName ) {
-			var map = element.parentNode,
-				mapName = map.name,
-				img;
-			if ( !element.href || !mapName || map.nodeName.toLowerCase() !== "map" ) {
-				return false;
-			}
-			img = $( "img[usemap=#" + mapName + "]" )[0];
-			return !!img && visible( img );
-		}
-		return ( /input|select|textarea|button|object/.test( nodeName )
-			? !element.disabled
-			: "a" == nodeName
-				? element.href || !isNaN( tabIndex )
-				: !isNaN( tabIndex ))
-			// the element and all of its ancestors must be visible
-			&& visible( element );
+		return focusable( element, !isNaN( $.attr( element, "tabindex" ) ) );
 	},
 
 	tabbable: function( element ) {
-		var tabIndex = $.attr( element, "tabindex" );
-		return ( isNaN( tabIndex ) || tabIndex >= 0 ) && $( element ).is( ":focusable" );
+		var tabIndex = $.attr( element, "tabindex" ),
+			isTabIndexNaN = isNaN( tabIndex );
+		return ( isTabIndexNaN || tabIndex >= 0 ) && focusable( element, !isTabIndexNaN );
 	}
 });
 
 // support
 $(function() {
-	var div = document.createElement( "div" ),
-		body = document.body;
+	var body = document.body,
+		div = body.appendChild( div = document.createElement( "div" ) );
 
 	$.extend( div.style, {
 		minHeight: "100px",
@@ -227,7 +230,9 @@ $(function() {
 		borderWidth: 0
 	});
 
-	$.support.minHeight = body.appendChild( div ).offsetHeight === 100;
+	$.support.minHeight = div.offsetHeight === 100;
+	$.support.selectstart = "onselectstart" in div;
+
 	// set display to none to avoid a layout bug in IE
 	// http://dev.jquery.com/ticket/4014
 	body.removeChild( div ).style.display = "none";
@@ -310,11 +315,10 @@ $.extend( $.ui, {
 
 
 
-
 /*!
- * jQuery UI Widget 1.8.5
+ * jQuery UI Widget 1.8.13
  *
- * Copyright 2010, AUTHORS.txt (http://jqueryui.com/about)
+ * Copyright 2011, AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT or GPL Version 2 licenses.
  * http://jquery.org/license
  *
@@ -403,21 +407,25 @@ $.widget.bridge = function( name, object ) {
 			options;
 
 		// prevent calls to internal methods
-		if ( isMethodCall && options.substring( 0, 1 ) === "_" ) {
+		if ( isMethodCall && options.charAt( 0 ) === "_" ) {
 			return returnValue;
 		}
 
 		if ( isMethodCall ) {
 			this.each(function() {
-				var instance = $.data( this, name );
-				if ( !instance ) {
-					throw "cannot call methods on " + name + " prior to initialization; " +
-						"attempted to call method '" + options + "'";
-				}
-				if ( !$.isFunction( instance[options] ) ) {
-					throw "no such method '" + options + "' for " + name + " widget instance";
-				}
-				var methodValue = instance[ options ].apply( instance, args );
+				var instance = $.data( this, name ),
+					methodValue = instance && $.isFunction( instance[options] ) ?
+						instance[ options ].apply( instance, args ) :
+						instance;
+				// TODO: add this back in 1.9 and use $.error() (see #5972)
+//				if ( !instance ) {
+//					throw "cannot call methods on " + name + " prior to initialization; " +
+//						"attempted to call method '" + options + "'";
+//				}
+//				if ( !$.isFunction( instance[options] ) ) {
+//					throw "no such method '" + options + "' for " + name + " widget instance";
+//				}
+//				var methodValue = instance[ options ].apply( instance, args );
 				if ( methodValue !== instance && methodValue !== undefined ) {
 					returnValue = methodValue;
 					return false;
@@ -458,7 +466,7 @@ $.Widget.prototype = {
 		this.element = $( element );
 		this.options = $.extend( true, {},
 			this.options,
-			$.metadata && $.metadata.get( element )[ this.widgetName ],
+			this._getCreateOptions(),
 			options );
 
 		var self = this;
@@ -467,7 +475,11 @@ $.Widget.prototype = {
 		});
 
 		this._create();
+		this._trigger( "create" );
 		this._init();
+	},
+	_getCreateOptions: function() {
+		return $.metadata && $.metadata.get( this.element[0] )[ this.widgetName ];
 	},
 	_create: function() {},
 	_init: function() {},
@@ -489,12 +501,11 @@ $.Widget.prototype = {
 	},
 
 	option: function( key, value ) {
-		var options = key,
-			self = this;
+		var options = key;
 
 		if ( arguments.length === 0 ) {
 			// don't return a reference to the internal hash
-			return $.extend( {}, self.options );
+			return $.extend( {}, this.options );
 		}
 
 		if  (typeof key === "string" ) {
@@ -505,11 +516,17 @@ $.Widget.prototype = {
 			options[ key ] = value;
 		}
 
+		this._setOptions( options );
+
+		return this;
+	},
+	_setOptions: function( options ) {
+		var self = this;
 		$.each( options, function( key, value ) {
 			self._setOption( key, value );
 		});
 
-		return self;
+		return this;
 	},
 	_setOption: function( key, value ) {
 		this.options[ key ] = value;

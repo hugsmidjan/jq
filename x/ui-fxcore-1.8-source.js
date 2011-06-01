@@ -1,16 +1,17 @@
 /*
- * jQuery UI Effects 1.8.5
+ * jQuery UI Effects 1.8.13
  *
- * Copyright 2010, AUTHORS.txt (http://jqueryui.com/about)
+ * Copyright 2011, AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT or GPL Version 2 licenses.
  * http://jquery.org/license
  *
  * http://docs.jquery.com/UI/Effects/
  */
+
+
 ;jQuery.effects || (function($, undefined) {
 
 $.effects = {};
-
 
 
 /******************************************************************************/
@@ -104,13 +105,12 @@ $.effects.animateClass = function(value, duration, easing, callback) {
 		easing = null;
 	}
 
-	return this.each(function() {
-
+	return this.queue(function() {
 		var that = $(this),
 			originalStyleAttr = that.attr('style') || ' ',
 			originalStyle = filterStyles(getElementStyles.call(this)),
 			newStyle,
-			className = that.attr('className');
+			className = that.attr('class');
 
 		$.each(classAnimationActions, function(i, action) {
 			if (value[action]) {
@@ -118,20 +118,26 @@ $.effects.animateClass = function(value, duration, easing, callback) {
 			}
 		});
 		newStyle = filterStyles(getElementStyles.call(this));
-		that.attr('className', className);
+		that.attr('class', className);
 
-		that.animate(styleDifference(originalStyle, newStyle), duration, easing, function() {
-			$.each(classAnimationActions, function(i, action) {
-				if (value[action]) { that[action + 'Class'](value[action]); }
-			});
-			// work around bug in IE by clearing the cssText before setting it
-			if (typeof that.attr('style') == 'object') {
-				that.attr('style').cssText = '';
-				that.attr('style').cssText = originalStyleAttr;
-			} else {
-				that.attr('style', originalStyleAttr);
+		that.animate(styleDifference(originalStyle, newStyle), {
+			queue: false,
+			duration: duration,
+			easding: easing,
+			complete: function() {
+				$.each(classAnimationActions, function(i, action) {
+					if (value[action]) { that[action + 'Class'](value[action]); }
+				});
+				// work around bug in IE by clearing the cssText before setting it
+				if (typeof that.attr('style') == 'object') {
+					that.attr('style').cssText = '';
+					that.attr('style').cssText = originalStyleAttr;
+				} else {
+					that.attr('style', originalStyleAttr);
+				}
+				if (callback) { callback.apply(this, arguments); }
+				$.dequeue( this );
 			}
-			if (callback) { callback.apply(this, arguments); }
 		});
 	});
 };
@@ -174,24 +180,24 @@ $.fn.extend({
 /******************************************************************************/
 
 $.extend($.effects, {
-	version: "1.8.5",
+	version: "1.8.13",
 
 	// Saves a set of properties in a data storage
 	save: function(element, set) {
 		for(var i=0; i < set.length; i++) {
-			if(set[i] !== null) { element.data("ec.storage."+set[i], element[0].style[set[i]]); }
+			if(set[i] !== null) element.data("ec.storage."+set[i], element[0].style[set[i]]);
 		}
 	},
 
 	// Restores a set of previously saved properties from a data storage
 	restore: function(element, set) {
 		for(var i=0; i < set.length; i++) {
-			if(set[i] !== null) { element.css(set[i], element.data("ec.storage."+set[i])); }
+			if(set[i] !== null) element.css(set[i], element.data("ec.storage."+set[i]));
 		}
 	},
 
 	setMode: function(el, mode) {
-		if (mode == 'toggle') { mode = el.is(':hidden') ? 'show' : 'hide'; } // Set for toggle
+		if (mode == 'toggle') mode = el.is(':hidden') ? 'show' : 'hide'; // Set for toggle
 		return mode;
 	},
 
@@ -255,16 +261,15 @@ $.extend($.effects, {
 					props[pos] = 'auto';
 				}
 			});
-			element.css({position: 'relative', top: 0, left: 0 });
+			element.css({position: 'relative', top: 0, left: 0, right: 'auto', bottom: 'auto' });
 		}
 
 		return wrapper.css(props).show();
 	},
 
 	removeWrapper: function(element) {
-		if (element.parent().is('.ui-effects-wrapper')) {
+		if (element.parent().is('.ui-effects-wrapper'))
 			return element.parent().replaceWith(element);
-		}
 		return element;
 	},
 
@@ -272,7 +277,7 @@ $.extend($.effects, {
 		value = value || {};
 		$.each(list, function(i, x){
 			unit = element.cssUnit(x);
-			if (unit[0] > 0) { value[x] = unit[0] * factor + unit[1]; }
+			if (unit[0] > 0) value[x] = unit[0] * factor + unit[1];
 		});
 		return value;
 	}
@@ -306,30 +311,58 @@ function _normalizeArguments(effect, options, speed, callback) {
 
 	speed = speed || options.duration;
 	speed = $.fx.off ? 0 : typeof speed == 'number'
-		? speed : $.fx.speeds[speed] || $.fx.speeds._default;
+		? speed : speed in $.fx.speeds ? $.fx.speeds[speed] : $.fx.speeds._default;
 
 	callback = callback || options.complete;
 
 	return [effect, options, speed, callback];
 }
 
+function standardSpeed( speed ) {
+	// valid standard speeds
+	if ( !speed || typeof speed === "number" || $.fx.speeds[ speed ] ) {
+		return true;
+	}
+	
+	// invalid strings - treat as "normal" speed
+	if ( typeof speed === "string" && !$.effects[ speed ] ) {
+		return true;
+	}
+	
+	return false;
+}
+
 $.fn.extend({
 	effect: function(effect, options, speed, callback) {
 		var args = _normalizeArguments.apply(this, arguments),
-			// TODO: make effects takes actual parameters instead of a hash
+			// TODO: make effects take actual parameters instead of a hash
 			args2 = {
 				options: args[1],
 				duration: args[2],
 				callback: args[3]
 			},
+			mode = args2.options.mode,
 			effectMethod = $.effects[effect];
 		
-		return effectMethod && !$.fx.off ? effectMethod.call(this, args2) : this;
+		if ( $.fx.off || !effectMethod ) {
+			// delegate to the original method (e.g., .show()) if possible
+			if ( mode ) {
+				return this[ mode ]( args2.duration, args2.callback );
+			} else {
+				return this.each(function() {
+					if ( args2.callback ) {
+						args2.callback.call( this );
+					}
+				});
+			}
+		}
+		
+		return effectMethod.call(this, args2);
 	},
 
 	_show: $.fn.show,
 	show: function(speed) {
-		if (!speed || typeof speed == 'number' || $.fx.speeds[speed] || !$.effects[speed] ) {
+		if ( standardSpeed( speed ) ) {
 			return this._show.apply(this, arguments);
 		} else {
 			var args = _normalizeArguments.apply(this, arguments);
@@ -340,7 +373,7 @@ $.fn.extend({
 
 	_hide: $.fn.hide,
 	hide: function(speed) {
-		if (!speed || typeof speed == 'number' || $.fx.speeds[speed] || !$.effects[speed] ) {
+		if ( standardSpeed( speed ) ) {
 			return this._hide.apply(this, arguments);
 		} else {
 			var args = _normalizeArguments.apply(this, arguments);
@@ -352,8 +385,7 @@ $.fn.extend({
 	// jQuery core overloads toggle and creates _toggle
 	__toggle: $.fn.toggle,
 	toggle: function(speed) {
-		if (!speed || typeof speed == 'number' || $.fx.speeds[speed] || !$.effects[speed]  ||
-			typeof speed == 'boolean' || $.isFunction(speed)) {
+		if ( standardSpeed( speed ) || typeof speed === "boolean" || $.isFunction( speed ) ) {
 			return this.__toggle.apply(this, arguments);
 		} else {
 			var args = _normalizeArguments.apply(this, arguments);
@@ -366,9 +398,8 @@ $.fn.extend({
 	cssUnit: function(key) {
 		var style = this.css(key), val = [];
 		$.each( ['em','px','%','pt'], function(i, unit){
-			if(style.indexOf(unit) > 0) {
-				val = [parseFloat(style), unit]; 
-			}
+			if(style.indexOf(unit) > 0)
+				val = [parseFloat(style), unit];
 		});
 		return val;
 	}
