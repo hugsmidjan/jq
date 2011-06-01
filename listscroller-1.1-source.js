@@ -49,7 +49,6 @@
       itemStatusPager:   False,  // true changes statusPager to count items shown rather than "pages" ... e.g. "Displaying: 1-4 of 13 items"
 
       autoScrollDelay:   0, //Timeout in ms for autoscroll
-      setFocus:          True,   // lets setPos trigger() .focus on the first currently visible list element.
 
       initCallback:      function () {},
       moveCallback:      function () {},
@@ -274,7 +273,7 @@
     {
       $.listscroller.animate[ c.animation||'none' ].call( _block, list, c );
     }
-    if ( !opts._noFocus  &&  c.setFocus )
+    if ( !opts._noFocus )
     {
       setTimeout(function(){
           list.eq( c.index ).setFocus();
@@ -323,6 +322,11 @@
       var lastIdx = newSatusIndex + c.windowSize;
       lastIdx = ( lastIdx > list.length ) ? list.length : lastIdx;
        c.status.append( '-' + lastIdx );
+    }
+    
+    if(c.autoScrollDelay)
+    {
+      _block.trigger('afterMove');
     }
 
   }
@@ -534,18 +538,22 @@
 
     if(c.autoScrollDelay)
     {
-      var nexttrigger = function ( e ) {
-        setPos( c, c.index + c.stepSize, { _noFocus:True } );
-      };
-      scrollInterval = setInterval( nexttrigger, c.autoScrollDelay);
-      _block.hover(
-          function() {
-            clearInterval( scrollInterval );
-          },
-          function() {
-            scrollInterval = setInterval( nexttrigger, c.autoScrollDelay);
-          }
-        );
+      var scrollTimeout,
+          nexttrigger = function ( e ) {
+            setPos( c, c.index + c.stepSize, { _noFocus:True } );
+          };
+      scrollTimeout = setTimeout( nexttrigger, c.autoScrollDelay );
+
+      _block
+          .bind('mouseenter', function (e) {
+              clearTimeout(scrollTimeout);
+            })
+          .bind('mouseleave', function (e) {
+              scrollTimeout = setTimeout( nexttrigger, c.autoScrollDelay );
+            })
+          .bind('afterMove', function (e) {
+              scrollTimeout = setTimeout( nexttrigger, c.autoScrollDelay );
+            });
     }
 
   }
