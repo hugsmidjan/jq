@@ -326,7 +326,11 @@
     
     if(c.autoScrollDelay)
     {
-      _block.trigger('afterMove');
+      _block.queue(function () {
+          _block
+              .trigger('afterMove')
+              .dequeue();
+        });
     }
 
   }
@@ -540,7 +544,7 @@
     {
       var scrollTimeout,
           nexttrigger = function ( e ) {
-            setPos( c, c.index + c.stepSize, { _noFocus:True } );
+            setPos( c, c.index + c.stepSize, { _noFlash:True, _noFocus:True } );
           };
       scrollTimeout = setTimeout( nexttrigger, c.autoScrollDelay );
 
