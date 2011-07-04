@@ -462,102 +462,100 @@
 
 
 
-  function initScroller ( c, _block, _items )
+  function initScroller ( cfg, _block, _items )
   {
 
     // test and stop repeat inits
-    if ( _block.hasClass( c.classPrefix + '-active' ) )
+    if ( _block.hasClass( cfg.classPrefix + '-active' ) )
     {
       return False;
     }
 
-    c.list = _items;
-    c.block = _block;
+    cfg.list = _items;
+    cfg.block = _block;
 
     // wrap elements with containers
-    var _ref, _inner, _outer;
-    if (_items.eq( 0 ).is( 'li' ))
-    {
-      _inner = _items.parent();
-    }
-    else
-    {
-      _inner = _items.wrapAll( '<div />' ).parent();
-    }
+    var _ref,
+        _inner = _items.eq( 0 ).is( 'li' ) ? 
+                    _items.parent():
+                    _items.wrapAll( '<div />' ).parent(),
+       _outer = _inner.wrap( '<div />' ).parent();
 
-    _outer = _inner.wrap( '<div />' ).parent();
-    _inner.addClass( c.classPrefix + '-clip' );
-    _outer.addClass( c.classPrefix + '-wrapper' );
-    _block.addClass( c.classPrefix + '-active' );
-
-    _inner.add( _outer ).css( 'position', 'relative' );
-    _outer.addClass( c.classPrefix + '-' + c.aspect );
+    _block
+        .addClass( cfg.classPrefix + '-active' );
+    _outer
+        .addClass( cfg.classPrefix + '-wrapper' )
+        .addClass( cfg.classPrefix + '-' + cfg.aspect );
+    _inner
+        .addClass( cfg.classPrefix + '-clip' )
+        .add( _outer )
+            .css( 'position', 'relative' );
 
     // for circular carousels
-    if ( c.wrap == 'loop' )
+    if ( cfg.wrap == 'loop' )
     {
       // generate flipover items
-      c.flipover = _items
-                      .slice( 0, c.windowSize )
+      cfg.flipover = _items
+                      .slice( 0, cfg.windowSize )
                           .clone( True );
       _items
           .parent()
-              .append( c.flipover );
+              .append( cfg.flipover );
     }
 
     // create and display control-links
-    if ( c.controls !== 'none' && _items.length > 0 )
+    if ( cfg.controls !== 'none' && _items.length > 0 )
     {
-      if ( /^(above|both)$/.test( c.controls ) )
+      if ( /^(above|both)$/.test( cfg.controls ) )
       {
         _outer
-            .before( buildControls( c )
-            .addClass( c.pagingTopClass ) );
+            .before( buildControls( cfg )
+            .addClass( cfg.pagingTopClass ) );
       }
 
-      if ( /^(below|both)$/.test( c.controls ) )
+      if ( /^(below|both)$/.test( cfg.controls ) )
       {
         _outer
-            .after( buildControls( c )
-            .addClass( c.pagingBottomClass ) );
+            .after( buildControls( cfg )
+            .addClass( cfg.pagingBottomClass ) );
       }
 
     }
 
-    if ( c.aspect == 'auto' )
+    if ( cfg.aspect == 'auto' )
     {
-      c.aspect = detectAspect( _items ) || // try to determine aspect
-                 $.listscroller.aspectDefaults[ c.animation ] ||  // pick default aspect for animation
+      cfg.aspect = detectAspect( _items ) || // try to determine aspect
+                 $.listscroller.aspectDefaults[ cfg.animation ] ||  // pick default aspect for animation
                  'horizontal';  // final fallback
     }
-    _outer.addClass( c.classPrefix + '-' + c.aspect );
+    _outer.addClass( cfg.classPrefix + '-' + cfg.aspect );
 
     //randomize starting position
-    if ( c.startPos == 'random' )
+    if ( cfg.startPos == 'random' )
     {
-      c.startPos = Math.floor(Math.ceil(_items.length / c.stepSize) * Math.random()) * c.stepSize;
+      cfg.startPos = Math.floor(Math.ceil(_items.length / cfg.stepSize) * Math.random()) * cfg.stepSize;
     }
 
     // set initial position
-    setPos( c, c.startPos || 0, { _noFlash:True, _noFocus:True } );
+    setPos( cfg, cfg.startPos || 0, { _noFlash:True, _noFocus:True } );
 
-    if(c.autoScrollDelay)
+    if(cfg.autoScrollDelay)
     {
       var scrollTimeout,
           nexttrigger = function ( e ) {
-            setPos( c, c.index + c.stepSize, { _noFlash:True, _noFocus:True } );
+            setPos( cfg, cfg.index + cfg.stepSize, { _noFlash:True, _noFocus:True } );
           };
-      scrollTimeout = setTimeout( nexttrigger, c.autoScrollDelay );
+      scrollTimeout = setTimeout( nexttrigger, cfg.autoScrollDelay );
 
       _block
           .bind('mouseenter', function (e) {
               clearTimeout(scrollTimeout);
             })
           .bind('mouseleave', function (e) {
-              scrollTimeout = setTimeout( nexttrigger, c.autoScrollDelay );
+              scrollTimeout = setTimeout( nexttrigger, cfg.autoScrollDelay );
             })
           .bind('afterMove', function (e) {
-              scrollTimeout = setTimeout( nexttrigger, c.autoScrollDelay );
+              scrollTimeout = setTimeout( nexttrigger, cfg.autoScrollDelay );
             });
     }
 

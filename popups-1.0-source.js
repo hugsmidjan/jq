@@ -24,7 +24,7 @@
           window:      window,        // window from which the new window is .open()ed
                                       // NOTE: this only affects elements with either config.url set, or an explicit target that doesn't start with '_')
           markTitle:   false,  // if true, will add $.fn.popUps.titleSuffix[lang] suffix to the link's title="" atribute
-          titleSuffix: {}      // Example: { en:'mytitlesuffix', se:'hurdygurdy' },
+          titleSuffix: {}      // Example: `{  is: '(opnast í nýjum glugga)',  en: '(opens in a new window)',  se:'(hurdy gurdy)'  }`,
           width:       0,      // px
           height:      0,      // px
           minimal:     false,  // true will automatically turn all of the following UI/Chrome options to false.
