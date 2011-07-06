@@ -39,7 +39,7 @@
               var dateElm = $(this),
                   date = dateElm.text().split('.'),
                   month = cfg.shortMonths ? monthList[ date[1] - 1 ].substr(0,3) : monthList[ date[1] - 1 ],
-                  monthDot = cfg.shortMonths ? '<i>.</i>' : ' ',
+                  monthDot = cfg.shortMonths ? '<i>.</i> ' : ' ',
                   jsDate = $('<span class="js-date" />'),
                   pendFunc = cfg.monthAfterDate ? 'append' : 'prepend';
 
