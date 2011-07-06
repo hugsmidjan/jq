@@ -39,11 +39,11 @@
               var dateElm = $(this),
                   date = dateElm.text().split('.'),
                   month = cfg.shortMonths ? monthList[ date[1] - 1 ].substr(0,3) : monthList[ date[1] - 1 ],
-                  monthDot = cfg.shortMonths ? '<i>.</i>' : '',
+                  monthDot = cfg.shortMonths ? '<i>.</i>' : ' ',
                   jsDate = $('<span class="js-date" />'),
                   pendFunc = cfg.monthAfterDate ? 'append' : 'prepend';
 
-              jsDate.append('<span class="d">'+ date[0] +'<i>.</i></span> ')[pendFunc]('<span class="m">'+ month +'</span> ' + monthDot ).append('<span class="y">'+ date[2] +'</span> ');
+              jsDate.append('<span class="d">'+ date[0] +'<i>.</i></span> ')[pendFunc]('<span class="m">'+ month +'</span>' + monthDot ).append('<span class="y">'+ date[2] +'</span> ');
 
               dateElm.before(jsDate).remove();
           });
