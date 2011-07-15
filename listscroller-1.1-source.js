@@ -245,6 +245,8 @@
 
   function setPos ( c, _newIndex, opts )
   {
+    clearTimeout(c.scrollTimeout);
+
     opts = opts || {};
     var _block = c.block;
     var list   = c.list;
@@ -462,100 +464,107 @@
 
 
 
-  function initScroller ( cfg, _block, _items )
+  function initScroller ( c, _block, _items )
   {
 
     // test and stop repeat inits
-    if ( _block.hasClass( cfg.classPrefix + '-active' ) )
+    if ( _block.hasClass( c.classPrefix + '-active' ) )
     {
       return False;
     }
 
-    cfg.list = _items;
-    cfg.block = _block;
+    c.list = _items;
+    c.block = _block;
 
     // wrap elements with containers
-    var _ref,
-        _inner = _items.eq( 0 ).is( 'li' ) ? 
-                    _items.parent():
-                    _items.wrapAll( '<div />' ).parent(),
-       _outer = _inner.wrap( '<div />' ).parent();
+    var _ref, _inner, _outer;
+    if (_items.eq( 0 ).is( 'li' ))
+    {
+      _inner = _items.parent();
+    }
+    else
+    {
+      _inner = _items.wrapAll( '<div />' ).parent();
+    }
 
-    _block
-        .addClass( cfg.classPrefix + '-active' );
-    _outer
-        .addClass( cfg.classPrefix + '-wrapper' )
-        .addClass( cfg.classPrefix + '-' + cfg.aspect );
-    _inner
-        .addClass( cfg.classPrefix + '-clip' )
-        .add( _outer )
-            .css( 'position', 'relative' );
+    _outer = _inner.wrap( '<div />' ).parent();
+    _inner.addClass( c.classPrefix + '-clip' );
+    _outer.addClass( c.classPrefix + '-wrapper' );
+    _block.addClass( c.classPrefix + '-active' );
+
+    _inner.add( _outer ).css( 'position', 'relative' );
+    _outer.addClass( c.classPrefix + '-' + c.aspect );
 
     // for circular carousels
-    if ( cfg.wrap == 'loop' )
+    if ( c.wrap == 'loop' )
     {
       // generate flipover items
-      cfg.flipover = _items
-                      .slice( 0, cfg.windowSize )
+      c.flipover = _items
+                      .slice( 0, c.windowSize )
                           .clone( True );
       _items
           .parent()
-              .append( cfg.flipover );
+              .append( c.flipover );
     }
 
     // create and display control-links
-    if ( cfg.controls !== 'none' && _items.length > 0 )
+    if ( c.controls !== 'none' && _items.length > 0 )
     {
-      if ( /^(above|both)$/.test( cfg.controls ) )
+      if ( /^(above|both)$/.test( c.controls ) )
       {
         _outer
-            .before( buildControls( cfg )
-            .addClass( cfg.pagingTopClass ) );
+            .before( buildControls( c )
+            .addClass( c.pagingTopClass ) );
       }
 
-      if ( /^(below|both)$/.test( cfg.controls ) )
+      if ( /^(below|both)$/.test( c.controls ) )
       {
         _outer
-            .after( buildControls( cfg )
-            .addClass( cfg.pagingBottomClass ) );
+            .after( buildControls( c )
+            .addClass( c.pagingBottomClass ) );
       }
 
     }
 
-    if ( cfg.aspect == 'auto' )
+    if ( c.aspect == 'auto' )
     {
-      cfg.aspect = detectAspect( _items ) || // try to determine aspect
-                 $.listscroller.aspectDefaults[ cfg.animation ] ||  // pick default aspect for animation
+      c.aspect = detectAspect( _items ) || // try to determine aspect
+                 $.listscroller.aspectDefaults[ c.animation ] ||  // pick default aspect for animation
                  'horizontal';  // final fallback
     }
-    _outer.addClass( cfg.classPrefix + '-' + cfg.aspect );
+    _outer.addClass( c.classPrefix + '-' + c.aspect );
 
     //randomize starting position
-    if ( cfg.startPos == 'random' )
+    if ( c.startPos == 'random' )
     {
-      cfg.startPos = Math.floor(Math.ceil(_items.length / cfg.stepSize) * Math.random()) * cfg.stepSize;
+      c.startPos = Math.floor(Math.ceil(_items.length / c.stepSize) * Math.random()) * c.stepSize;
     }
 
     // set initial position
-    setPos( cfg, cfg.startPos || 0, { _noFlash:True, _noFocus:True } );
+    setPos( c, c.startPos || 0, { _noFlash:True, _noFocus:True } );
 
-    if(cfg.autoScrollDelay)
+    if(c.autoScrollDelay)
     {
-      var scrollTimeout,
-          nexttrigger = function ( e ) {
-            setPos( cfg, cfg.index + cfg.stepSize, { _noFlash:True, _noFocus:True } );
+      var nexttrigger = function ( e ) {
+            setPos( c, c.index + c.stepSize, { _noFlash:True, _noFocus:True } );
           };
-      scrollTimeout = setTimeout( nexttrigger, cfg.autoScrollDelay );
-
+      c.scrollTimeout = setTimeout( nexttrigger, c.autoScrollDelay );
       _block
           .bind('mouseenter', function (e) {
-              clearTimeout(scrollTimeout);
+              _block.addClass('block-mouseover');
+              clearTimeout(c.scrollTimeout);
             })
           .bind('mouseleave', function (e) {
-              scrollTimeout = setTimeout( nexttrigger, cfg.autoScrollDelay );
+              _block.removeClass('block-mouseover');
+              clearTimeout(c.scrollTimeout);
+              c.scrollTimeout = setTimeout( nexttrigger, c.autoScrollDelay );
             })
           .bind('afterMove', function (e) {
-              scrollTimeout = setTimeout( nexttrigger, cfg.autoScrollDelay );
+              if (!_block.is('.block-mouseover'))
+              {
+                clearTimeout(c.scrollTimeout);
+                c.scrollTimeout = setTimeout( nexttrigger, c.autoScrollDelay );
+              }
             });
     }
 
@@ -572,7 +581,8 @@
               _lang = b.closest('[lang]').attr( 'lang' ) || '',
               i18n = $.listscroller.i18n,
               txts = i18n[_lang.toLowerCase()] || i18n[_lang.substr(0,2)] || i18n.en,
-              cfg = $.extend({}, dc, txts,  config );
+        
+              cfg = $.extend({}, dc, txts, { scrollTimeout: 0}, config );
 
           if (cfg.itemStatusPager)
           {
