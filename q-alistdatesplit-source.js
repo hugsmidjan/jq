@@ -25,7 +25,7 @@
   $.fn.alistDateSplit = function ( cfg ) {
 
     cfg = $.extend({
-              shortMonths:    1, // 1/true uses fyrst 3 letters, 0/false uses full month name
+              shortMonths:    1, // 1/true uses fyrst 3/4 letters, 0/false uses full month name
               monthAfterDate: 1, // 1/true inserts month after date, 0/false before
               dateSel:        '.item .date'
             }, months, cfg );
@@ -38,8 +38,9 @@
         alist.find( cfg.dateSel ).each(function(){
               var dateElm = $(this),
                   date = dateElm.text().split('.'),
-                  month = cfg.shortMonths ? monthList[ date[1] - 1 ].substr(0,3) : monthList[ date[1] - 1 ],
-                  monthDot = cfg.shortMonths ? '<i>.</i> ' : ' ',
+                  month = monthList[ date[1] - 1 ],
+                  month = cfg.shortMonths && month.length > 4 ? month.substr(0,3) : month,
+                  monthDot = cfg.shortMonths && month.length == 3 ? '<i>.</i> ' : ' ',
                   jsDate = $('<span class="js-date" />'),
                   pendFunc = cfg.monthAfterDate ? 'append' : 'prepend';
 
