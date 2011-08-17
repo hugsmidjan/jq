@@ -38,9 +38,9 @@
         alist.find( cfg.dateSel ).each(function(){
               var dateElm = $(this),
                   date = dateElm.text().split('.'),
-                  month = monthList[ date[1] - 1 ],
-                  month = cfg.shortMonths && month.length > 4 ? month.substr(0,3) : month,
-                  monthDot = cfg.shortMonths && month.length == 3 ? '<i>.</i> ' : ' ',
+                  Amonth = monthList[ date[1] - 1 ],
+                  month = cfg.shortMonths && Amonth.length > 4 ? Amonth.substr(0,3) : Amonth,
+                  monthDot = cfg.shortMonths && Amonth.length > 4 ? '<i>.</i> ' : ' ',
                   jsDate = $('<span class="js-date" />'),
                   pendFunc = cfg.monthAfterDate ? 'append' : 'prepend';
 
