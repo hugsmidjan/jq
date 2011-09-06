@@ -164,7 +164,8 @@
       video: { check: /\.(m(ov|pe?g|p4)|avi|wmv)($|#|\?)/i },
       pdf:   { check: /\.(pdf)($|#|\?)/i },
       doc:   { check: /\.(docx?|rtf|wri|odt|sxw)(#|$|\?)/i },
-      xls:   { check: /\.(xlsx?|csv|ods|sxc)(#|$|\?)/i }
+      xls:   { check: /\.(xlsx?|csv|ods|sxc)(#|$|\?)/i },
+      pack:  { check: /\.(zip|rar|7z|gz)(#|$|\?)/i }
     };
 
 
