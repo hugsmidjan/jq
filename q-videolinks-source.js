@@ -42,7 +42,7 @@
               useIframe = false,
               vidFinHeight = data.videoHeight;
 
-          if ( type == 'youtube' )
+          if ( type == 'youtube' || type == 'youtu' )
           {
             /*
               urls to handle:
@@ -50,8 +50,10 @@
               http://www.youtube.com/embed/nTasT5h0LEg/
               http://www.youtube.com/embed/nTasT5h0LEg?rel=0
               http://www.youtube.com/embed/nTasT5h0LEg
+              http://youtu.be/nTasT5h0LEg
             */
-            var youtubeId = videoHref.match(/(?:embed\/|watch\/?\?v=)([^&?\/]+)/i)[1];
+            var youtubeId = type == 'youtube' ? videoHref.match(/(?:embed\/|watch\/?\?v=)([^&?\/]+)/i)[1] : videoHref.match(/\/([0-9a-z]+)$/i)[1];
+            ;;;window.console&&console.log( youtubeId );
             videoUrl = docLocPC + '//www.youtube.com/embed/' + youtubeId + '?rel=0';
             vidFinHeight = vidFinHeight + 30; //add player height to video height
             useIframe = true;
@@ -114,6 +116,7 @@
                   type =  (/\.youtube\.com/i.test( videoHref ) && 'youtube') ||
                           (/\.(flv|mp4|m4v)(\?|$)/i.test( videoHref ) && 'file') ||
                           (/vimeo\.com/i.test( videoHref ) && 'vimeo') ||
+                          (/youtu\.be/i.test( videoHref ) && 'youtu') ||
                           undefined,
                   cntWidth = (cfg.vidWidth == 'auto') ? link.closest('div, p').width() : cfg.vidWidth,
                   vdHeight = (cfg.vidHeight == 'auto' && cfg.aspect4x3) ? (cntWidth/4)*3 :  
