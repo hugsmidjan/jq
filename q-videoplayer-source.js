@@ -52,7 +52,7 @@
 
           cfg.setfragment  &&  !firstrun  &&  $.setFrag(videoHref.replace(/^(https?:)?\/\//i, ''));
 
-          if (type !== '')
+          if (type.length)
           {
             $('#video').remove();
             $( videoTempl.data('videoopener') ).removeClass( currentClass );
@@ -60,7 +60,7 @@
             videoTempl.data( 'videoopener', item );
 
             //youtube suppor.data('playvideo_data')t
-            if ( type == 'youtube' )
+            if ( type == 'youtube' || type == 'youtu' )
             {
               /*
                 urls to handle:
@@ -68,8 +68,9 @@
                 http://www.youtube.com/embed/nTasT5h0LEg/
                 http://www.youtube.com/embed/nTasT5h0LEg?rel=0
                 http://www.youtube.com/embed/nTasT5h0LEg
+                http://youtu.be/nTasT5h0LEg
               */
-              var youtubeId = videoHref.match(/(?:embed\/|watch\/?\?v=)([^&?\/]+)/i)[1];
+              var youtubeId = type == 'youtube' ? videoHref.match(/(?:embed\/|watch\/?\?v=)([^&?\/]+)/i)[1] : videoHref.match(/\/([0-9a-z]+)$/i)[1];
 
               autoplay = cfg.autostart == 'all' ? autoplay = '&autoplay=1' :
                          cfg.autostart == 'none' ? autoplay = '' :
@@ -78,7 +79,6 @@
               videoUrl = docLocPC + '//www.youtube.com/embed/' + youtubeId + '?rel=0' + autoplay;
               vidFinHeight = cfg.vidHeight + 30; //add player height to video height
               useIframe = true;
-              
             }
             else if ( type == 'file' )
             {
@@ -99,17 +99,26 @@
                 http://vimeo.com/3274372?title=1
                 http://vimeo.com/3274372
               */
-              var vimeoId = videoHref.match(/\/([0-9a-z]{5,10})\/?(?:[#?]|$)/i)[1];
+              var videoId = videoHref.match(/\/([0-9a-z]{5,10})\/?(?:[#?]|$)/i)[1];
 
               autoplay = cfg.autostart == 'all' ? autoplay = '&autoplay=1' :
                          cfg.autostart == 'none' ? autoplay = '' :
                          firstrun ? '' : '&autoplay=1';
 
-              videoUrl = docLocPC + '//player.vimeo.com/video/'+ vimeoId +'?title=1&amp;byline=0&amp;portrait=0&fullscreen=1' + autoplay;
+              videoUrl = docLocPC + '//player.vimeo.com/video/'+ videoId +'?title=1&amp;byline=0&amp;portrait=0' + autoplay;
               vidFinHeight = cfg.vidHeight;
               useIframe = true;
             }
-
+            else if ( type == 'facebook' )
+            {
+              /*
+                urls to handle:
+                http://www.facebook.com/v/2246424718688
+                http://www.facebook.com/video/video.php?v=2246424718688
+              */
+              var videoId = videoHref.match(/(\d{10,15})$/)[1];
+              videoUrl = docLocPC + '//www.facebook.com/v/'+ videoId;
+            }
             if (useIframe)
             {
               videoTempl.find('.videocontainer')
@@ -167,6 +176,8 @@
                   type =  (/\.youtube\.com/i.test( videoHref ) && 'youtube') ||
                           (/\.(flv|mp4|m4v)(\?|$)/i.test( videoHref ) && 'file') ||
                           (/vimeo\.com/i.test( videoHref ) && 'vimeo') ||
+                          (/youtu\.be/i.test( videoHref ) && 'youtu') ||
+                          (/facebook\.com/i.test( videoHref ) && 'facebook') ||
                           '',
                   data = {
                       videoHref: videoHref,

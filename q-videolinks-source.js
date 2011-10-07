@@ -53,7 +53,6 @@
               http://youtu.be/nTasT5h0LEg
             */
             var youtubeId = type == 'youtube' ? videoHref.match(/(?:embed\/|watch\/?\?v=)([^&?\/]+)/i)[1] : videoHref.match(/\/([0-9a-z]+)$/i)[1];
-            ;;;window.console&&console.log( youtubeId );
             videoUrl = docLocPC + '//www.youtube.com/embed/' + youtubeId + '?rel=0';
             vidFinHeight = vidFinHeight + 30; //add player height to video height
             useIframe = true;
@@ -67,9 +66,19 @@
               http://vimeo.com/3274372?title=1
               http://vimeo.com/3274372
             */
-            var vimeoId = videoHref.match(/\/([0-9a-z]{5,10})\/?(?:[#?]|$)/i)[1];
-            videoUrl = docLocPC + '//player.vimeo.com/video/'+ vimeoId +'?title=1&amp;byline=0&amp;portrait=0';
+            var videoId = videoHref.match(/\/([0-9a-z]{5,10})\/?(?:[#?]|$)/i)[1];
+            videoUrl = docLocPC + '//player.vimeo.com/video/'+ videoId +'?title=1&amp;byline=0&amp;portrait=0';
             useIframe = true;
+          }
+          else if ( type == 'facebook' )
+          {
+            /*
+              urls to handle:
+              http://www.facebook.com/v/2246424718688
+              http://www.facebook.com/video/video.php?v=2246424718688
+            */
+            var videoId = videoHref.match(/(\d{10,15})$/)[1];
+            videoUrl = docLocPC + '//www.facebook.com/v/'+ videoId;
           }
           else if ( type == 'file' )
           {
@@ -117,6 +126,7 @@
                           (/\.(flv|mp4|m4v)(\?|$)/i.test( videoHref ) && 'file') ||
                           (/vimeo\.com/i.test( videoHref ) && 'vimeo') ||
                           (/youtu\.be/i.test( videoHref ) && 'youtu') ||
+                          (/facebook\.com/i.test( videoHref ) && 'facebook') ||
                           undefined,
                   cntWidth = (cfg.vidWidth == 'auto') ? link.closest('div, p').width() : cfg.vidWidth,
                   vdHeight = (cfg.vidHeight == 'auto' && cfg.aspect4x3) ? (cntWidth/4)*3 :  
