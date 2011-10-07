@@ -9,7 +9,7 @@
     var qsa = 'querySelectorAll',
         meta = doc[qsa] ? doc[qsa]('meta[name=viewport]') : [];
 
-    if ( meta[1] ) {
+    if ( meta[0] ) {
       var type = 'gesturestart',
           s = [1, 1],
           fix = function () {
