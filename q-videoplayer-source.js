@@ -118,6 +118,7 @@
               */
               var videoId = videoHref.match(/(\d{10,15})$/)[1];
               videoUrl = docLocPC + '//www.facebook.com/v/'+ videoId;
+              vidFinHeight = cfg.vidHeight;
             }
             if (useIframe)
             {
