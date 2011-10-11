@@ -82,7 +82,8 @@
           }
           else if ( type == 'file' )
           {
-            videoUrl = '/bitar/common/media/mediaplayer.swf?file=' + videoHref;
+            var extraParams = data.autostart ? 'autostart=true&' : '';
+            videoUrl = '/bitar/common/media/mediaplayer.swf?'+extraParams+'file=' + videoHref;
             vidFinHeight = vidFinHeight + 20; //add player height to video height
           }
           
@@ -112,9 +113,10 @@
     if (videoLinks.length)
     {
       cfg = $.extend({
-              vidWidth  : 'auto', //integer or 'auto' ()
-              vidHeight : 'auto',
-              aspect4x3 : false
+              //autostart: false, // Q: Should we change this default to true?
+              vidWidth:  'auto', //integer or 'auto' ()
+              vidHeight: 'auto',
+              aspect4x3:  false
             }, cfg );
 
 
@@ -137,7 +139,8 @@
                       type:        type,
                       vidCapt:     link.text(),
                       videoWidth:  cntWidth,
-                      videoHeight: Math.round(vdHeight)
+                      videoHeight: Math.round(vdHeight),
+                      autostart:   !!cfg.autostart
                     };
 
               if (type)
