@@ -116,7 +116,7 @@
                 http://www.facebook.com/v/2246424718688
                 http://www.facebook.com/video/video.php?v=2246424718688
               */
-              var videoId = videoHref.match(/(\d{10,15})$/)[1];
+              var videoId = videoHref.match(/(\d{10,20})$/)[1];
               videoUrl = docLocPC + '//www.facebook.com/v/'+ videoId;
               vidFinHeight = cfg.vidHeight;
             }
