@@ -70,7 +70,7 @@
                 http://www.youtube.com/embed/nTasT5h0LEg
                 http://youtu.be/nTasT5h0LEg
               */
-              var youtubeId = type == 'youtube' ? videoHref.match(/(?:embed\/|watch\/?\?v=)([^&?\/]+)/i)[1] : videoHref.match(/\/([0-9a-z]+)$/i)[1];
+              var youtubeId = type == 'youtube' ? videoHref.match(/(?:embed\/|watch\/?\?v=)([^&?\/]+)/i)[1] : videoHref.match(/\.be\/(.+)$/)[1];
 
               autoplay = cfg.autostart == 'all' ? autoplay = '&autoplay=1' :
                          cfg.autostart == 'none' ? autoplay = '' :
