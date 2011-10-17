@@ -70,15 +70,19 @@
                 http://www.youtube.com/embed/nTasT5h0LEg
                 http://youtu.be/nTasT5h0LEg
               */
-              var youtubeId = type == 'youtube' ? videoHref.match(/(?:embed\/|watch\/?\?v=)([^&?\/]+)/i)[1] : videoHref.match(/\.be\/(.+)$/)[1];
+              var youtubeId = type == 'youtube' ? videoHref.match(/(?:embed\/|watch\/?\?v=)([^&?\/]+)/i) : videoHref.match(/\.be\/(.+)$/);
+              youtubeId = youtubeId && youtubeId[1];
 
-              autoplay = cfg.autostart == 'all' ? autoplay = '&autoplay=1' :
-                         cfg.autostart == 'none' ? autoplay = '' :
-                         firstrun ? '' : '&autoplay=1';
+              if (youtubeId)
+              {
+                autoplay = cfg.autostart == 'all' ? autoplay = '&autoplay=1' :
+                           cfg.autostart == 'none' ? autoplay = '' :
+                           firstrun ? '' : '&autoplay=1';
 
-              videoUrl = docLocPC + '//www.youtube.com/embed/' + youtubeId + '?rel=0' + autoplay;
-              vidFinHeight = cfg.vidHeight + 30; //add player height to video height
-              useIframe = true;
+                videoUrl = docLocPC + '//www.youtube.com/embed/' + youtubeId + '?rel=0' + autoplay;
+                vidFinHeight = cfg.vidHeight + 30; //add player height to video height
+                useIframe = true;
+              }
             }
             else if ( type == 'file' )
             {
@@ -99,15 +103,19 @@
                 http://vimeo.com/3274372?title=1
                 http://vimeo.com/3274372
               */
-              var videoId = videoHref.match(/\/([0-9a-z]{5,10})\/?(?:[#?]|$)/i)[1];
+              var videoId = videoHref.match(/\/([0-9a-z]{5,10})\/?(?:[#?]|$)/i);
+              videoId = videoId && videoId[1];
 
-              autoplay = cfg.autostart == 'all' ? autoplay = '&autoplay=1' :
-                         cfg.autostart == 'none' ? autoplay = '' :
-                         firstrun ? '' : '&autoplay=1';
+              if (videoId)
+              {
+                autoplay = cfg.autostart == 'all' ? autoplay = '&autoplay=1' :
+                           cfg.autostart == 'none' ? autoplay = '' :
+                           firstrun ? '' : '&autoplay=1';
 
-              videoUrl = docLocPC + '//player.vimeo.com/video/'+ videoId +'?title=1&amp;byline=0&amp;portrait=0' + autoplay;
-              vidFinHeight = cfg.vidHeight;
-              useIframe = true;
+                videoUrl = docLocPC + '//player.vimeo.com/video/'+ videoId +'?title=1&amp;byline=0&amp;portrait=0' + autoplay;
+                vidFinHeight = cfg.vidHeight;
+                useIframe = true;
+              }
             }
             else if ( type == 'facebook' )
             {
@@ -116,9 +124,14 @@
                 http://www.facebook.com/v/2246424718688
                 http://www.facebook.com/video/video.php?v=2246424718688
               */
-              var videoId = videoHref.match(/(\d{10,20})$/)[1];
-              videoUrl = docLocPC + '//www.facebook.com/v/'+ videoId;
-              vidFinHeight = cfg.vidHeight;
+              var videoId = videoHref.match(/(\d{10,20})$/);
+              videoId = videoId && videoId[1];
+
+              if (videoId)
+              {
+                videoUrl = docLocPC + '//www.facebook.com/v/'+ videoId;
+                vidFinHeight = cfg.vidHeight;
+              }
             }
             if (useIframe)
             {

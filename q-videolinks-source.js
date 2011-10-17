@@ -52,7 +52,8 @@
               http://www.youtube.com/embed/nTasT5h0LEg
               http://youtu.be/nTasT5h0LEg
             */
-            var youtubeId = type == 'youtube' ? videoHref.match(/(?:embed\/|watch\/?\?v=)([^&?\/]+)/i)[1] : videoHref.match(/\.be\/(.+)$/)[1];
+            var youtubeId = type == 'youtube' ? videoHref.match(/(?:embed\/|watch\/?\?v=)([^&?\/]+)/i) : videoHref.match(/\.be\/(.+)$/);
+            youtubeId = youtubeId && youtubeId[1];
             videoUrl = docLocPC + '//www.youtube.com/embed/' + youtubeId + '?rel=0';
             vidFinHeight = vidFinHeight + 30; //add player height to video height
             useIframe = true;
@@ -66,7 +67,8 @@
               http://vimeo.com/3274372?title=1
               http://vimeo.com/3274372
             */
-            var videoId = videoHref.match(/\/([0-9a-z]{5,10})\/?(?:[#?]|$)/i)[1];
+            var videoId = videoHref.match(/\/([0-9a-z]{5,10})\/?(?:[#?]|$)/i);
+            videoId = videoId && videoId[1];
             videoUrl = docLocPC + '//player.vimeo.com/video/'+ videoId +'?title=1&amp;byline=0&amp;portrait=0';
             useIframe = true;
           }
@@ -75,9 +77,11 @@
             /*
               urls to handle:
               http://www.facebook.com/v/2246424718688
+              https://www.facebook.com/video/video.php?v=10150469623167067
               http://www.facebook.com/video/video.php?v=2246424718688
             */
-            var videoId = videoHref.match(/(\d{10,20})$/)[1];
+            var videoId = videoHref.match(/(\d{10,20})$/);
+            videoId = videoId && videoId[1];
             videoUrl = docLocPC + '//www.facebook.com/v/'+ videoId;
           }
           else if ( type == 'file' )
