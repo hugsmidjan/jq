@@ -11,7 +11,7 @@
 
   $[makePageStyles] = function (cfg) {
       cfg = $.extend({}, defaults, cfg);
-      var lang = $('html').attr('lang') || 'en',
+      var lang = cfg.lang || $('html').attr('lang') || 'en',
           txt = i18n[ lang ] || i18n.en,
           makeItem = function (type, classIdx, menuElm) {
               return $(cfg.itemTempl
@@ -49,7 +49,7 @@
       {
         var menuUS = menuFB.clone().empty(),
             userstylesOn = !!(cfg.userstyles  &&  $.cookie('userstyles')),
-            setMode = function (e) {
+            toggleMode = function (e) {
                 if ( e )
                 {
                   userstylesOn = !userstylesOn;
@@ -80,38 +80,44 @@
               };
 
         makeItem('uon',  3, menuFB)
-            .bind('click', setMode);
+            .bind('click', toggleMode);
 
         makeItem('uoff', 4, menuUS)
-            .bind('click', setMode);
+            .bind('click', toggleMode);
         makeItem('pref', 5, menuUS)
             .find('a')
                 .attr('href', location.protocol +'//minar.stillingar.is/lesa/form/?redirect=yes&l='+ lang );
 
-        setMode();
+        toggleMode();
       }
 
       if ( cfg.appendTo )
       {
         menuCont.appendTo( cfg.appendTo );
       }
+      if ( $.fn.fontsizer )
+      {
+        menuCont.fontsizer( cfg.fontsizerCfg)
+      }
       return menuCont;
     };
 
   var defaults = $[makePageStyles].defaults = {
           fontsizeBtns:   true,
-          userstyles:     false,
-          boldBtn:        false,
+          //userstyles:     false,
+          //boldBtn:        false,
           boldClass:      'font-bold',
 
           menuTempl:      '<div class="pagestyle screen"><h2>%{headline}:</h2><ul/></div>',
+          //lang:           null, // defaults to html[lang] || 'en'
           appendTo:       'body',
           menuSel:        'ul',
           itemTempl:      '<li><a href="#" title="%{title}">%{label}</a></li>',
           itemClasses:    ['up','dwn','bold','userstyles','off','settings'],
           userstyleMedia: 'all',
           cookieExpires:  365,
-          cookiePath:     '/'
+          cookiePath:     '/',
+          fontsizerCfg:   { doClientSide:true }
         };
 
       i18n = $[makePageStyles].i18n = {
