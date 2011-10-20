@@ -63,11 +63,11 @@
                       .detach();
                   $('link[rel="stylesheet"]').attr('rel', 'disabledstylesheet');
                   $('<link rel="stylesheet" type="text/css" class="userstylesheet" />')
+                      .appendTo( 'head' )
                       .attr({
                           'media': cfg.userstyleMedia,
                           'href':  $('meta[name="X-UserstyleURL"]').attr('content')
-                        })
-                      .appendTo( 'head' );
+                        });
                 }
                 else if (e)
                 {
