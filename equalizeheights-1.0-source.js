@@ -49,7 +49,7 @@
                 // find highest 'natural' element-height
                 .each(function ( i ) {
                     var _this = $( this );
-                    _this.css( _heightAttribute, 0 );
+                    _this.css( _heightAttribute, '' );
                     var _totalHeight = _this.outerHeight(!!_margins);
                     _paddings[i] = _totalHeight - _this.height();
                     _maxHeight = Math.max( _totalHeight, _maxHeight );
