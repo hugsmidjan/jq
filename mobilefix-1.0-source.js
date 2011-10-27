@@ -1,3 +1,4 @@
+// encoding: utf-8
 // Implement common tricks for mobile devices
 
 (function(win, doc, ua, addEv) {
@@ -27,7 +28,7 @@
   // attempt to hide location bar in iPhone and Android devices by scrolling ever so slightly.
   // Based on: https://gist.github.com/1183357
   // If there's a hash, or addEventListener is undefined, stop here
-  if( !location.hash || !win[addEv] ){
+  if( !location.hash && win[addEv] ) {
     var scrTo = 'scrollTo',
         scrTop = scrTo+'p',
         topVal = 1,
