@@ -39,6 +39,7 @@
               videoHref = data.videoHref,
               type = data.type,
               videoUrl,
+              autoplay,
               useIframe = false,
               vidFinHeight = data.videoHeight;
 
@@ -54,7 +55,8 @@
             */
             var youtubeId = type == 'youtube' ? videoHref.match(/(?:embed\/|watch\/?\?v=)([^&?\/]+)/i) : videoHref.match(/\.be\/(.+)$/);
             youtubeId = youtubeId && youtubeId[1];
-            videoUrl = docLocPC + '//www.youtube.com/embed/' + youtubeId + '?rel=0';
+            autoplay = data.autostart ? '&autoplay=1' : '';
+            videoUrl = docLocPC + '//www.youtube.com/embed/' + youtubeId + '?rel=0' + autoplay;
             vidFinHeight = vidFinHeight + 30; //add player height to video height
             useIframe = true;
           }
@@ -69,7 +71,8 @@
             */
             var videoId = videoHref.match(/\/([0-9a-z]{5,10})\/?(?:[#?]|$)/i);
             videoId = videoId && videoId[1];
-            videoUrl = docLocPC + '//player.vimeo.com/video/'+ videoId +'?title=1&amp;byline=0&amp;portrait=0';
+            autoplay = data.autostart ? '&autoplay=1' : '';
+            videoUrl = docLocPC + '//player.vimeo.com/video/'+ videoId +'?title=1&amp;byline=0&amp;portrait=0' + autoplay;
             useIframe = true;
           }
           else if ( type == 'facebook' )
@@ -86,8 +89,8 @@
           }
           else if ( type == 'file' )
           {
-            var extraParams = data.autostart ? 'autostart=true&' : '';
-            videoUrl = '/bitar/common/media/mediaplayer.swf?'+extraParams+'file=' + videoHref;
+            autoplay = data.autostart ? '&autostart=true' : '';
+            videoUrl = '/bitar/common/media/mediaplayer.swf?file=' + videoHref + autoplay;
             vidFinHeight = vidFinHeight + 20; //add player height to video height
           }
           
