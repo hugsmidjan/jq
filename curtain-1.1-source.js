@@ -31,12 +31,12 @@
     jQuery.curtain(true);            // quick-n-dirty mode. applies some default color and opacity to the curtain element
                                      //     { bgcol: '#888', opacity: .5, zindex: 99 }
 
-    jQuery.curtain({                 // applies options to the curtain element.
-        fixed:     Boolean           //  * Triggers `position:fixed` for curtain // default: false
-        className: String,           //  * CSS class-name                        // default: 'curtain-overlay'
-        bg:        CssColorValue,    //  * inline CSS background-color value     // default: none
-        opacity:   Float [0...1],    //  * inline CSS opacity value              // default: none
-        z:         Integer           //  * inline CSS z-index value              // default: none
+    jQuery.curtain({                  // applies options to the curtain element.
+        fixed:     false              //  * Triggers `position:fixed` for curtain
+        className: 'curtain-overlay', //  * CSS class-name
+        bg:        null,              //  * inline CSS background-color value
+        opacity:   null ,             //  * inline CSS opacity value (0-1)
+        z:         null               //  * inline CSS z-index value
       });
 
 
@@ -60,108 +60,120 @@
       heightProp = dimPrefix+'height',
       _opacity = 'opacity',
 
-      curtain = $[_strCurtain] = function (cfg, elm) {
-
-          if (cfg == 'destroy')
-          {
-            var _pos = $.inArray(elm, _curtainlist);
-            if ( _pos > -1 )
-            {
-              $(elm).remove();
-              _curtainlist.splice( _pos, 1 );
-            }
-            !_curtainlist.length  &&  w.unbind('resize', _resizeCurtains);
-            return;
-          }
-
-
-          if (cfg && (cfg.tagName || cfg.jquery))
-          {
-            elm = cfg;
-            cfg = {};
-          }
-
-          cfg = $.extend({
-                className: _strCurtain+'-overlay'
-              },
-              typeof(cfg)=='string' ?  // cfg == 'myCurtainClassName'
-                  { className: cfg }:
-              typeof(cfg)=='boolean'&&cfg ? // cfg === true triggers "sensible defaults" mode
-                  { bg: '#888', opacity: .5, z:99 }:
-                  cfg || {}
-            );
-          msie6 && (cfg.fixed = 0); // disable cfg.fixed in MSIE6
-          var _curtain = $(elm || '<div />')
-                              .hide()
-                              .addClass( cfg.className )
-                              .css({ 
-                                  position: cfg.fixed?'fixed':'absolute',
-                                  top: 0,
-                                  left: 0
-                                })
-                              .css( widthProp,  '100%' )
-                              .css( heightProp, '100%' );
-          // for newly generated (or orphaned elements) auto-append it to document.body
-          if (!elm || !elm.parentNode)
-          {
-            _curtain
-                .appendTo( document.body );
-          }
-          if ( cfg.bg || cfg[_opacity] || cfg.z )
-          {
-            _curtain.css({
-                background: cfg.bg,
-                opacity:    cfg[_opacity],
-                zIndex:     cfg.z
-              });
-          }
-
-          if (!cfg.fixed)
-          {
-            _curtainlist.push(_curtain[0]);
-
-            b = b || $('body'); // delayed assignment to save memory
-            w.bind('resize', _resizeCurtains);
-            _resizeCurtains(1);
-          }
-
-          return _curtain;
-        };
-
-  $.fn[_strCurtain] = function (cfg) {
-      return this.each(function(){  $[_strCurtain](cfg, this);  });
-    };
-
-
-  var _curtainlist = [],
+      _curtainList = [],
 
       w = $(window),
       b,// = $('body');
 
       _resizeCurtains = function (e) {
-          var i = _curtainlist.length,
-              W = -1,
-              H = W;
+          var list = !e ? [this] :  _curtainList,
+              i = list.length,
+              W,
+              H = -1;
 
           while (i--)
           {
-            var elm = _curtainlist[i],
-                $elm = $(elm);
-            if ( elm  &&  ( (elm.parentNode  &&  $elm.is(':visible'))  ||  e == 1 ) )
+            var curtain = $( list[i] );
+            if ( !curtain.data('is'+_strCurtain) )
             {
-              // only calculate window+body dimensions once per _resizeCurtain run, and only if _curtainlist.length>0
-              W = (W!=-1) ? W : Math.max( w.width(),  b.innerWidth() );
-              H = (H!=-1) ? H : Math.max( w.height(), b.innerHeight() );
-              msie6  && $elm // silly IE6 workaround
-                            .css( widthProp, 0 )
+              $[_strCurtain]( 'destroy', curtain );
+            }
+            else if ( !e  ||  (curtain[0].parentNode  &&  curtain.is(':visible')) )
+            {
+              // only calculate window+body dimensions once per _resizeCurtain run, and only if _curtainList.length>0
+              W = (H<0) ? W : Math.max( w.width(),  b.innerWidth()  );
+              H = (H<0) ? H : Math.max( w.height(), b.innerHeight() );
+              msie6  && curtain // silly IE6 workaround
+                            .css( widthProp,  0 )
                             .css( heightProp, 0 );
-              $elm
+              curtain
                   .css( widthProp,  W )
                   .css( heightProp, H );              
             }
           }
         };
 
+
+
+  $[_strCurtain] = function (cfg, elm) {
+
+      if (cfg == 'destroy')
+      {
+        var _pos = $.inArray(elm, _curtainList);
+        if ( _pos > -1 )
+        {
+          $(elm).remove();
+          _curtainList.splice( _pos, 1 );
+        }
+        !_curtainList.length  &&  w.unbind('resize', _resizeCurtains);
+        return;
+      }
+
+
+      if (cfg && (cfg.tagName || cfg.jquery))
+      {
+        elm = cfg;
+        cfg = {};
+      }
+
+      cfg = $.extend({
+            className: _strCurtain+'-overlay'
+          },
+          typeof(cfg)=='string' ?  // cfg == 'myCurtainClassName'  (Too much sugar!)
+              { className: cfg }:
+          (cfg && typeof(cfg)=='boolean') ? // cfg === true triggers "sensible defaults" mode  (Too much sugar!)
+              { bg: '#888', opacity: .5, z:99 }:
+              cfg || {}
+        );
+      msie6 && (cfg.fixed = 0); // disable cfg.fixed in MSIE6
+      var _curtain = $(elm || '<div />')
+                          .hide()
+                          .addClass( cfg.className )
+                          .css({
+                              position: cfg.fixed?'fixed':'absolute',
+                              top: 0,
+                              left: 0
+                            });
+      // for newly generated (or orphaned elements) auto-append it to document.body
+      if (!elm || !elm.parentNode)
+      {
+        _curtain
+            .appendTo( document.body );
+      }
+
+      if (!cfg.fixed)
+      {
+        _curtainList.push( _curtain[0] );
+
+        b = b || $('body'); // delayed assignment to save memory
+        w.bind('resize', _resizeCurtains);
+        _curtain
+            .data('is'+_strCurtain, !0)
+            .each(_resizeCurtains);
+      }
+      else
+      {
+        _curtain
+            .css( widthProp,  '100%' )
+            .css( heightProp, '100%' );
+      }
+
+      if ( cfg.bg || cfg[_opacity] || cfg.z )
+      {
+        _curtain.css({
+            background: cfg.bg,
+            opacity:    cfg[_opacity],
+            zIndex:     cfg.z
+          });
+      }
+
+      return _curtain;
+    };
+
+
+  $.fn[_strCurtain] = function (cfg) {
+      return this.each(function(){  $[_strCurtain](cfg, this);  });
+    };
 
 
 
