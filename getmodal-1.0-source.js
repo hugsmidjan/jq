@@ -7,10 +7,12 @@
 //   * Már Örlygsson        -- http://mar.anomy.net
 // ----------------------------------------------------------------------------------
 //
+//  Provides basic modal popup UI service on top of $.fn.fickle and
+//  with close button, and $.fn.curtain behaviour - 
+//
+//
 //  Depends on:
 //    $.fn.fickle  v1.0
-//    $.fn.curtain v1.1  (optional)
-//
 //
 //  Usage:
 //      var modal = $.getModal({
@@ -29,21 +31,23 @@
 
     $.getModal = function (cfg) {
         cfg = $.extend({
-            // modal:    false,  // `true` means direct clicks on the .modalpop (curtain/container) DO NOT close the modal.
-            // className: '',
-            // content:   '',
-            // marginTop: '',  // defaults to $(window).scrollTop() - unless explicitly set to `null`
-            // appendTo:  'body',
-            // opener:    ''      // shortcut for fickle:{ opener:... }
-            // curtain:  '',   // $.fn.curtain configuration  -- set to `null` to disable the curtain functionality
-            // fickle:  ''   // $.fn.fickle configuration (NOTE: getModal always sets the "focusTarget" option to falsy)
+            // modal:    false,   // Boolean: `true` prevents direct clicks on the .modalpop (curtain/container) from closing the modal.
+            // className: '',     // String: additional class-name for the (outermost) modal container
+            // content:   '',     // String/Elements - initial HTML content for the "body" element (as defined by the `bodySel` setting below)
+            // marginTop: '',     // Integer/Function: specifies the margin-top value set to the "window" element (see `winSel` setting below)
+                                  // defaults to $(window).scrollTop() - unless explicitly set to `null`
+            // appendTo:  'body', // Selector|Element: to which to append the modal
+            // opener:    ''      // shortcut for fickle:{ opener:... } -- i.e. the button/element to which the focus should return when the modal closes
+            // fickle:  ''        // $.fn.fickle configuration (NOTE: getModal always sets the "focusTarget" option to falsy)
             template: '<div class="modalpop">'+
+                        '<span class="curtain"/>'+
                         '<div class="popwin">'+
                           '<a class="focustarget" href="#">.</a>'+
                           '<div class="popbody"/>'+
                           '<a class="closebtn" href="#"/>'+
                         '</div>'+
                       '</div>',
+            // curtainSel:  ''    // Selector: describing the "curtain" element - defaults to '' - i.e. the .modalpop container itself.
             winSel:      '>.popwin',
             bodySel:     '>*>.popbody',
             closebtnSel: '>*>.closebtn'
@@ -64,21 +68,22 @@
 
         if ( cfg.content )
         {
-          popup.find( cfg.bodySel ).append( cfg.content );
+          popup.find( cfg.bodySel )
+              .append( cfg.content );
         }
         if ( cfg.marginTop !== null  )
         {
           popup
               .bind('fickleopen', function (/* e */) {
                   var marginTop = cfg.marginTop;
+                  marginTop = (marginTop===undef) ?
+                                  $(window).scrollTop():
+                              $.isFunction(marginTop) ?
+                                  marginTop.call(this):
+                                  marginTop
                   $(this).find(cfg.winSel)
-                      .css( 'margin-top', (marginTop!==undef) ? marginTop : $(window).scrollTop() );
+                      .css( 'margin-top', marginTop );
                 });
-        }
-        if ( popup.curtain  &&  cfg.curtain !== null  )
-        {
-          popup
-              .curtain( cfg.curtain||'' );
         }
         popup
             .data('popclosebtn', closeBtn)
@@ -86,7 +91,13 @@
             .addClass( cfg.className )
             .bind('click', function (e) {
                 var targ = e.target;
-                if ( (!cfg.modal && targ == this)  ||  $(targ).closest(cfg.closeSel)[0] )
+                if ( ( !cfg.modal  && 
+                        ( targ == this  ||  
+                          ( cfg.cfg.curtainSel  &&  targ == $(this).find(cfg.cfg.curtainSel)[0] )
+                        )
+                      )  ||  
+                      $(targ).closest(cfg.closebtnSel)[0] 
+                    )
                 {
                   $(this).fickle('close');
                   return false;
