@@ -48,9 +48,9 @@
                         '</div>'+
                       '</div>',
             // curtainSel:  ''    // Selector: describing the "curtain" element - defaults to '' - i.e. the .modalpop container itself.
-            winSel:      '>.popwin',
-            bodySel:     '>*>.popbody',
-            closebtnSel: '>*>.closebtn'
+            winSel:      '.popwin',
+            bodySel:     '.popbody',
+            closebtnSel: '.closebtn'
           },
           $.getModal.defaults,
           cfg);
@@ -93,7 +93,7 @@
                 var targ = e.target;
                 if ( ( !cfg.modal  && 
                         ( targ == this  ||  
-                          ( cfg.cfg.curtainSel  &&  targ == $(this).find(cfg.cfg.curtainSel)[0] )
+                          ( cfg.curtainSel  &&  targ == $(this).find(cfg.curtainSel)[0] )
                         )
                       )  ||  
                       $(targ).closest(cfg.closebtnSel)[0] 
