@@ -141,7 +141,13 @@
             .appendTo( document.body );
       }
 
-      if (!cfg.fixed)
+      if (cfg.fixed)
+      {
+        _curtain
+            .css( widthProp,  '100%' )
+            .css( heightProp, '100%' );
+      }
+      else
       {
         _curtainList.push( _curtain[0] );
 
@@ -150,12 +156,6 @@
         _curtain
             .data('is'+_strCurtain, !0)
             .each(_resizeCurtains);
-      }
-      else
-      {
-        _curtain
-            .css( widthProp,  '100%' )
-            .css( heightProp, '100%' );
       }
 
       if ( cfg.bg || cfg[_opacity] || cfg.z )
