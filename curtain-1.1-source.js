@@ -81,8 +81,8 @@
             else if ( !e  ||  (curtain[0].parentNode  &&  curtain.is(':visible')) )
             {
               // only calculate window+body dimensions once per _resizeCurtain run, and only if _curtainList.length>0
-              W = (H<0) ? W : Math.max( w.width(),  b.innerWidth()  );
-              H = (H<0) ? H : Math.max( w.height(), b.innerHeight() );
+              W = (H>-1) ? W : Math.max( w.width(),  b.innerWidth()  );
+              H = (H>-1) ? H : Math.max( w.height(), b.innerHeight() );
               msie6  && curtain // silly IE6 workaround
                             .css( widthProp,  0 )
                             .css( heightProp, 0 );
