@@ -80,7 +80,7 @@
                                   $(window).scrollTop():
                               $.isFunction(marginTop) ?
                                   marginTop.call(this):
-                                  marginTop
+                                  marginTop;
                   $(this).find(cfg.winSel)
                       .css( 'margin-top', marginTop );
                 });
