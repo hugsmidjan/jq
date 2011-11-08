@@ -20,6 +20,7 @@
       jQuery('ul').delayedHighlight({
           delegate:     'li',             // the elements to highlight ... 
                                           // Set `delegate` to `''` or `null` to highlight the collection itself.
+          holes:        null,             // sub-selector for elements that should work as holes in the delegate element
           className:    'focused',        // for highlighted elements
           delay:        500,              // ms, until highlighton
           delayOut:     300,              // ms, until highlightoff (applies when sticky !== true)
@@ -59,6 +60,7 @@
       {
         cfg = $.extend({
               //delegate:     'li',
+              //holes:        null,
               className:    'focused',
               delay:        500,
               delayOut:     300,
@@ -72,8 +74,11 @@
           );
         var list = this,
             className =  cfg.className,
-            delegate =   !('delegate' in cfg) ? 'li' : cfg.delegate,
+            delegate =   !('delegate' in cfg) ? 'li' : cfg.delegate, // make sure the default doesn't override explicitly falsy cfg.delegate values 
+            holes =      cfg.holes,
+            holeSelector = (delegate?delegate+' ':'')+holes,
             evPrefix =   'highlight',
+            clrTimeout = clearTimeout,
             inTimeout,
             outTimeout,
             activeItem,
@@ -85,30 +90,40 @@
               .bind( evPrefix+'on '+evPrefix+'off', false ) // don't have the custom events bubble upwards from the list
         }
 
+
         var highlightOn = function (e) {
-                var item = $(this);
-                clearTimeout( outTimeout );
-                (e.type.charAt(0)=='m')  &&  (currentHover = this);
-                inTimeout = setTimeout(function(){
-                    if ( !activeItem  ||  item[0] != activeItem[0] )
-                    {
-                      if ( activeItem )
+                if ( holes && $(e.target).closest(holes, this)[0] )
+                {
+                  highlightOff.call(this, e);
+                }
+                else
+                {
+                  var item = $(this);
+                  clrTimeout( inTimeout );
+                  clrTimeout( outTimeout );
+                  (e.type.charAt(0)=='m')  &&  (currentHover = this);
+                  inTimeout = setTimeout(function(){
+                      if ( !activeItem  ||  item[0] != activeItem[0] )
                       {
-                        activeItem
-                            .removeClass( className )
-                            .trigger( evPrefix+'off' );
+                        if ( activeItem )
+                        {
+                          activeItem
+                              .removeClass( className )
+                              .trigger( evPrefix+'off' );
+                        }
+                        activeItem = item;
+                        item
+                            .addClass( className )
+                            .trigger( evPrefix+'on' );
                       }
-                      activeItem = item;
-                      item
-                          .addClass( className )
-                          .trigger( evPrefix+'on' );
-                    }
-                  }, e.delayOut || cfg.delay);
+                    }, e.delayOut || cfg.delay);
+                }
               },
 
             highlightOff = function (e) {
                 var isClick = e.type=='click';
-                clearTimeout( inTimeout );
+                clrTimeout( inTimeout );
+                clrTimeout( outTimeout );
                 if ( !cfg.sticky  ||  isClick )
                 {
                   (e.type.charAt(0)=='m')  &&  (currentHover = undefined);
@@ -124,7 +139,7 @@
                 }
               },
 
-            highlingOnClick = function (e) {
+            handleClick = function (e) {
                 var method = ( !activeItem  ||  this != activeItem[0] ) ?
                                   highlightOn:
                               ( cfg.clickToggles  &&  !$(e.target).closest( cfg.cancelOff||'' )[0]  ) ?
@@ -133,28 +148,20 @@
                 method  &&  method.call( this, { type:'click', delayOut: 1 } );
               };
 
-        // FIXME: this forking shouldn't be neccessary, but current versions of jQuery
-        // perform some weird internal handling of missing `selector` parameters on the `.delegate()` method
-        // falling back on `.live()` and thus failing unexpectedly when the `list` collection has no 
-        // `selector` property (i.e. when it was created via a `$(element)` operation).
-        // See feature request: http://bugs.jquery.com/ticket/9316
+
         if ( delegate )
         {
           list
               .delegate(delegate, 'mouseover focusin', highlightOn)
               .delegate(delegate, 'mouseout focusout', highlightOff);
+          cfg.click  &&  list.delegate(delegate, 'click', handleClick);
         }
         else
         {
           list
               .bind('mouseover focusin', highlightOn)
               .bind('mouseout focusout', highlightOff);
-        }
-        if ( cfg.click )
-        {
-          delegate ? 
-              list.delegate(delegate, 'click', highlingOnClick):
-              list.bind('click', highlingOnClick);
+          cfg.click  &&  list.bind('click', handleClick);
         }
 
       }
