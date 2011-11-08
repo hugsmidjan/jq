@@ -78,6 +78,8 @@
       statusCurrTempl:   '<b/>',
       statusTotalTempl:  '<i/>',
       inputPagerTempl:   '<input type="text" value="" size="2"/>'
+
+      //destroy:           false // true strips away all listscroller classes, paging elements, etc. etc.
     },
 
 
@@ -245,7 +247,7 @@
 
   function setPos ( c, _newIndex, opts )
   {
-    clearTimeout(c.scrollTimeout);
+    clearTimeout( c.scrollTimeout );
 
     opts = opts || {};
     var _block = c.block;
@@ -253,87 +255,91 @@
     c.lastIndex = c.index;
     c.index = $.listscroller.wrap[ c.wrap || 'none' ]( _newIndex, list, c );
 
-    list
-        .addClass( c.hideClass )
-        .removeClass( c.cursorItemClass )
-        .removeClass( c.currentItemClass )
-        .slice( c.index, c.index + c.windowSize )
-            .addClass( c.currentItemClass )
-            .removeClass( c.hideClass )
-            .eq(0)
-                .addClass( c.cursorItemClass );
+    if ( c.index != c.lastIndex )
+    {
+      list
+          .addClass( c.hideClass )
+          .removeClass( c.cursorItemClass )
+          .removeClass( c.currentItemClass )
+          .slice( c.index, c.index + c.windowSize )
+              .addClass( c.currentItemClass )
+              .removeClass( c.hideClass )
+              .eq(0)
+                  .addClass( c.cursorItemClass );
 
-    if ( $.isFunction( c.moveCallback ) )
-    {
-      c.moveCallback.call( _block, list, c );
-    }
+      if ( $.isFunction( c.moveCallback ) )
+      {
+        c.moveCallback.call( _block, list, c );
+      }
 
-    if ( $.isFunction( c.animation ) )
-    {
-      c.animation.call( _block, list, c )
-    }
-    else
-    {
-      $.listscroller.animate[ c.animation||'none' ].call( _block, list, c );
-    }
-    if ( !opts._noFocus  &&  c.setFocus )
-    {
-      setTimeout(function(){
-          list.eq( c.index ).setFocus();
-        }, c.speed || 1 );
-    }
+      if ( $.isFunction( c.animation ) )
+      {
+        c.animation.call( _block, list, c )
+      }
+      else
+      {
+        $.listscroller.animate[ c.animation||'none' ].call( _block, list, c );
+      }
+      // Food for thought: should we move this block out of the c.index != c.lastIndex check??
+      if ( !opts._noFocus  &&  c.setFocus )
+      {
+        setTimeout(function(){
+            list.eq( c.index ).setFocus();
+          }, c.speed || 1 );
+      }
 
-    _block
-      .removeClass( c.topClass )
-      .removeClass( c.bottomClass );
+      _block
+        .removeClass( c.topClass )
+        .removeClass( c.bottomClass );
 
-    if ( c.index == 0 )
-    {
-      _block.addClass( c.topClass );
-    }
+      if ( c.index == 0 )
+      {
+        _block.addClass( c.topClass );
+      }
 
-    if ( c.index == list.length - c.windowSize )
-    {
-      _block.addClass( c.bottomClass );
-    }
+      if ( c.index == list.length - c.windowSize )
+      {
+        _block.addClass( c.bottomClass );
+      }
 
-    // flash the container
-    if (!opts._noFlash)
-    {
-      _block.addClass( c.classPrefix + '-changed' );
-      setTimeout(function(){
-          _block.removeClass( c.classPrefix + '-changed' );
-        }, c.speed || 1);
-    }
+      // flash the container
+      if (!opts._noFlash)
+      {
+        _block.addClass( c.classPrefix + '-changed' );
+        setTimeout(function(){
+            _block.removeClass( c.classPrefix + '-changed' );
+          }, c.speed || 1);
+      }
 
-    var newWinIndex = Math.ceil(c.index / c.stepSize);
-    // mark paging/status/ element if needed
-    if ( c.jumps )
-    {
-      c.jumps
-          .removeClass( c.currentPageClass )
-          .eq( newWinIndex )
-              .addClass( c.currentPageClass )
-    }
+      var newWinIndex = Math.ceil(c.index / c.stepSize);
+      // mark paging/status/ element if needed
+      if ( c.jumps )
+      {
+        c.jumps
+            .removeClass( c.currentPageClass )
+            .eq( newWinIndex )
+                .addClass( c.currentPageClass )
+      }
 
-    var newSatusIndex = c.itemStatusPager ?  c.index : newWinIndex;
-    c.inputPager  &&  c.inputPager.val( newWinIndex+1 );
-    c.status      &&  c.status.text( newSatusIndex+1 );
+      var newSatusIndex = c.itemStatusPager ?  c.index : newWinIndex;
+      c.inputPager  &&  c.inputPager.val( newWinIndex+1 );
+      c.status      &&  c.status.text( newSatusIndex+1 );
 
-    if (c.status  &&  c.itemStatusPager  &&  c.windowSize > 1)
-    {
-      var lastIdx = newSatusIndex + c.windowSize;
-      lastIdx = ( lastIdx > list.length ) ? list.length : lastIdx;
-       c.status.append( '-' + lastIdx );
-    }
-    
-    if(c.autoScrollDelay)
-    {
-      _block.queue(function () {
-          _block
-              .trigger('afterMove')
-              .dequeue();
-        });
+      if (c.status  &&  c.itemStatusPager  &&  c.windowSize > 1)
+      {
+        var lastIdx = newSatusIndex + c.windowSize;
+        lastIdx = ( lastIdx > list.length ) ? list.length : lastIdx;
+         c.status.append( '-' + lastIdx );
+      }
+      
+      if(c.autoScrollDelay)
+      {
+        _block.queue(function () {
+            _block
+                .trigger('afterMove')
+                .dequeue();
+          });
+      }
     }
 
   }
@@ -464,108 +470,161 @@
 
 
 
-  function initScroller ( c, _block, _items )
+  function initScroller ( cfg, _block, _items )
   {
+    var _ref,
+        _inner,
+        _outer;
 
-    // test and stop repeat inits
-    if ( _block.hasClass( c.classPrefix + '-active' ) )
+    var oldCfg = _block.data('listscrollerCfg');
+    if ( oldCfg )
     {
-      return False;
-    }
+      // reset/clear to allow a fresh start
 
-    c.list = _items;
-    c.block = _block;
+      _block.removeData('listscrollerCfg');
 
-    // wrap elements with containers
-    var _ref, _inner, _outer;
-    if (_items.eq( 0 ).is( 'li' ))
-    {
-      _inner = _items.parent();
-    }
-    else
-    {
-      _inner = _items.wrapAll( '<div />' ).parent();
-    }
-
-    _outer = _inner.wrap( '<div />' ).parent();
-    _inner.addClass( c.classPrefix + '-clip' );
-    _outer.addClass( c.classPrefix + '-wrapper' );
-    _block.addClass( c.classPrefix + '-active' );
-
-    _inner.add( _outer ).css( 'position', 'relative' );
-    _outer.addClass( c.classPrefix + '-' + c.aspect );
-
-    // for circular carousels
-    if ( c.wrap == 'loop' )
-    {
-      // generate flipover items
-      c.flipover = _items
-                      .slice( 0, c.windowSize )
-                          .clone( True );
-      _items
-          .parent()
-              .append( c.flipover );
-    }
-
-    // create and display control-links
-    if ( c.controls !== 'none' && _items.length > 0 )
-    {
-      if ( /^(above|both)$/.test( c.controls ) )
+      _inner = oldCfg.list.parent();
+      _outer = _inner.parent();
+      if ( cfg.destroy )
       {
-        _outer
-            .before( buildControls( c )
-            .addClass( c.pagingTopClass ) );
+        _inner.filter('div').zap();
+        _outer.zap();
+        _inner = _outer = undefined;
       }
+      
+      clearTimeout( oldCfg.scrollTimeout );
 
-      if ( /^(below|both)$/.test( c.controls ) )
-      {
-        _outer
-            .after( buildControls( c )
-            .addClass( c.pagingBottomClass ) );
-      }
-
-    }
-
-    if ( c.aspect == 'auto' )
-    {
-      c.aspect = detectAspect( _items ) || // try to determine aspect
-                 $.listscroller.aspectDefaults[ c.animation ] ||  // pick default aspect for animation
-                 'horizontal';  // final fallback
-    }
-    _outer.addClass( c.classPrefix + '-' + c.aspect );
-
-    //randomize starting position
-    if ( c.startPos == 'random' )
-    {
-      c.startPos = Math.floor(Math.ceil(_items.length / c.stepSize) * Math.random()) * c.stepSize;
-    }
-
-    // set initial position
-    setPos( c, c.startPos || 0, { _noFlash:True, _noFocus:True } );
-
-    if(c.autoScrollDelay)
-    {
-      var nexttrigger = function ( e ) {
-            setPos( c, c.index + c.stepSize, { _noFlash:True, _noFocus:True } );
-          };
-      c.scrollTimeout = setTimeout( nexttrigger, c.autoScrollDelay );
+      var oldDisplay = _block.css('display');
       _block
-          .bind('mouseenter', function (e) {
-              _block.addClass('block-mouseover');
-              clearTimeout(c.scrollTimeout);
-            })
-          .bind('mouseleave', function (e) {
-              _block.removeClass('block-mouseover');
-              clearTimeout(c.scrollTimeout);
-              c.scrollTimeout = setTimeout( nexttrigger, c.autoScrollDelay );
-            })
-          .bind('afterMove', function (e) {
-              if (!_block.is('.block-mouseover'))
-              {
-                clearTimeout(c.scrollTimeout);
-                c.scrollTimeout = setTimeout( nexttrigger, c.autoScrollDelay );
-              }
-            });
+          .hide()
+          .removeClass( oldCfg.classPrefix + '-active' )
+          .removeClass( oldCfg.topClass )
+          .removeClass( oldCfg.bottomClass )
+          .removeClass( 'block-mouseover' )
+          .unbind('.lscr')
+          .find( '.'+ $.trim( oldCfg.pagingTopClass +',.'+ oldCfg.pagingBottomClass ).replace(/ +/g,'.') )
+              .remove();
+      oldCfg.list
+          .removeClass( oldCfg.hideClass )
+          .removeClass( oldCfg.cursorItemClass )
+          .removeClass( oldCfg.currentItemClass );
+      oldCfg.flipover && oldCfg.flipover
+          .remove();
+      _inner && _inner
+          .removeClass( oldCfg.classPrefix + '-clip' )
+          .css( 'position', '' );
+      _outer && _outer
+          .scroll(0,0)
+          .removeClass( oldCfg.classPrefix + '-wrapper' )
+          .removeClass( oldCfg.classPrefix + '-' + oldCfg.aspect )
+          .css( 'position', '' );
+      _block
+          .css( 'display', oldDisplay );
+      // END: Cleanup/Reset
+
+    }
+
+    if ( !cfg.destroy )
+    {
+
+      _items = typeof _items == 'string' ?
+              _block.find( _items ):
+              _items;
+
+      if ( !oldCfg )
+      {
+        // wrap elements with containers
+        _inner = _items.eq( 0 ).is( 'li' ) ? 
+                    _items.parent():
+                    _items.wrapAll( '<div />' ).parent(),
+        _outer = _inner.wrap( '<div />' ).parent();
+      }
+
+      cfg.list = _items;
+      cfg.block = _block;
+      _block.data('listscrollerCfg', cfg);
+
+      _block
+          .addClass( cfg.classPrefix + '-active' );
+      _outer
+          .addClass( cfg.classPrefix + '-wrapper' )
+          .addClass( cfg.classPrefix + '-' + cfg.aspect );
+      _inner
+          .addClass( cfg.classPrefix + '-clip' )
+          .add( _outer )
+              .css( 'position', 'relative' );
+
+      // for circular carousels
+      if ( cfg.wrap == 'loop' )
+      {
+        // generate flipover items
+        cfg.flipover = _items
+                        .slice( 0, cfg.windowSize )
+                            .clone( True );
+        _items
+            .parent()
+                .append( cfg.flipover );
+      }
+
+      // create and display control-links
+      if ( cfg.controls !== 'none' && _items.length > 0 )
+      {
+        if ( /^(above|both)$/.test( cfg.controls ) )
+        {
+          _outer
+              .before( buildControls( cfg ).addClass( cfg.pagingTopClass ) );
+        }
+
+        if ( /^(below|both)$/.test( cfg.controls ) )
+        {
+          _outer
+              .after( buildControls( cfg ).addClass( cfg.pagingBottomClass ) );
+        }
+
+      }
+
+      if ( cfg.aspect == 'auto' )
+      {
+        cfg.aspect = detectAspect( _items ) || // try to determine aspect
+                   $.listscroller.aspectDefaults[ cfg.animation ] ||  // pick default aspect for animation
+                   'horizontal';  // final fallback
+      }
+      _outer.addClass( cfg.classPrefix + '-' + cfg.aspect );
+
+      //randomize starting position
+      if ( cfg.startPos == 'random' )
+      {
+        cfg.startPos = Math.floor(Math.ceil(_items.length / cfg.stepSize) * Math.random()) * cfg.stepSize;
+      }
+
+      // set initial position
+      setPos( cfg, cfg.startPos || 0, { _noFlash:True, _noFocus:True } );
+
+      if ( cfg.autoScrollDelay )
+      {
+        var nexttrigger = function ( e ) {
+              setPos( cfg, cfg.index + cfg.stepSize, { _noFlash:True, _noFocus:True } );
+            };
+        cfg.scrollTimeout = setTimeout( nexttrigger, cfg.autoScrollDelay );
+        _block
+            .bind('mouseenter.lscr', function (e) {
+                _block.addClass('block-mouseover');
+                clearTimeout(cfg.scrollTimeout);
+              })
+            .bind('mouseleave.lscr', function (e) {
+                _block.removeClass('block-mouseover');
+                clearTimeout(cfg.scrollTimeout);
+                cfg.scrollTimeout = setTimeout( nexttrigger, cfg.autoScrollDelay );
+              })
+            .bind('afterMove.lscr', function (e) {
+                if ( !_block.is('.block-mouseover') )
+                {
+                  clearTimeout(cfg.scrollTimeout);
+                  cfg.scrollTimeout = setTimeout( nexttrigger, cfg.autoScrollDelay );
+                }
+              });
+      }
+
     }
 
   }
@@ -574,15 +633,14 @@
   $.fn.listscroller = function ( config )
   {
     var dc = $.listscroller.defaultConfig;
-    if ( (config && config.item) || dc.item )
+    if ( (config && config.item || config.destroy) || dc.item )
     {
       this.each(function () {
           var b = $( this ),
               _lang = b.closest('[lang]').attr( 'lang' ) || '',
               i18n = $.listscroller.i18n,
               txts = i18n[_lang.toLowerCase()] || i18n[_lang.substr(0,2)] || i18n.en,
-        
-              cfg = $.extend({}, dc, txts, { scrollTimeout: 0}, config );
+              cfg = $.extend( {}, dc, txts, config );
 
           if (cfg.itemStatusPager)
           {
@@ -592,9 +650,7 @@
           initScroller(
               cfg,
               b,
-              typeof cfg.item == 'string' ?
-                  b.find( cfg.item ):
-                  cfg.item
+              cfg.item
             );
         });
     }
