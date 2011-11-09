@@ -6,7 +6,7 @@
  * Released under the MIT and GPL licenses.
  */
 
-// Imported from jQuery UI Effects 1.8.13 (and modified)
+// Imported from jQuery UI Effects 1.8.16 (and modified)
 
 // override the animation for color styles
 $.each(['backgroundColor', 'borderBottomColor', 'borderLeftColor',
