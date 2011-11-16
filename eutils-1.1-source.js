@@ -422,20 +422,23 @@
       return el.id;
     },
 
-    
 
-    // Turns `$.get`/`$.ajax` responseText HTML document source into a DOM tree, wrapped in a `<div/>` element for easy `.find()`ing
-    // Stripping out all nasty `<script>`s and such things.
-    getResultBody: function(responseText) {
-        //return $('<body/>').append( // <-- this seems to cause crashes in IE8. (Note: Crash doesn't seem to happen on first run)
-        return $('<div/>').append(
-                    $(responseText||[])
-                        .not('script,title,meta,link,style')
-                            .find('script,style')
-                                .remove()
-                            .end()
-                  );
-      },
+
+  // Utility method to turn `$.get`/`$.ajax` xhr.responseText HTML document source
+  // into a DOM tree, wrapped in a `<div/>` element for easy `.find()`ing
+  // ...stripping out all nasty `<script>`s and such things.
+  getResultBody: function (responseText, cfg) {
+      var me = $.getResultBody;
+      cfg = cfg || {};
+      //return $('<body/>').append( // <-- this seems to cause crashes in IE8. (Note: Crash doesn't seem to happen on first run)
+      return $('<div/>').append(
+                  $(responseText||[])
+                      .not( cfg.stripFlat || me.stripFlat || 'script,title,meta,link,style' )
+                          .find( cfg.stripDeep || me.stripDeep || 'script,style' )
+                              .remove()
+                          .end()
+                );
+    },
 
 
 
