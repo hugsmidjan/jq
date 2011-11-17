@@ -44,6 +44,10 @@
       {
         makeItem('up',  0, menuFB);
         makeItem('dwn', 1, menuFB);
+        if ( $.fn.fontsizer )
+        {
+          menuFB.fontsizer( cfg.fontsizerCfg)
+        }
       }
       if ( cfg.userstyles )
       {
@@ -95,10 +99,6 @@
       if ( cfg.appendTo )
       {
         menuCont.appendTo( cfg.appendTo );
-      }
-      if ( $.fn.fontsizer )
-      {
-        menuCont.fontsizer( cfg.fontsizerCfg)
       }
       return menuCont;
     };
