@@ -77,6 +77,7 @@
                   $('link.userstylesheet').remove();
                   $('link[rel="disabledstylesheet"]').attr('rel', 'stylesheet');
                 }
+                $('body').toggleClass('userstyles-on', userstylesOn);
               };
 
         makeItem('uon',  3, menuFB)
