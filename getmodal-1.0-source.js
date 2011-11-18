@@ -27,39 +27,15 @@
 //    * add support for jQuery UI Position plugin
 //
 
-(function( $, undef ){
+(function( $, undef, getModal ){
 
-    $.getModal = function (cfg) {
-        cfg = $.extend({
-            // modal:    false,   // Boolean: `true` prevents direct clicks on the .modalpop (curtain/container) from closing the modal.
-            // className: '',     // String: additional class-name for the (outermost) modal container
-            // content:   '',     // String/Elements - initial HTML content for the "body" element (as defined by the `bodySel` setting below)
-            // marginTop: '',     // Integer/Function: specifies the margin-top value set to the "window" element (see `winSel` setting below)
-                                  // defaults to $(window).scrollTop() - unless explicitly set to `null`
-            // appendTo:  'body', // Selector|Element: to which to append the modal
-            // opener:    ''      // shortcut for fickle:{ opener:... } -- i.e. the button/element to which the focus should return when the modal closes
-            // fickle:  ''        // $.fn.fickle configuration (NOTE: getModal always sets the "focusTarget" option to falsy)
-            template: '<div class="modalpop">'+
-                        '<span class="curtain"/>'+
-                        '<div class="popwin">'+
-                          '<a class="focustarget" href="#">.</a>'+
-                          '<div class="popbody"/>'+
-                          '<a class="closebtn" href="#"/>'+
-                        '</div>'+
-                      '</div>',
-            // curtainSel:  ''    // Selector: describing the "curtain" element - defaults to '' - i.e. the .modalpop container itself.
-            winSel:      '.popwin',
-            bodySel:     '.popbody',
-            closebtnSel: '.closebtn'
-          },
-          $.getModal.defaults,
-          cfg);
-
+    getModal = $.getModal = function (cfg) {
+        cfg = $.extend({}, getModal.defaults, cfg );
         var popup = $( cfg.template );
 
         var lang = $( cfg.opener || 'html' ).closest('[lang]').attr('lang') || 'en',
             closeBtn = popup.find( cfg.closebtnSel ),
-            txt = $.getModal.i18n;
+            txt = getModal.i18n;
         txt = txt[ lang.substr(0,2) ] || txt.en;
 
         closeBtn
@@ -124,8 +100,32 @@
         return popup;
       };
 
+
+
+    getModal.defaults = {
+        // modal:    false,   // Boolean: `true` prevents direct clicks on the .modalpop (curtain/container) from closing the modal.
+        // className: '',     // String: additional class-name for the (outermost) modal container
+        // content:   '',     // String/Elements - initial HTML content for the "body" element (as defined by the `bodySel` setting below)
+        // marginTop: '',     // Integer/Function: specifies the margin-top value set to the "window" element (see `winSel` setting below)
+                              // defaults to $(window).scrollTop() - unless explicitly set to `null`
+        // appendTo:  'body', // Selector|Element: to which to append the modal
+        // opener:    ''      // shortcut for fickle:{ opener:... } -- i.e. the button/element to which the focus should return when the modal closes
+        // fickle:  ''        // $.fn.fickle configuration (NOTE: getModal always sets the "focusTarget" option to falsy)
+        template: '<div class="modalpop">'+
+                    '<span class="curtain"/>'+
+                    '<div class="popwin">'+
+                      '<a class="focustarget" href="#">.</a>'+
+                      '<div class="popbody"/>'+
+                      '<a class="closebtn" href="#"/>'+
+                    '</div>'+
+                  '</div>',
+        curtainSel:  '.curtain',    // Selector: describing the "curtain" element - defaults to '' - i.e. the .modalpop container itself.
+        winSel:      '.popwin',
+        bodySel:     '.popbody',
+        closebtnSel: '.closebtn'
+      };
     
-    $.getModal.i18n = {
+    getModal.i18n = {
         dk: {
             closeT: 'Close popup',
             close: 'Luk'
