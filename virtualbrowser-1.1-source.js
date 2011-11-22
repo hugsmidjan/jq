@@ -198,7 +198,7 @@
 
       _methods = {
 
-          'load': function (arg) {
+          'load': function (arg, _privateOpts) {
               var request = {},
                   elm,
                   url,
@@ -213,7 +213,7 @@
               {
                 $.extend( request, arg );
                 url = request.url;
-                delete request.elm; // incoming request objects don't get to have a URL - it only confuses things.
+                delete request.elm; // incoming request objects don't get to have an elm - it only confuses things.
               }
               else if ( typeof arg == 'string' )
               {
@@ -383,7 +383,6 @@
                   if ( evBeforeload._doIframeSubmit )
                   {
                     // perform a fake XHR request by temporarily injecting an iframe;
-                    ajaxOptions = $.extend({}, ajaxOptions);
                     var iframeName = 'if'+ (new Date).getTime(),
                         // javascript:""; seems to be the safest bet for HTTP and HTTPS pages.
                         // See here: http://www.zachleat.com/web/adventures-in-i-frame-shims-or-how-i-learned-to-love-the-bomb/
@@ -413,6 +412,10 @@
                         // (Otherwise tab-loading indicator keeps spinning idefinitely (in Firefox at least).)
                         setTimeout(function(){ iframe.remove(); }, 0);
                       });
+                    if ( !_privateOpts || !_privateOpts._nativeEvent )
+                    {
+                      elm.trigger('submit', ['VBiframeHack']);
+                    }
                   }
                   else
                   {
@@ -485,7 +488,7 @@
               }
               else // normal link-click or submit event
               {
-                var bfloadEv = _methods['load'].call(vbElm, elm);
+                var bfloadEv = _methods['load'].call(vbElm, elm, {_nativeEvent:true});
                 if ( !bfloadEv[_passThrough] )
                 {
                   !bfloadEv._doIframeSubmit  &&  e[_preventDefault]();
