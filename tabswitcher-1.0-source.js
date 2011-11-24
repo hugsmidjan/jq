@@ -85,13 +85,9 @@
         data.tab.removeClass( c.currentTabClass );
 
         // unwrap the `currentTabTag` element if it exists
-        if ( c.currentTabTag ) {
-          var w = data.tab.find( c.currentTabTag );
-          if ( w.length ) {
-            var p = data.link[0];
-            while (w[0].firstChild) { p.appendChild(w[0].firstChild); }
-            w.remove();
-          }
+        if ( c.currentTabTag )
+        {
+          data.tab.find( c.currentTabTag ).zap();
         }
 
         // hide the tabPanel block
@@ -248,34 +244,35 @@
       fixInitScroll : true,
 
       // the tabswitcher keeps the current status of tabs in a 20 minute session if this is set
-      cookieName       : 'tabswitcher',    // tabs status cookie state  - setting this to "" will disable it's use
-      cookiePath       : '/',              // set to '' to set a unique cookie for each page.
-      cookieTTL        : 1200,             // Number of seconds before we forget the tab-satus  (1200 sec / 60 = 20 min)
+      cookieName:        'tabswitcher',    // tabs status cookie state  - setting this to "" will disable it's use
+      cookiePath:        '/',              // set to '' to set a unique cookie for each page.
+      cookieTTL:         1200,             // Number of seconds before we forget the tab-satus  (1200 sec / 60 = 20 min)
 
-      defaultConfig : {
-        tabSelector      : 'li',
-        stripActiveClass : 'tabs-active',
-        currentTabClass  : 'current',
-        currentTabTag    : 'strong',      // emphasis tag for current element - setting this to "" will disable it's use
-        paneClass        : 'tabpane',
-        hiddenPaneClass  : 'tabpane-hidden',  // only used when `cssHide` option is set to true.
-        cssHide          : false,             // Should the script hide the sections with theSection.style.display="none" (false) or with simple CSS class names (true); ??
-        showFirst        : true,
-        setCookie        : true,
-        setFragment      : true,          // allow or disallow fragment changes as tabs are switched.
-        monitorFragment  : false,          // hook up an document.onfragment() (custom)event to automatically switch tabs when the user navigates back/forward in history.  (`.setFragment` must be `true`)
+      defaultConfig:  {
+        tabSelector:       'li',
+        stripActiveClass:  'tabs-active',
+        currentTabClass:   'current',
+        currentTabTag:     'strong',      // emphasis tag for current element - setting this to "" will disable it's use
+        paneClass:         'tabpane',
+        hiddenPaneClass:   'tabpane-hidden',  // only used when `cssHide` option is set to true.
+        cssHide:           false,             // Should the script hide the sections with theSection.style.display="none" (false) or with simple CSS class names (true); ??
+        showFirst:         true,
+        setCookie:         true,
+        setFragment:       true,          // allow or disallow fragment changes as tabs are switched.
+        monitorFragment:   false,          // hook up an document.onfragment() (custom)event to automatically switch tabs when the user navigates back/forward in history.  (`.setFragment` must be `true`)
 
         // template for a link placed at the top of the panel. use '' to disable
-        focusLinkTemplate : '<a href="#" class="focustarget">.</a>',
+        focusLinkTemplate:  '<a href="#" class="focustarget">.</a>',
         // template for a link placed at the bottom of the panel. use '' to disable
-        returnLinkTemplate : '<a href="#" class="stream">.</a>',
+        returnLinkTemplate: '<a href="#" class="stream">.</a>',
 
-        en : {
-          backLinkText     : 'Back to '
+        en:  {
+          backLinkText:     'Back to '
+        },
+        is:  {
+          backLinkText:     'Til baka í '
         }
       },
-
-      i18n : function ( txt, lang ) { return txt; },
 
 
       // public method for manually setting/swicthing tabs.
@@ -355,8 +352,9 @@
           _allHashLinks = _allHashLinks || $('a[href*="#"]');
 
           var data    = { tab : $(t) },
-              link    = data.link   = (t.tagName == 'A') ? data.tab : $( 'a', t );
-          data.lang   = link.closest('[lang]').attr('lang') || 'en';
+              link    = data.link   = (t.tagName == 'A') ? data.tab : $( 'a', t ),
+              lang    = (link.closest('[lang]').attr('lang') || 'en').substr(0,2);
+          data.lang   = _conf[lang] ? lang : 'en';
           data.config = _conf;
           data.block  = block;
           var id      = $.getFrag( link.attr('href') ),
@@ -367,7 +365,7 @@
           {
 
             panel.addClass( _conf.paneClass );
-            var backtxt = $.tabSwitcher.i18n( _conf.en.backLinkText, data.lang ) + data.tab.text();
+            var backtxt = _conf[data.lang].backLinkText + data.tab.text();
 
 
             // Accessibility: Add a focusAnchor (+ "return to tab" link) to the top of the _tabPanelElm.
