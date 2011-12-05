@@ -55,7 +55,7 @@
             else
             {
               input = cont.find('input:text:first');
-              cont = cont.filter('.fi_txt');
+              cont = input.closest('.fi_txt');
             }
             var selectBox = postCodeSel.clone()
                                 .attr({
