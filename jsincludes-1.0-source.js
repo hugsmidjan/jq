@@ -23,7 +23,7 @@
 
   var _jsincludes     = 'jsincludes',
       _virtualBrowser = 'virtualBrowser',
-      _disengage = 'disengage',
+      _disengage      = 'disengage',
 
       // on 'VBerror' remove the dummy virtualbrowser element and "disengage"
       _errorHandler = function (e, request) {
@@ -146,9 +146,6 @@
                     config = $.extend(new _defaultConfig(), _defaultConfig, cfg, { url:null }); // disable the url - the link should always rule!
                 if ( !inclElm.data( _jsincludes ) ) // prevent unwanted reruns
                 {
-                  if ( config[_disengage] === true ) {
-                    config[_disengage] = '*';
-                  }
                   var foundLinks =  inclElm.is('a') ?
                                         inclElm:
                                         inclElm.find('a').not( config.noIncl );
@@ -169,6 +166,10 @@
                             .addClass( elm.attr('class') );
                         // and setting the link itself as standin `inclElm`.
                         elm = link;
+                      }
+                      if ( !elm.is( config.recurse ) )
+                      {
+                        config[_disengage] = true;
                       }
 
                       var vBody = $('<div/>')
@@ -243,8 +244,8 @@
       //delayUnseen:  false,      // when set to true, links positioned below the fold
       unseenBuffer: 100,          // pixel distance below the visible "fold" where elements stop being loaded when "delayUnseen == true"
       forceLoad:    '.forceload',  // target elements that match this selector are loaded immediately, even when `config.delayUnseen == true`
+      recurse:      ''            // target elements that match this selector do *not* instantly disengage `.virtualBrowser()`s recursive loading behaviour (true === '*')
       //setFocus:     false,      // if non-falsy then attempt to use jQuery.fn.setFocus() to set the keyboard focus to the first focusable element.
-      disengage:    '*'           // target elements that match this selector instantly disengage `.virtualBrowser()`s recursive loading behaviour (true === '*')
       // ...for other options refer to the jQuery.fn.virtualBrowser() documentation
     };
   // _jsIncl.config.mySetting = 'myValue'; // <--- Extend jQuery.fn.jsIncludes.config to set config values for future invocations.
