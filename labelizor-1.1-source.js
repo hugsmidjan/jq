@@ -10,7 +10,8 @@
 // Requires jQuery 1.4+
 
 (function ($) {
-  var labelizor = 'labelizor';
+  var labelizor = 'labelizor',
+       labelizorlabel = labelizor+'label';
 
   $.fn[labelizor] = function ( cfg, b ) {
 
@@ -40,18 +41,20 @@
         _showPlaceholder = function (e) {
             var field = $(this),
                 val = field.val(),
-                labelizorlabel = field.data( labelizor+'label' );
-            if ( !val  ||  (e==labelizor && val==labelizorlabel) )
+                llabel = field.data( labelizorlabel ),
+                labelize = !val  ||  (e==labelizor && val==llabel);
+            if ( labelize )
             {
               field
-                  .val( labelizorlabel )
-                  .addClass(_blurClass);
+                  .val( llabel );
             }
+            field
+                .toggleClass(_blurClass, labelize);
           },
         _hidePlaceholder = function (e) {
             var field = $(this),
                 val = field.val();
-            if ( !val  ||  (field.is('.'+_blurClass) && val==field.data( labelizor+'label' )) )
+            if ( !val  ||  (field.is('.'+_blurClass) && val==field.data( labelizorlabel )) )
             {
               field
                   .val('')
@@ -60,7 +63,11 @@
           },
         _hideAllPlaceholders = function (e) {
             $(this).find('.'+_blurClass)
-                .filter(function () { return $(this).data(labelizor); })
+                .filter(function () {
+                    var input = $(this),
+                        llabel = input.data(labelizorlabel);
+                    return llabel  &&  input.val()==llabel;
+                  })
                     .val('');
           };
 
@@ -111,7 +118,7 @@
               if ( !hasPlaceholderSupport )
               {
                 field
-                    .data( labelizor+'label', _labelText);
+                    .data( labelizorlabel, _labelText);
                 form
                     .bind('submit', _hideAllPlaceholders);
               }
@@ -128,7 +135,7 @@
               }
               field
                   .bind('focus', _hidePlaceholder)
-                  .bind('blur', _showPlaceholder);
+                  .bind('blur change', _showPlaceholder);
 
               _showPlaceholder.call( fieldElm, labelizor );
             }
