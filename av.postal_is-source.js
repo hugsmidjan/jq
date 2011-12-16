@@ -33,7 +33,7 @@
       {
         if ( !postCodeSel )
         {
-          postCodeSel = $('<select />');
+          postCodeSel = $('<select><option/></select>');
           $.each(
               $.av.postCodes.is,
               function ( code, town ) {
