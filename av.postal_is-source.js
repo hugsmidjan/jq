@@ -58,6 +58,7 @@
               cont = input.closest('.fi_txt');
             }
             var selectBox = postCodeSel.clone()
+                                .val( input.val() )
                                 .attr({
                                     name: input.attr('name'),
                                     id:   input.attr('id')
