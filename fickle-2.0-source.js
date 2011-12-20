@@ -101,8 +101,8 @@
               {
                 var focusElm = cfg.focusElm;
                     focusTarget = focusElm ?
-                                      ( focusElm.charAt ? this.find(focusElm) : $(focusElm) ):
-                                      pop;
+                                      ( focusElm.charAt ? this.find(focusElm) : focusElm ):
+                                      [];
                 data._gotFocus = undefined;
                 cfg.fickle  &&  $(_document).bind('focusin click', data._confirmFocusLeave);
                 cfg.closeOnEsc  &&  $(_document).bind('keydown', data._listenForEsc);
@@ -113,7 +113,7 @@
                         var pop = $(this);
                         pop.unhide();
                         _triggerEvent(pop, 'opened', cfg);
-                        data._gotFocus || focusTarget.focusHere();
+                        data._gotFocus || $(focusTarget[0]||this).focusHere();
                         pop.dequeue();
                       });
               }
@@ -208,7 +208,7 @@
             {
               // Bind onEvent handles specified in cfg.
               $.each(['Open','Opened','Close','Closed'], function (i, type) {
-                        cfg['on'+type]  &&  _this.bind(fickle+type.toLowerCase(), cfg['on'+type]);
+                  cfg['on'+type]  &&  _this.bind(fickle+type.toLowerCase(), cfg['on'+type]);
                 });
 
               var data = {
