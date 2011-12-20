@@ -30,13 +30,13 @@
       startOpen:   false     // Instantly shows and `open`s the fickle element.  No fadeIns or any fancy effects.
       opener:      element/collection/selector,  // the opener receives focus again when `fickleclosed` has been triggered.
 
-      fadein:      0,        // ms fadeIn duration  -- shorthand for .bind('fickleopen', function(){ $(this).fadeIn( fadeinMs ) });
-      fadeout:     0,        // ms fadeOut duration -- shorthand for .bind('fickleclose', function(){ $(this).fadeOut( fadeinMs ) });
+      fadein:      0,        // ms fadeIn duration  -- shorthand for .on('fickleopen', function(){ $(this).fadeIn( fadeinMs ) });
+      fadeout:     0,        // ms fadeOut duration -- shorthand for .on('fickleclose', function(){ $(this).fadeOut( fadeinMs ) });
 
-      onOpen:      null,     // shorthand for .bind('fickleopen', handlerFunc);
-      onOpened:    null,     // shorthand for .bind('fickleopened', handlerFunc);
-      onClose:     null,     // shorthand for .bind('fickleclose', handlerFunc);
-      onClosed:    null,     // shorthand for .bind('fickleclosed', handlerFunc);
+      onOpen:      null,     // shorthand for .on('fickleopen', handlerFunc);
+      onOpened:    null,     // shorthand for .on('fickleopened', handlerFunc);
+      onClose:     null,     // shorthand for .on('fickleclose', handlerFunc);
+      onClosed:    null,     // shorthand for .on('fickleclosed', handlerFunc);
     }
 
     Events:
@@ -73,7 +73,7 @@
           // NOTE: `collection` must only contain one item - otherwise shared-event-object-weirdness ensues.
           var e = $.Event(fickle+type);
           e.cfg = cfg;
-          e.stopPropagation();
+          //e.stopPropagation();  // in jQuery 1.7 this seems to prevent the event from ever taking place on the target element itself. // consider allowing bubbling from here on, anyway.
           collection.trigger(e);
           return !e.isDefaultPrevented();
         },
@@ -104,8 +104,8 @@
                                       ( focusElm.charAt ? this.find(focusElm) : focusElm ):
                                       [];
                 data._gotFocus = undefined;
-                cfg.fickle  &&  $(_document).bind('focusin click', data._confirmFocusLeave);
-                cfg.closeOnEsc  &&  $(_document).bind('keydown', data._listenForEsc);
+                cfg.fickle  &&  $(_document).on('focusin click', data._confirmFocusLeave);
+                cfg.closeOnEsc  &&  $(_document).on('keydown', data._listenForEsc);
                 data._isOpen = !0;// true
                 cfg.fadein  &&  this.fadeIn(cfg.fadein); // because .fadeIn(0) !== .show()
                 this
@@ -123,8 +123,8 @@
               if ( data._isOpen  &&  _triggerEvent(this, 'close', cfg) )
               {
                 $(_document)
-                    .unbind('focusin click', data._confirmFocusLeave)
-                    .unbind('keydown', data._listenForEsc);
+                    .off('focusin click', data._confirmFocusLeave)
+                    .off('keydown', data._listenForEsc);
                 $.focusHere(cfg.opener||_document.body);
 //                _cancelTimeout(); // to ensure 'trapFocus' doesn't steal the focus back
                 data._isOpen = !1;// false
@@ -208,7 +208,7 @@
             {
               // Bind onEvent handles specified in cfg.
               $.each(['Open','Opened','Close','Closed'], function (i, type) {
-                  cfg['on'+type]  &&  _this.bind(fickle+type.toLowerCase(), cfg['on'+type]);
+                  cfg['on'+type]  &&  _this.on(fickle+type.toLowerCase(), cfg['on'+type]);
                 });
 
               var data = {
@@ -229,7 +229,7 @@
 
             _this
                 .data(_dataId, data)
-                .bind('focusin focusout', function (e) { // keeps track of whether the fickle element has focus. Determines whether .focusHere() is needed on `fickleopened` (see above)
+                .on('focusin focusout', function (e) { // keeps track of whether the fickle element has focus. Determines whether .focusHere() is needed on `fickleopened` (see above)
                     data._gotFocus = e.type=='focusin';
                   });
             
@@ -239,7 +239,7 @@
               // popup content virkni
               // close popup
               _this
-                  .bind('focusout', function (e) {
+                  .on('focusout', function (e) {
                       var popup = this;
                       _cancelTimeout();
                       //;;;window.console&&console.log( 'focusout' );
@@ -252,7 +252,7 @@
                                       }, cfg.trapFocus ? 0 : cfg.closeDelay);
                     })
                   // make the popup sticky
-                  .bind('click mousedown focusin', function (e) {
+                  .on('click mousedown focusin', function (e) {
                       setTimeout(_cancelTimeout, 0); // because focusout (setting the _popupLock) *might* not fire before this focusin event...?
                       //;;;window.console&&console.log( 'focusin' );
                       if (e.type == 'click')
