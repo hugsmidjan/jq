@@ -44,7 +44,7 @@
                   jsDate = $('<span class="js-date" />'),
                   pendFunc = cfg.monthAfterDate ? 'append' : 'prepend';
 
-              jsDate.append('<span class="d">'+ date[0] +'<i>.</i></span> ')[pendFunc]('<span class="m">'+ month +'</span>' + monthDot ).append('<span class="y">'+ date[2] +'</span> ');
+              jsDate.append('<span class="d">'+ date[0] +'<i>.</i></span> ')[pendFunc]('<span class="m">'+ month + monthDot +'</span>').append('<span class="y">'+ date[2] +'</span> ');
 
               dateElm.before(jsDate).remove();
           });
