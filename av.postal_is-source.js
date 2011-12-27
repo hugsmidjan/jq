@@ -64,8 +64,8 @@
                                     id:   input.attr('id')
                                   });
             cont
-                .removeClass('fi_txt')
-                .addClass('fi_sel');
+                .removeClass('fi_txt fi_postal_is')
+                .addClass('fi_sel postal_is');
             input.replaceWith( selectBox );
           });
       }
