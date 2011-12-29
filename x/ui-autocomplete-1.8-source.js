@@ -653,7 +653,7 @@ $.extend( proto, {
 		return $( "<li></li>" )
 			.addClass( item.className )  // <-- Már's addition!!
 			.data( "item.autocomplete", item )
-			.append( $( "<a></a>" )[ this.options.html ? "html" : "text" ]( item.label ) )
+			.append( $( '<a href="#"/>' )[ this.options.html ? "html" : "text" ]( item.label ) )
 			.appendTo( ul );
 	}
 });
