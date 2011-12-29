@@ -34,7 +34,13 @@
 
   Each time .delayedHighlight highlights (or dims) an element, the custom events
   `highlighton` and `highlightoff` are triggered respectively.
-  Those events bubble up to (but no further than) the original
+
+  Before an element is highlighted/dimmed, the custom events
+  `beforehighlighton` and `beforehighlightoff` are triggered,
+  and e.preventDefault() during those events
+  prevents the highlighting/dimming from happening.
+
+  All those events bubble up to (but no further than) the original
   element container (the 'ul' in the example code above).
 
   Handlers for those events can therefore be bound to the container
@@ -42,6 +48,16 @@
 
       jQuery('ul')
           .delayedHighlight()
+          .bind('beforehighlighton', function (e) {
+              if ( $(e.target).is('.disabled') ) {
+                e.preventDefault();
+              }
+            })
+          .bind('beforehighlightoff', function (e) {
+              if ( $(e.target).is('.pinnedopen') ) {
+                e.preventDefault();
+              }
+            })
           .bind('highlighton', function (e) {
               $(e.target).prepend('<img class="icon" src="star.gif" alt=""/>');
             })
@@ -50,7 +66,9 @@
             });
 
 
-
+  FIXME:
+    * highlightoff is not triggered on elements when auto-dimmed when highlighting a new element...
+      Needs more thought...
 
 */
 (function($, undefined){
@@ -78,6 +96,9 @@
             holes =      cfg.holes,
             holeSelector = (delegate?delegate+' ':'')+holes,
             evPrefix =   'highlight',
+            _mouseover_focusin = 'mouseover focusin',
+            _mosueout_focusout = 'mouseout focusout',
+            _isDefaultPrevented = 'isDefaultPrevented',
             clrTimeout = clearTimeout,
             inTimeout,
             outTimeout,
@@ -105,16 +126,21 @@
                   inTimeout = setTimeout(function(){
                       if ( !activeItem  ||  item[0] != activeItem[0] )
                       {
-                        if ( activeItem )
+                        var beforeEv = jQuery.Event('before'+evPrefix+'on');
+                        item.trigger(beforeEv);
+                        if ( !beforeEv[_isDefaultPrevented]() )
                         {
-                          activeItem
-                              .removeClass( className )
-                              .trigger( evPrefix+'off' );
+                          if ( activeItem )
+                          {
+                            activeItem
+                                .removeClass( className )
+                                .trigger( evPrefix+'off' );
+                          }
+                          activeItem = item;
+                          item
+                              .addClass( className )
+                              .trigger( evPrefix+'on' );
                         }
-                        activeItem = item;
-                        item
-                            .addClass( className )
-                            .trigger( evPrefix+'on' );
                       }
                     }, e.delayOut || cfg.delay);
                 }
@@ -130,10 +156,15 @@
                   outTimeout = setTimeout(function(){
                       if ( activeItem  &&  activeItem[0] != currentHover  ||  isClick )
                       {
-                        activeItem
-                            .removeClass( className )
-                            .trigger( evPrefix+'off' );
-                        activeItem = undefined;
+                        var beforeEv = jQuery.Event('before'+evPrefix+'off');
+                        activeItem.trigger(beforeEv);
+                        if ( !beforeEv[_isDefaultPrevented]() )
+                        {
+                          activeItem
+                              .removeClass( className )
+                              .trigger( evPrefix+'off' );
+                          activeItem = undefined;
+                        }
                       }
                     }, e.delayOut || cfg.delayOut);
                 }
@@ -152,15 +183,15 @@
         if ( delegate )
         {
           list
-              .delegate(delegate, 'mouseover focusin', highlightOn)
-              .delegate(delegate, 'mouseout focusout', highlightOff);
+              .delegate(delegate, _mouseover_focusin, highlightOn)
+              .delegate(delegate, _mosueout_focusout, highlightOff);
           cfg.click  &&  list.delegate(delegate, 'click', handleClick);
         }
         else
         {
           list
-              .bind('mouseover focusin', highlightOn)
-              .bind('mouseout focusout', highlightOff);
+              .bind(_mouseover_focusin, highlightOn)
+              .bind(_mosueout_focusout, highlightOff);
           cfg.click  &&  list.bind('click', handleClick);
         }
 
