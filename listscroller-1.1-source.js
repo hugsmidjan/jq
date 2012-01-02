@@ -297,7 +297,7 @@
         _block.addClass( c.topClass );
       }
 
-      if ( c.index == list.length - c.windowSize )
+      if ( c.index >= list.length - c.windowSize )
       {
         _block.addClass( c.bottomClass );
       }
