@@ -7,7 +7,11 @@
 //   * Már Örlygsson        -- http://mar.anomy.net
 // ----------------------------------------------------------------------------------
 
-(function($, visualImageMap, undefined){
+(function($, undefined){
+  var visualImageMap = 'visualImageMap',
+      toFloat = parseFloat,
+      toInt = parseInt,
+      usemap = 'usemap';
 
   $.fn[visualImageMap] = function ( cfg ) {
       cfg = $.extend({
@@ -18,18 +22,19 @@
       this
           .each(function () {
               var img = $(this),
-                  mapName = (img.attr('usemap')||'').substr(1),
-                  mapElm = mapName ? $('map[name="'+ mapName +'"]').detach() : img.data('usemapElm') || [];
+                  mapName = (img.attr(usemap)||'').substr(1),
+                  mapElm = mapName ? $('map[name="'+ mapName +'"]').detach() : img.data(usemap+'Elm') || [];
               if ( mapElm[0] )
               {
-                $( img.data('usemapoverlay') || [] ).remove();
+                $( img.data(usemap+'overlay') || [] ).remove();
 
                 img
-                    .removeAttr('usemap')
-                    .data( 'usemapElm', mapElm )
+                    .removeAttr(usemap)
+                    .data( usemap+'Elm', mapElm )
                     .one('load', function (e) {
-                        var realImgW = parseInt(img.attr('width'), 10) || img.clone().appendTo('body').width(),
-                            realImgH = parseInt(img.attr('height'), 10) || img.clone().appendTo('body').height(),
+                        var clone,
+                            realImgW = toInt(img.attr('width'), 10)  || (clone = img.clone().appendTo('body')).width(),
+                            realImgH = toInt(img.attr('height'), 10) || (clone = (clone || img.clone().appendTo('body'))).height(),
                             scaleX    = img.width() / realImgW,
                             scaleY    = img.height() / realImgH,
                             areaOffs,
@@ -38,18 +43,19 @@
                                 .insertAfter(img)
                                 .css({
                                     position: 'absolute',
-                                    top:      img.position().top  + parseFloat(img.css('padding-top'))  + parseFloat(img.css('border-top-width')),
-                                    left:     img.position().left + parseFloat(img.css('padding-left')) + parseFloat(img.css('border-left-width'))
+                                    top:      img.position().top  + toFloat(img.css('padding-top'))  + toFloat(img.css('border-top-width')),
+                                    left:     img.position().left + toFloat(img.css('padding-left')) + toFloat(img.css('border-left-width'))
                                     // apply no width/height dimentions to allow direct clicks on the image...
                                   });
-                        img.data('usemapoverlay', imgOverlay);
+                        clone  &&  clone.detach();
+                        img.data(usemap+'overlay', imgOverlay);
 
                         mapElm.find('area')
                             .each(function (i) {
                                 var area = $(this),
                                     labelText = area.attr('title'),
                                     xys = $.map( area.attr('coords').split(','), function ( val, i ) {
-                                        return parseInt( val, 10 );
+                                        return toInt( val, 10 );
                                       });
                                     areaElm = protoArea.clone(true);
                                 if ( !areaOffs )
@@ -57,8 +63,8 @@
                                   areaElm
                                       .prependTo( imgOverlay ); // insert into the DOM to allow margin measurements
                                   areaOffs = [
-                                      parseInt(areaElm.css('margin-left'), 10)||0,  // x offset
-                                      parseInt(areaElm.css('margin-top'), 10)||0    // y offset
+                                      toInt(areaElm.css('margin-left'), 10)||0,  // x offset
+                                      toInt(areaElm.css('margin-top'), 10)||0    // y offset
                                     ];
                                 }
                                 areaElm
@@ -86,4 +92,4 @@
       return this;
     };
 
-})(jQuery, 'visualImageMap');
+})(jQuery);
