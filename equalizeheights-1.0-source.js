@@ -40,12 +40,13 @@
         },
 
       _equalizeHeights = function (_collection, _margins) {
-          if (_collection.filter(':visible').length) // only equalize if at least one of the elements is :visible
+          var visible = _collection.filter(':visible');
+          if (visible.length) // only equalize if at least one of the elements is :visible
           {
             var _maxHeight = 0,
                 _paddings = [];
 
-            _collection
+            visible
                 // find highest 'natural' element-height
                 .each(function ( i ) {
                     var _this = $( this );
@@ -54,7 +55,7 @@
                     _paddings[i] = _totalHeight - _this.height();
                     _maxHeight = Math.max( _totalHeight, _maxHeight );
                   })
-                // assign new min-heights to collection
+                // assign new min-heights to visible elements of _collection
                 .each(function( i ){
                     $(this).css( _heightAttribute,  _maxHeight - _paddings[i] + .5 ); // Adding 1px seems to fix some sub-pixel float-clearing calculation bugs in Firefox 3+
                   })
