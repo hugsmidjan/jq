@@ -33,8 +33,9 @@
                     .data( usemap+'Elm', mapElm )
                     .one('load', function (e) {
                         var clone,
-                            realImgW = toInt(img.attr('width'), 10)  || (clone = img.clone().appendTo('body')).width(),
-                            realImgH = toInt(img.attr('height'), 10) || (clone = (clone || img.clone().appendTo('body'))).height(),
+                            realDim = mapElm.data(usemap+'Sz') || [],
+                            realImgW = realDim[0] || toInt(img.attr('width'), 10)  || (clone = img.clone().appendTo('body')).width(),
+                            realImgH = realDim[1] || toInt(img.attr('height'), 10) || (clone = (clone || img.clone().appendTo('body'))).height(),
                             scaleX    = img.width() / realImgW,
                             scaleY    = img.height() / realImgH,
                             areaOffs,
@@ -50,6 +51,7 @@
                         clone  &&  clone.detach();
                         img.data(usemap+'overlay', imgOverlay);
 
+                        mapElm.data( usemap+'Sz', [realImgW, realImgH] ); // store these away, in case the img[width|height] attributes get mangled later
                         mapElm.find('area')
                             .each(function (i) {
                                 var area = $(this),
