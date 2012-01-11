@@ -16,10 +16,11 @@
           activeClass:   'active',
           listClass:     'newsheadlinelist itemlist',
         /* BEGIN: sleppa þessu og/eða gera þetta meira módúlar */
-          inclmeta:      true,
+          inclmeta:      "before", /* falsy values hide the span.meta  Allowed values are "before" and "after" */
           incltitle:     true,
-          topwrap:       false,
-          bottomwrap:    false,
+          //inclimg:       false,
+          //topwrap:       false,
+          //bottomwrap:    false,
         /* END: sleppa þessu og/eða gera þetta meira módúlar */
           switchdelay:   350,
           fadeoutspeed:  125,
@@ -54,8 +55,10 @@
                       .addClass( i===0 ? _config.activeClass:'' )
                     /* BEGIN: þetta ætti að vera stillanlegra/meira módúlar */
                       .append( _config.topwrap ? '<i class="top" />' : '' )
-                      .append( _config.inclmeta ? _this.find('span.meta').clone() : '' )
+                      .append( _config.inclimg ? _this.find('img').clone() : '' )
+                      .append(( _config.inclmeta && _config.inclmeta !== 'after') ? _this.find('span.meta').clone() : '' )
                       .append( _config.incltitle ? _this.find('h3 > a').clone() : '' )
+                      .append(( _config.inclmeta == 'after') ? _this.find('span.meta').clone() : '' )
                       .append( _config.bottomwrap ? '<i class="bottom" />' : '' )
                     /* END: þetta ætti að vera stillanlegra/meira módúlar */
                       .bind('mouseenter', function (e) {
