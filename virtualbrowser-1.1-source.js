@@ -33,8 +33,9 @@
     * url:           null,                      // String|linkElm|formElm|collection: Initial URL for the frame (Uses the 'href' or 'action' attributes in case elements were passed.)
     * params:        null,                      // Object/String: Persistent request data (as in $.get(url, data, callback) ) that gets added to *every* 'load' request.
     * noCache:       null,                      // Boolean: Controls the $.ajax() cache option
-    * selector:      '>*',                      // String selector to quickly filter the incoming DOM just before injecting it into the virtualBrowser container/body
+    * selector:      null,                      // String selector to quickly filter the incoming DOM just before injecting it into the virtualBrowser container/body. Defaults to just dumping the whole request body
     * stripCfg:      null,                      // Object: config for the $.getResultsBody() method
+    * imgSuppress:   false,                     // Boolean: true renames img[src] to img[data-srcattr] until req.resultDOM has been inserted into the DOM, to stop the browser from preloading every <img> in the result dom
     * onBeforeload:  null,                      // Function: Shorthand for .bind('VBbeforeload' handler);
     * onError:       null,                      // Function: Shorthand for .bind('VBerror', handler);
     * onLoad:        null,                      // Function: Shorthand for .bind('VBload', handler);
@@ -55,64 +56,72 @@
 
   Events:
     * 'VBbeforeload'  // Triggered before the $.ajax call.
-                      //  .bind('VBbeforeload', function (e, request) {
+                      //  .bind('VBbeforeload', function (e, request, vbdata) {
                               this  // the virtualBrowser body element
-                              $(this).data('virtualBrowser').cfg  // config object
-                              $(this).data('virtualBrowser').lastRequest // the request object from the last 'load'
-                              request  // Object: {
-                                       //   url:  // String the URL that was just loaded (Modifiable by handler)
-                                       //   elm:  // undefined or jQuery collection containing the link (or form element) that was clicked/submitted
-                                       //   btn:  // undefined or Object whose presense indicates that form-submit was triggered by a named button or input[type=image]
-                                                  // Contains an `elm` property (jQuery collection with the button element), and also `X` & `Y` (int) click coordinates for image buttons.
-                                       // }
+                              vbdata  // Object: {
+                                      //   cfg:          // config object
+                                      //   lastRequest:  // the *current* request object
+                                      // }
+                              request // Object: {
+                                      //   url:  // String the URL that was just loaded (Modifiable by handler)
+                                      //   elm:  // undefined or jQuery collection containing the link (or form element) that was clicked/submitted
+                                      //   btn:  // undefined or Object whose presense indicates that form-submit was triggered by a named button or input[type=image]
+                                                 // Contains an `elm` property (jQuery collection with the button element), and also `X` & `Y` (int) click coordinates for image buttons.
+                                      // }
                               // Cancellable via e.preventDefault()
                               // cancel caching of the request by explicitly setting `request.noCache = true;`
                               // e.passThrough = true;  // Instructs the virtualBrowser to disable any click events and pass the click through to the web browser
                             });
 
     * 'VBerror'       // Triggered when the ajax request returns an error.
-                      //  .bind('VBerror', function (e, request) {
+                      //  .bind('VBerror', function (e, request vbdata) {
                               this  // the virtualBrowser body element
-                              $(this).data('virtualBrowser').cfg // config object
-                              $(this).data('virtualBrowser').lastRequest // the *current* request object
-                              request  // Object: {
-                                       // ...all the same properties as the 'VBload' event
-                                       // ...except `result` and `resultDOM` are empty
-                                       // }
+                              vbdata  // Object: {
+                                      // cfg:          // config object
+                                      // lastRequest:  // the *current* request object
+                                      // }
+                              request // Object: {
+                                      // ...all the same properties as the 'VBload' event
+                                      // ...except `result` and `resultDOM` are empty
+                                      // }
                               // Assign custom error DOM into `request.resultDOM`, or `request.result` to trigger normal processing by VBload and VBloaded...
                               // ...otherwise nothing will happen...
                             });
 
     * 'VBload'        // Triggered after the $.ajax request has completed, *before* any DOM injection has taken place
-                      //  .bind('VBload', function (e, request) {
+                      //  .bind('VBload', function (e, request, vbdata) {
                               this  // the virtualBrowser body element
-                              $(this).data('virtualBrowser').cfg  // config object
-                              $(this).data('virtualBrowser').lastRequest // the request object from the last 'load'
+                              vbdata  // Object: {
+                                      // cfg:          // config object
+                                      // lastRequest:  // the *current* request object
+                                      // }
                               request  // Object: {
-                                       //   result:     // String: The $.ajax()/$.get() callback responseText parameter
-                                       //   resultDOM:  // Element(s)/Collection that will get inserted into the virtualBrowser body.
-                                                        // ...will be `undefined` unless `cfg.selector` is non-empty, or an `VBerror` handler has injected a custom resultDOM.
-                                                        // set/modify this property to your heart's desire.
-                                       //   xhr:        // The XMLHTTPRequest object
-                                       //   status:  // The friendly status msg returned by .ajax Complete callback (i.e. "notmodified", "success", "error", "timeout", etc.)
-                                       //   url:     // String the URL that was just loaded
-                                       //   params:  // String the contents of the $.ajax data property
-                                       //   method:  // String the method that was used (either "GET" or "POST")
-                                       //   noCache: // boolean (defaults to false)
-                                       //   elm:     // (See above documentation for 'VBbeforeload'.)
-                                       //   btn:     // (See above documentation for 'VBbeforeload'.)
-                                       // }
+                                      //   result:  // String: The $.ajax()/$.get() callback responseText parameter
+                                      //   resultDOM:  // Element(s)/Collection that will get inserted into the virtualBrowser body.
+                                                       // ...will be `undefined` unless `cfg.selector` is non-empty, or an `VBerror` handler has injected a custom resultDOM.
+                                                       // set/modify this property to your heart's desire.
+                                      //   xhr:        // The XMLHTTPRequest object
+                                      //   status:  // The friendly status msg returned by .ajax Complete callback (i.e. "notmodified", "success", "error", "timeout", etc.)
+                                      //   url:     // String the URL that was just loaded
+                                      //   params:  // String the contents of the $.ajax data property
+                                      //   method:  // String the method that was used (either "GET" or "POST")
+                                      //   noCache: // boolean (defaults to false)
+                                      //   elm:     // (See above documentation for 'VBbeforeload'.)
+                                      //   btn:     // (See above documentation for 'VBbeforeload'.)
+                                      // }
                               // Cancellable via e.preventDefault()
                             });
 
     * 'VBloaded'      // Triggered *after* the resultDOM has been injected into the virtualBrowser body. Think of it as `window.onload` of sorts.
-                      //  .bind('VBloaded', function (e, request) {
+                      //  .bind('VBloaded', function (e, request, vbdata) {
                               this  // the virtualBrowser body element
-                              $(this).data('virtualBrowser').cfg // config object
-                              $(this).data('virtualBrowser').lastRequest // the *current* request object
-                              request  // Object: {
-                                       // ...all the same properties as the 'VBload' event...
-                                       // }
+                              vbdata  // Object: {
+                                      // cfg:          // config object
+                                      // lastRequest:  // the *current* request object
+                                      // }
+                              request // Object: {
+                                      // ...all the same properties as the 'VBload' event...
+                                      // }
                               // Uncancellable!
                             });
 
@@ -196,6 +205,7 @@
       _replace            = 'replace',             // ...to save bandwidth
       _resultDOM          = 'resultDOM',           // ...to save bandwidth
       _result             = 'result',              // ...to save bandwidth
+      _srcDataAttr        = 'data-srcattr',        // ...to save bandwidth
       _protocolSlash      = /^(https?:)?\/\//,
 
 
@@ -233,10 +243,9 @@
               // Correctly resolve relative empty-string URLs (like <form action="">)
               url = request.url = (url === '') ? _docLoc.href : url;
 
-              if ( VBdata.$$empty )
+              if ( !VBdata.lastRequest )
               {
                 request.isFirst = true;
-                delete VBdata.$$empty;
               }
 
               if (url)
@@ -245,7 +254,7 @@
                 if ( VBdata._clicked ) {
                   request.btn = VBdata._clicked; // store reference to the clicked button - to allow access/evaulation by event handlers.
                 }
-                body.trigger(evBeforeload, [request]);
+                body.trigger(evBeforeload, [request, VBdata]);
                 // trap external (non-AJAXable) URLs or links targeted at another window and set .passThrough as true
                 if (  // if passThrough is already set, then there's not need for further checks, and...
                       !evBeforeload[_passThrough] &&
@@ -337,14 +346,18 @@
                               var isError = !status || status == 'error';
                               if ( isError )
                               {
-                                body.trigger(_VBerror, [request]);
+                                body.trigger(_VBerror, [request, VBdata]);
                               }
                               else
                               {
                                 request[_result] = $.injectBaseHrefToHtml(xhr.responseText||'', request.url);
+                                if ( config.imgSuppress )
+                                {
+                                  request[_result] = request[_result].replace(/(<img[^>]*? )src=/g,'$1'+_srcDataAttr+'=');
+                                }
                               }
                               // We intentionally allow VBerror handlers to set custom .result string and then process it normally.
-                              if ( request[_result]  &&  config.selector )
+                              if ( request[_result] && config.selector )
                               {
                                 request[_resultDOM] = $.getResultBody( request[_result], config.stripCfg ).find( config.selector );
                               }
@@ -353,7 +366,7 @@
                               {
                                 evLoad = $.Event(_VBload);
                                 evLoad[_stopPropagation]();
-                                body.trigger(evLoad, [request]);
+                                body.trigger(evLoad, [request, VBdata]);
                                 if ( !evLoad[_isDefaultPrevented]() )
                                 {
                                   evLoaded = $.Event(_VBloaded);
@@ -361,12 +374,23 @@
                                   config.loadmsgElm  &&  config.loadmsgElm.detach();
                                   // default to just dumping resultBody's `.contents()` into the DOM.
                                   request[_resultDOM] = request[_resultDOM]  ||  $.getResultBody( request[_result], config.stripCfg ).contents();
+                                  if ( config.imgSuppress )
+                                  {
+                                    request[_resultDOM].find('img')
+                                        .add( request[_resultDOM].filter('img') )
+                                            .attr('src', function () {
+                                                var img = $(this),
+                                                    src = img.attr(_srcDataAttr);
+                                                  img.removeAttr(_srcDataAttr);
+                                                  return src;
+                                              });
+                                  }
                                   body
                                       .empty()
                                       .append( request[_resultDOM] );
                                   VBdata.lastRequest = request;
                                   body
-                                      .trigger(evLoaded, [request])
+                                      .trigger(evLoaded, [request, VBdata])
                                       // NOTE: We can't rely on bubbling in IE8- because bubbling happens first on the container elements,
                                       // and last on the form itself. (at least in jQuery 1.4 and 1.5)
                                       // This makes .isDefaultPrevented() checks fail when plugin-users bind (and .preventDefault())
@@ -564,7 +588,7 @@
                     {
                       delete cfg.loadmsgElm;
                     }
-                    body.data(_virtualBrowser, { cfg: cfg, $$empty:1 });
+                    body.data(_virtualBrowser, { cfg: cfg });
                     body
                         // Depend on 'click' events bubbling up to the virtualBrowser element to allow event-delegation
                         // Thus, we assume that any clicks who's bubbling were cancelled should not be handled by virtualBrowser.
@@ -593,19 +617,20 @@
 
 
   fnVB.defaults = {
-      //url:          null,                     // String: Initial URL for the frame
-      //noCache:      false,                    // Boolean: Controls the $.ajax() cache option
-      //params:       null,                     // Object/String: Persistent request data (as in $.get(url, data, callback) ) that gets added to *every* 'load' request.
-      //stripCfg:     null,                     // Object: config for the $.getResultsBody() method
-      //selector:     '>*',                     // String selector to quickly filter the incoming DOM before injecting it into the virtualBrowser container/body
-      //onBeforeload: null,                     // Function: Shorthand for .bind('VBbeforeload' handler);
-      //onLoad:       null,                     // Function: Shorthand for .bind('VBload' handler);
-      //onLoaded:     null,                     // Function: Shorthand for .bind('VBloaded' handler);
-      //onDisengaged: null,                     // Function: Shorthand for .bind('VBdisengaged' handler);
-      //loadingClass: null,                     // String: className to apply to the virtualBrowser body element during loading
-      //loadmsgElm:  '<div class="loading" />', // String/Element: Template for a loading message displayed while loading a URL
-      loadmsgMode:    'none'                    // String: available: "none", "overlay" & "replace"
-      //disengage:    false,                    // Boolean: Sugar method. True triggers the 'disengage' method as soon as the next VBloaded has finished.
+      //url:          null,                      // String: Initial URL for the frame
+      //noCache:      false,                     // Boolean: Controls the $.ajax() cache option
+      //params:       null,                      // Object/String: Persistent request data (as in $.get(url, data, callback) ) that gets added to *every* 'load' request.
+      //stripCfg:     null,                      // Object: config for the $.getResultsBody() method
+      //imgSuppress:  false,                     // Boolean: true renames img[src] to img[data-srcattr] until req.resultDOM has been inserted into the DOM, to stop the browser from preloading every <img> in the result dom
+      //selector:     null,                      // String selector to quickly filter the incoming DOM before injecting it into the virtualBrowser container/body. Defaults to just dumping the whole result body
+      //onBeforeload: null,                      // Function: Shorthand for .bind('VBbeforeload' handler);
+      //onLoad:       null,                      // Function: Shorthand for .bind('VBload' handler);
+      //onLoaded:     null,                      // Function: Shorthand for .bind('VBloaded' handler);
+      //onDisengaged: null,                      // Function: Shorthand for .bind('VBdisengaged' handler);
+      //loadingClass: null,                      // String: className to apply to the virtualBrowser body element during loading
+      //loadmsgElm:   '<div class="loading" />', // String/Element: Template for a loading message displayed while loading a URL
+      loadmsgMode:    'none'                   // String: available: "none", "overlay" & "replace"
+      //disengage:    false,                     // Boolean: Sugar method. True triggers the 'disengage' method as soon as the next VBloaded has finished.
     };
 
   fnVB.i18n = {
