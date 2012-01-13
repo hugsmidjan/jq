@@ -63,10 +63,11 @@
                                       //   lastRequest:  // the *current* request object
                                       // }
                               request // Object: {
-                                      //   url:  // String the URL that was just loaded (Modifiable by handler)
-                                      //   elm:  // undefined or jQuery collection containing the link (or form element) that was clicked/submitted
-                                      //   btn:  // undefined or Object whose presense indicates that form-submit was triggered by a named button or input[type=image]
-                                                 // Contains an `elm` property (jQuery collection with the button element), and also `X` & `Y` (int) click coordinates for image buttons.
+                                      //   isFirst: // Boolean sugar flag indicating if there is such a thing as vbdata.lastRequest
+                                      //   url:     // String the URL that was just loaded (Modifiable by handler)
+                                      //   elm:     // undefined or jQuery collection containing the link (or form element) that was clicked/submitted
+                                      //   btn:     // undefined or Object whose presense indicates that form-submit was triggered by a named button or input[type=image]
+                                                    // Contains an `elm` property (jQuery collection with the button element), and also `X` & `Y` (int) click coordinates for image buttons.
                                       // }
                               // Cancellable via e.preventDefault()
                               // cancel caching of the request by explicitly setting `request.noCache = true;`
@@ -96,6 +97,7 @@
                                       // lastRequest:  // the *current* request object
                                       // }
                               request  // Object: {
+                                      //   isFirst: // Boolean sugar flag indicating if there is such a thing as vbdata.lastRequest
                                       //   result:  // String: The $.ajax()/$.get() callback responseText parameter
                                       //   resultDOM:  // Element(s)/Collection that will get inserted into the virtualBrowser body.
                                                        // ...will be `undefined` unless `cfg.selector` is non-empty, or an `VBerror` handler has injected a custom resultDOM.
@@ -207,6 +209,12 @@
       _result             = 'result',              // ...to save bandwidth
       _srcDataAttr        = 'data-srcattr',        // ...to save bandwidth
       _protocolSlash      = /^(https?:)?\/\//,
+      _triggerCustomEv    = function ( evtype, body, req, vbdata ) {
+          var ev = $.Event(evtype);
+          ev.stopPropagation();
+          body.trigger(ev, [req, vbdata]);
+          return ev;
+        };
 
 
 
@@ -219,8 +227,6 @@
                   body = $(this),
                   VBdata = body.data(_virtualBrowser),
                   config = VBdata.cfg,
-                  evBeforeload = $.Event(_VBbeforeload),
-                  evLoad, evLoaded,
                   applyLoadMsg;
 
               if ( $.isPlainObject(arg) )
@@ -250,11 +256,10 @@
 
               if (url)
               {
-                evBeforeload[_stopPropagation]();
                 if ( VBdata._clicked ) {
                   request.btn = VBdata._clicked; // store reference to the clicked button - to allow access/evaulation by event handlers.
                 }
-                body.trigger(evBeforeload, [request, VBdata]);
+                var evBeforeload = _triggerCustomEv(_VBbeforeload, body, request, VBdata);
                 // trap external (non-AJAXable) URLs or links targeted at another window and set .passThrough as true
                 if (  // if passThrough is already set, then there's not need for further checks, and...
                       !evBeforeload[_passThrough] &&
@@ -346,7 +351,7 @@
                               var isError = !status || status == 'error';
                               if ( isError )
                               {
-                                body.trigger(_VBerror, [request, VBdata]);
+                                _triggerCustomEv(_VBerror, body, request, VBdata);
                               }
                               else
                               {
@@ -364,13 +369,8 @@
                               // allow VBerror handlers to set custom .resultDOM and then process it normally.
                               if ( !isError  ||  request[_result]  ||  request[_resultDOM] )
                               {
-                                evLoad = $.Event(_VBload);
-                                evLoad[_stopPropagation]();
-                                body.trigger(evLoad, [request, VBdata]);
-                                if ( !evLoad[_isDefaultPrevented]() )
+                                if ( !_triggerCustomEv(_VBload, body, request, VBdata)[_isDefaultPrevented]() )
                                 {
-                                  evLoaded = $.Event(_VBloaded);
-                                  evLoaded[_stopPropagation]();
                                   config.loadmsgElm  &&  config.loadmsgElm.detach();
                                   // default to just dumping resultBody's `.contents()` into the DOM.
                                   request[_resultDOM] = request[_resultDOM]  ||  $.getResultBody( request[_result], config.stripCfg ).contents();
@@ -389,8 +389,8 @@
                                       .empty()
                                       .append( request[_resultDOM] );
                                   VBdata.lastRequest = request;
+                                  _triggerCustomEv(_VBloaded, body, request, VBdata);
                                   body
-                                      .trigger(evLoaded, [request, VBdata])
                                       // NOTE: We can't rely on bubbling in IE8- because bubbling happens first on the container elements,
                                       // and last on the form itself. (at least in jQuery 1.4 and 1.5)
                                       // This makes .isDefaultPrevented() checks fail when plugin-users bind (and .preventDefault())
@@ -453,8 +453,8 @@
                     $.ajax(ajaxOptions);
                   }
                 }
+                return evBeforeload;
               }
-              return evBeforeload;
             },
 
 
@@ -473,7 +473,8 @@
                       .unbind( 'submit', _handleHttpRequest)
                   .end()
                   .unbind( [_VBbeforeload,_VBerror,_VBload,_VBloaded].join(' ') )
-                  .trigger( _VBdisengaged )
+              _triggerCustomEv( body, _VBdisengaged );
+              body
                   .unbind( _VBdisengaged );
             }
 
