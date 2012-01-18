@@ -642,17 +642,17 @@
     cropText: function (str, length, e)
     {
       e = e || '...';
-      var newTxt = str = $.trim(str);
       if (length  &&  str.length >  length+e.length)
       {
-        var hash = length +'~~'+e,
-            cache = $.cropText.re || ($.cropText.re = {}),
-            re = cache[hash] || (cache[hash] = new RegExp('^(.{0,'+length+'}\\s).{'+e.length+',}$'));
-        newTxt = newTxt.replace(/\s+/g, ' ').replace(re, '$1');
+        str = $.trim(str).replace(/\s+/g, ' ');
+        var cache = $.cropText.re || ($.cropText.re = {}),
+            hash = length +'~~'+e,
+            re = cache[hash] || (cache[hash] = new RegExp('^(.{0,'+length+'})\\s.+$')),
+            newTxt = str.replace(re, '$1');
+        return newTxt + (newTxt.length<str.length ? e : '');
       }
-      return newTxt + (newTxt.length<str.length ? e : '');
+      return str;
     },
-
 
 
     // Simple String templating (variable injection) that accepts either arrays or hash-maps.
