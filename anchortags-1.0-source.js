@@ -71,10 +71,12 @@
               _isExternal = 0,
               _protocol = linkElm.protocol;
 
-
           if (_protocol == 'mailto:') // mailto links
           {
             link.addClass(cfg.emailClass);
+          }
+          else if (_protocol == 'tel:' || _protocol == 'callto:') {  // tel links
+            link.addClass(cfg.telClass);
           }
           else
           {
@@ -152,6 +154,7 @@
           //'(www\\d?.)?domain.com'  // Matches: domain.com, www.domain.com, www2.domain.com, www.domain3.com, etc.
         ],
       emailClass:    'mailto',
+      telClass:      'tel',
       externalClass: 'external',
       internalClass: 'withinpage',
       patternClassPrefix: 'file_',
