@@ -563,11 +563,14 @@
     },
 
 
-
+    // fixes this issue: http://terrillthompson.com/blog/161
     fixSkiplinks: function (selector) {
       $(document).delegate(selector||'a[href^="#"]', 'click', function (e) {
-          $( '#'+ $(this).attr("href").substr(1) )
-              .focusHere();
+          if ( !e.isDefaultPrevented() )
+          {
+            $( '#'+ $(this).attr("href").substr(1) )
+                .focusHere();
+          }
         });
     },
 
