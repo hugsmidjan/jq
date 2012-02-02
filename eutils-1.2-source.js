@@ -568,8 +568,11 @@
       $(document).delegate(selector||'a[href^="#"]', 'click', function (e) {
           if ( !e.isDefaultPrevented() )
           {
-            $( '#'+ $(this).attr("href").substr(1) )
-                .focusHere();
+            var id = $(this).attr("href").substr(1);
+            if ( id )
+            {
+              $('#'+id).focusHere();
+            }
           }
         });
     },
