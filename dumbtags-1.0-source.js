@@ -193,31 +193,43 @@
                                       var term = $.trim( request.term.toLowerCase() ).replace(/\s+/g, ' ');
                                       if ( cfg.ajax )
                                       {
-                                        $.ajax({
-                                            url:      acUrl,
-                                            type:     cfg.ajaxCfg.type,
-                                            data:     acName + "=" + encodeURIComponent( term ),
-                                            dataType: cfg.ajaxCfg.dataType,
-                                            success:  function (results) {
-                                                if ( cfg.acFixResults ) {
-                                                  results = cfg.acFixResults(results);
+                                        if ( cfg.ajaxMethod )
+                                        {
+                                          cfg.ajaxMethod({
+                                              term: term,
+                                              input: input,
+                                              config: cfg,
+                                              callback: callback
+                                            });
+                                        }
+                                        else
+                                        {
+                                          $.ajax({
+                                              url:      acUrl,
+                                              type:     cfg.ajaxCfg.type,
+                                              data:     acName + "=" + encodeURIComponent( term ),
+                                              dataType: cfg.ajaxCfg.dataType,
+                                              success:  function (results) {
+                                                  if ( cfg.acFixResults ) {
+                                                    results = cfg.acFixResults(results);
+                                                  }
+                                                  // untangle the naming-conflict coming from the server
+                                                  $.each(results, function (i, item) {
+                                                      if ( cfg.acFixItem )
+                                                      {
+                                                        cfg.acFixItem(item);
+                                                      }
+                                                      else
+                                                      {
+                                                        item.id =    item.value;
+                                                        item.value = item.tag;
+                                                      }
+                                                      delete item.tag;
+                                                    });
+                                                  callback(results);
                                                 }
-                                                // untangle the naming-conflict coming from the server
-                                                $.each(results, function (i, item) {
-                                                    if ( cfg.acFixItem )
-                                                    {
-                                                      cfg.acFixItem(item);
-                                                    }
-                                                    else
-                                                    {
-                                                      item.id =    item.value;
-                                                      item.value = item.tag;
-                                                    }
-                                                    delete item.tag;
-                                                  });
-                                                callback(results);
-                                              }
-                                          });
+                                            });
+                                        }
                                       }
                                       else
                                       {
@@ -293,6 +305,7 @@
       delSel:       'a.del',
       //splitter:     ',',
       ajax:         1,  // Flags whether to use ajax to fill the autocomplete menu, or with local (<select> box) values only.
+      //ajaxMethod:   null,  // Function(options{term: input: config: callback: }) - allows overriding the built-in jQuery ajax request mechanism with custom behavior (e.g. DWR method calls, etc.);
       //acUrl:        null,  // String - overriding URL for the autocomplete ajax call. Defaults to picking up hints from cfg.acNameAttr attributes in the dom, or the form[action]
       //acName:       null   // String - parameter name for the autocomplete ajax call. Defaults to to using the name="" of the input field.
       acUrlAttr:    'data-suggesturl',
