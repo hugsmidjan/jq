@@ -2,7 +2,7 @@
 // ----------------------------------------------------------------------------------
 // jQuery.fn.fickle v 2.0
 // ----------------------------------------------------------------------------------
-// (c) 2009-2011 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+// (c) 2009-2012 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
 //  written by:
 //   * Már Örlygsson        -- http://mar.anomy.net
 // ----------------------------------------------------------------------------------
@@ -57,6 +57,8 @@
       close:   .fickle('close')       // Closes (hides) the fickle element, and sends focus back to `options.opener`.
       toggle:  .fickle('toggle'[, doOpen])  // Toggles between 'open'/'close' - Optional: `doOpen` boolean true `open`s, while false `close`s
       isOpen   .fickle('isOpen')      // returns boolean value for the first item in the collection
+      isFickle .fickle('isFickle')    // returns boolean value indicating if this element is fickle (has been inited)
+      config   .fickle('config')      // returns the fickle config object
 
 
   FIXME:
@@ -99,6 +101,18 @@
               cfg.opener = (extras && extras.opener) || cfg.opener;
               if ( !data._isOpen  &&  _triggerEvent(this, 'open', cfg) )
               {
+                // If the fickle object is the last focusable element in the document
+                // then (in FF3 and Chrome, at least) keyboard Tabbing out of the popup will place the focus inside the location bar
+                // ...which triggers a document.onblur() (this is identical to what happens when the user Switches away from the browser)
+                // ...which ruins everything!
+                // Henche, we append a hidden tabindexable element to the document (for the lack of a better idea for a workaround).
+                var focusTrap = $('#'+_dataId);
+                if ( !focusTrap[0] ) {
+                  focusTrap = $('<i id="'+ _dataId +'" tabindex="0" style="position:fixed;_position:absolute;left:-9999px;overflow:hidden;margin-top:-1px;width:1px;height:1px;"> </i>');
+                }
+                $('body').append( focusTrap );
+
+                // ...and now onto the actual opening:
                 var focusElm = cfg.focusElm;
                     focusTarget = focusElm ?
                                       ( focusElm.charAt ? this.find(focusElm) : focusElm ):
@@ -151,6 +165,9 @@
             },
           isFickle: function (data) {
               return !!data;
+            },
+          config: function (data) {
+              return data.c;
             }
         /**
           disable: _notImplemented,
@@ -266,23 +283,6 @@
                         _lastFocusElm = e.target;
                       }
                     });
-
-              if (document.body == _this.closest('body')[0])
-              {
-                // FIXME: this is an ugly hack. let's find a more elegant solution to this.
-                var lastFocusableLineage = $('a,input,select,textarea,button,object,area').filter(':last').parents().andSelf();
-                      // check if the
-                // FIXME: this is an ugly hack. let's find a more elegant solution to this.
-                if ( lastFocusableLineage.index(this) > -1 )
-                {
-                  // Established: The popup contains the document's last Link.
-                  // ...which means (at least in FF3 and Chrome) that Keyboard Tabbing out of the popup will place the focus inside the location bar
-                  // ...which triggers a document.onblur() (this is identical to what happens when the user Switches away from the browser)
-                  // ...which ruins everything!
-                  // Henche, we append a hidden tabindexable element to the document (for the lack of a better idea for a workaround).
-                  $('body').append('<i tabindex="0" style="position:fixed;_position:absolute;left:-9999px;overflow:hidden;width:1px;height:1px;"> </i>');
-                }
-              }
             }
 
             if (cfg.startOpen)

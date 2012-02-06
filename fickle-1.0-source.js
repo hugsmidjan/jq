@@ -10,6 +10,7 @@
 /*
   Depends on eutils:
       $.fn.setFocus()
+      $.fn.unhide()
       $.beget()
 
   Usage:
@@ -56,6 +57,8 @@
       close:   .fickle('close')       // Closes (hides) the fickle element, and sends focus back to `options.opener`.
       toggle:  .fickle('toggle'[, doOpen])  // Toggles between 'open'/'close' - Optional: `doOpen` boolean true `open`s, while false `close`s
       isOpen   .fickle('isOpen')      // returns boolean value for the first item in the collection
+      isFickle .fickle('isFickle')    // returns boolean value indicating if this element is fickle (has been inited)
+      config   .fickle('config')      // returns the fickle config object
 
   FIXME:
     * In MSIE6&7 clicking the scrollbar closes the window.
@@ -104,7 +107,7 @@
                 this
                     .queue(function(){  // to allow event handlers to perform fadeIns and things...
                         var pop = $(this);
-                        pop.show();
+                        pop.unhide();
                         _triggerEvent(pop, 'opened', cfg);
                         data._gotFocus || pop.setFocus();
                         pop.dequeue();
@@ -144,6 +147,9 @@
             },
           isFickle: function (data) {
               return !!data;
+            },
+          config: function (data) {
+              return data.c;
             }
         /**
           disable: _notImplemented,
@@ -218,9 +224,10 @@
                   },
                 _lastFocusElm;
 
+            !cfg.startOpen && _this.hide();  // hide by default - unless cfg.startOpen is true
+
             _this
                 .data(_dataId, data)
-                .toggle( !!cfg.startOpen )  // hide by default - unless cfg.startOpen is true
                 // accessibility aid
                 .prepend( cfg.focusTarget )
                 .bind('focusin focusout', function (e) { // keeps track of whether the fickle element has focus. Determines whether .setFocus() is needed on `fickleopened` (see above)
