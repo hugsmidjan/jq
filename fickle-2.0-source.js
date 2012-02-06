@@ -206,7 +206,7 @@
         var methd = methods[cfg];
         if (methd)
         {
-          return ( /^is(Open|Fickle)$/.test(cfg) ) ?
+          return ( /^(?:config|is(?:Open|Fickle))$/.test(cfg) ) ?
                       methd( candidates.data(_dataId)/*, extras */ ):
                       candidates.each(function(i, _this){
                           _this = $(_this);
