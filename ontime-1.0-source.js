@@ -338,7 +338,10 @@
                   {
                     _data._startLap = (new Date()).getTime();
                     var e = $.Event(ontimeNS+label);
-                    !config.bubble && e.stopPropagation();
+                    if ( !config.bubble )
+                    {
+                      _this.one(e.type, function(e){ e.stopPropagation() }); // needed because of http://bugs.jquery.com/ticket/10699
+                    }
                     _this.trigger( e, [_counter, _this.data(ontimeNS+label)] );
                     if (e.isDefaultPrevented()  ||  (config.reps !== 0  &&  ++_counter >= config.reps) )
                     // if the event handler returns `false` the timer should stop

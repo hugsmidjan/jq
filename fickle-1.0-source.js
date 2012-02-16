@@ -73,8 +73,9 @@
           // NOTE: `collection` must only contain one item - otherwise shared-event-object-weirdness ensues.
           var e = $.Event(fickle+type);
           e.cfg = cfg;
-          e.stopPropagation();
-          collection.trigger(e);
+          collection
+              .one(e.type, function(e){ e.stopPropagation() }) // needed because of http://bugs.jquery.com/ticket/10699
+              .trigger(e);
           return !e.isDefaultPrevented();
         },
 
