@@ -43,29 +43,49 @@
                       tagElms.push(
                           $(cfg.tagTempl )
                               .text( itm.value )
+                              .data( 'dumbTag', {
+                                  value: itm.id||itm.value, // id
+                                  tag: itm.value            // human readable tag "name"
+                                })
                               .append( $('<input type="hidden"/>').attr({ name:submName, value:itm.id||itm.value }) )
                               .append( $( cfg.tagDelTempl ).attr( 'title', i18n.delTitle||i18n.delLabel ).html( i18n.delLabel ) )
                               .attr( 'title', itm.value )
                               [0]
                         );
                     });
-                  input.before( tagElms );
+                  return $(tagElms).insertBefore( input );
                 },
               addItem = function ( item ) {
+                  // IDEA: trigger 'dumbTagAdd' event  here!
                   var val = item.value.toLowerCase(),
                       tags = input.prevAll(cfg.tagSel)
                                   .filter(function(){
                                       var notSame = this.title.toLowerCase() != val;
-                                      notSame  ||  $(this).remove();
+                                      notSame  ||  delTag(this, true); // silently remove existing duplicates
                                       return notSame;
                                     });
                   // auto remove the last tag when we've hit the maxTags limit.
                   if ( cfg.maxTags  &&  tags.length >= cfg.maxTags )
                   {
-                    input.prev( cfg.tagSel ).remove();
+                    delTag( input.prev( cfg.tagSel ), true );
                   }
-                  buildTagElms([item]);
+                  var tagElm = buildTagElms([item]);
                   input.val(''); // empty the field to prevent selection via ENTER saving that text as tag.
+                  tagElm.trigger('dumbTagAdded');
+                },
+
+              delTag = function ( tagElm, autoDelete ) {
+                  tagElm = $(tagElm);
+                  var removeEv = $.Event('dumbTagRemove');
+                  removeEv.autoDelete = autoDelete;
+                  tagElm.trigger(removeEv);
+                  if ( autoDelete  ||  !removeEv.isDefaultPrevented() )
+                  {
+                    tagElm.remove();
+                    // IDEA: trigger 'dumbTagRemoved' event  here!
+                    return true;
+                  }
+                  return false;
                 },
 
               selectBox;
@@ -133,7 +153,7 @@
                       // handle clicks on the delete buttons
                       else if ( $(e.target).is( cfg.delSel ) )
                       {
-                        $(e.target).closest( cfg.tagSel ).remove();
+                        delTag( $(e.target).closest( cfg.tagSel ) );
                         return false;
                       }
                     })
@@ -155,9 +175,12 @@
                             setTimeout(function(){
                                 var prevTag = input.prev( cfg.tagSel ),
                                     prevValue = prevTag.attr('title');
-                                prevTag.find( cfg.delSel ).trigger('click');
-                                input.val( prevValue );
-                                input[0].select();
+                                if ( delTag( prevTag ) )
+                                {
+                                  input
+                                      .val( prevValue )
+                                      [0].select();
+                                }
                               }, 0);
                           }
                           // enter (or comma) inside the input-field may create a new tag
