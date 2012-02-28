@@ -36,20 +36,22 @@
 
               acLocalValues = [],
               prefills = [],
+              activeTags = [],
 
               buildTagElms = function (items) {
                   var tagElms = [];
                   $.each(items, function (i, itm) {
+                      var tagItem = {
+                              value: itm.id||itm.value, // id
+                              tag: itm.value            // human readable tag "name"
+                            };
+                      activeTags.push( tagItem.tag.toLowerCase() );
                       tagElms.push(
                           $(cfg.tagTempl )
-                              .text( itm.value )
-                              .data( 'dumbTag', {
-                                  value: itm.id||itm.value, // id
-                                  tag: itm.value            // human readable tag "name"
-                                })
-                              .append( $('<input type="hidden"/>').attr({ name:submName, value:itm.id||itm.value }) )
+                              .text( tagItem.tag )
+                              .data( 'dumbTag', tagItem)
+                              .append( $('<input type="hidden"/>').attr({ name:submName, value:tagItem.value }) )
                               .append( $( cfg.tagDelTempl ).attr( 'title', i18n.delTitle||i18n.delLabel ).html( i18n.delLabel ) )
-                              .attr( 'title', itm.value )
                               [0]
                         );
                     });
@@ -57,15 +59,15 @@
                 },
               addItem = function ( item ) {
                   // IDEA: trigger 'dumbTagAdd' event  here!
-                  var val = item.value.toLowerCase(),
-                      tags = input.prevAll(cfg.tagSel)
+                  var tag = item.value.toLowerCase(),
+                      tagElms = input.prevAll(cfg.tagSel)
                                   .filter(function(){
-                                      var notSame = this.title.toLowerCase() != val;
-                                      notSame  ||  delTag(this, true); // silently remove existing duplicates
-                                      return notSame;
+                                      var same = $(this).data('dumbTag').tag.toLowerCase() == tag;
+                                      if (same) {  delTag(this, true);  } // silently remove existing duplicates
+                                      return !same;
                                     });
                   // auto remove the last tag when we've hit the maxTags limit.
-                  if ( cfg.maxTags  &&  tags.length >= cfg.maxTags )
+                  if ( cfg.maxTags  &&  tagElms.length >= cfg.maxTags )
                   {
                     delTag( input.prev( cfg.tagSel ), true );
                   }
@@ -81,6 +83,11 @@
                   tagElm.trigger(removeEv);
                   if ( autoDelete  ||  !removeEv.isDefaultPrevented() )
                   {
+                    var pos = $.inArray( tagElm.data('dumbTag').tag.toLowerCase(), activeTags );
+                    if ( pos > -1 )
+                    {
+                      activeTags.splice( pos , 1);
+                    }
                     tagElm.remove();
                     // IDEA: trigger 'dumbTagRemoved' event  here!
                     return true;
@@ -173,9 +180,9 @@
                           {
                             var input = $(this);
                             setTimeout(function(){
-                                var prevTag = input.prev( cfg.tagSel ),
-                                    prevValue = prevTag.attr('title');
-                                if ( delTag( prevTag ) )
+                                var prevTagElm = input.prev( cfg.tagSel ),
+                                    prevValue = prevTagElm.data('dumbTag').tag;
+                                if ( delTag( prevTagElm ) )
                                 {
                                   input
                                       .val( prevValue )
@@ -203,6 +210,10 @@
                         });
                   if ( cfg.ajax  ||  acLocalValues.length )
                   {
+                    if ( !cfg.ajax )
+                    {
+                      cfg.acCfg.minLength = 0;
+                    }
                     input
                         .autocomplete(
                             $.extend(
@@ -211,7 +222,6 @@
                                 },
                                 cfg.acCfg,
                                 {
-                                  minLength:  cfg.ajax ? cfg.acCfg.minLength : 0,
                                   source:     function(request, callback){
                                       var term = $.trim( request.term.toLowerCase() ).replace(/\s+/g, ' ');
                                       if ( cfg.ajax )
@@ -237,7 +247,7 @@
                                                     results = cfg.acFixResults(results);
                                                   }
                                                   // untangle the naming-conflict coming from the server
-                                                  $.each(results, function (i, item) {
+                                                  results = $.map(results, function (item, i) {
                                                       if ( cfg.acFixItem )
                                                       {
                                                         cfg.acFixItem(item);
@@ -248,6 +258,10 @@
                                                         item.value = item.tag;
                                                       }
                                                       delete item.tag;
+
+                                                      return ( $.inArray( item.value.toLowerCase(), activeTags ) == -1 ) ? // skip over tags that are already active
+                                                                  item:
+                                                                  null;
                                                     });
                                                   callback(results);
                                                 }
@@ -260,9 +274,14 @@
                                             i = 0;
                                         while ( acLocalValues[i] )
                                         {
-                                          if ( acLocalValues[i].label.toLowerCase().indexOf( term ) > -1 )
+                                          var localItem = acLocalValues[i],
+                                              localTag = acLocalValues[i].label.toLowerCase();
+                                          if ( localTag.indexOf( term ) > -1 )
                                           {
-                                            res.push( acLocalValues[i] );
+                                            if ( $.inArray( localTag, activeTags ) == -1 ) // skip over tags that are already active
+                                            {
+                                              res.push( localItem );
+                                            }
                                           }
                                           i++;
                                         }
@@ -284,16 +303,20 @@
                           })
                         .bind('autocompleteselect', function (e, ui) {
                             addItem(ui.item);
+                            if ( !cfg.acCfg.minLength )
+                            {
+                              setTimeout(function(){  input.autocomplete('search');  }, 100);
+                            }
                             return false; // prevent autocomplete from filling the input field with the selected value.
                           });
 
-                    if ( !cfg.ajax )
+                    if ( !cfg.acCfg.minLength )
                     {
                       input
                           .bind('focus', function (e) {
                               input.autocomplete('search');
                             })
-                          .autocomplete('search');
+                          .autocomplete('search'); // do it now, because we're inside a .one()-off focus handler, remember? :-)
                     }
                   }
                 });
@@ -336,7 +359,7 @@
       acMenuClass:  'tags-acmenu ui-autocomplete ui-menu',
       acCfg: {
           minLength:  2,
-          //autoFocus:  true,
+          //autoFocus:  false,
           delay:      300,
           //position:   { of:input.parent() },
           html:       true
