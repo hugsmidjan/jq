@@ -24,7 +24,7 @@
           window:      window,        // window from which the new window is .open()ed
                                       // NOTE: this only affects elements with either config.url set, or an explicit target that doesn't start with '_')
           markTitle:   false,  // if true, will add $.fn.popUps.titleSuffix[lang] suffix to the link's title="" atribute
-          titleSuffix: {}      // Example: `{  is: '(opnast í nýjum glugga)',  en: '(opens in a new window)',  se:'(hurdy gurdy)'  }`,
+          titleSuffix: {}      // Example: { en:'mytitlesuffix', se:'hurdygurdy' },
           width:       0,      // px
           height:      0,      // px
           minimal:     false,  // true will automatically turn all of the following UI/Chrome options to false.
@@ -39,11 +39,11 @@
 */
       cfg = cfg || {};
 
+      cfg.titleSuffix = $.extend( {}, p.titleSuffix, cfg.titleSuffix||{} );
+
       var settings = [];
       if (cfg.width)  { settings.push('width='+cfg.width); }
       if (cfg.height) { settings.push('height='+cfg.height); }
-      cfg.titleSuffix = $.extend( {}, p.titleSuffix, cfg.titleSuffix||{} );
-
       $.each(['location','menubar','scrollbars','status','toolbar'], function(i, param){
           if (cfg[param] !== undefined) { settings.push(param + (cfg[param]?'=yes':'=no') ); }
           else if (cfg.minimal) { settings.push(param+'=no'); }
@@ -107,7 +107,8 @@
             {                                             // ...since we're passing the event through (i.e. not stopping it w. `return false;`)
                                                           // if target starts with '_' all window settings are ignored.
               var _newWin = (cfg.window || window).open(cfg.url || 'about:'+blank, _target, cfg._wSettings);
-              setTimeout(function(){ _newWin.focus(); }, 150);
+              setTimeout(function(){  $(_elm).trigger('popupsopen', [_newWin, cfg]);  }, 0);
+              setTimeout(function(){  _newWin.focus();  }, 150);
             }
             if (!_elm.target)  // if there's no target attribute on the _elm
             {
