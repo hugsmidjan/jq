@@ -612,7 +612,7 @@
 
     cropText: function (str, length, e)
     {
-      e = e || '...';
+      e = e || ' ...';
       if (length  &&  str.length >  length+e.length)
       {
         str = $.trim(str).replace(/\s+/g, ' ');
