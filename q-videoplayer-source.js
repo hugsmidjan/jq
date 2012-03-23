@@ -79,7 +79,7 @@
                            cfg.autostart == 'none' ? autoplay = '' :
                            firstrun ? '' : '&autoplay=1';
 
-                videoUrl = docLocPC + '//www.youtube.com/embed/' + youtubeId + '?rel=0' + autoplay;
+                videoUrl = docLocPC + '//www.youtube.com/embed/' + youtubeId + '?rel=0&wmode=transparent' + autoplay;
                 vidFinHeight = cfg.vidHeight + 30; //add player height to video height
                 useIframe = true;
               }
