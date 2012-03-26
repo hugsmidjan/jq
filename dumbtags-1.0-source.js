@@ -121,9 +121,9 @@
                       var elm = $(this);
                       if ( !cfg.ajax )
                       {
-                        item = { id:elm.val(),  value:elm.text() };
-                        item.label = item.value;
-                        acLocalValues.push( item );
+                        itm = { id:elm.val(),  value:elm.text() };
+                        itm.label = itm.value;
+                        acLocalValues.push( itm );
                       }
                       if ( elm.is('[selected]') )
                       {
@@ -247,20 +247,20 @@
                                                     results = cfg.acFixResults(results);
                                                   }
                                                   // untangle the naming-conflict coming from the server
-                                                  results = $.map(results, function (item, i) {
+                                                  results = $.map(results, function (itm, i) {
                                                       if ( cfg.acFixItem )
                                                       {
-                                                        cfg.acFixItem(item);
+                                                        cfg.acFixItem(itm);
                                                       }
                                                       else
                                                       {
-                                                        item.id =    item.value;
-                                                        item.value = item.tag;
+                                                        itm.id =    itm.value;
+                                                        itm.value = itm.tag;
                                                       }
                                                       delete item.tag;
 
-                                                      return ( $.inArray( item.value.toLowerCase(), activeTags ) == -1 ) ? // skip over tags that are already active
-                                                                  item:
+                                                      return ( $.inArray( itm.value.toLowerCase(), activeTags ) == -1 ) ? // skip over tags that are already active
+                                                                  itm:
                                                                   null;
                                                     });
                                                   callback(results);
@@ -270,12 +270,12 @@
                                       }
                                       else
                                       {
-                                        var res = [];
-                                            i = 0;
-                                        while ( acLocalValues[i] )
+                                        var res = [],
+                                            i = 0,
+                                            localItem;
+                                        while ( (localItem = acLocalValues[i++]) )
                                         {
-                                          var localItem = acLocalValues[i],
-                                              localTag = acLocalValues[i].label.toLowerCase();
+                                          var localTag = localItem.label.toLowerCase();
                                           if ( localTag.indexOf( term ) > -1 )
                                           {
                                             if ( $.inArray( localTag, activeTags ) == -1 ) // skip over tags that are already active
@@ -283,7 +283,6 @@
                                               res.push( localItem );
                                             }
                                           }
-                                          i++;
                                         }
                                         callback( res );
                                       }
