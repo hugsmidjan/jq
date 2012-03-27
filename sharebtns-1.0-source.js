@@ -7,7 +7,37 @@
 //   * Már Örlygsson        -- http://mar.anomy.net
 // ----------------------------------------------------------------------------------
 //
-// Requires:
+// Inserts standard share/tweet/like/plus buttons into the dom.
+//
+//
+// Requires:  jQuery 1.4+
+//
+//
+// Usage:
+//  $('.container').sharebtns({ /* options */ });
+//
+//
+// Plugin Options (defaults):
+//    twitter:   true,     // Boolean|Number(non-zero order index)|Object(button config)  - non-falsy values insert Twitter "Tweet" button
+//    facebook:  true,     // Boolean|Number(non-zero order index)|Object(button config)  - non-falsy values insert Facebook "Like" button
+//    gplus:     false,    // Boolean|Number(non-zero order index)|Object(button config)  - non-falsy values insert Google+ "+1" button
+//
+//    process:   function ( btnHTML, btnName, btnCfg ) { // allows modifying each button before injection
+//                    // do stuff - like adding a wrapper, or modifying the HTML, or whatever...
+//                    return updatedHTMLorElm || btnHTML;
+//                 }
+//    insertion: 'append', // String  - jQuery method used to insert the buttons.  Accepted values: 'append', 'prepend', 'after', 'before'
+//
+//    url:       '',       // String  - Url to share. Defaults to document.location.href
+//
+//    large:     false,    // Boolean  - true prints a large version of the button, where supported (not supported by Facebook)
+//    countNone: false,    // Boolean  - true suppresses the display of tweet-/like-/share counter balloons. (not supported by Facebook)
+//    countV:    false,    // Boolean  - true displays vertically positioned share-counter ballonons.
+//
+//    ...additionally each button type has its own config object.
+//    See "btnDefeaults" below for details.
+//
+//
 //
 
 (function($,doc,script){
@@ -88,19 +118,11 @@
                   b.height = large ?  '28px' : vCount ?  '62px' : '20px'; // vercial && large seems not to be supported by Twitter
                 },
               $tmpl:  '<iframe src="//platform.twitter.com/widgets/tweet_button.html?%{size}%{count}%{via}%{related}%{hashtags}%{text}%{url}%{lang}" style="width:{width}; height:{height};" allowtransparency="true" frameborder="0" scrolling="no" />',
-            /*
-              $init:  function () {
-                  // https://twitter.com/about/resources/buttons#tweet
-                  (function(d,s,id){
-                      var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}
-                    })(document,"script","twitter-wjs");
-                }
-            */
               $pos:  10 // highest $pos comes first
             },
 
           facebook: {
-              width:   100,  // we don't really control the width...
+              width:   100,            // min-width for the iframe
               count:   'button_count', // 'standard', 'box_count'
               sendBtn: false,
               faces:   false, 
@@ -114,29 +136,29 @@
                   if ( !$('#fb-root')[0] )
                   {
                     $('body').prepend('<div id="fb-root"/>');
-                    injectScriptOnce( 'facebook-jssdk', '//connect.facebook.net/en_GB/all.js#xfbml=1' );
+                    injectScriptIfNeeded( 'facebook-jssdk', '//connect.facebook.net/en_GB/all.js#xfbml=1' );
                   }
                   window.FB  &&  FB.XFBML.parse();
                 },
-              $pos:  30 // defaults to last because when 'count' is set to '' - loads of text appear to the right of the button
+              $pos:  30 // defaults to last position because when 'count' is set to '' - loads of text appear to the right of the button
             },
 
           gplus: {
               url:   '', //  defaults to document.location.href
               count: '', //  'inline' (facebook-style) or 'none' (defaults to "bubble" (== '') )
-              size:  'medium', // 'small', 'medium', '' (large), 'tall'
+              size:  'medium', // 'small', 'medium', '' (large), 'tall' (tall combined with count:'bubble' displays a vertically positioned counter)
 
               $tmpl: '<div class="g-plusone" data-size="{size}" data-annotation="{count}" data-href="{url}"/>',
               $init: function () {
                   // https://www.google.com/intl/en/webmasters/+1/button/index.html
-                  injectScriptOnce( 'gplus-script', 'https://apis.google.com/js/plusone.js' );
+                  injectScriptIfNeeded( 'gplus-script', 'https://apis.google.com/js/plusone.js' );
                   window.gapi  &&  gapi.plusone.go();
                 },
               $pos:  20
             }
         },
 
-      injectScriptOnce = function ( id, url ) {
+      injectScriptIfNeeded = function ( id, url ) {
           if ( !doc.getElementById( id ) ) 
           {
             var firstScript = doc.getElementsByTagName(script)[0],
