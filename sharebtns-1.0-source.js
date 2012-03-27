@@ -16,7 +16,7 @@
           if ( this.length )
           {
             cfg = $.extend(true, {}, defaultCfg, cfg);
-            var htmlInsert = [];
+            var buttonsToInsert = [];
             $.each(btnDefeaults, function (btnName, btnDefaultCfg) {
                 var cfgBtnName = cfg[btnName];
                 if ( cfgBtnName )
@@ -31,17 +31,18 @@
                   // allow cfgBtnName itself to be a $pos number
                   bCfg.$pos = bCfg.$pos || 1*cfgBtnName || 0;
                   bCfg.$prep && bCfg.$prep( bCfg, cfg );
-                  var btnHTML = new String( bCfg.$tmpl.replace(/(%)?\{(.+?)\}/g, function(m,p1,p2){
-                                                                                        var val = bCfg[p2];
-                                                                                        return !p1 ? val : val ? p2+'='+encodeURIComponent(val)+'&' : '';
-                                                                                      }) );
-                  btnHTML.$pos = bCfg.$pos;
-                  htmlInsert.push( btnHTML );
-                  setTimeout(function(){ bCfg.$init && bCfg.$init(); }, 0);
+                  var newBtn = bCfg.$tmpl.replace(/(%)?\{(.+?)\}/g, function(m,p1,p2){
+                                                                          var val = bCfg[p2];
+                                                                          return !p1 ? val : val ? p2+'='+encodeURIComponent(val)+'&' : '';
+                                                                        });
+                  newBtn = $( cfg.process ? cfg.process(newBtn, btnName, bCfg) : newBtn );
+                  newBtn.$pos = bCfg.$pos;
+                  buttonsToInsert.push( newBtn );
+                  bCfg.$init && setTimeout(function(){ bCfg.$init(); }, 0);
                 }
               });
-            htmlInsert.sort(function(a,b){ var d = a.$pos-b.$pos; return d>0 ? 1 : d<0 ? -1 : 0; });
-            this[cfg.insertion]( htmlInsert.join('') );
+            buttonsToInsert.sort(function(a,b){ var d = a.$pos-b.$pos; return d>0 ? 1 : d<0 ? -1 : 0; });
+            this[cfg.insertion].apply( this, buttonsToInsert );
           }
           return this;
         },
@@ -50,6 +51,10 @@
           twitter:   true, // or a non-zero Number to indicate $pos
           facebook:  true,
           //gplus:   false,
+          //process:   function ( btnHTML, btnName, btnCfg ) {
+          //                // do stuff - like adding a wrapper, or modifying the HTML, or whatever...
+          //                return updatedHTMLorElm || btnHTML;
+          //             }
           insertion: 'append',
           //countNone: false,
           //countV:    false,
