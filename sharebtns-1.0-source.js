@@ -71,8 +71,11 @@
                   bCfg.$init && setTimeout(function(){ bCfg.$init(); }, 0);
                 }
               });
-            buttonsToInsert.sort(function(a,b){ var d = a.$pos-b.$pos; return d>0 ? 1 : d<0 ? -1 : 0; });
-            this[cfg.insertion].apply( this, buttonsToInsert );
+            buttonsToInsert = $.map(
+                                  buttonsToInsert.sort(function(a,b){ var d = a.$pos-b.$pos; return d>0 ? 1 : d<0 ? -1 : 0; }),
+                                  function (btnCollection) { return btnCollection.toArray(); }
+                                );
+            this[cfg.insertion]( buttonsToInsert );
           }
           return this.pushStack( buttonsToInsert );
         },
