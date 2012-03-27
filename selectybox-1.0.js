@@ -2,9 +2,9 @@
 // ----------------------------------------------------------------------------------
 // jQuery.fn.selectybox v 1.0
 // ----------------------------------------------------------------------------------
-// (c) 2012 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+// (c) 2012 HugsmiÃ°jan ehf  -- http://www.hugsmidjan.is
 //  written by:
-//   * Már Örlygsson        -- http://mar.anomy.net
+//   * MÃ¡r Ã–rlygsson        -- http://mar.anomy.net
 // ----------------------------------------------------------------------------------
 //
 // Allows simple styling of selectboxes in a way that is both a11y and mobile friendly.
@@ -16,6 +16,7 @@
 // Usage:
 //  $('select').selectybox({ /* options */ });
 //
+//  Returns the wrapper element.
 //
 //
 (function($, selectyButton){
@@ -23,7 +24,7 @@
   var selectybox = $.fn.selectybox = function ( cfg ) {
           cfg = $.extend({}, defaultCfg, cfg);
           var button = $(cfg.button);
-          this
+          return this
               .wrap(cfg.wrapper)
               .each(function () {
                   var sel = $(this);
@@ -52,7 +53,6 @@
           wrapper:        '<span class="selecty"/>',
           button:         '<span class="'+selectyButton+'"/>',
           focusClass:     'focused',
-          btnValSelector: '.'+selectyButton,
           emptyVal:       '\u00a0 \u00a0 \u00a0',
           wrapperCSS:     { position: 'relative' },
           selectCSS:      { position: 'absolute', bottom:0, left:0 }
