@@ -43,10 +43,10 @@
 (function($,doc,script){
 
   var sharebtns = $.fn.sharebtns = function ( cfg ) {
+          var buttonsToInsert = [];
           if ( this.length )
           {
             cfg = $.extend(true, {}, defaultCfg, cfg);
-            var buttonsToInsert = [];
             $.each(btnDefeaults, function (btnName, btnDefaultCfg) {
                 var cfgBtnName = cfg[btnName];
                 if ( cfgBtnName )
@@ -74,7 +74,7 @@
             buttonsToInsert.sort(function(a,b){ var d = a.$pos-b.$pos; return d>0 ? 1 : d<0 ? -1 : 0; });
             this[cfg.insertion].apply( this, buttonsToInsert );
           }
-          return this;
+          return this.pushStack( buttonsToInsert );
         },
 
       defaultCfg = sharebtns.defaults = {
@@ -136,9 +136,23 @@
                   if ( !$('#fb-root')[0] )
                   {
                     $('body').prepend('<div id="fb-root"/>');
-                    injectScriptIfNeeded( 'facebook-jssdk', '//connect.facebook.net/en_GB/all.js#xfbml=1' );
+                    injectScriptIfNeeded( 'facebook-jssdk', '//connect.facebook.net/'+ this.$locale() +'/all.js#xfbml=1' );
                   }
                   window.FB  &&  FB.XFBML.parse();
+                },
+              $loc: '',
+              $locs: {
+                  is: 'is_IS',
+                  dk: 'dk_DK',
+                  pl: 'pl_PL',
+                  fo: 'fo_FO',
+                  no: 'nn_NO',
+                  se: 'sv_SE',
+                  de: 'de_DE'
+                },
+              $locale: function () {
+                  this.$loc = this.$loc  ||  this.$locs[ $('html').attr('lang').substr(0,2) ]  ||  'en_US';
+                  return this.$loc;
                 },
               $pos:  30 // defaults to last position because when 'count' is set to '' - loads of text appear to the right of the button
             },
@@ -168,6 +182,7 @@
             firstScript.parentNode.insertBefore(js, firstScript);
           }
         };
+
 
 
 })(jQuery, document, 'script');
