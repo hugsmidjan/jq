@@ -75,7 +75,6 @@
           // NOTE: `collection` must only contain one item - otherwise shared-event-object-weirdness ensues.
           var e = $.Event(fickle+type);
           e.cfg = cfg;
-          //e.stopPropagation();  // in jQuery 1.7 this seems to prevent the event from ever taking place on the target element itself. // consider allowing bubbling from here on, anyway.
           collection.trigger(e);
           return !e.isDefaultPrevented();
         },

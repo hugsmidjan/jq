@@ -24,7 +24,7 @@
       inputSel:          '.fi_txt input',
       milleSep:          true,
       decimals:          2,
-      decimalsThreshold: 5,
+      decimalsThreshold: 5,         // the scale factor between base currency and target currency above which results are reported in whole (rounded) numbers - i.e. where `decimals` is set to 0
       startAmount:       1000
       // lang:           undefined, // optional override for the dom language - useful when the DOM is incomplete/wrong
     };

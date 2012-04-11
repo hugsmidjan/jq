@@ -23,7 +23,7 @@
           _config.currentSize = Math.min( _config.maxSize,  Math.max( _newSize,  _config.minSize ) );
           if ($.cookie) // use $.cookie tools if available
           {
-            $.cookie('fontSize', _config.currentSize, { path: '/', expires: 365 });
+            $.cookie(_config.cookie, _config.currentSize, { path: '/', expires: 365 });
           }
           return _applySize();
         };
@@ -36,14 +36,15 @@
       _body = _body || document.body;
 
       _config = $.extend({
-          doClientSide : !1,  // default: false (rely on server-side functions)
-          fontDownSel  : '.dwn a',
-          fontUpSel    : '.up a',
-          fontJumpSel  : '[class*=fsz] > a',
-          minSize      : 1,
-          maxSize      : 3,
-          defaultSize  : 1,
-          currentSize  : 1
+          doClientSide:  !1,  // default: false (rely on server-side functions)
+          fontDownSel:   '.dwn a',
+          fontUpSel:     '.up a',
+          fontJumpSel:   '[class*=fsz] > a',
+          minSize:       1,
+          maxSize:       3,
+          defaultSize:   1,
+          currentSize:   1,
+          cookie:       'fontSize'
         }, options );
 
       _config.currentSize = _config.defaultSize;
@@ -52,11 +53,11 @@
       {
         _config.currentSize = parseInt( RegExp.$1, 10 );
       }
-      
+
       // apply cookie values
       if (_config.doClientSide)
       {
-        var _cookieFontSize = ( $.cookie ) ? parseInt( $.cookie('fontSize'), 10 ) : 0;
+        var _cookieFontSize = ( $.cookie ) ? parseInt( $.cookie(_config.cookie), 10 ) : 0;
         if (_cookieFontSize)
         {
           _config.currentSize = Math.min( _config.maxSize,  Math.max( _cookieFontSize, _config.minSize ) );
