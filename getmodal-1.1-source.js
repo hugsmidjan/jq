@@ -2,13 +2,13 @@
 // ----------------------------------------------------------------------------------
 // jQuery.getModal v 1.1
 // ----------------------------------------------------------------------------------
-// (c) 2011 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+// (c) 2012 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
 //  written by:
 //   * Már Örlygsson        -- http://mar.anomy.net
 // ----------------------------------------------------------------------------------
 //
 //  Provides basic modal popup UI service on top of $.fn.fickle and
-//  with close button, and $.fn.curtain behaviour - 
+//  with close button, and curtain element
 //
 //
 //  Depends on:
@@ -111,7 +111,6 @@
         template: '<div class="modalpop">'+
                     '<span class="curtain"/>'+
                     '<div class="popwin">'+
-                      '<a class="focustarget" href="#">.</a>'+
                       '<div class="popbody"/>'+
                       '<a class="closebtn" href="#"/>'+
                     '</div>'+
