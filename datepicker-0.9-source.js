@@ -1,5 +1,5 @@
 //encoding: utf-8
-!window.datePicker && (function($){
+!window.datePicker && (function(){
 
   var oldIe = $.browser.msie   &&  parseInt($.browser.version,10)<8,
       _capitalize = function(s) { return s  &&  (s.charAt(0).toUpperCase() + s.substr(1)); },
@@ -289,12 +289,12 @@
         +   '<li class="next"><a href="#" title="'+(_txt.nextMLong||_txt.nextM)+'">'+_txt.nextM+'</a></li>'
         + '</ul>'
       );
-      var _nav = _monthNav.find("a");
-      $(_nav[0]).bind('click', function (e) {
+      _monthNav.find('.prev a').bind('click', function (e) {
+          ;;;window.console&&console.log( 'prev' );
           datePicker.flipCal(myId,-1,"m");
           e.preventDefault();
         });
-      $(_nav[1]).bind('click', function (e) {
+      _monthNav.find('.next a').bind('click', function (e) {
           datePicker.flipCal(myId,1,"m");
           e.preventDefault();
         });
@@ -309,12 +309,13 @@
           +   '<li class="next"><a href="#" title="'+(_txt.nextYLong||_txt.nextY)+'">'+_txt.nextY+'</a></li>'
           + '</ul>'
         );
-        _nav = _yearNav.find("a");
-        $(_nav[0]).bind('click', function (e) {
+        _yearNav.find('.prev a').bind('click', function (e) {
             datePicker.flipCal(myId,-1,"y");
+            e.preventDefault();
           });
-        $(_nav[1]).bind('click', function (e) {
+        _yearNav.find('.next a').bind('click', function (e) {
             datePicker.flipCal(myId,1,"y");
+            e.preventDefault();
           });
         _cal.append(_yearNav);
       }
@@ -450,7 +451,7 @@
       var _myField = this.fields[myId];
       if (!_myField.isOpen) { return false; }
       _myField.isOpen = false;
-      $(_myField._calendar).remove();
+      $(_myField._calendar).detach();
       $('body').unbind('click', this.delayedCloseAll);
       return false;
     },
@@ -691,4 +692,4 @@
   };
 
 
-})(jQuery);
+})();
