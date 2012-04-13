@@ -46,7 +46,7 @@
         makeItem('dwn', 1, menuFB);
         if ( $.fn.fontsizer )
         {
-          menuFB.fontsizer( cfg.fontsizerCfg)
+          menuFB.fontsizer( cfg.fontsizerCfg );
         }
       }
       if ( cfg.userstyles )
