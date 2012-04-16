@@ -338,6 +338,14 @@
     },
 
 
+
+    // Returns window.innerWidth in all browsers (fixes IE8/7 quirks)
+    winWidth: function () {
+        var de = _doc.documentElement;
+        return _win.innerWidth || (de && de.clientWidth) || _doc.body.clientWidth;
+      },
+
+
     // Usage:
     // jQuery.aquireId();                         // returns a valid unique DOM id string that can be safely assigned to an element.
     // jQuery.aquireId(prefDefaultIdString);      // returns a valid unique DOM id based on `prefDefaultIdString` (appending/autoincrementing a trailing integer if needed)
