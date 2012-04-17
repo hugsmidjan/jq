@@ -47,15 +47,17 @@
       ['fi,fr,no,se', ' ,'],
       ['de-ch,de-li,fr-ch,it-ch', "'."]
     ], function(i, tokenArr){
-      var tok = tokenArr[1].split('');
-      $.each(tokenArr[0].split(','), function(i, lang){
-          _tokens[lang] = tok;
-        });
+      var tok = tokenArr[1].split(''),
+          langs = tokenArr[0].split(','),
+          i = langs.length;
+      while (i--) {  _tokens[langs[i]] = tok;  }
     });
 
 
   $.prettyNum = {
 
+      tokens: _tokens, // { 'is':['.',','], 'en':[',','.']  }
+    
     /*
       Returns a prettified numerical string
       Usage:
