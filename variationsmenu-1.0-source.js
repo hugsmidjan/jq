@@ -232,6 +232,8 @@
                                               $( defaultImgs ).addClass( cfg.imgOnClass );
                                             }
                                           });
+
+                                    !firstRun  &&  $(menus).trigger('variationchanged');
                                   }
                                 });
                   menuElm
