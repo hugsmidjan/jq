@@ -266,7 +266,7 @@
           tagnames = taglabels = numTags = tagTextSplitter = tags = cont = select = headline = rnd = undefined;
         });
 
-      return this.pushStack( menus );
+      return this.pushStack( wrapper );
     };
   
 })(jQuery);
