@@ -152,7 +152,8 @@
                                                       .replace(/\{tagname\}/g, t.name+rnd)
                                                       .replace(/\{label\}/g,   label)
                                                       .replace(/\{value\}/g,   value),
-                                      item = $( itemHTML ).data('varValue', value);
+                                      item =  $( itemHTML )
+                                                  .data('varValue', value);
                                   if ( value == selectedTags[i] )
                                   {
                                     item
@@ -170,10 +171,11 @@
 
                   items = $(items)
                               .on('click.variationmenu', function (e, firstRun) {
-                                  var thisItem = this;
-                                  if ( firstRun  ||  (lastItem != thisItem  &&  !$(thisItem).data('varDisabled') ))
+                                  var thisItem = this,
+                                      $thisItem = $(thisItem);
+                                  if ( firstRun  ||  (lastItem != thisItem  &&  !$thisItem.data('varDisabled') ))
                                   {
-                                    if ( !firstRun || $(thisItem).is('.'+cfg.currentClass) )
+                                    if ( !firstRun || $thisItem.is('.'+cfg.currentClass) )
                                     {
                                       // only mark the item as .current and update the enabled/disabled states
                                       // on real clicks (!firstRun) or if the targetItem is preselected (current)
@@ -188,7 +190,7 @@
                                       // update lastItem
                                       lastItem = thisItem;
                                       // update selectedTags info
-                                      selectedTags[i] = $(thisItem)
+                                      selectedTags[i] = $thisItem
                                                             .addClass( cfg.currentClass ) // (and mark thisItem as current)
                                                             .find('input')
                                                                 .prop('checked', true)
@@ -197,19 +199,21 @@
                                       // derive the new selectedVariation
                                       selectedVariation = deriveSelectedVariation( variations, selectedTags );
                                       // refresh the enabled/disabled state on all menu items across all menus 
-                                      $(menus).each(function (i) {
-                                          var available = deriveAvailableValues( i,  variations, selectedTags );
-                                          $(this).data('varMenuItems')
-                                              .each(function () {
-                                                  var item = $(this),
-                                                      isUnavailable = !available[ item.data('varValue') ];
-                                                  item
-                                                      .toggleClass( cfg.disabledClass, isUnavailable )
-                                                      .data( 'varDisabled', isUnavailable )
-                                                      .find('input:radio, button')
-                                                          .prop('disabled', isUnavailable );
-                                                });
-                                        });
+                                      $(menus)
+                                          .data('selectedvariation', selectedVariation)
+                                          .each(function (i) {
+                                              var available = deriveAvailableValues( i,  variations, selectedTags );
+                                              $(this).data('varMenuItems')
+                                                  .each(function () {
+                                                      var item = $(this),
+                                                          isUnavailable = !available[ item.data('varValue') ];
+                                                      item
+                                                          .toggleClass( cfg.disabledClass, isUnavailable )
+                                                          .data( 'varDisabled', isUnavailable )
+                                                          .find('input:radio, button')
+                                                              .prop('disabled', isUnavailable );
+                                                    });
+                                            });
                                     }
                                     imgCont
                                         .each(function () {
@@ -233,7 +237,7 @@
                                             }
                                           });
 
-                                    !firstRun  &&  $(menus).trigger('variationchanged');
+                                    !firstRun  &&  $thisItem.trigger( 'variationchanged', [selectedVariation, t.name, selectedTags[i]] );
                                   }
                                 });
                   menuElm
