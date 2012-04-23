@@ -72,6 +72,22 @@
                 imgItems:       '>*',         // sub-selector inside imgCont - to find the image items (default + for each variation)
                 imgContOnClass: 'variated',
                 imgOnClass:     'active',     // classname for imgItems that are active
+                // turns simpler image links into proper thumbnail images right before `variationImageActive`
+                imgOnBuilder:   function (imgLi) {
+                    if ( !imgLi.is('.image') )
+                    {
+                      var link = imgLi.find('a');
+                      imgLi.addClass('image');
+                      link.addClass('img');
+                      $('<img/>')
+                          .attr({
+                              src: link.attr('data-img'),
+                              alt: link.text()
+                            })
+                          .appendTo( link.empty() );
+                    }
+                  },
+                imgClickFirst: !!$.fn.bigimgSwitcher, // flags whether first :visible imgItem should be 'clicked' to trigger `newbigimg`
                 tagJoint:       '-',
                 wrapper:        '<fieldset class="variationsmenu"><i headline/><i menus/></fieldset>',
                 wrapperHl:      '<h3/>',
@@ -83,7 +99,7 @@
                 disabledClass:  'disabled'
               }, cfg);
 
-      var menus = [];
+      var wrappers = [];
               
       this.each(function () {
           var cont = $(this),
@@ -173,12 +189,14 @@
                               .on('click.variationmenu', function (e, firstRun) {
                                   var thisItem = this,
                                       $thisItem = $(thisItem);
+                                  // do nothing unless this is either firstRun
+                                  // or if the clicked item is neither disabled nor already current
                                   if ( firstRun  ||  (lastItem != thisItem  &&  !$thisItem.data('varDisabled') ))
                                   {
                                     if ( !firstRun || $thisItem.is('.'+cfg.currentClass) )
                                     {
                                       // only mark the item as .current and update the enabled/disabled states
-                                      // on real clicks (!firstRun) or if the targetItem is preselected (current)
+                                      // on real clicks (!firstRun) or if the targetItem is preselected on page load (current)
                                       if ( $(e.target).closest('[href]', thisItem)[0] )
                                       {
                                         // only preventDefault on link clicks. radio-input clicks shouldn't be touched
@@ -218,7 +236,7 @@
                                     imgCont
                                         .each(function () {
                                             var images = $(this).find( cfg.imgItems ),
-                                                defaultImgs = [];
+                                                defaultImgs = [],
                                                 activeImgs = images.filter(function () {
                                                     var imgItem = $(this),
                                                         variations = imgItem.attr('data-forvariation'),
@@ -228,12 +246,23 @@
                                                                         !selectedId;
                                                     !variations  &&  defaultImgs.push( imgItem[0] );
                                                     imgItem.toggleClass( cfg.imgOnClass, isActive );
-                                                    isActive  &&  imgItem.trigger('variationImageActive');
+                                                    // initiate virgin imgItems
+                                                    if ( isActive  &&  !imgItem.data('variationinited') )
+                                                    {
+                                                      cfg.imgOnBuilder  &&  cfg.imgOnBuilder(imgItem);
+                                                      imgItem
+                                                          .trigger('variationImageActive')
+                                                          .data('variationinited', true);
+                                                    }
                                                     return isActive;
                                                   });
-                                            if ( !activeImgs.length )
+                                            if ( !activeImgs[0] )
                                             {
                                               $( defaultImgs ).addClass( cfg.imgOnClass );
+                                            }
+                                            if ( cfg.imgClickFirst  &&  (activeImgs[0] || !firstRun) )
+                                            {
+                                              $( activeImgs[0] || defaultImgs[0] ).trigger('click');
                                             }
                                           });
 
@@ -247,6 +276,7 @@
                   return menuElm.toArray();
                 });
           var wrapper = $(cfg.wrapper);
+          wrappers.push(wrapper[0]);
           wrapper
               .find( '[headline]' )
                   .replaceWith(  $( cfg.wrapperHl ).append( headline )  )
@@ -263,10 +293,10 @@
                       .triggerHandler('click.variationmenu', [true]);
                 
           // Release memory (GC)
-          tagnames = taglabels = numTags = tagTextSplitter = tags = cont = select = headline = rnd = undefined;
+          tagnames = taglabels = numTags = tagTextSplitter = tags = cont = select = headline = rnd = wrapper = undefined;
         });
 
-      return this.pushStack( wrapper );
+      return this.pushStack( wrappers );
     };
   
 })(jQuery);
