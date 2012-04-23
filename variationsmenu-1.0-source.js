@@ -73,7 +73,7 @@
                 imgContOnClass: 'variated',
                 imgOnClass:     'active',     // classname for imgItems that are active
                 tagJoint:       '-',
-                wrapper:        '<fieldset class="variationmenu"><i headline/><i menus/></fieldset>',
+                wrapper:        '<fieldset class="variationsmenu"><i headline/><i menus/></fieldset>',
                 wrapperHl:      '<h3/>',
                 menuTmpl:       '<fieldset class="fi_rdo req"><h4>{legend}</h4><ul><li items/></ul></fieldset>',
                 menuItem:       '<li class="{value}"><input type="radio" name="{tagname}" value="{value}" id="{id}" /><label for="{id}">{label}</label></li>',
