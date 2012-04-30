@@ -59,7 +59,7 @@ window.relative_time = '';
       }).replace(/\B@([_a-z0-9]+)/ig, function(reply) {
         return  reply.charAt(0)+'<a href="http://twitter.com/'+reply.substring(1)+'">'+reply.substring(1)+'</a>';
       });
-      statusHTML.push('<li><span>'+status+'</span> <a class="timestamp" href="http://twitter.com/'+username+'/statuses/'+twitters[i].id+'">'+relative_time(twitters[i].created_at)+'</a></li>');
+      statusHTML.push('<li><span>'+status+'</span> <a target="_blank" class="timestamp" href="http://twitter.com/'+username+'/statuses/'+twitters[i].id_str+'">'+relative_time(twitters[i].created_at)+'</a></li>');
     }
     document.getElementById('twitter_update_list').innerHTML = statusHTML.join('');
   };
