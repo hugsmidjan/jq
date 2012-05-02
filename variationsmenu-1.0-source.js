@@ -39,7 +39,7 @@
           }
           return selectedVariation;
         },
-        
+
       // returns an object with all tagValues (of index tagIdx), that are available alternatives based on all the other selectedTags values.
       deriveAvailableValues = function ( tagIdx,  allVariations, selectedTags ) {
           var availableVals = {},
@@ -100,7 +100,7 @@
               }, cfg);
 
       var wrappers = [];
-              
+
       this.each(function () {
           var cont = $(this),
               select = cont.find('select'),
@@ -216,7 +216,7 @@
                                                             .data('varValue');
                                       // derive the new selectedVariation
                                       selectedVariation = deriveSelectedVariation( variations, selectedTags );
-                                      // refresh the enabled/disabled state on all menu items across all menus 
+                                      // refresh the enabled/disabled state on all menu items across all menus
                                       $(menus)
                                           .data('selectedvariation', selectedVariation)
                                           .each(function (i) {
@@ -267,6 +267,7 @@
                                           });
 
                                     !firstRun  &&  $thisItem.trigger( 'variationchanged', [selectedVariation, t.name, selectedTags[i]] );
+                                    hiddenInput.val( selectedVariation ? selectedVariation.id : '' );
                                   }
                                 });
                   menuElm
@@ -291,12 +292,12 @@
               .filter( ':first, .'+cfg.currentClass )
                   .last() // ensure we click the .current item if available
                       .triggerHandler('click.variationmenu', [true]);
-                
+
           // Release memory (GC)
           tagnames = taglabels = numTags = tagTextSplitter = tags = cont = select = headline = rnd = wrapper = undefined;
         });
 
       return this.pushStack( wrappers );
     };
-  
+
 })(jQuery);
