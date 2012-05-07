@@ -29,7 +29,7 @@
                               .each(function () {
                                   var sel = $(this);
                                       btn = $(cfg.button)
-                                                .text( sel.val() || cfg.emptyVal );
+                                                .text( sel.find('option:selected').text() || cfg.emptyVal );
                                   sel
                                       .data(selectyButton, btn)
                                       .before( btn );
@@ -41,7 +41,7 @@
                               .bind('change', function (e) {
                                   var sel = $(this);
                                   sel.data( selectyButton )
-                                      .text( sel.val() || cfg.emptyVal );
+                                      .text( sel.find('option:selected').text() || cfg.emptyVal );
                                 })
                               .css({ opacity: .0001 })
                               .css( cfg.selectCSS )
