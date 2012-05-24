@@ -88,7 +88,7 @@
                     }
                   },
                 imgClickFirst: !!$.fn.bigimgSwitcher, // flags whether first :visible imgItem should be 'clicked' to trigger `newbigimg`
-                tagJoint:       '-',
+                tagJoint:       ' - ',
                 wrapper:        '<fieldset class="variationsmenu"><i headline/><i menus/></fieldset>',
                 wrapperHl:      '<h3/>',
                 menuTmpl:       '<fieldset class="fi_rdo req"><h4>{legend}</h4><ul><li items/></ul></fieldset>',
@@ -114,7 +114,7 @@
               tagnames = (select.attr('data-tagnames')||'').split('|'),
               taglabels = (select.attr('data-taglabels')||'').split('|') ,
               numTags = tagnames.length,
-              tagTextSplitter = new RegExp('\s*'+(select.attr('data-tagjoint')||cfg.tagJoint) +'\s*' ),
+              tagTextSplitter = new RegExp('\\s*'+(select.attr('data-tagjoint')||cfg.tagJoint) +'\\s*' ),
 
               // list of available variationObjects
               variations = [/*  [ 'id':variationId, 0:tag1value, 1:tag2value, ... ],  [... */],
