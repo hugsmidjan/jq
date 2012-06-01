@@ -6,7 +6,7 @@
 //  written by:
 //   * Már Örlygsson        -- http://mar.anomy.net
 //   * Borgar Þorsteinsson  -- http://borgar.undraland.com
-//   * Valur Sverrisson     
+//   * Valur Sverrisson
 // ----------------------------------------------------------------------------------
 
 // todo : set position to list element / page that receives 'focusin'
@@ -44,7 +44,7 @@
       aspect:            'auto',     // auto|horizontal|vertical
       paging:            False,    // indicates wheather to render `jumpPager` links or `statusPager` info (set below)
       jumpPager:         True,   // toggles the "Pages: (1) (2) (3) (4)" links - Kicks in if `paging` is set to `true`
-      statusPager:       False,  // toggles the "Page: 1 of 6" status message 
+      statusPager:       False,  // toggles the "Page: 1 of 6" status message
       inputPager:        False,  // true forces the `statusPager` option to `true` (unless `itemStatusPager` is set to true) and turns the current-page number into a text input field.
       itemStatusPager:   False,  // true changes statusPager to count items shown rather than "pages" ... e.g. "Displaying: 1-4 of 13 items"
 
@@ -223,7 +223,7 @@
   function detectAspect ( _items )
   {
     var ret,
-        i2 = _items.eq( 1 );
+        i2 = _items.eq( 1 ),
         p1 = _items.eq( 0 ).offset(),
         p2 = i2.offset();
     // usable second item?
@@ -274,7 +274,7 @@
 
       if ( $.isFunction( c.animation ) )
       {
-        c.animation.call( _block, list, c )
+        c.animation.call( _block, list, c );
       }
       else
       {
@@ -297,7 +297,7 @@
         _block.addClass( c.topClass );
       }
 
-      if ( c.index >= list.length - c.windowSize )
+      if ((list.length - c.index) <= c.windowSize)
       {
         _block.addClass( c.bottomClass );
       }
@@ -318,7 +318,7 @@
         c.jumps
             .removeClass( c.currentPageClass )
             .eq( newWinIndex )
-                .addClass( c.currentPageClass )
+                .addClass( c.currentPageClass );
       }
 
       var newSatusIndex = c.itemStatusPager ?  c.index : newWinIndex;
@@ -331,7 +331,7 @@
         lastIdx = ( lastIdx > list.length ) ? list.length : lastIdx;
          c.status.append( '-' + lastIdx );
       }
-      
+
       if(c.autoScrollDelay)
       {
         _block.queue(function () {
@@ -421,7 +421,7 @@
           cfg.inputPager = $( cfg.inputPagerTempl )
                         .prependTo( jTemp )
                         .val( page+1 )
-                        .bind( 'change', cfg, inputChange )
+                        .bind( 'change', cfg, inputChange );
         }
         else
         {
@@ -441,7 +441,7 @@
               .text( cfg.jumpLabel )
               .appendTo( jumpMenu );
         }
-        // make buttons
+        // make buttons+
         for (var i=0; i<numWindows; i++)
         {
           var bt = $( cfg.jumpBtnTemplate ),
@@ -491,7 +491,7 @@
         _outer.zap();
         _inner = _outer = undefined;
       }
-      
+
       clearTimeout( oldCfg.scrollTimeout );
 
       var oldDisplay = _block.css('display');
@@ -534,9 +534,9 @@
       if ( !oldCfg )
       {
         // wrap elements with containers
-        _inner = _items.eq( 0 ).is( 'li' ) ? 
+        _inner = _items.eq( 0 ).is( 'li' ) ?
                     _items.parent():
-                    _items.wrapAll( '<div />' ).parent(),
+                    _items.wrapAll( '<div />' ).parent();
         _outer = _inner.wrap( '<div />' ).parent();
       }
 
@@ -633,7 +633,7 @@
   $.fn.listscroller = function ( config )
   {
     var dc = $.listscroller.defaultConfig;
-    if ( (config && config.item || config.destroy) || dc.item )
+    if ( (config && (config.item || config.destroy)) || dc.item )
     {
       this.each(function () {
           var b = $( this ),
