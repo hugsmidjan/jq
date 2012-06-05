@@ -16,6 +16,7 @@
 //  - $('.articlelist').alistDateSplit();
 
 
+(function($){
 
   $.alistDateSplit = {
       i18n: {
@@ -30,10 +31,6 @@
       }
   };
 
-(function($){
-
-
-
   $.fn.alistDateSplit = function ( cfg ) {
 
     cfg = $.extend({
@@ -46,16 +43,14 @@
     return this.each(function(){
 
         var alist = $(this),
-            text = $.alistDateSplit.i18n[alist.lang()] || $.alistDateSplit.i18n.en,
-            monthList = text.months,
-            weekdayList = text.weekdays;
+            text = $.alistDateSplit.i18n[alist.lang()] || $.alistDateSplit.i18n.en;
 
         alist.find( cfg.dateSel ).each(function(){
               var dateElm = $(this),
                   date = dateElm.text().split('.'),
-                  Amonth = monthList[ date[1] - 1 ],
+                  Amonth = text.months[ date[1] - 1 ],
                   dateObj = new Date(date[2],date[1],date[0]),
-                  weekday = weekdayList[dateObj.getDay()],
+                  weekday = text.weekdays[dateObj.getDay()],
                   month = cfg.shortMonths && Amonth.length > 4 ? Amonth.substr(0,3) : Amonth,
                   monthDot = cfg.shortMonths && Amonth.length > 4 ? '<i>.</i> ' : ' ',
                   jsDate = $('<span class="js-date" />'),
