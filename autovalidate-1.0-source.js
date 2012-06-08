@@ -42,7 +42,7 @@
     reqErrorClass       : 'reqerror',        // The `className` put on field "container" elements when they trigger a "required" error.
     typeErrorClass      : 'typeerror',       // The className put on field "container" elements that have a "invalid input" error.
 
-    //emulateTab:         false, 
+    //emulateTab:         false,
     //includeDisabled:    false,             // true - means that [disabled] fields are not filtered out.
     //maxLengthTab:       false
 
@@ -223,10 +223,10 @@
           var ctrl  = $( this ),
               label = $.av.getLabel( ctrl, contexts, conf ),
               errorMsg = ctrl.data('av-error-short');
-          
+
           if (errorMsg)
           {
-            label += ' ('+errorMsg+')'; 
+            label += ' ('+errorMsg+')';
           }
 
           if ( $(this).is('.' + conf.typeErrorClass) ) {  // is it a type error?
@@ -409,7 +409,7 @@
               {
                 // neccessary in jQuery 1.2.6 to prevent forms with inline onsubmit="" attributes returning false getting ignored
                 // (not a problem in jQuery 1.3)
-                e.preventDefault(); 
+                e.preventDefault();
               }
               return valid;
             /*}*/
@@ -623,37 +623,37 @@ $.extend($.av.lang.en, {
 
 
 // control types are plugged into jQuery.av.type
-// in: 
+// in:
 //    string: the controls current value
 //    node: the wrapper control (marked fi_)
 //    lang: the language of the control ( or 'en' if none was selected )
 //
 //    additionally, the context (this) of the function is the input element itself
 //
-// out: 
+// out:
 //   true:   input is valid
 //   false:  input is missing
-//   string: input is malformed => string is a localized error message 
-//           or '' if default error is to be used 
+//   string: input is malformed => string is a localized error message
+//           or '' if default error is to be used
 //
 
 var avTypes = $.av.type;
 $.extend(avTypes, {
-  
+
 
   fi_kt : function ( v, w, lang ) {
     if (v) {
       var error = $.av.getError( 'fi_kt', lang ),
            kt = v.replace(/[\s\-]/g, ''); // Allow "-" and " " as delimiting characters (strip them out).
       $( this ).val( kt );
-      // remainder must all be numericals, 10 characters, and the last character must be 0 or 9 
+      // remainder must all be numericals, 10 characters, and the last character must be 0 or 9
       // kt must not be a robot
       var robot = /010130(2(12|20|39|47|55|63|71|98)|3(01|36)|4(33|92)|506|778)9/.test(kt);
       if ( robot || !/^\d{9}[90]$/.test(kt) ) {
         return error;
       }
       // Checksum validation
-      var x = [3,2,7,6,5,4,3,2,1], 
+      var x = [3,2,7,6,5,4,3,2,1],
           _summa = 0,
           i = 9;
       while (i--) { _summa += (x[i] * kt.charAt(i)); }
@@ -698,16 +698,16 @@ $.extend(avTypes, {
   // ====[ internet & communication ]====
 
   fi_email : function ( v, w, lang ) {
-    if (v && !/^[a-z0-9-._+]+@([a-z0-9-_]+\.)+[a-z0-9-_]{2,99}$/i.test(v)) {
+    if (v && !/^[a-z0-9-._+]+@(?:[a-z0-9-_]+\.)+[a-z0-9-_]{2,99}$/i.test(v)) {
       return $.av.getError( 'fi_email', lang );
     }
     return !!v;
   },
-  
+
   fi_url : function( v, w, lang ) {
-    if (v) { 
+    if (v) {
       var _url = v.replace(/^[a-z]+:\/\/.+$/i, '');
-      if ( !/^[a-z]+:\/\/.+\..+$/.test( v ) || 
+      if ( !/^[a-z]+:\/\/.+\..+$/.test( v ) ||
            /[\(\)\<\>\,\:\"\[\]\\]/.test( _url ) ) {
         return $.av.getError( 'fi_url', lang );
       }
@@ -721,7 +721,22 @@ $.extend(avTypes, {
     if (v) {
       // This function simply removes all *legal* characters from the string
       // and then returns false if there are any left overs afterwards.
-      return !v.replace( /(\s|[-+()]|\d)/g, '' ) || '';
+      var m = w.className.match(/(?:^| )fi_tel_min_(\d+)(?: |$)/);
+      return  (
+                !v.replace( /(?:\s|[-+()]|\d)/g, '' )  &&
+                ( !m  ||  m[1] <= v.replace( /\D/g, '' ).length )
+              )
+              || '';
+    }
+    return false;
+  },
+
+
+  // Returns true if it approximates an icelandic telephone number
+  //  (with or without the +354 country code)
+  fi_tel_is : function( v, w, lang ) {
+    if (v) {
+      return /^(?:\+354)?\d{7}$/.test( v.replace(/[ -()]/g, '') )  || '';
     }
     return false;
   },
@@ -731,15 +746,15 @@ $.extend(avTypes, {
   //   is : "dæmi: 101",
   //   en : "example: 101",
   fi_postal_is : function ( v, w, lang ) {
-    
+
     if (v) {
       // have no DB -- fallback to a simple 3-digits test
       var codes = $.av.postCodes && $.av.postCodes.is;
-      if (!codes) { 
+      if (!codes) {
         return /^\d\d\d$/.test( v ) || $.av.getError( 'fi_pnr', lang );
       }
-      // have DB and code is present in it -- 
-      else if ( codes[v] ) {  
+      // have DB and code is present in it --
+      else if ( codes[v] ) {
         // report the zone name
         if (this.nodeType) {
           var unit = $( this ).siblings('span.unit');
@@ -752,7 +767,7 @@ $.extend(avTypes, {
         return true;
       }
       // have DB but code isn't found in it
-      return $.av.getError( 'fi_pnr', lang ); 
+      return $.av.getError( 'fi_pnr', lang );
 
     }
     return false;
@@ -779,12 +794,12 @@ $.extend(avTypes, {
     }
     return false;
   },
-  
+
 
 
 
   // ====[ numerics ]====
-  
+
   // Returns true only on a positive integer value.
   fi_qty : function( v, w, lang ) {
     $( this ).val( v );  // set field to trimmed value
@@ -803,7 +818,7 @@ $.extend(avTypes, {
 
   // ====[ dates ]====
 
-  // Returns true on a valid date (dd.mm.yyyy|d/m/yy|etc.). 
+  // Returns true on a valid date (dd.mm.yyyy|d/m/yy|etc.).
   // Valid year-range: 1900-2099. one or two digit days and months, two or four digit years.
   fi_year : function ( v, w, lang ) {
     if (v && !/^(19|20)\d\d$/.test(v)) {
@@ -811,8 +826,8 @@ $.extend(avTypes, {
     }
     return !!v;
   },
-  
-  // Returns true on a valid date (dd.mm.yyyy|d/m/yy|etc.). 
+
+  // Returns true on a valid date (dd.mm.yyyy|d/m/yy|etc.).
   // Valid year-range: 1900-2099. one or two digit days and months, two or four digit years
   //    is : "dæmi: %format",
   //    en : "example: %format",
@@ -845,7 +860,7 @@ $.extend(avTypes, {
       v = v.replace(/[ .-\/]+/g, '.').replace(/\.(\d\d)$/, '.20$1');
       // $(this).val( v );
       return /^(3[01]|[12]?[0-9]|(0)?[1-9])\.(1[012]|(0)?[1-9])\.(19|20)?\d\d$/.test(v) || error;
-      
+
     }
     return !!v;
   },
@@ -870,7 +885,7 @@ $.extend(avTypes, {
     }
     return !!v;
   },
-  
+
 
 
 
@@ -883,14 +898,14 @@ $.extend(avTypes, {
     var error = $.av.getError( 'fi_ccnum', lang );
     if (v) {
       // Strip out the optional space|dash delimiters
-      var ccNum = v.replace(/[ -]/g, ''); 
+      var ccNum = v.replace(/[ -]/g, '');
       // make sure there are 16 digits (or 15 for AmEx cards (starting with 34 or 37))
       if ( !/^(\d{16}|3[47]\d{13})$/.test( ccNum ) ) {
         return error;
       }
 
       // insert the cleaned up creditcard number back into the field
-      $( this ).val( ccNum ); 
+      $( this ).val( ccNum );
       var checkSum = 0,
           item,
            i = ccNum.length;
@@ -918,16 +933,16 @@ $.extend(avTypes, {
 
 
   // Returns true if valid credid card expiry date (further development needed to check against the current year)
-  fi_ccexp : function ( v, w, lang ) { 
+  fi_ccexp : function ( v, w, lang ) {
     if (v) {
       // accept space and dash, and change them into "/". Then remove all spaces
-      v = v.replace(/(\d\d)\s*[ -\/]?\s*(\d\d)/, '$1/$2').replace(/\s+/g, ''); 
+      v = v.replace(/(\d\d)\s*[ -\/]?\s*(\d\d)/, '$1/$2').replace(/\s+/g, '');
       // ...then test against the pattern "mm/yy"
-      return /^(0\d|1[012])\/(\d\d)$/.test(v) || $.av.getError( 'fi_ccexp', lang ); 
+      return /^(0\d|1[012])\/(\d\d)$/.test(v) || $.av.getError( 'fi_ccexp', lang );
     }
     return !!v;
   }
-  
+
 
 });
 
@@ -936,3 +951,4 @@ avTypes.fi_pnr = avTypes.fi_postal_is;
 
 
 })(jQuery);
+
