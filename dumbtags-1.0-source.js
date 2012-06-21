@@ -11,7 +11,13 @@
 
   Enables simple Facebook-style keyword-tagging autocomplete fields.
 
-  TODO: Wite proper documentation...
+  Requires:
+    * jQuery 1.6+
+    * jQuery UI autocomplete +(Core, Widget, Position)
+
+  TODO:
+   * Wite proper documentation. (Until then see `dumbTags.defaults` below...)
+
 
 */
 (function($){
@@ -41,17 +47,29 @@
               buildTagElms = function (items) {
                   var tagElms = [];
                   $.each(items, function (i, itm) {
+                      // Transform the raw autocomplete "itm" object into a
+                      // trimmed tagItem
                       var tagItem = {
                               value: itm.id||itm.value, // id
-                              tag: itm.value            // human readable tag "name"
+                              tag:   itm.value            // human readable tag "name"
                             };
                       activeTags.push( tagItem.tag.toLowerCase() );
                       tagElms.push(
                           $(cfg.tagTempl )
                               .text( tagItem.tag )
                               .data( 'dumbTag', tagItem)
-                              .append( $('<input type="hidden"/>').attr({ name:submName, value:tagItem.value }) )
-                              .append( $( cfg.tagDelTempl ).attr( 'title', i18n.delTitle||i18n.delLabel ).html( i18n.delLabel ) )
+                              .append(
+                                  $('<input type="hidden"/>')
+                                      .attr({
+                                          name:  submName,
+                                          value: tagItem.value
+                                        })
+                                )
+                              .append(
+                                  $( cfg.tagDelTempl )
+                                      .attr( 'title', i18n.delTitle||i18n.delLabel )
+                                      .html( i18n.delLabel )
+                                )
                               [0]
                         );
                     });
@@ -244,7 +262,10 @@
                                               dataType: cfg.ajaxCfg.dataType,
                                               success:  function (results) {
                                                   if ( cfg.acFixResults ) {
-                                                    results = cfg.acFixResults(results);
+                                                    var results2 = cfg.acFixResults(results);
+                                                    results = results2!==undefined ?
+                                                                  results2:
+                                                                  results;
                                                   }
                                                   // untangle the naming-conflict coming from the server
                                                   results = $.map(results, function (itm, i) {
@@ -257,9 +278,11 @@
                                                         itm.id =    itm.value;
                                                         itm.value = itm.tag;
                                                       }
-                                                      delete item.tag;
+                                                      delete itm.tag;
 
-                                                      return ( $.inArray( itm.value.toLowerCase(), activeTags ) == -1 ) ? // skip over tags that are already active
+                                                      // Return only items that are not already active (selected)
+                                                      // TODO: consider if we need to optionally allow duplicate tags (hasn't come up yet)
+                                                      return ( $.inArray( itm.value.toLowerCase(), activeTags ) == -1 ) ?
                                                                   itm:
                                                                   null;
                                                     });
@@ -349,7 +372,7 @@
       tagSel:       '.tag',
       delSel:       'a.del',
       //splitter:     ',',
-      ajax:         1,  // Flags whether to use ajax to fill the autocomplete menu, or with local (<select> box) values only.
+      ajax:         true,  // Flags whether to use ajax to fill the autocomplete menu, or with local (<select> box) values only.
       //ajaxMethod:   null,  // Function(options{term: input: config: callback: }) - allows overriding the built-in jQuery ajax request mechanism with custom behavior (e.g. DWR method calls, etc.);
       //acUrl:        null,  // String - overriding URL for the autocomplete ajax call. Defaults to picking up hints from cfg.acNameAttr attributes in the dom, or the form[action]
       //acName:       null   // String - parameter name for the autocomplete ajax call. Defaults to to using the name="" of the input field.
@@ -363,7 +386,7 @@
           //position:   { of:input.parent() },
           html:       true
         },
-      //acFixResults:  null  // Function(ajaxResults) - must return an Array of Objects (just like $.getJSON results would look like)
+      //acFixResults:  null  // Function(ajaxResults) - may either modify ajaxResults (if it's an object) or return a completely new results
       //acFixItem:     null  // Function(item) - custom function for manipulating each incoming ac item (useful for mapping conflicting json values)
       ajaxCfg: {
           //type: 'GET'

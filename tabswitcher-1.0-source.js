@@ -13,7 +13,7 @@
 
   Requires
    * jQuery 1.3 or better (event bubbling)
-   * Eutils ($.setFrag)
+   * Eutils ($.setFrag, $.beget)
 */
 
 (function($){
@@ -471,52 +471,51 @@
 
   // Makes .tabbox for those tabpane collections that lack it.
   // auto-assigns IDs, and pushes the newly created tabbox onto the stack.
-  $.fn.makeTabbox = function ( conf )
-  {
-    conf =  $.extend({
-                min:        2,
-                defaultId:  'tab1',
-                tabContSel: 'ul',
-                titleSel:   'h1, h2, h3',
-                boxClass:   'tab-box',
-                boxTempl:   '<div><ul class="tabs" /></div>',
-                tabTempl:   '<li><a href="#%{id}" title="%{title}">%{title}</a></li>',
-                makeTab:    function(tabPane, conf){
-                                return $(  $.inject(conf.tabTempl, {
-                                                id:    tabPane[0].id,
-                                                title: tabPane.find(conf.titleSel).eq(0).text()
-                                              })
-                                          );
-                              }
-              }, conf);
+  var makeTabbox = $.fn.makeTabbox = function ( cfg ) {
+          cfg =  $.beget(tabboxDefaults, cfg);
 
-    var tabBox = [],
-        tabPanes = this;
-    if (tabPanes.length >= conf.min)
-    {
-      tabBox = $( conf.boxTempl ).addClass( conf.boxClass );
-      var tabList = conf.tabContSel ? $(conf.tabContSel, tabBox) : tabBox,
-          paneParent = tabPanes.eq(0).parent(),
-          refLang = paneParent.closest('[lang]').attr('lang') || '';
+          var tabBox = [],
+              tabPanes = this;
+          if (tabPanes.length >= cfg.min)
+          {
+            tabBox = $( cfg.boxTempl ).addClass( cfg.boxClass );
+            var tabList = cfg.tabContSel ? $(cfg.tabContSel, tabBox) : tabBox,
+                paneParent = tabPanes.eq(0).parent(),
+                refLang = paneParent.closest('[lang]').attr('lang') || '';
 
-      paneParent.attr('lang', refLang);  // to speed up lookup of paneLang later.
+            paneParent.attr('lang', refLang);  // to speed up lookup of paneLang later.
 
-      tabPanes
-          .each(function(){
-              var tabPane = $(this);
-              tabPane.aquireId(conf.defaultId);
-              var newTab = conf.makeTab(tabPane, conf).appendTo( tabList ),
-                  paneLang = tabPane.closest('[lang]').attr('lang');
-              paneLang  &&  paneLang != refLang  &&  newTab.attr('lang', paneLang);
-            })
-          .eq(0)
-              .before( tabBox );
+            tabPanes
+                .each(function(){
+                    var tabPane = $(this);
+                    tabPane.aquireId(cfg.defaultId);
+                    var newTab = cfg.makeTab(tabPane, cfg).appendTo( tabList ),
+                        paneLang = tabPane.closest('[lang]').attr('lang');
+                    paneLang  &&  paneLang != refLang  &&  newTab.attr('lang', paneLang);
+                  })
+                .eq(0)
+                    .before( tabBox );
 
-    }
+          }
 
-    return this.pushStack( tabBox );
-  };
-
+          return this.pushStack( tabBox );
+        },
+      tabboxDefaults = makeTabbox.defaults = {
+          min:        2,
+          defaultId:  'tab1',
+          tabContSel: 'ul',
+          titleSel:   'h1, h2, h3',
+          boxClass:   'tab-box',
+          boxTempl:   '<div><ul class="tabs" /></div>',
+          tabTempl:   '<li><a href="#%{id}" title="%{title}">%{title}</a></li>',
+          makeTab:    function(tabPane, cfg){
+                          return $(  $.inject(cfg.tabTempl, {
+                                          id:    tabPane[0].id,
+                                          title: tabPane.find(cfg.titleSel).eq(0).text()
+                                        })
+                                    );
+                        }
+        };
 
 
 })(jQuery);

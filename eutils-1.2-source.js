@@ -411,7 +411,7 @@
         attr = attr || 'data-srcAttr';
         dom.find('img').add( dom.filter('img') )
             .attr('src', function () {
-                var img = $(this), 
+                var img = $(this),
                     src = img.attr(attr);
                 img.removeAttr(attr);
                 return src;
@@ -597,6 +597,7 @@
             if ( id )
             {
               $('#'+id).focusHere();
+              e.preventDefault();
             }
           }
         });
