@@ -507,7 +507,8 @@
       oldCfg.list
           .removeClass( oldCfg.hideClass )
           .removeClass( oldCfg.cursorItemClass )
-          .removeClass( oldCfg.currentItemClass );
+          .removeClass( oldCfg.currentItemClass )
+          .css({'display':''});
       oldCfg.flipover && oldCfg.flipover
           .remove();
       _inner && _inner
