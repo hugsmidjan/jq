@@ -20,8 +20,7 @@
 
     defaultConfig: {
         fadeInSpeed : 250, // set 1 for almost no animation
-        fadeOutSpeed : 200, // set 1 for almost no animation
-        setContainerWidth :0 //apply img outerwidth to the container-wrapper
+        fadeOutSpeed : 200 // set 1 for almost no animation
     },
 
     i18n: {
@@ -49,27 +48,46 @@
 
     pagingTempl : '<div class="status">' +
                     '<strong>%{imageText}</strong> ' +
-                    '<span><b>%{num}</b> %{ofTotalText} %{total}</span>' +
+                    '<span><b class="count">%{num}</b> %{ofTotalText} %{total}</span>' +
                   '</div>' +
                   '<ul class="stepper">' +
                     '<li class="next"><a href="#">%{nextText}</a></li>' +
                     '<li class="prev"><a href="#">%{prevText}</a></li>' +
-                  '</ul>',
-
-    getImage : function( images, currentPos ) {
-      var curImg = images.eq(currentPos),
-          prevImg = new Image(),
-          nextImg = new Image();
-      prevImg.src = images.eq( currentPos - 1 ).attr('href'); // preload prev
-      nextImg.src = images.eq( currentPos + 1 ).attr('href'); // preload next
-
-      return $.inject($.imgPopper.imgTempl, {
-                              img   : curImg.attr('href'),
-                              alt   : curImg.find('img').attr('alt')   || '',
-                              title : curImg.find('img').attr('title') || ''
-                            });
-    }
+                  '</ul>'
   };
+
+  var getImage = function( images, currentPos ) {
+        var curImg = images.eq(currentPos),
+            preloader = $('<img />');
+
+        if (currentPos != 0)
+        {
+          preloader.attr('src', images.eq( currentPos - 1 ).attr('href') ); // preload prev
+        }
+        else if (currentPos != images.length-1)
+        {
+          preloader.attr('src', images.eq( currentPos + 1 ).attr('href') ); // preload next
+        }
+
+        return $.inject($.imgPopper.imgTempl, {
+                                img   : curImg.attr('href'),
+                                alt   : curImg.find('img').attr('alt')   || '',
+                                title : curImg.find('img').attr('title') || ''
+                              });
+      },
+
+      refreshPaging = function ( currentPos, imgCount, pager ) {
+        pager.find('.nav-end').removeClass('nav-end');
+        if ( currentPos == 0 )
+        {
+          pager.find('.prev').addClass('nav-end');
+        }
+        else if (currentPos == imgCount - 1)
+        {
+          pager.find('.next').addClass('nav-end');
+        }
+        pager.find('.count').text( currentPos + 1  );
+      };
 
   $.fn.imgPopper = function ( cfg ) {
 
@@ -97,14 +115,14 @@
                               nextText    : cfg.nextText,
                               prevText    : cfg.prevText,
                               total       : _hrefElms.length,
-                              num         : (_idx + 1)
+                              num         : _idx + 1
                             })
               );
-        _paging.find('b').text(_idx + 1  );
+        refreshPaging( _idx, _hrefElms.length, _paging );
 
         _imgPop
             .empty()
-            .append( $.imgPopper.getImage( _hrefElms, _idx ) )
+            .append( getImage( _hrefElms, _idx ) )
             .append( _paging );
 
         _modal = $.getModal({
@@ -129,8 +147,9 @@
                   _idx = _idx != 0 ? _idx - 1 : _idx;
                 }
 
-                _imgPop.find('.image').replaceWith( $.imgPopper.getImage( _hrefElms, _idx  ) );
-                _paging.find('b').text( _idx + 1  );
+                refreshPaging( _idx, _hrefElms.length, _paging );
+
+                _imgPop.find('.image').replaceWith( getImage( _hrefElms, _idx  ) );
                 e.preventDefault();
               });
 
