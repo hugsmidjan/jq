@@ -22,11 +22,11 @@
       i18n: {
         en: {
           months: 'January,February,March,April,May,June,July,August,September,October,November,December'.split(','),
-          weekdays: 'Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday'.split(',')
+          weekdays: 'Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday'.split(',')
         },
         is: {
           months: 'janúar,febrúar,mars,apríl,maí,júní,júlí,ágúst,september,október,nóvember,desember'.split(','),
-          weekdays: 'Mánudagur, Þriðjudagur, Miðvikudagur, Fimmtudagur, Föstudagur, Laugardagur, Sunnudagur'.split(',')
+          weekdays: 'Sunnudagur,Mánudagur,Þriðjudagur,Miðvikudagur,Fimmtudagur,Föstudagur,Laugardagur'.split(',')
         }
       }
   };
@@ -48,9 +48,9 @@
         alist.find( cfg.dateSel ).each(function(){
               var dateElm = $(this),
                   date = dateElm.text().split('.'),
-                  Amonth = text.months[ date[1] - 1 ],
-                  dateObj = new Date(date[2],date[1],date[0]),
-                  weekday = text.weekdays[dateObj.getDay()],
+                  dateObj = new Date(date[2],date[1]-1,date[0]),
+                  Amonth = text.months[ dateObj.getMonth() ],
+                  weekday = text.weekdays[ dateObj.getDay() ],
                   month = cfg.shortMonths && Amonth.length > 4 ? Amonth.substr(0,3) : Amonth,
                   monthDot = cfg.shortMonths && Amonth.length > 4 ? '<i>.</i> ' : ' ',
                   jsDate = $('<span class="js-date" />'),
