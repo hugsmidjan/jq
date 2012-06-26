@@ -47,7 +47,7 @@
 
         alist.find( cfg.dateSel ).each(function(){
               var dateElm = $(this),
-                  date = dateElm.text().split('.'),
+                  date = $.trim(dateElm.text()).split('.') ,
                   dateObj = new Date(date[2],date[1]-1,date[0]),
                   Amonth = text.months[ dateObj.getMonth() ],
                   weekday = text.weekdays[ dateObj.getDay() ],
