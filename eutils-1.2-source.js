@@ -408,6 +408,7 @@
       },
     // Reinserts img[src] values escaped by $.imgSuppress()
     imgUnsuppress: function (dom, attr) {
+        dom = $(dom);
         attr = attr || 'data-srcAttr';
         dom.find('img').add( dom.filter('img') )
             .attr('src', function () {
@@ -416,6 +417,7 @@
                 img.removeAttr(attr);
                 return src;
               });
+        return dom;
       },
 
 

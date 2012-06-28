@@ -52,26 +52,30 @@
                       var tagItem = {
                               value: itm.id||itm.value, // id
                               tag:   itm.value            // human readable tag "name"
-                            };
+                            },
+                          tagElm = $(cfg.tagTempl );
+
+                      tagElm
+                          [cfg.htmlTags ? 'html' : 'text']( tagItem.tag )
+                          .data( 'dumbTag', tagItem)
+                          .each(function () {
+                              cfg.processTag  &&  cfg.processTag( tagElm, itm );
+                            })
+                          .append(
+                              $('<input type="hidden"/>')
+                                  .attr({
+                                      name:  submName,
+                                      value: tagItem.value
+                                    })
+                            )
+                          .append(
+                              $( cfg.tagDelTempl )
+                                  .attr( 'title', i18n.delTitle||i18n.delLabel )
+                                  .html( i18n.delLabel )
+                            );
+
                       activeTags.push( tagItem.tag.toLowerCase() );
-                      tagElms.push(
-                          $(cfg.tagTempl )
-                              .text( tagItem.tag )
-                              .data( 'dumbTag', tagItem)
-                              .append(
-                                  $('<input type="hidden"/>')
-                                      .attr({
-                                          name:  submName,
-                                          value: tagItem.value
-                                        })
-                                )
-                              .append(
-                                  $( cfg.tagDelTempl )
-                                      .attr( 'title', i18n.delTitle||i18n.delLabel )
-                                      .html( i18n.delLabel )
-                                )
-                              [0]
-                        );
+                      tagElms.push( tagElm[0] );
                     });
                   return $(tagElms).insertBefore( input );
                 },
@@ -192,7 +196,7 @@
                 })
               .one('focus', function (e) {
                   input
-                      .bind('keypress', function (e) {
+                      .bind('keydown', function (e) {
                           // backspace inside an empty input should delete the last .tag and fill the input with its value
                           if ( !this.value  &&  e.which == 8 )
                           {
@@ -261,11 +265,12 @@
                                               data:     acName + "=" + encodeURIComponent( term ),
                                               dataType: cfg.ajaxCfg.dataType,
                                               success:  function (results) {
-                                                  if ( cfg.acFixResults ) {
-                                                    var results2 = cfg.acFixResults(results);
-                                                    results = results2!==undefined ?
-                                                                  results2:
-                                                                  results;
+                                                  if ( cfg.acFixResults )
+                                                  {
+                                                    var newResults = cfg.acFixResults(results);
+                                                    results = newResults===undefined ?
+                                                                  results:
+                                                                  newResults;
                                                   }
                                                   // untangle the naming-conflict coming from the server
                                                   results = $.map(results, function (itm, i) {
@@ -367,6 +372,8 @@
       //limitVocab:   false,  // Boolean - indicates whether only a limited set of values can be chosen from - or if free-form tagging is allowed.
       wrapperTempl: '<span class="tagswrap"/>',
       tagTempl:     '<span class="tag">',
+      //htmlTags:     false,                            // allows item.value to contain HTML to be displayed inside the tag...
+      //processTag:   function ( $tagElm, acItem ) {},  // allows customization of the tagElm's content and className - before the delete-button and input field are injected.
       tagDelTempl:  '<a href="#" class="del">x</a>',
       focusClass:   'focused',
       tagSel:       '.tag',
