@@ -127,7 +127,7 @@
           // the groups heading will override the current label text
           var isGroup = control.is('fieldset') && control.find('input[name=' + input.attr('name') + ']')[1];
           if (isGroup) {
-            var thd = control.find(':header, legend, p').eq(0).text();  // move to config?
+            var thd = control.find(':header,legend,p').eq(0).text() || control.attr('title');  // move selector to config?
             labelData = (thd) ? $.av.cleanLabelString( thd, conf.maxLabelLength ) : labelData;
           }
 
@@ -138,10 +138,10 @@
 
           // form elements that are contained by fieldset that has a heading
           // additionally get their fieldsets legend/heading in []
-          var legend = contexts.find('fieldset:has(#'+$.av.id(control)+'):last')
-                               .children(':header:first-child, legend:first-child, p:first-child');
+          var legendCont = contexts.find('fieldset:has(#'+$.av.id(control)+'):last'),
+              legend = legendCont.children(':header,legend,p').eq(0);
           if (legend.length) {
-            labelData += ' [' + $.av.cleanLabelString( legend.text(), conf.maxLabelLength ) + ']';
+            labelData += ' [' + $.av.cleanLabelString( legend.text()||legendCont.attr('title'), conf.maxLabelLength ) + ']';
           }
 
           $(input).data( 'av-labeltext', labelData );
