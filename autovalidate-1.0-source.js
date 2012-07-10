@@ -125,7 +125,7 @@
 
           // if this element is a group (has named 1+ siblings contained in fieldset wrapper)
           // the groups heading will override the current label text
-          var isGroup = control.is('fieldset:has(input[name=' + input.attr('name') + ']:odd)');
+          var isGroup = control.is('fieldset') && control.find('input[name=' + input.attr('name') + ']')[1];
           if (isGroup) {
             var thd = control.find(':header, legend, p').eq(0).text();  // move to config?
             labelData = (thd) ? $.av.cleanLabelString( thd, conf.maxLabelLength ) : labelData;
@@ -141,7 +141,7 @@
           var legend = contexts.find('fieldset:has(#'+$.av.id(control)+'):last')
                                .children(':header:first-child, legend:first-child, p:first-child');
           if (legend.length) {
-            labelData = labelData + ' [' + $.av.cleanLabelString( legend.text(), conf.maxLabelLength ) + ']';
+            labelData += ' [' + $.av.cleanLabelString( legend.text(), conf.maxLabelLength ) + ']';
           }
 
           $(input).data( 'av-labeltext', labelData );
@@ -670,7 +670,6 @@ $.extend(avTypes, {
       if ( ret === true )
       {
         v = $(this).val(); // refresh as the .fi_kt check function normalizes the value. :)
-        ;;;window.console&&console.log( ['foo', v,  v.substr(0,1), parseInt( v.substr(0,1), 10)] );
         if ( parseInt( v.substr(0,1), 10) > 3 ) // dd + 40 seems to ben the method for generating company 'kennitala's
         {
           ret = $.av.getError( 'fi_kt_einst', lang );
@@ -951,4 +950,3 @@ avTypes.fi_pnr = avTypes.fi_postal_is;
 
 
 })(jQuery);
-
