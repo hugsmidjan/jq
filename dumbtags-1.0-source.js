@@ -75,7 +75,7 @@
                             );
 
                       activeTags.push( tagItem.tag.toLowerCase() );
-                      tagElms.push( tagElm[0] );
+                      tagElms.push( tagElm[0], document.createTextNode(' ') );
                     });
                   return $(tagElms).insertBefore( input );
                 },
@@ -255,7 +255,6 @@
                                 {
                                   source:     function(request, callback){
                                       var term = $.trim( request.term.toLowerCase() ).replace(/\s+/g, ' ');
-                                      ;;;window.console&&console.log( ['asdadkdkdkdkdkdaksdfæljkasdfæljzsdælj'] );
                                       if ( cfg.ajax  &&  request.term.length >= cfg.acCfg.minLength )
                                       {
                                         if ( cfg.ajaxMethod )
