@@ -111,6 +111,7 @@
                       activeTags.splice( pos , 1);
                     }
                     tagElm.remove();
+                    input.trigger('focus');
                     // IDEA: trigger 'dumbTagRemoved' event  here!
                     return true;
                   }
@@ -123,12 +124,16 @@
 
           if ( input.is('select') )
           {
-            if ( !('limitVocab' in cfg) )
-            {
-              cfg.limitVocab = true;
-            }
             selectBox = input;
-            input = $('<input type="text" />').insertAfter( selectBox );
+            input = selectBox.siblings('input:text');
+            if ( !input[0] )
+            {
+              if ( !('limitVocab' in cfg) )
+              {
+                cfg.limitVocab = true;
+              }
+              input = $('<input type="text" />').insertAfter( selectBox );
+            }
           }
           else
           {
@@ -208,21 +213,22 @@
                                 {
                                   input
                                       .val( prevValue )
-                                      [0].select();
+                                      [0].select(a);
                                 }
                               }, 0);
                           }
-                        })
-                      .bind('keypress', function (e) {
-                          // enter (or comma) inside the input-field may create a new tag
-                          if ( e.which == 13/* ENTER */ || e.which == 44/* , */ )
+                          // enter inside the input-field may create a new tag
+                          if ( e.which == 13/* ENTER */ )
                           {
-                            if ( !cfg.limitVocab  &&  this.value )
+                            if ( !cfg.limitVocab  &&  this.value  &&  !$(this).autocomplete('widget').find('a.ui-state-hover')[0] )
                             {
                               var val = $.trim( this.value.replace(/\s+/g, ' ') );
                               addItem({ value:val });
                             }
-                            $(this).autocomplete('close');
+                            var field = $(this);
+                            setTimeout(function(){
+                                field.autocomplete('close');
+                              }, 0);
                             return false;
                           }
                         })
