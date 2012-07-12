@@ -404,19 +404,26 @@
 
     // Escape img[src] values in incoming Ajax html result bodies to avoid automatic preloading of all images.
     imgSuppress: function (html, attr) {
-        return html.replace(/(<img[^>]*? )src=/g,'$1'+(attr||'data-srcAttr')+'=');
+        return html.replace( /(<img[^>]*? )src=/gi, '$1'+(attr||'data-srcAttr')+'=' );
       },
     // Reinserts img[src] values escaped by $.imgSuppress()
     imgUnsuppress: function (dom, attr) {
-        dom = $(dom);
         attr = attr || 'data-srcAttr';
-        dom.find('img').add( dom.filter('img') )
-            .attr('src', function () {
-                var img = $(this),
-                    src = img.attr(attr);
-                img.removeAttr(attr);
-                return src;
-              });
+        if ( typeof dom == 'string')
+        {
+          dom = dom.replace( new RegExp('(<img[^>]*? )'+attr+'=', 'gi') ,'$1src=' );
+        }
+        else
+        {
+          dom = $(dom);
+          dom.find('img').add( dom.filter('img') )
+              .attr('src', function () {
+                  var img = $(this),
+                      src = img.attr(attr);
+                  img.removeAttr(attr);
+                  return src;
+                });
+        }
         return dom;
       },
 
