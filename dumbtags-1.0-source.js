@@ -146,12 +146,11 @@
               .find('option')
                   .each(function () {
                       var elm = $(this);
-                      if ( !cfg.ajax )
-                      {
-                        itm = { id:elm.val(),  value:elm.text() };
-                        itm.label = itm.value;
-                        acLocalValues.push( itm );
-                      }
+
+                      itm = { id:elm.val(),  value:elm.text() };
+                      itm.label = itm.value;
+                      acLocalValues.push( itm );
+
                       if ( elm.is('[selected]') )
                       {
                         prefills.push({ id:elm.val(),  value:elm.text() } );
@@ -242,12 +241,9 @@
                               .parent()
                                   .removeClass( cfg.focusClass );
                         });
-                  if ( cfg.ajax  ||  acLocalValues.length )
+                  if ( cfg.ajax  ||  acLocalValues[0] )
                   {
-                    if ( !cfg.ajax )
-                    {
-                      cfg.acCfg.minLength = 0;
-                    }
+                    var minLengthOverride = acLocalValues[0] ? { minLength: 0 } : {};
                     input
                         .autocomplete(
                             $.extend(
@@ -255,10 +251,12 @@
                                   position:{ of:input.parent() }
                                 },
                                 cfg.acCfg,
+                                minLengthOverride,
                                 {
                                   source:     function(request, callback){
                                       var term = $.trim( request.term.toLowerCase() ).replace(/\s+/g, ' ');
-                                      if ( cfg.ajax )
+                                      ;;;window.console&&console.log( ['asdadkdkdkdkdkdaksdfæljkasdfæljzsdælj'] );
+                                      if ( cfg.ajax  &&  request.term.length >= cfg.acCfg.minLength )
                                       {
                                         if ( cfg.ajaxMethod )
                                         {
@@ -342,14 +340,14 @@
                           })
                         .bind('autocompleteselect', function (e, ui) {
                             addItem(ui.item);
-                            if ( !cfg.acCfg.minLength )
+                            if ( cfg.reShowLocals )
                             {
                               setTimeout(function(){  input.autocomplete('search');  }, 100);
                             }
                             return false; // prevent autocomplete from filling the input field with the selected value.
                           });
 
-                    if ( !cfg.acCfg.minLength )
+                    if ( !cfg.acCfg.minLength  ||  cfg.showLocals )
                     {
                       input
                           .bind('focus', function (e) {
@@ -391,7 +389,9 @@
       tagSel:       '.tag',
       delSel:       'a.del',
       //splitter:     ',',
-      ajax:         true,  // Flags whether to use ajax to fill the autocomplete menu, or with local (<select> box) values only.
+      ajax:           true,  // Flags whether to use ajax to fill the autocomplete menu, or with local (<select> box) values only.
+      showLocals:   true,  // controls wheter local values are shown instantly on focus.
+      //reShowLocals: false, // controls wheter to show the local-values again every time a tag is added
       //ajaxMethod:   null,  // Function(options{term: input: config: callback: }) - allows overriding the built-in jQuery ajax request mechanism with custom behavior (e.g. DWR method calls, etc.);
       //acUrl:        null,  // String - overriding URL for the autocomplete ajax call. Defaults to picking up hints from cfg.acNameAttr attributes in the dom, or the form[action]
       //acName:       null   // String - parameter name for the autocomplete ajax call. Defaults to to using the name="" of the input field.
