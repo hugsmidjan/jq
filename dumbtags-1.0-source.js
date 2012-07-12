@@ -212,8 +212,10 @@
                                 }
                               }, 0);
                           }
+                        })
+                      .bind('keypress', function (e) {
                           // enter (or comma) inside the input-field may create a new tag
-                          else if ( e.which == 13/* ENTER */ || e.which == 44/* , */ )
+                          if ( e.which == 13/* ENTER */ || e.which == 44/* , */ )
                           {
                             if ( !cfg.limitVocab  &&  this.value )
                             {
