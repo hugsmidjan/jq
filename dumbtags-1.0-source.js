@@ -53,7 +53,7 @@
                               value: itm.id||itm.value, // id
                               tag:   itm.value            // human readable tag "name"
                             },
-                          tagElm = $(cfg.tagTempl );
+                          tagElm = $( cfg.tagTempl );
 
                       tagElm
                           [cfg.htmlTags ? 'html' : 'text']( tagItem.tag )
@@ -212,8 +212,12 @@
                                 if ( delTag( prevTagElm ) )
                                 {
                                   input
-                                      .val( prevValue )
-                                      [0].select(a);
+                                      .val(
+                                          cfg.htmlTags ?
+                                              prevValue.replace(/<.+?>/g, ''):
+                                              prevValue
+                                        )
+                                      [0].select();
                                 }
                               }, 0);
                           }
