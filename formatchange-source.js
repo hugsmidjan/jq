@@ -10,6 +10,10 @@
     as defined by the document's CSS code (See: http://adactio.com/journal/5429/),
     triggering custom window.onformatchange events when needed.
 
+    NOTE: The current version always reports the format as `null`
+    in IE8 and other browsers that don't support `window.getCurrentStyle()`
+    or don't otherwise allow reading an element's `:before/:after` content.
+
 
     Event Binding:
 
