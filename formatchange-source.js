@@ -35,8 +35,10 @@
         var S = jQuery.formatChange();
       ...or...
         jQuery.formatChange({
-            elm:    document.body,
-            before: true
+            // default options:
+            tagName: 'del',
+            elmId:   'mediaformat',
+            before:  false
           });
       ...or...
         jQuery.formatChange(null, {
@@ -72,11 +74,13 @@
         if ( window.getComputedStyle )
         {
           $(window).bind(evName, function (e) {
-              if ( !cfg.elm  &&  !elm )
+              if ( !elm )
               {
-                elm = $('<del id="mediaformat" style="position:absolute;visibility:hidden;width:0;height:0;overflow:hidden;"/>').appendTo('body')[0];
+                elm = $('<'+ (cfg.tagName||'del') +' style="position:absolute;visibility:hidden;width:0;height:0;overflow:hidden;"/>')
+                          .appendTo('body')[0];
+                elm.id = cfg.elmId || 'mediaformat';
               }
-              var newFormat = window.getComputedStyle( cfg.elm||elm, cfg.before?':before':':after' )
+              var newFormat = window.getComputedStyle( elm, cfg.before?':before':':after' )
                                   .getPropertyValue('content')
                                       .replace(/['"]/g,''); // some browsers return a quoted string.
               if ( newFormat != s.format )
