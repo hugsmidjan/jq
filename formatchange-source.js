@@ -16,6 +16,8 @@
 
 
     Event Binding:
+    (Should occur before running $.formatChange() to capture the initial event.
+    Otherwise you need to run $.formatChange(true); re-trigger the initial event.
 
         jQuery(window)
             .on('formatchange', function (e, s, oldFormat) {
@@ -32,8 +34,6 @@
     Initialization:
         jQuery.formatChange();
       ...or...
-        var S = jQuery.formatChange();
-      ...or...
         jQuery.formatChange({
             // default options:
             tagName: 'del',
@@ -44,8 +44,11 @@
         jQuery.formatChange(null, {
             isMobile: { 'mobile-portrait':true, 'mobile-landscape':true }
           });
+      ...or...
+        var S = jQuery.formatChange();
+        alert(S.format);
 
-    Trigger manual refresh/format check any time:
+    Trigger manual refresh/format check any time (useful after scripted CSS changes):
         jQuery.formatChange();
 
     Teardown:
@@ -73,7 +76,7 @@
         s = $.extend({/* format: null */}, extras);
         if ( window.getComputedStyle )
         {
-          $(window).bind(evName, function (e) {
+          $(window).bind(evName, function (e, forceTrigger) {
               if ( !elm )
               {
                 elm = $('<'+ (cfg.tagName||'del') +' style="position:absolute;visibility:hidden;width:0;height:0;overflow:hidden;"/>')
@@ -83,9 +86,9 @@
               var newFormat = window.getComputedStyle( elm, cfg.before?':before':':after' )
                                   .getPropertyValue('content')
                                       .replace(/['"]/g,''); // some browsers return a quoted string.
-              if ( newFormat != s.format )
+              if ( newFormat != s.format  ||  forceTrigger )
               {
-                var oldFormat = s.format;
+                var oldFormat = forceTrigger ? undefined : s.format;
                 s.format = newFormat;
                 $(window).trigger('formatchange', [s, oldFormat]);
               }
@@ -102,7 +105,7 @@
       }
       if ( s )
       {
-        $(window).trigger(evName);
+        $(window).trigger(evName, [cfg===true]); // $.formatChange( true );  force-triggers an window.onformatchange event
         return s;
       }
 
