@@ -561,7 +561,8 @@
         // generate flipover items
         cfg.flipover = _items
                         .slice( 0, cfg.windowSize )
-                            .clone( True );
+                            .clone( True )
+                            .addClass('listscroller-clone');
         _items
             .parent()
                 .append( cfg.flipover );

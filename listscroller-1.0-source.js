@@ -6,7 +6,7 @@
 //  written by:
 //   * Borgar Þorsteinsson  -- http://borgar.undraland.com
 //   * Már Örlygsson        -- http://mar.anomy.net
-//   * Valur Sverrisson     
+//   * Valur Sverrisson
 // ----------------------------------------------------------------------------------
 
 // todo : set position to list element / page that reports focus (BT: WTF does that even mean?)
@@ -21,31 +21,31 @@
     defaultConfig : {
 
       item              : '',
-                        
+
       windowSize        : 3,   // how many unmarked items
       stepSize          : 1,   // how many items to move at a time
       startPos          : 0,
-                        
+
       hideClass         : 'overflow',
       topClass          : 'at-top',
       bottomClass       : 'at-bottom',
-                        
+
       wrap              : 'both',   // none|start|end|both|loop|random
-      overflow          : 'hidden',  // visible|hidden 
-                        
+      overflow          : 'hidden',  // visible|hidden
+
       controls          : 'below',   // none|both|above|below
-                        
+
       animation         : 'none',     // none|carousel|crossfade|accordion, or custom function
       easing            : 'swing',
       speed             : 600,
-                        
+
       aspect            : 'auto',     // auto|horizontal|vertical
       paging            : false,
       inputPager        : false,
       statusPager       : false,
-      
+
       autoScrollDelay   : 0, //Timeout in ms for autoscroll
-      
+
       initCallback      : function () {},
       moveCallback      : function () {},
 
@@ -70,7 +70,7 @@
 
       statusLabel       : 'Viewing results:',
       jumpLabel         : 'Pages:',
-      ofTotalSeparator  : ' of ', 
+      ofTotalSeparator  : ' of ',
       labelNext         : 'Next',
       labelPrev         : 'Previous',
       titleNext         : 'Page forward',
@@ -83,7 +83,7 @@
     animate : {
       none : function ( l, c ) {},
       carousel : function ( l, c ) {
-        var p, 
+        var p,
             w = $( '.' + c.classPrefix + '-wrapper', this ),
             z = l.eq( l.length -1 ),
             last = l.length - c.stepSize,
@@ -94,7 +94,7 @@
         w.stop();
         p = l.eq( c.index ).position();
         conf[prop] = p.left;
-        
+
         if ( c.wrap == 'loop' && c.lastIndex == 0 && c.index == last )
         {
           w[prop]( z.position().left + z[dimp]() );
@@ -122,8 +122,8 @@
           else if ( !nw && c.lastIndex == null ) // init
           {
             $(this).stop().hide();
-          }        
-          else if ( !nw && ow )  // hide 
+          }
+          else if ( !nw && ow )  // hide
           {
             $(this).stop().show().fadeOut( c.speed );
           }
@@ -156,7 +156,7 @@
         });
       }
     },
-    
+
     wrap : {
       none : function ( i, l, c ) {
         return Math.max( Math.min( i, max( l, c ) ), 0 );
@@ -186,7 +186,7 @@
         return ( (l.length + i) % l.length );
       }
     },
-    
+
     aspectDefaults : {
       none      : 'vertical',
       carousel  : 'horizontal',
@@ -196,18 +196,18 @@
 
   };
 
-  // detect list aspect 
+  // detect list aspect
   function detectAspect ( _items )
   {
-    var ret, 
+    var ret,
         i2 = _items.eq( 1 );
         p1 = _items.eq( 0 ).offset(),
         p2 = i2.offset();
     // usable second item?
     if ( p2 && i2.is(':visible') )
     {
-      return ( Math.abs( p2.top - p1.top ) <= Math.abs( p2.left - p1.left ) ) 
-              ? 'horizontal' 
+      return ( Math.abs( p2.top - p1.top ) <= Math.abs( p2.left - p1.left ) )
+              ? 'horizontal'
               : 'vertical';
     }
     // indeterminate
@@ -216,7 +216,7 @@
 
   function max ( l, c )
   {
-    return (c.overflow == 'visible') 
+    return (c.overflow == 'visible')
         ? Math.floor( l.length / c.stepSize ) * c.stepSize
         : l.length - c.windowSize;
   }
@@ -311,7 +311,7 @@
 
   function movePage ( e )
   {
-    var c = e.data, 
+    var c = e.data,
         p = (parseInt( $( this ).text(), 10 ) -1) || 0;
     setPos( c, p * c.stepSize );
     return false;
@@ -319,7 +319,7 @@
 
   function inputChange ( e )
   {
-    var c = e.data, 
+    var c = e.data,
         p = (parseInt( $( this ).val(), 10 ) -1) || 0;
     setPos( c, p * c.stepSize );
     return false;
@@ -402,10 +402,10 @@
   }
 
 
-  
+
   function initScroller ( c, _block, _items )
   {
-    
+
     // test and stop repeat inits
     if ( _block.hasClass( c.classPrefix + '-active' ) )
     {
@@ -430,7 +430,7 @@
     _inner.addClass( c.classPrefix + '-clip' );
     _outer.addClass( c.classPrefix + '-wrapper' );
     _block.addClass( c.classPrefix + '-active' );
-    
+
     _inner.add( _outer ).css( 'position', 'relative' );
     _outer.addClass( c.classPrefix + '-' + c.aspect );
 
@@ -438,7 +438,7 @@
     if ( c.wrap == 'loop' )
     {
       // generate flipover items
-      c.flipover = _items.slice( 0, c.windowSize ).clone( true );
+      c.flipover = _items.slice( 0, c.windowSize ).clone( true ).log().addClass('listscroller-clone');
       _items.parent().append( c.flipover );
     }
 
@@ -446,7 +446,7 @@
     if ( c.controls !== 'none' && _items.length > 0 )
     {
       var _lang = _items.parents( '[lang]' ).attr( 'lang' ) || 'en';
-      
+
       if ( /^(above|both)$/.test( c.controls ) )
       {
         _outer.before( buildControls( c, _lang ).addClass( c.pagingTopClass ) );
@@ -456,7 +456,7 @@
       {
         _outer.after( buildControls( c, _lang ).addClass( c.pagingBottomClass ) );
       }
-      
+
     }
 
     if ( c.aspect == 'auto' )
@@ -468,7 +468,7 @@
     _outer.addClass( c.classPrefix + '-' + c.aspect );
 
     setPos( c, c.startPos || 0, true );
-    
+
     if(c.autoScrollDelay)
     {
       function nexttrigger ( e ) {
@@ -485,8 +485,8 @@
     }
 
   }
-  
-  
+
+
   $.fn.listscroller = function ( config )
   {
 
@@ -503,7 +503,7 @@
       initScroller( $.extend( {}, dc, config ),  this.eq(0).parent(), this );
     }
     return this;
-    
+
   };
-  
+
 })(jQuery);
