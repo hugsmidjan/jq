@@ -27,7 +27,8 @@
       closeOnEsc:  true,     // set to false to disable keyboard "Esc" keypress to run  .fickle(`close`)
       trapFocus:   false,    // attempts to retain (and return) the keyboard focus within the fickle element.
       closeDelay:  300,      // Specifies a "grace period" before a `focusout` causes a .fickle(`close`).
-      startOpen:   false     // Instantly shows and `open`s the fickle element.  No fadeIns or any fancy effects.
+      startOpen:   false,    // Instantly shows and `open`s the fickle element.  No fadeIns or any fancy effects.
+      silent:      false,    // when true, focus is not transferred on open/close.
       opener:      element/collection/selector,  // the opener receives focus again when `fickleclosed` has been triggered.
 
       fadein:      0,        // ms fadeIn duration  -- shorthand for .on('fickleopen', function(){ $(this).fadeIn( fadeinMs ) });
@@ -54,6 +55,8 @@
       open:    .fickle('open', data)  // Opens (shows) the fickle element and gives it focus.
                                       // `data` is an object, that may contain `opener` element that overwrites/updates the original `options.opener`
                                       // Example:   $(fickleElm).fickle('open', { opener: linkElm });
+                                      // `data` may also contain a one-time `silent` flag to suppress focus transfer
+                                      // Example:   $(fickleElm).fickle('open', { silent: true });
       close:   .fickle('close')       // Closes (hides) the fickle element, and sends focus back to `options.opener`.
       toggle:  .fickle('toggle'[, doOpen])  // Toggles between 'open'/'close' - Optional: `doOpen` boolean true `open`s, while false `close`s
       isOpen   .fickle('isOpen')      // returns boolean value for the first item in the collection
@@ -126,19 +129,34 @@
                         var pop = $(this);
                         pop.unhide();
                         _triggerEvent(pop, 'opened', cfg);
-                        data._gotFocus || $(focusTarget[0]||this).focusHere();
+                        if ( !data._gotFocus )
+                        {
+                          var silent =  (extras  &&  extras.silent!==undefined) ?
+                                            extras.silent:
+                                            cfg.silent;
+                          if ( !silent )
+                          {
+                            $.focusHere(focusTarget[0]||this);
+                          }
+                        }
                         pop.dequeue();
                       });
               }
             },
-          close: function (data/*, extras */) {
+          close: function (data, extras) {
               var cfg = data.c;
               if ( data._isOpen  &&  _triggerEvent(this, 'close', cfg) )
               {
                 $(_document)
                     .off('focusin click', data._confirmFocusLeave)
                     .off('keydown', data._listenForEsc);
-                $.focusHere(cfg.opener||_document.body);
+                var silent =  (extras  &&  extras.silent!==undefined) ?
+                                  extras.silent:
+                                  cfg.silent;
+                if ( !silent )
+                {
+                  $.focusHere(cfg.opener||_document.body);
+                }
 //                _cancelTimeout(); // to ensure 'trapFocus' doesn't steal the focus back
                 data._isOpen = !1;// false
                 cfg.fadeout  &&  this.fadeOut(cfg.fadeout); // because .fadeOut(0) !== .hide()
@@ -154,7 +172,7 @@
           toggle: function(data, extras){
               var doOpen =  typeof extras == 'boolean' ?
                                 extras:
-                            extras && extras.doOpen !== undefined? 
+                            extras && extras.doOpen !== undefined?
                                 extras.doOpen:
                                 !data._isOpen;
               methods[doOpen?'open':'close'].call(this, data, extras);
@@ -166,7 +184,7 @@
               return !!data;
             },
           config: function (data) {
-              return data.c;
+              return data && data.c;
             }
         /**
           disable: _notImplemented,
@@ -248,7 +266,7 @@
                 .on('focusin focusout', function (e) { // keeps track of whether the fickle element has focus. Determines whether .focusHere() is needed on `fickleopened` (see above)
                     data._gotFocus = e.type=='focusin';
                   });
-            
+
             // if cfg.fickle is set to false, the element becomes a very simple "open/close" window without any "fickly" properties to make it special.
             if (cfg.fickle)
             {
@@ -275,7 +293,7 @@
                       {
                         var popup = $(this);
                         // on 'click' popup looses "focus" so we need to reset the focus once the mouse leaves
-                        popup.one('mouseleave', function(e){ $.focusHere(_lastFocusElm); });
+                        popup.one('mouseleave', function(e){ data._isOpen  &&  $.focusHere(_lastFocusElm); });
                       }
                       else if (e.type == 'focusin')
                       {
