@@ -583,27 +583,34 @@
   });
 
 })(jQuery);
+
+
+
+
 // Icelandic translation
 // encoding: utf-8
 jQuery.av.lang.is = {
 
-  bullet          : ' • ',
-  errorReqMsg     : 'Það þarf að fylla út þessa liði:\n\n',
-  errorTypeMsg    : 'Þessir liðir eru rangt útfylltir:\n\n',
-  inlineMsgPrefix : 'Villa:',
-  inlineReqMsg    : 'Það þarf að fylla út þennan lið ',
-  inlineTypeMsg   : 'Þessi liður er rangt út fylltur ',
-  inlineNextError : 'Næsta villa',
-  resetAlert      : 'Ath: Þú ert í þann mund að afturkalla öll innslegin gildi...',
+  bullet:           ' • ',
+  errorReqMsg:      'Það þarf að fylla út þessa liði:\n\n',
+  errorTypeMsg:     'Þessir liðir eru rangt útfylltir:\n\n',
+  inlineMsgPrefix:  'Villa:',
+  inlineReqMsg:     'Það þarf að fylla út þennan lið ',
+  inlineTypeMsg:    'Þessi liður er rangt út fylltur ',
+  inlineNextError:  'Næsta villa',
+  resetAlert:       'Ath: Þú ert í þann mund að afturkalla öll innslegin gildi...',
 
-  fi_kt_fyrirt    : 'Sláðu inn fyrirtækiskennitölu',
-  fi_kt_einst     : 'Sláðu inn kennitölu einstaklings',
-  fi_email        : { inline: 'Vinsamlega sláðu inn rétt netfang (dæmi: notandi@daemi.is)',  alert: 'e.g. nafn@domain.is' },
-  fi_url          : { inline: 'Vinsamlega sláðu inn löggilda vefslóð (dæmi: http://www.example.is)',  alert: 'e.g. http://www.domain.is' },
-  fi_year         : { inline: 'Vinsamlega sláðu inn rétt ártal (dæmi: 1998)',  alert: 't.d. 1998' },
-  fi_ccnum_noamex : 'American Express kort virka ekki'
+  fi_kt_fyrirt:     'Sláðu inn fyrirtækiskennitölu',
+  fi_kt_einst:      'Sláðu inn kennitölu einstaklings',
+  fi_email:         { inline: 'Vinsamlega sláðu inn rétt netfang (dæmi: notandi@daemi.is)',  alert: 'e.g. nafn@domain.is' },
+  fi_url:           { inline: 'Vinsamlega sláðu inn löggilda vefslóð (dæmi: http://www.example.is)',  alert: 'e.g. http://www.domain.is' },
+  fi_year:          { inline: 'Vinsamlega sláðu inn rétt ártal (dæmi: 1998)',  alert: 't.d. 1998' },
+  fi_ccnum_noamex:  'American Express kort virka ekki',
+  fi_valuemismatch: 'Staðfesting stemmir ekki'
 
 };
+
+
 
 
 // encoding: utf-8
@@ -611,12 +618,13 @@ jQuery.av.lang.is = {
 
 $.extend($.av.lang.en, {
 
-  fi_kt_fyrirt:    'Only company \'kennitala\'s allowed',
-  fi_kt_einst:     'Only people\'s \'kennitala\'s allowed',
-  fi_email:        { inline: 'Please provide a valid e-mail address (example: user@example.com)',  alert: 'e.g. user@example.com' },
-  fi_url:          { inline: 'Please provide a valid web address (example: http://www.example.is)',  alert: 'e.g. http://www.example.com' },
-  fi_year:         { inline: 'Please provide a valid four digit year (example: 1998)',  alert: 'e.g. 1998' },
-  fi_ccnum_noamex: { inline: 'American Express cards not accepted',  alert:'AmEx not accepted' }
+  fi_kt_fyrirt:     'Only company \'kennitala\'s allowed',
+  fi_kt_einst:      'Only people\'s \'kennitala\'s allowed',
+  fi_email:         { inline: 'Please provide a valid e-mail address (example: user@example.com)',  alert: 'e.g. user@example.com' },
+  fi_url:           { inline: 'Please provide a valid web address (example: http://www.example.is)',  alert: 'e.g. http://www.example.com' },
+  fi_year:          { inline: 'Please provide a valid four digit year (example: 1998)',  alert: 'e.g. 1998' },
+  fi_ccnum_noamex:  { inline: 'American Express cards not accepted',  alert:'AmEx not accepted' },
+  fi_valuemismatch: 'Confirmation doesn\'t match'
 
 });
 
@@ -641,7 +649,7 @@ var avTypes = $.av.type;
 $.extend(avTypes, {
 
 
-  fi_kt : function ( v, w, lang ) {
+  fi_kt:  function ( v, w, lang ) {
     if (v) {
       var error = $.av.getError( 'fi_kt', lang ),
            kt = v.replace(/[\s\-]/g, ''); // Allow "-" and " " as delimiting characters (strip them out).
@@ -665,7 +673,7 @@ $.extend(avTypes, {
     return !!v;
   },
 
-  fi_kt_einst : function ( v, w, lang ) {
+  fi_kt_einst:  function ( v, w, lang ) {
       var ret = avTypes.fi_kt.call( this, v, w, lang );
       if ( ret === true )
       {
@@ -679,7 +687,7 @@ $.extend(avTypes, {
     },
 
 
-  fi_kt_fyrirt : function ( v, w, lang ) {
+  fi_kt_fyrirt:  function ( v, w, lang ) {
       var ret = avTypes.fi_kt.call( this, v, w, lang );
       if ( ret === true )
       {
@@ -696,14 +704,14 @@ $.extend(avTypes, {
 
   // ====[ internet & communication ]====
 
-  fi_email : function ( v, w, lang ) {
+  fi_email:  function ( v, w, lang ) {
     if (v && !/^[a-z0-9-._+]+@(?:[a-z0-9-_]+\.)+[a-z0-9-_]{2,99}$/i.test(v)) {
       return $.av.getError( 'fi_email', lang );
     }
     return !!v;
   },
 
-  fi_url : function( v, w, lang ) {
+  fi_url:  function( v, w, lang ) {
     if (v) {
       var _url = v.replace(/^[a-z]+:\/\/.+$/i, '');
       if ( !/^[a-z]+:\/\/.+\..+$/.test( v ) ||
@@ -716,7 +724,7 @@ $.extend(avTypes, {
   },
 
   // Returns true if valid telephone number (further development needed)
-  fi_tel : function( v, w, lang ) {
+  fi_tel:  function( v, w, lang ) {
     if (v) {
       // This function simply removes all *legal* characters from the string
       // and then returns false if there are any left overs afterwards.
@@ -733,7 +741,7 @@ $.extend(avTypes, {
 
   // Returns true if it approximates an icelandic telephone number
   //  (with or without the +354 country code)
-  fi_tel_is : function( v, w, lang ) {
+  fi_tel_is:  function( v, w, lang ) {
     if (v) {
       return /^(?:\+354)?\d{7}$/.test( v.replace(/[ -()]/g, '') )  || '';
     }
@@ -742,9 +750,9 @@ $.extend(avTypes, {
 
 
   // Returns true on a valid Icelandic Zip-code ("póstnúmer").
-  //   is : "dæmi: 101",
-  //   en : "example: 101",
-  fi_postal_is : function ( v, w, lang ) {
+  //   is:  "dæmi: 101",
+  //   en:  "example: 101",
+  fi_postal_is:  function ( v, w, lang ) {
 
     if (v) {
       // have no DB -- fallback to a simple 3-digits test
@@ -775,11 +783,11 @@ $.extend(avTypes, {
 
   // Returns true on a comma|space|semicolon deliminated list of valid Icelandic Zip-codes ("póstnúmer").
 /*
-    is : "dæmi: 101, 107, 105",
-    en : "example: 101, 107, 105",
-    delimiter : ", ",
+    is:  "dæmi: 101, 107, 105",
+    en:  "example: 101, 107, 105",
+    delimiter:  ", ",
 */
-  fi_pnrs : function ( v, w, lang ) {
+  fi_pnrs:  function ( v, w, lang ) {
     if ( v ) {
       var pnrs = v.replace(/(^[ ,;]+|[ ,;]+$)/g,'').split(/[ ,;]+/);
       var v, valid = false;
@@ -800,13 +808,13 @@ $.extend(avTypes, {
   // ====[ numerics ]====
 
   // Returns true only on a positive integer value.
-  fi_qty : function( v, w, lang ) {
+  fi_qty:  function( v, w, lang ) {
     $( this ).val( v );  // set field to trimmed value
     return !v || /^\d+$/.test(v) || '';
   },
 
   // Returns true only on any numeric value (floats, negative values, etc.).
-  fi_num : function( v, w, lang ) {
+  fi_num:  function( v, w, lang ) {
     var v = v.replace(/^-\s+/, '-').replace(/[,.]$/, '');
     $( this ).val( v );
     return !v || (/\d/.test(v) && /^-?\d*[.,]?\d*$/.test(v)) || '';
@@ -819,7 +827,7 @@ $.extend(avTypes, {
 
   // Returns true on a valid date (dd.mm.yyyy|d/m/yy|etc.).
   // Valid year-range: 1900-2099. one or two digit days and months, two or four digit years.
-  fi_year : function ( v, w, lang ) {
+  fi_year:  function ( v, w, lang ) {
     if (v && !/^(19|20)\d\d$/.test(v)) {
       return $.av.getError( 'fi_year', lang );
     }
@@ -828,9 +836,9 @@ $.extend(avTypes, {
 
   // Returns true on a valid date (dd.mm.yyyy|d/m/yy|etc.).
   // Valid year-range: 1900-2099. one or two digit days and months, two or four digit years
-  //    is : "dæmi: %format",
-  //    en : "example: %format",
-  fi_date : function ( v, w, lang ) {
+  //    is:  "dæmi: %format",
+  //    en:  "example: %format",
+  fi_date:  function ( v, w, lang ) {
     if (v)
     {
       var error = $.av.getError( 'fi_year', lang );
@@ -866,7 +874,7 @@ $.extend(avTypes, {
 
 
   // validate a correct time entry
-  fi_time : function ( v, w, lang ) {
+  fi_time:  function ( v, w, lang ) {
     if (v) {
       var error = $.av.getError( 'fi_time', lang );
       if ( /^([01]?\d|2[01234])(:([0-5]\d))?(:([0-5]\d))?\s*([ap]\.?m\.?)?$/i.test( v ) ) {
@@ -893,7 +901,7 @@ $.extend(avTypes, {
 
   // Returns true if valid credid card number
   // Fake Credit Card number for testing: 1234-1234-1234-1238
-  fi_ccnum : function ( v, w, lang ) {
+  fi_ccnum:  function ( v, w, lang ) {
     var error = $.av.getError( 'fi_ccnum', lang );
     if (v) {
       // Strip out the optional space|dash delimiters
@@ -932,12 +940,33 @@ $.extend(avTypes, {
 
 
   // Returns true if valid credid card expiry date (further development needed to check against the current year)
-  fi_ccexp : function ( v, w, lang ) {
+  fi_ccexp:  function ( v, w, lang ) {
     if (v) {
       // accept space and dash, and change them into "/". Then remove all spaces
       v = v.replace(/(\d\d)\s*[ -\/]?\s*(\d\d)/, '$1/$2').replace(/\s+/g, '');
       // ...then test against the pattern "mm/yy"
       return /^(0\d|1[012])\/(\d\d)$/.test(v) || $.av.getError( 'fi_ccexp', lang );
+    }
+    return !!v;
+  },
+
+
+
+  fi_sameasprev: function (v, w, lang) {
+    ;;;window.console&&console.log( w );
+    v = $(this).val();
+    if ( v )
+    {
+      ;;;window.console&&console.log( v );
+      var allFields = $(this.form).find('.fi_txt>input,select,textarea'),
+          pos = allFields.index(this),
+          prevVal = pos>0 ? allFields.eq( pos-1 ).val() : "";
+      ;;;window.console&&console.log( prevVal );
+      if ( prevVal  &&  v !== prevVal )
+      {
+        ;;;window.console&&console.log( 'mismatch!' );
+        return $.av.getError('fi_valuemismatch', lang);
+      }
     }
     return !!v;
   }
