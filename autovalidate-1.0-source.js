@@ -953,18 +953,14 @@ $.extend(avTypes, {
 
 
   fi_sameasprev: function (v, w, lang) {
-    ;;;window.console&&console.log( w );
     v = $(this).val();
     if ( v )
     {
-      ;;;window.console&&console.log( v );
       var allFields = $(this.form).find('.fi_txt>input,select,textarea'),
           pos = allFields.index(this),
           prevVal = pos>0 ? allFields.eq( pos-1 ).val() : "";
-      ;;;window.console&&console.log( prevVal );
       if ( prevVal  &&  v !== prevVal )
       {
-        ;;;window.console&&console.log( 'mismatch!' );
         return $.av.getError('fi_valuemismatch', lang);
       }
     }

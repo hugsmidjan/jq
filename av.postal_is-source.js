@@ -1,4 +1,3 @@
-/// encoding: utf-8
 // ----------------------------------------------------------------------------------
 // jQuery.fn.islPostcodeSelect and jQuery.av.postCodes.is
 // ----------------------------------------------------------------------------------
@@ -28,7 +27,10 @@
   }
 
   var postCodeSel;
-  $.fn.islPostcodeSelect = function () {
+  $.fn.islPostcodeSelect = function (cfg) {
+      cfg = $.extend({
+          // townField: '.locality,.town,.city'  // default off...
+        }, cfg);
       if (this.length)
       {
         if ( !postCodeSel )
@@ -62,9 +64,29 @@
                                 .attr({
                                     name: input.attr('name'),
                                     id:   input.attr('id')
-                                  });
+                                  }),
+                townField  = cfg.townField;
+
+            // attempt to auto-fill redundant town-name fields - if present...
+            if ( townField )
+            {
+              (townField.charAt ? cont.next(cfg.townField) : townField)
+                  .hide()
+                  .removeAttr('class')
+                  .each(function () {
+                      var input = $(this);
+                      selectBox
+                          .on('change', function (e) {
+                              var townName = $.trim(
+                                                $(e.target).children(':selected').text().split('-')[1] || ''
+                                              );
+                              input.add( input.find('input') ).filter('input:text').eq(0).val( townName );
+                            });
+                    });
+            }
+
             cont
-                .removeClass('fi_txt fi_postal_is')
+                .removeClass('fi_txt fi_postal_is fi_pnr')
                 .addClass('fi_sel postal_is');
             input.replaceWith( selectBox );
           });
