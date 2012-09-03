@@ -42,16 +42,15 @@
       speed:             600,
 
       aspect:            'auto',     // auto|horizontal|vertical
-      paging:            False,    // indicates wheather to render `jumpPager` links or `statusPager` info (set below)
+      //paging:            False,    // indicates wheather to render `jumpPager` links or `statusPager` info (set below)
       jumpPager:         True,   // toggles the "Pages: (1) (2) (3) (4)" links - Kicks in if `paging` is set to `true`
-      statusPager:       False,  // toggles the "Page: 1 of 6" status message
-      inputPager:        False,  // true forces the `statusPager` option to `true` (unless `itemStatusPager` is set to true) and turns the current-page number into a text input field.
-      itemStatusPager:   False,  // true changes statusPager to count items shown rather than "pages" ... e.g. "Displaying: 1-4 of 13 items"
+      //statusPager:       False,  // toggles the "Page: 1 of 6" status message
+      //inputPager:        False,  // true forces the `statusPager` option to `true` (unless `itemStatusPager` is set to true) and turns the current-page number into a text input field.
+      //itemStatusPager:   False,  // true changes statusPager to count items shown rather than "pages" ... e.g. "Displaying: 1-4 of 13 items"
 
       autoScrollDelay:   0, //Timeout in ms for autoscroll
       setFocus:          True,   // lets setPos trigger() .focus on the first currently visible list element.
 
-      initCallback:      function () {},
       moveCallback:      function () {},
 
       classPrefix:       'listscroller',
@@ -502,8 +501,10 @@
           .removeClass( oldCfg.bottomClass )
           .removeClass( 'block-mouseover' )
           .unbind('.lscr')
-          .find( '.'+ $.trim( oldCfg.pagingTopClass +',.'+ oldCfg.pagingBottomClass ).replace(/ +/g,'.') )
+          .data('lstscr_pagingElms')
               .remove();
+      _block
+          .removeData('lstscr_pagingElms');
       oldCfg.list
           .removeClass( oldCfg.hideClass )
           .removeClass( oldCfg.cursorItemClass )
@@ -569,21 +570,25 @@
       }
 
       // create and display control-links
+      var pagingElms = [];
       if ( cfg.controls !== 'none' && _items.length > 0 )
       {
         if ( /^(above|both)$/.test( cfg.controls ) )
         {
+          pagingElms.unshift( buildControls( cfg ).addClass( cfg.pagingTopClass )[0] );
           _outer
-              .before( buildControls( cfg ).addClass( cfg.pagingTopClass ) );
+              .before( pagingElms[0] );
         }
 
         if ( /^(below|both)$/.test( cfg.controls ) )
         {
+          pagingElms.unshift( buildControls( cfg ).addClass( cfg.pagingBottomClass )[0] );
           _outer
-              .after( buildControls( cfg ).addClass( cfg.pagingBottomClass ) );
+              .after( pagingElms[0] );
         }
 
       }
+      _block.data('lstscr_pagingElms', $(pagingElms) );
 
       if ( cfg.aspect == 'auto' )
       {
@@ -602,12 +607,13 @@
       // set initial position
       setPos( cfg, cfg.startPos || 0, { _noFlash:True, _noFocus:True } );
 
-      if ( cfg.autoScrollDelay )
+      var delay = cfg.autoScrollDelay;
+      if ( delay )
       {
         var nexttrigger = function ( e ) {
               setPos( cfg, cfg.index + cfg.stepSize, { _noFlash:True, _noFocus:True } );
             };
-        cfg.scrollTimeout = setTimeout( nexttrigger, cfg.autoScrollDelay );
+        cfg.scrollTimeout = setTimeout( nexttrigger, delay );
         _block
             .bind('mouseenter.lscr', function (e) {
                 _block.addClass('block-mouseover');
@@ -616,13 +622,13 @@
             .bind('mouseleave.lscr', function (e) {
                 _block.removeClass('block-mouseover');
                 clearTimeout(cfg.scrollTimeout);
-                cfg.scrollTimeout = setTimeout( nexttrigger, cfg.autoScrollDelay );
+                cfg.scrollTimeout = setTimeout( nexttrigger, delay );
               })
             .bind('afterMove.lscr', function (e) {
                 if ( !_block.is('.block-mouseover') )
                 {
                   clearTimeout(cfg.scrollTimeout);
-                  cfg.scrollTimeout = setTimeout( nexttrigger, cfg.autoScrollDelay );
+                  cfg.scrollTimeout = setTimeout( nexttrigger, delay );
                 }
               });
       }
