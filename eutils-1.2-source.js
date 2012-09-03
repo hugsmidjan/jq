@@ -664,25 +664,37 @@
 
 
 
-/**
-    // Convert queryString type String into a neat object.
+    // Convert queryString type Strings into a neat object
+    // where each named value is an Array of URL-decoded Strings.
+    // Defaults to parsing the current document URL if no paramString is passed.
+    //
+    // Example:
+    //    $.parseParamS( "?foo=1&=bar&baz=&foo=2&" );
+    //      ==>  {  'foo':['1','2'],  '':['bar'],  'baz':['']  }
+    //    $.parseParamS( "" );
+    //      ==>  { }
     parseParams: function (paramString)
     {
-      paramString = paramString || document.location.search;
-      var params = paramString.split('?').reverse()[0].split('&'),
-          i = params.length,
-          map = {}, pair;
-      while (i--)
+      paramString = $.trim( paramString!=undefined ? paramString : document.location.search )
+                        .replace(/^[?&]|&$/g, '');
+      var map = {};
+      if ( paramString )
       {
-        pair = (params[i]||'').split('=');
-        if (pair[0])
+        var params = paramString.replace(/\+/g, ' ')
+                        .split('&'),
+            dCode = decodeURIComponent,
+            i = 0,
+            l = params.length;
+        for (; i<l; i++)
         {
-          params[pair[0]] = pair[1];
+          var pair = params[i].split('='),
+              name = dCode(pair[0]);
+          ( map[name] = map[name]||[] ).push( dCode(pair[1]||'') );
         }
       }
       return map;
     },
-/**/
+
 
 
     cropText: function (str, length, e)
