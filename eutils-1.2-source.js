@@ -164,6 +164,13 @@
         return coll;
       },
 
+
+    imgUnsuppress: function (attr) {
+        $.imgUnsuppress(this);
+        return this;
+      },
+
+
     unhide: function () {
         return this.css('display', '');
       },
@@ -466,7 +473,6 @@
         }
         return dom;
       },
-
 
 
     // Finds and returns the language of an element - caching the results on the element itself.
