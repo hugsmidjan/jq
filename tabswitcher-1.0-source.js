@@ -1,4 +1,3 @@
-// encoding: utf-8
 // ----------------------------------------------------------------------------------
 // jQuery.fn.tabSwitcher/.makeTabbox  v 1.0
 // ----------------------------------------------------------------------------------
@@ -9,14 +8,12 @@
 // ----------------------------------------------------------------------------------
 
 /*
-  TODO: Fix back-navigation jumpyness in IE7 when `monitorFragment=true`
-
   Requires
    * jQuery 1.3 or better (event bubbling)
    * Eutils ($.setFrag, $.beget)
 */
 
-(function($){
+(function($, document){
 
 /*
   $.event.special.fragment = {
@@ -69,7 +66,8 @@
       _allTabIds = {},
       _tabsToOpen,
 
-      _tabswitcherData = 'tabswitcher', // to save bytes
+      _cookieName = 'tabswitcher',
+      _tabswitcherData = _cookieName, // to save bytes
 
   // ===  internal support functions  ===
 
@@ -147,11 +145,11 @@
       // FIXME: Finish this comment...
       crossReferenceMonitor = function ( e )
       {
-        var l = $(e.target).closest('a[href*="#"]')[0];
-        if ( l )
+        var l = $(e.target).closest('a, area');
+        if ( l.is('[href*="#"]')  &&  !l.data(_tabswitcherData+'Link')  &&  document.location.href.split('#')[0]==l[0].href.split('#')[0] )
         {
-          var id = $.getFrag( l.href );
-          if (id  &&  _allTabIds[id]  &&  !$(l).data( _tabswitcherData+'Link' ) )
+          var id = $.getFrag( l[0].href );
+          if (id  &&  _allTabIds[id] )
           {
             $.tabSwitcher.switchTo( id );
             e.preventDefault();
@@ -177,63 +175,9 @@
         e.target !== this  &&  $.tabSwitcher.switchTo( this.id, true );
       },
 
-
-      // fragment monitoring system
-      _lastSetFragment = null,
-      _fragmentsToMonitor = {},
-
-      monitorFragment = function ( e ) {
-        var _currentFragment = $.getFrag();
-        if ( _lastSetFragment != _currentFragment  &&  _fragmentsToMonitor[_currentFragment] ) {
-          tabSwitcher.switchTo(_currentFragment, true);
-          _lastSetFragment = _currentFragment;
-        }
-      },
-
       startFragmentMonitoring = function () {
 
       };
-
-
-/*
-      _prepModule = function (e) {
-        var _cookie = tabSwitcher.cookieName && cookieU.getValue(tabSwitcher.cookieName);
-        if (_cookie) { _cookieTargets = _cookie.split(','); }
-      },
-
-
-      _finalizeModule = function (e) {
-        if ($.tabSwitcher.fixInitScroll) { window.scrollTo(0,0); }
-
-        _findOtherLinks();
-
-        _setParentTabTriggers();
-
-        if (!Object.isEmpty(_fragmentsToMonitor))
-        {
-          EEvent.add(document, 'fragment', _monitorFragment);
-        }
-
-        // `switchTo` all the tabs that have been scheduled for opening.
-        for (var i=0; i<4; i++)
-        {
-          var tabIds = _tabsToOpen[i];
-          for (var j=0, tabId; (tabId = tabIds[j]); j++)
-          {
-            tabSwitcher.switchTo(tabId, true);
-          }
-        }
-
-      },
-
-    _setTabCookie = function () {
-      var _openTabIds = [];
-      for (var k in _openTabs) { _openTabIds.push(k); };
-      cookieU.set(tabSwitcher.cookieName, _openTabIds.join(','), tabSwitcher.cookiePath, tabSwitcher.cookieTTL);
-    };
-
-
-*/
 
 
   $.extend({
@@ -244,7 +188,7 @@
       fixInitScroll : true,
 
       // the tabswitcher keeps the current status of tabs in a 20 minute session if this is set
-      cookieName:        'tabswitcher',    // tabs status cookie state  - setting this to "" will disable it's use
+      cookieName:        _cookieName,    // tabs status cookie state  - setting this to "" will disable it's use
       cookiePath:        '/',              // set to '' to set a unique cookie for each page.
       cookieTTL:         1200,             // Number of seconds before we forget the tab-satus  (1200 sec / 60 = 20 min)
 
@@ -259,7 +203,6 @@
         showFirst:         true,
         setCookie:         true,
         setFragment:       true,          // allow or disallow fragment changes as tabs are switched.
-        monitorFragment:   false,          // hook up an document.onfragment() (custom)event to automatically switch tabs when the user navigates back/forward in history.  (`.setFragment` must be `true`)
 
         // template for a link placed at the top of the panel. use '' to disable
         focusLinkTemplate:  '<a href="#" class="focustarget">.</a>',
@@ -273,6 +216,7 @@
           backLinkText:     'Til baka í '
         }
       },
+
 
 
       // public method for manually setting/swicthing tabs.
@@ -307,7 +251,6 @@
 
           if ( !silentSwitch ) {
             if ( c.setFragment ) {
-              _lastSetFragment = id;
               $.setFrag( id );
             }
             if (d.focusLink) {
@@ -342,15 +285,12 @@
       var block     = $( this ),
           _conf     = $.extend( {}, $.tabSwitcher.defaultConfig, conf ),
           tabs      = $( _conf.tabSelector, this ),
-          _allHashLinks,
           openTabId = '',
           openLevel = 0;
 
       _conf.tabs = {};
       _conf.tabBlock = this;
       tabs.each(function ( i, t ) {
-          _allHashLinks = _allHashLinks || $('a[href*="#"]');
-
           var data    = { tab : $(t) },
               link    = data.link   = (t.tagName == 'A') ? data.tab : $( 'a', t ),
               lang    = (link.closest('[lang]').attr('lang') || 'en').substr(0,2);
@@ -405,26 +345,21 @@
               openLevel = 4; // HASH;
             }
 
-            data.tab.bind('click', function (e) { return false; /* cancel the bubble! */ });
+            data.tab
+                .bind('click', function (e) { return false; /* cancel the bubble! */ });
+            ( data.tab.is('a') ? data.tab : data.tab.find('a:first') )
+                .data(_tabswitcherData+'Link', 1)
+                .bind('click', switchToFragmentPanel);
+
 
             closePanel( id );
 
             // register all tab id's
             _allTabIds[id] = true;
 
-            // register tab id's to monitor
-            if (_conf.monitorFragment) {
-              _fragmentsToMonitor[id] = true;
-            }
-
             // Detect bubbling TabSwitch events (from nested tab-panes) and switch to the current tabpane
             panel
                 .bind('Tabswitch', detectNestedTabswitch);
-
-            _allHashLinks.filter('[href$="#'+ id +'"]') // this includes the current tab `link`
-                .data( _tabswitcherData+'Link', 1 )
-                .bind('click', switchToFragmentPanel );
-
 
           }
 
@@ -444,12 +379,6 @@
       }
 
     });
-
-/*
-    if (!Object.isEmpty(_fragmentsToMonitor)) {
-      EEvent.add( document, 'fragment', _monitorFragment );
-    }
-*/
 
     // `switchTo` all the tabs that have been scheduled for opening.
     // todo : consider pushing this to next thread
@@ -518,4 +447,4 @@
         };
 
 
-})(jQuery);
+})(jQuery, document);
