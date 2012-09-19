@@ -1,4 +1,3 @@
-// encoding: utf-8
 // ----------------------------------------------------------------------------------
 // jQuery.fn.dumbTags v 1.0
 // ----------------------------------------------------------------------------------
@@ -6,7 +5,6 @@
 //  written by:
 //   * Már Örlygsson        -- http://mar.anomy.net
 // ----------------------------------------------------------------------------------
-
 /*
 
   Enables simple Facebook-style keyword-tagging autocomplete fields.
@@ -55,47 +53,53 @@
                             },
                           tagElm = $( cfg.tagTempl );
 
-                      tagElm
-                          [cfg.htmlTags ? 'html' : 'text']( tagItem.tag )
-                          .data( 'dumbTag', tagItem)
-                          .each(function () {
-                              cfg.processTag  &&  cfg.processTag( tagElm, itm );
-                            })
-                          .append(
-                              $('<input type="hidden"/>')
-                                  .attr({
-                                      name:  submName,
-                                      value: tagItem.value
-                                    })
-                            )
-                          .append(
-                              $( cfg.tagDelTempl )
-                                  .attr( 'title', i18n.delTitle||i18n.delLabel )
-                                  .html( i18n.delLabel )
-                            );
+                      if ( tagItem.value )
+                      {
+                        tagElm
+                            [cfg.htmlTags ? 'html' : 'text']( tagItem.tag )
+                            .data( 'dumbTag', tagItem)
+                            .each(function () {
+                                cfg.processTag  &&  cfg.processTag( tagElm, itm );
+                              })
+                            .append(
+                                $('<input type="hidden"/>')
+                                    .attr({
+                                        name:  submName,
+                                        value: tagItem.value
+                                      })
+                              )
+                            .append(
+                                $( cfg.tagDelTempl )
+                                    .attr( 'title', i18n.delTitle||i18n.delLabel )
+                                    .html( i18n.delLabel )
+                              );
 
-                      activeTags.push( tagItem.tag.toLowerCase() );
-                      tagElms.push( tagElm[0], document.createTextNode(' ') );
+                        activeTags.push( tagItem.tag.toLowerCase() );
+                        tagElms.push( tagElm[0], document.createTextNode(' ') );
+                      }
                     });
                   return $(tagElms).insertBefore( input );
                 },
               addItem = function ( item ) {
-                  // IDEA: trigger 'dumbTagAdd' event  here!
-                  var tag = item.value.toLowerCase(),
-                      tagElms = input.prevAll(cfg.tagSel)
-                                  .filter(function(){
-                                      var same = $(this).data('dumbTag').tag.toLowerCase() == tag;
-                                      if (same) {  delTag(this, true);  } // silently remove existing duplicates
-                                      return !same;
-                                    });
-                  // auto remove the last tag when we've hit the maxTags limit.
-                  if ( cfg.maxTags  &&  tagElms.length >= cfg.maxTags )
+                  if ( item.value || item.id )
                   {
-                    delTag( input.prev( cfg.tagSel ), true );
+                    // IDEA: trigger 'dumbTagAdd' event  here!
+                    var tag = item.value.toLowerCase(),
+                        tagElms = input.prevAll(cfg.tagSel)
+                                    .filter(function(){
+                                        var same = $(this).data('dumbTag').tag.toLowerCase() == tag;
+                                        if (same) {  delTag(this, true);  } // silently remove existing duplicates
+                                        return !same;
+                                      });
+                    // auto remove the last tag when we've hit the maxTags limit.
+                    if ( cfg.maxTags  &&  tagElms.length >= cfg.maxTags )
+                    {
+                      delTag( input.prev( cfg.tagSel ), true );
+                    }
+                    var tagElm = buildTagElms([item]);
+                    input.val(''); // empty the field to prevent selection via ENTER saving that text as tag.
+                    tagElm.trigger('dumbTagAdded');
                   }
-                  var tagElm = buildTagElms([item]);
-                  input.val(''); // empty the field to prevent selection via ENTER saving that text as tag.
-                  tagElm.trigger('dumbTagAdded');
                 },
 
               delTag = function ( tagElm, autoDelete ) {
