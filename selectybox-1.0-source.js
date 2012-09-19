@@ -1,4 +1,3 @@
-// encoding: utf-8
 // ----------------------------------------------------------------------------------
 // jQuery.fn.selectybox v 1.0
 // ----------------------------------------------------------------------------------
@@ -38,7 +37,7 @@
                                   $(this).parent()
                                       .toggleClass( cfg.focusClass, e.type == 'focus' );
                                 })
-                              .bind('change', function (e) {
+                              .bind('change keypress', function (e) {
                                   var sel = $(this);
                                   sel.data( selectyButton )
                                       .text( sel.find('option:selected').text() || cfg.emptyVal );
