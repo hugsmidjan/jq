@@ -713,9 +713,13 @@ $.extend(avTypes, {
 
   fi_url:  function( v, w, lang ) {
     if (v) {
-      var _url = v.replace(/^[a-z]+:\/\/.+$/i, '');
+      if ( /^www\./.test(v) )
+      {
+        v = 'http://'+v;
+        $(this).val(v);
+      }
       if ( !/^[a-z]+:\/\/.+\..+$/.test( v ) ||
-           /[\(\)\<\>\,\:\"\[\]\\]/.test( _url ) ) {
+           /[\(\)\<\>\,\"\[\]\\\s]/.test( v ) ) {
         return $.av.getError( 'fi_url', lang );
       }
       return true;
