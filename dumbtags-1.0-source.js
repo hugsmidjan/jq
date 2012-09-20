@@ -240,6 +240,13 @@
                           }
                         })
                       .bind('blur', function (e) {
+                          // add the current value on blur
+                          if ( !cfg.limitVocab  &&  this.value )
+                          {
+                            var fakeEnterEvent = jQuery.Event('keydown');
+                            fakeEnterEvent.which = 13; // enter
+                            $(this).trigger(fakeEnterEvent);
+                          }
                           $(this)
                               .val('')
                               .parent()
