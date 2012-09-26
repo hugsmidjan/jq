@@ -107,7 +107,7 @@
                     var tag = item.value.toLowerCase(),
                         tagElms = input.prevAll(cfg.tagSel)
                                     .filter(function(){
-                                        var same = $(this).data('dumbTag').tag.toLowerCase() == tag;
+                                        var same = $(this).data('dumbTag').tag.toLowerCase() === tag;
                                         if (same) {  delTag(this, true);  } // silently remove existing duplicates
                                         return !same;
                                       });
@@ -170,7 +170,7 @@
                   prefills.push({ id:val, value:val });
                 }
               });
-            if ( input.val() == val )
+            if ( input.val() === val )
             {
               input.val('');
             }
@@ -182,7 +182,7 @@
               .parent()// .tagswrap
                   .bind('click', function (e) {
                       // direct clicks to the white background of .tagswrap should move focus to the input
-                      if ( e.target == this )
+                      if ( e.target === this )
                       {
                         input.trigger('focus');
                       }
@@ -205,7 +205,7 @@
                   input
                       .bind('keydown', function (e) {
                           // backspace inside an empty input should delete the last .tag and fill the input with its value
-                          if ( !this.value  &&  e.which == 8 )
+                          if ( !this.value  &&  e.which === 8 )
                           {
                             var input = $(this);
                             setTimeout(function(){
@@ -224,7 +224,7 @@
                               }, 0);
                           }
                           // enter inside the input-field may create a new tag
-                          if ( e.which == 13/* ENTER */ )
+                          if ( e.which === 13/* ENTER */ )
                           {
                             if ( !cfg.limitVocab  &&  this.value  &&  !$(this).autocomplete('widget').find('a.ui-state-hover')[0] )
                             {
@@ -281,7 +281,7 @@
                                           $.ajax({
                                               url:      acUrl,
                                               type:     cfg.ajaxCfg.type,
-                                              data:     acName + "=" + encodeURIComponent( term ),
+                                              data:     acName + '=' + encodeURIComponent( term ),
                                               dataType: cfg.ajaxCfg.dataType,
                                               success:  function (results) {
                                                   if ( cfg.acFixResults )
@@ -306,7 +306,7 @@
 
                                                       // Return only items that are not already active (selected)
                                                       // TODO: consider if we need to optionally allow duplicate tags (hasn't come up yet)
-                                                      return ( $.inArray( itm.value.toLowerCase(), activeTags ) == -1 ) ?
+                                                      return ( $.inArray( itm.value.toLowerCase(), activeTags ) === -1 ) ?
                                                                   itm:
                                                                   null;
                                                     });
@@ -325,7 +325,7 @@
                                           var localTag = localItem.label.toLowerCase();
                                           if ( localTag.indexOf( term ) > -1 )
                                           {
-                                            if ( $.inArray( localTag, activeTags ) == -1 ) // skip over tags that are already active
+                                            if ( $.inArray( localTag, activeTags ) === -1 ) // skip over tags that are already active
                                             {
                                               res.push( localItem );
                                             }
