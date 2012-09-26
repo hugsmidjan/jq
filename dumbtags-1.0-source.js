@@ -23,7 +23,7 @@
 
   var dumbTags = $.fn.dumbTags = function (options) {
 
-      this.each(function (e) {
+      this.each(function () {
           var input = $(this),
               cfg  = $.extend(true, {}, dumbTags.defaults, options ),
               lang = input.closest('[lang]').attr('lang').substr(0.2),
@@ -80,6 +80,26 @@
                     });
                   return $(tagElms).insertBefore( input );
                 },
+              delTag = function ( tagElm, autoDelete ) {
+                  tagElm = $(tagElm);
+                  var removeEv = $.Event('dumbTagRemove');
+                  removeEv.autoDelete = autoDelete;
+                  tagElm.trigger(removeEv);
+                  if ( autoDelete  ||  !removeEv.isDefaultPrevented() )
+                  {
+                    var pos = $.inArray( tagElm.data('dumbTag').tag.toLowerCase(), activeTags );
+                    if ( pos > -1 )
+                    {
+                      activeTags.splice( pos , 1);
+                    }
+                    tagElm.remove();
+                    input.trigger('focus');
+                    // IDEA: trigger 'dumbTagRemoved' event  here!
+                    return true;
+                  }
+                  return false;
+                },
+
               addItem = function ( item ) {
                   if ( item.value || item.id )
                   {
@@ -100,26 +120,6 @@
                     input.val(''); // empty the field to prevent selection via ENTER saving that text as tag.
                     tagElm.trigger('dumbTagAdded');
                   }
-                },
-
-              delTag = function ( tagElm, autoDelete ) {
-                  tagElm = $(tagElm);
-                  var removeEv = $.Event('dumbTagRemove');
-                  removeEv.autoDelete = autoDelete;
-                  tagElm.trigger(removeEv);
-                  if ( autoDelete  ||  !removeEv.isDefaultPrevented() )
-                  {
-                    var pos = $.inArray( tagElm.data('dumbTag').tag.toLowerCase(), activeTags );
-                    if ( pos > -1 )
-                    {
-                      activeTags.splice( pos , 1);
-                    }
-                    tagElm.remove();
-                    input.trigger('focus');
-                    // IDEA: trigger 'dumbTagRemoved' event  here!
-                    return true;
-                  }
-                  return false;
                 },
 
               selectBox;
@@ -149,9 +149,8 @@
               .detach()
               .find('option')
                   .each(function () {
-                      var elm = $(this);
-
-                      itm = { id:elm.val(),  value:elm.text() };
+                      var elm = $(this),
+                          itm = { id:elm.val(),  value:elm.text() };
                       itm.label = itm.value;
                       acLocalValues.push( itm );
 
@@ -197,12 +196,12 @@
               .end()
               .attr( 'autocomplete', 'off' ) // need to do this explictly because of the lazy deployment of the autocomplete functionality (otherwise first contact with the field has autocomplete="on"
               // make the `.tagswrap` respond to focus/blur like an input field
-              .bind('focus', function (e) {
+              .bind('focus', function (/*e*/) {
                   $(this)
                       .parent()
                           .addClass( cfg.focusClass );
                 })
-              .one('focus', function (e) {
+              .one('focus', function (/*e*/) {
                   input
                       .bind('keydown', function (e) {
                           // backspace inside an empty input should delete the last .tag and fill the input with its value
@@ -239,7 +238,7 @@
                             return false;
                           }
                         })
-                      .bind('blur', function (e) {
+                      .bind('blur', function (/*e*/) {
                           // add the current value on blur
                           if ( !cfg.limitVocab  &&  this.value )
                           {
@@ -293,7 +292,7 @@
                                                                   newResults;
                                                   }
                                                   // untangle the naming-conflict coming from the server
-                                                  results = $.map(results, function (itm, i) {
+                                                  results = $.map(results, function (itm) {
                                                       if ( cfg.acFixItem )
                                                       {
                                                         cfg.acFixItem(itm);
@@ -338,14 +337,14 @@
                                 }
                               )
                           )
-                        .one('autocompleteopen', function (e, ui) {
+                        .one('autocompleteopen', function (/*e, ui*/) {
                             input.autocomplete('widget').attr( 'class', cfg.acMenuClass);
                           })
-                        .bind('autocompleteopen', function (e, ui) {
+                        .bind('autocompleteopen', function (/*e, ui*/) {
                             input.autocomplete('widget').width( input.parent().outerWidth() );
                           })
                         // prevent focusing an item in the ac-menu updating the input field.
-                        .bind('autocompletefocus', function (e, ui) {
+                        .bind('autocompletefocus', function (/*e, ui*/) {
                             return false;
                           })
                         .bind('autocompleteselect', function (e, ui) {
@@ -360,7 +359,7 @@
                     if ( !cfg.acCfg.minLength  ||  cfg.showLocals )
                     {
                       input
-                          .bind('focus', function (e) {
+                          .bind('focus', function (/*e*/) {
                               input.autocomplete('search');
                             })
                           .autocomplete('search'); // do it now, because we're inside a .one()-off focus handler, remember? :-)
