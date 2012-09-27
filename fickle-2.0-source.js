@@ -1,4 +1,3 @@
-// encoding: utf-8
 // ----------------------------------------------------------------------------------
 // jQuery.fn.fickle v 2.0
 // ----------------------------------------------------------------------------------
@@ -87,7 +86,7 @@
 
       _popuplock,
       _doClosePopup,
-      _cancelTimeout = function(e){
+      _cancelTimeout = function(/*e*/){
           //;;;window.console&&console.log( 'clearing', e, e&&e.type );
           clearTimeout(_popuplock);
         },
@@ -115,7 +114,7 @@
                 $('body').append( focusTrap );
 
                 // ...and now onto the actual opening:
-                var focusElm = cfg.focusElm;
+                var focusElm = cfg.focusElm,
                     focusTarget = focusElm ?
                                       ( focusElm.charAt ? this.find(focusElm) : focusElm ):
                                       [];
@@ -170,7 +169,7 @@
               }
             },
           toggle: function(data, extras){
-              var doOpen =  typeof extras == 'boolean' ?
+              var doOpen =  typeof extras === 'boolean' ?
                                 extras:
                             extras && extras.doOpen !== undefined?
                                 extras.doOpen:
@@ -217,7 +216,7 @@
 
   $.fn.fickle = function (cfg, extras) {
       var candidates = this;
-      if (typeof cfg == 'string')
+      if (typeof cfg === 'string')
       {
         // Handle "method" calls
         var methd = methods[cfg];
@@ -249,11 +248,11 @@
                     c: $.beget(cfg),
                     _listenForEsc: function (e) {
                         // return true on non-ESC keypresses, but envoke fickle('close') and return false on ESC.
-                        return (e.which != 27 /* ESC */)  ||  _this.fickle('close') && false;
+                        return (e.which !== 27 /* ESC */)  ||  _this.fickle('close') && false;
                       },
                     _confirmFocusLeave: function (e) {
                         var popupElm = _this[0];
-                        _doClosePopup = e.target != popupElm  &&  !$.contains( popupElm, e.target );
+                        _doClosePopup = e.target !== popupElm  &&  !$.contains( popupElm, e.target );
                       }
 
                   },
@@ -264,7 +263,7 @@
             _this
                 .data(_dataId, data)
                 .on('focusin focusout', function (e) { // keeps track of whether the fickle element has focus. Determines whether .focusHere() is needed on `fickleopened` (see above)
-                    data._gotFocus = e.type=='focusin';
+                    data._gotFocus = e.type==='focusin';
                   });
 
             // if cfg.fickle is set to false, the element becomes a very simple "open/close" window without any "fickly" properties to make it special.
@@ -273,7 +272,7 @@
               // popup content virkni
               // close popup
               _this
-                  .on('focusout', function (e) {
+                  .on('focusout', function (/*e*/) {
                       var popup = this;
                       _cancelTimeout();
                       //;;;window.console&&console.log( 'focusout' );
@@ -289,13 +288,13 @@
                   .on('click mousedown focusin', function (e) {
                       setTimeout(_cancelTimeout, 0); // because focusout (setting the _popupLock) *might* not fire before this focusin event...?
                       //;;;window.console&&console.log( 'focusin' );
-                      if (e.type == 'click')
+                      if (e.type === 'click')
                       {
                         var popup = $(this);
                         // on 'click' popup looses "focus" so we need to reset the focus once the mouse leaves
-                        popup.one('mouseleave', function(e){ data._isOpen  &&  $.focusHere(_lastFocusElm); });
+                        popup.one('mouseleave', function(/*e*/){ data._isOpen  &&  $.focusHere(_lastFocusElm); });
                       }
-                      else if (e.type == 'focusin')
+                      else if (e.type === 'focusin')
                       {
                         _lastFocusElm = e.target;
                       }
@@ -307,7 +306,7 @@
               // NOTE: _this has already been toggled visible (via `.toggle(!!cfg.startOpen)` above)
               // - so fadeIn() fickleopen events will not show.
               // We need, however, to envoke proper .fickle('open') to set the appropriate flags and run the events.
-              _this.fickle('open')
+              _this.fickle('open');
             }
 
             }
