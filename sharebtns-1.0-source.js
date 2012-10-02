@@ -1,4 +1,3 @@
-// encoding: utf-8
 // ----------------------------------------------------------------------------------
 // jQuery.fn.sharebtns v 1.0
 // ----------------------------------------------------------------------------------
@@ -21,6 +20,7 @@
 //    twitter:   true,     // Boolean|Number(non-zero order index)|Object(button config)  - non-falsy values insert Twitter "Tweet" button
 //    facebook:  true,     // Boolean|Number(non-zero order index)|Object(button config)  - non-falsy values insert Facebook "Like" button
 //    gplus:     false,    // Boolean|Number(non-zero order index)|Object(button config)  - non-falsy values insert Google+ "+1" button
+//    pinterest: false,    // Boolean|Number(non-zero order index)|Object(button config)  - non-falsy values insert Pinterest "PinIt" button
 //
 //    process:   function ( btnHTML, btnName, btnCfg ) { // allows modifying each button before injection
 //                    // do stuff - like adding a wrapper, or modifying the HTML, or whatever...
@@ -40,7 +40,7 @@
 //
 //
 
-(function($,doc,script){
+(function($, doc, script){
 
   var sharebtns = $.fn.sharebtns = function ( cfg ) {
           var buttonsToInsert = [];
@@ -95,9 +95,9 @@
           url: ''
         },
       presets = {
-          large:     { twitter:{size:'l'},         facebook:{},                   gplus:{size:''}               },
-          countNone: { twitter:{count:'none'},     facebook:{count:'standard'},   gplus:{count:'none'}          },
-          countV:    { twitter:{count:'vertical'}, facebook:{count:'box_count'},  gplus:{count:'',size:'tall'}  }
+          large:     { twitter:{size:'l'},         facebook:{},                   gplus:{size:''},               pinterest:{} },
+          countNone: { twitter:{count:'none'},     facebook:{count:'standard'},   gplus:{count:'none'},          pinterest:{count:'none'} },
+          countV:    { twitter:{count:'vertical'}, facebook:{count:'box_count'},  gplus:{count:'',size:'tall'},  pinterest:{count:'vertical'} }
         },
 
       btnDefeaults = sharebtns.btnDefeaults = {
@@ -108,15 +108,15 @@
               via:      '',       // Twitter username. Example: "foobar"
               related:  '',       // Recommended usernames. Example: "anywhere:The Javascript API,sitestreams,twitter:The official account"
               lang:     '',       // defaults to 'en'
-              hashtags: '',       // 
+              hashtags: '',       //
               text:     '',       // defaults to <title>
               url:      '',       // defaults to document.location.href
 
               // we must inject a manually-sized iframe because Twitter doesn't provide an API for initing/parsing ajax-injected buttons
-              $prep: function( b, pluginCfg ) {
-                  var hCount = !b.count || b.count == 'horizontal',
-                      vCount = b.count == 'vertical',
-                      large = b.size == 'l';
+              $prep: function( b/*, pluginCfg*/ ) { // b is buttonConfig
+                  var hCount = !b.count || b.count === 'horizontal',
+                      vCount = b.count === 'vertical',
+                      large = b.size === 'l';
                   b.width =  (hCount && large) ? '138px' : hCount ? '110px' : large ? '76px' : '58px';
                   b.height = large ?  '28px' : vCount ?  '62px' : '20px'; // vercial && large seems not to be supported by Twitter
                 },
@@ -128,7 +128,7 @@
               width:   100,            // min-width for the iframe
               count:   'button_count', // 'standard', 'box_count'
               sendBtn: false,
-              faces:   false, 
+              faces:   false,
               color:   '', // 'dark',
               verb:    '', // 'recommend' (default text is "like")
               url:     '', // defaults to document.location.href
@@ -157,7 +157,7 @@
                   this.$loc = this.$loc  ||  this.$locs[ $('html').attr('lang').substr(0,2) ]  ||  'en_US';
                   return this.$loc;
                 },
-              $pos:  30 // defaults to last position because when 'count' is set to '' - loads of text appear to the right of the button
+              $pos:  40 // defaults to last position because when 'count' is set to '' - loads of text appear to the right of the button
             },
 
           gplus: {
@@ -172,11 +172,37 @@
                   window.gapi  &&  gapi.plusone.go();
                 },
               $pos:  20
+            },
+
+          pinterest: {
+              url:   '',  //  defaults to document.location.href
+              imgsrc:'',  //  defaults to the first image on the page or the opengraph image
+              count: '',       // '' == 'horizontal'. Other options: 'none', 'vertical'
+              //imgSrcAttr: '',  // defaults to 'src'
+              imgSelector: '.pgmain img',  // The `imgSrcAttr` value of the first image matching this selector will be used
+
+              $tmpl: '<a href="http://pinterest.com/pin/create/button/?url=%{url}&amp;media=%{imgsrc}" class="pin-it-button" count-layout="{count}" lang="en">Pin It</a>',
+                        //<img border="0" src="//assets.pinterest.com/images/PinExt.png" title="Pin It" />
+
+              $prep: function( b/*, pluginCfg*/ ) { // b is buttonConfig
+                  b.url = b.url || doc.location.href;
+                  if ( !b.imgsrc )
+                  {
+                    b.imgsrc =  (b.imgSelector  &&  $(b.imgSelector).attr(b.imgSrcAttr||'src'))  ||
+                                $('meta[property="og:image"]').attr('content')  || // fallback to using the open-graph image
+                                $('img').attr('src');
+                  }
+                },
+              $init: function () {
+                  // http://pinterest.com/about/goodies/#button_for_websites
+                  injectScriptIfNeeded( 'pinterest-script', 'https://assets.pinterest.com/js/pinit.js' );
+                },
+              $pos:  30
             }
         },
 
       injectScriptIfNeeded = function ( id, url ) {
-          if ( !doc.getElementById( id ) ) 
+          if ( !doc.getElementById( id ) )
           {
             var firstScript = doc.getElementsByTagName(script)[0],
                 js = doc.createElement(script);
