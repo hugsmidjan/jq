@@ -61,9 +61,15 @@
                   // allow cfgBtnName itself to be a $pos number
                   bCfg.$pos = bCfg.$pos || 1*cfgBtnName || 0;
                   bCfg.$prep && bCfg.$prep( bCfg, cfg );
-                  var newBtn = bCfg.$tmpl.replace(/(%)?\{(.+?)\}/g, function(m,p1,p2){
+                  var newBtn = bCfg.$tmpl.replace(/(%=?)?\{(.+?)\}/g, function(m,p1,p2){
                                                                           var val = bCfg[p2];
-                                                                          return !p1 ? val : val ? p2+'='+encodeURIComponent(val)+'&' : '';
+                                                                          return  !p1 ?
+                                                                                      val:
+                                                                                  p1==='%' ?
+                                                                                      encodeURIComponent(val):
+                                                                                  val ?
+                                                                                      p2+'='+encodeURIComponent(val)+'&':
+                                                                                      '';
                                                                         });
                   newBtn = $( cfg.process ? cfg.process(newBtn, btnName, bCfg) : newBtn );
                   newBtn.$pos = bCfg.$pos;
@@ -120,7 +126,7 @@
                   b.width =  (hCount && large) ? '138px' : hCount ? '110px' : large ? '76px' : '58px';
                   b.height = large ?  '28px' : vCount ?  '62px' : '20px'; // vercial && large seems not to be supported by Twitter
                 },
-              $tmpl:  '<iframe src="//platform.twitter.com/widgets/tweet_button.html?%{size}%{count}%{via}%{related}%{hashtags}%{text}%{url}%{lang}" style="width:{width}; height:{height};" allowtransparency="true" frameborder="0" scrolling="no" />',
+              $tmpl:  '<iframe src="//platform.twitter.com/widgets/tweet_button.html?%={size}%={count}%={via}%={related}%={hashtags}%={text}%={url}%={lang}" style="width:{width}; height:{height};" allowtransparency="true" frameborder="0" scrolling="no" />',
               $pos:  10 // highest $pos comes first
             },
 
