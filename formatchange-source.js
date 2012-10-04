@@ -7,12 +7,17 @@
 // ----------------------------------------------------------------------------------
 /*
     Monitors changes in `#mediaformat:after`'s `content` values
-    as defined by the document's CSS code (See: http://adactio.com/journal/5429/),
+    as defined by the document's CSS code (See: http://adactio.com/journal/5429/)
+    (falling back to `#mediaformat`'s `font-family` name when needed),
     triggering custom window.onformatchange events when needed.
 
     NOTE: The current version always reports the format as `null`
     in IE8 and other browsers that don't support `window.getCurrentStyle()`
     or don't otherwise allow reading an element's `:before/:after` content.
+    Android Browser on Gingerbread (2.3) and older also doesn't allow access
+    to `:before/:after` so we fall back to reading 'font-family' on the the element itself.
+    That trick doesn't work on it's own as Opera wont report imaginary font-faces,
+    only the actual displayed font-face. They're doing it right, but in this case it's really annoying.
 
 
     Event Binding:
@@ -57,7 +62,7 @@
 
 
 */
-(function($, window, evName, s, elm, undefined){
+(function($, window, evName, getComputedStyle, s, elm, undefined){
 
   $.formatChange = function (cfg, extras) {
 
@@ -70,11 +75,12 @@
       else if ( !s )
       {
         cfg = cfg || {
-                  // elm:    document.body, // element to monitor
-                  // before: false,         // use ':before' instead of the default ':after'
+                  // tagName: 'del',
+                  // elmId:   'mediaformat',
+                  // before:  false  // set to `true` to use ':before' instead of the default ':after'
                 };
         s = $.extend({/* format: null */}, extras);
-        if ( window.getComputedStyle )
+        if ( window[getComputedStyle] )
         {
           $(window).bind(evName, function (e, forceTrigger) {
               if ( !elm )
@@ -83,9 +89,9 @@
                           .appendTo('body')[0];
                 elm.id = cfg.elmId || 'mediaformat';
               }
-              var newFormat = window.getComputedStyle( elm, cfg.before?':before':':after' )
-                                  .getPropertyValue('content')
-                                      .replace(/['"]/g,''); // some browsers return a quoted string.
+              var newFormat = window[getComputedStyle]( elm, cfg.before?':before':':after' )
+                                  .getPropertyValue('content').replace(/['"]/g,'')  // some browsers return a quoted string.
+                            || window[getComputedStyle]( elm, null ).getPropertyValue('font-family');
               if ( newFormat != s.format  ||  forceTrigger )
               {
                 var oldFormat = forceTrigger ? undefined : s.format;
@@ -111,4 +117,4 @@
 
     };
 
-})(jQuery, window, 'resize.formatchange');
+})(jQuery, window, 'resize.formatchange', 'getComputedStyle');
