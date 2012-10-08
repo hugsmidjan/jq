@@ -39,7 +39,7 @@
         },
 
       _equalizeHeights = function (_collection, _margins) {
-          var visibleElms = _collection.filter(':visible');
+          var visibleElms = $(_collection).filter(':visible');
           if (visibleElms.length) // only equalize if at least one of the elements is :visible
           {
             var _maxHeight = 0,
@@ -76,26 +76,31 @@
                 theSet = _sets[ setIdx ];
             if ( theSet )
             {
-              var elmIdx = theSet.index(this);
+              var elmIdx = $.inArray(this, theSet);
               if ( elmIdx > -1 )
               {
                 elm
                     .removeData('eqh_setsIdx')
                     .css( _heightAttribute, '');
-                [].splice.call(theSet, elmIdx, 1 );
-                _sets[ setIdx ] = theSet;
-                if ( theSet.length === 1  &&  set[i+1] !== theSet[0] )
+                theSet.splice( elmIdx, 1 );
+                if ( theSet.length === 1  &&  0 > $.inArray( theSet[0], set.slice(i) ) )
                 {
-                  theSet.equalizeHeights( 'destroy' );
+                  // destroy single-item sets whose leftover element is not contained
+                  // in the rest of the 'destroy' set `set`,
+                  // and are thus doomed to be left dangling.
+                  $(theSet).equalizeHeights( 'destroy' );
                 }
                 else if ( !theSet.length )
                 {
+                  //  remove any trace of empty sets
                   _sets = _sets.splice(setIdx,1);
                   _cfgs = _cfgs.splice(setIdx,1);
                 }
                 if ( !_sets.length )
                 {
+                  // when no sets are left unbind the window resize and fontsize event handlers.
                   $( window ).unbind('.eqh');
+                  _evSet = 0;
                 }
               }
             }
@@ -118,24 +123,17 @@
 
         if ( cfg )
         {
-          if (!cfg.onceOnly)  // only set reize and fontresize events when cfg.onceOnly is false (default)
+          if (!cfg.onceOnly  &&  eqh_setIdx == undefined )  // only set reize and fontresize events when cfg.onceOnly is false (default)
           {
-            if ( eqh_setIdx === undefined ) // ==undefined also matches "null"
-            {
-              _sets[setsIdx] = set;
-              _cfgs[setsIdx] = cfg;
-              set.data('eqh_setsIdx', setsIdx); // prevent inifinite loops when looping through the _sets
-              setsIdx++;
-            }
-
-            if (!_evSet)
-            {
-              _evSet = 1;
-              $( window )
-                  .bind( 'resize.eqh', _reRun )
-                  .bind( 'load fontresize.eqh', _resetHeights );
-            }
+            set.data('eqh_setsIdx', setsIdx); // prevent inifinite loops when looping through the _sets
+            _sets[setsIdx] = set.toArray();
+            _cfgs[setsIdx] = cfg;
+            setsIdx++;
           }
+
+          $( window )
+              .bind( 'resize.eqh', _reRun )
+              .bind( 'load.eqh fontresize.eqh', _resetHeights );
 
           _equalizeHeights(set, cfg.margins);
         }
