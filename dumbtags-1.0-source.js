@@ -125,7 +125,7 @@
 
               selectBox;
 
-          cfg.splitter = cfg.splitter!==undefined ? cfg.splitter : /,/;
+          cfg.splitter = cfg.splitter!==undefined ? cfg.splitter : /,|;/;
 
           if ( input.is('select') )
           {
@@ -412,7 +412,7 @@
       focusClass:   'focused',
       tagSel:       '.tag',
       delSel:       'a.del',
-      //splitter:     /,/, // Regexp
+      //splitter:     /,|;/, // Regexp
       ajax:           true,  // Flags whether to use ajax to fill the autocomplete menu, or with local (<select> box) values only.
       showLocals:   true,  // controls wheter local values are shown instantly on focus.
       //reShowLocals: false, // controls wheter to show the local-values again every time a tag is added
