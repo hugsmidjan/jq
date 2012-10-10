@@ -117,14 +117,15 @@
                       delTag( input.prev( cfg.tagSel ), true );
                     }
                     var tagElm = buildTagElms([item]);
-                    input.val(''); // empty the field to prevent selection via ENTER saving that text as tag.
+                    input.val(''); // empty the field to prevent selection via ENTER
+                                   // saving that text as tag.
                     tagElm.trigger('dumbTagAdded');
                   }
                 },
 
               selectBox;
 
-          cfg.splitter = cfg.splitter || ',';
+          cfg.splitter = cfg.splitter!==undefined ? cfg.splitter : /,/;
 
           if ( input.is('select') )
           {
@@ -163,13 +164,16 @@
           var val = input.attr('value');
           if ( val )
           {
-            $.each(val.split(cfg.splitter), function (i, val) {
-                val = $.trim( val ).replace(/\s+/g, '');
-                if (val)
-                {
-                  prefills.push({ id:val, value:val });
-                }
-              });
+            if ( cfg.splitter )
+            {
+              $.each(val.split(cfg.splitter), function (i, val) {
+                  val = $.trim( val ).replace(/\s+/g, '');
+                  if (val)
+                  {
+                    prefills.push({ id:val, value:val });
+                  }
+                });
+            }
             if ( input.val() === val )
             {
               input.val('');
@@ -226,6 +230,7 @@
                           // enter inside the input-field may create a new tag
                           if ( e.which === 13/* ENTER */ )
                           {
+                            e.preventDefault();
                             if ( !cfg.limitVocab  &&  this.value  &&  !$(this).autocomplete('widget').find('a.ui-state-hover')[0] )
                             {
                               var val = $.trim( this.value.replace(/\s+/g, ' ') );
@@ -235,22 +240,32 @@
                             setTimeout(function(){
                                 field.autocomplete('close');
                               }, 0);
-                            return false;
                           }
                         })
                       .bind('blur', function (/*e*/) {
                           // add the current value on blur
-                          if ( !cfg.limitVocab  &&  this.value )
-                          {
-                            var fakeEnterEvent = jQuery.Event('keydown');
-                            fakeEnterEvent.which = 13; // enter
-                            $(this).trigger(fakeEnterEvent);
-                          }
+                          var fakeEnterEvent = jQuery.Event('keydown');
+                          fakeEnterEvent.which = 13; // enter
                           $(this)
+                              .trigger(fakeEnterEvent)
                               .val('')
                               .parent()
                                   .removeClass( cfg.focusClass );
                         });
+                  if ( cfg.splitter )
+                  {
+                    input
+                        .bind('keypress', function (e) {
+                            if ( cfg.splitter.test( String.fromCharCode(e.which) ) )
+                            {
+                              e.preventDefault();
+                              var fakeEnterEvent = jQuery.Event('keydown');
+                              fakeEnterEvent.which = 13; // enter
+                              $(this)
+                                  .trigger(fakeEnterEvent);
+                            }
+                          });
+                  }
                   if ( cfg.ajax  ||  acLocalValues[0] )
                   {
                     var minLengthOverride = acLocalValues[0] ? { minLength: 0 } : {};
@@ -397,7 +412,7 @@
       focusClass:   'focused',
       tagSel:       '.tag',
       delSel:       'a.del',
-      //splitter:     ',',
+      //splitter:     /,/, // Regexp
       ajax:           true,  // Flags whether to use ajax to fill the autocomplete menu, or with local (<select> box) values only.
       showLocals:   true,  // controls wheter local values are shown instantly on focus.
       //reShowLocals: false, // controls wheter to show the local-values again every time a tag is added
