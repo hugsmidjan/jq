@@ -175,8 +175,7 @@
                   iframe.contents()[0].write(
                       '<!DOCTYPE html><html lang="'+ b.lang +'">' +
                       '<head><meta charset="UTF-8" /><title>.</title>' +
-                      //'<link href="https://codecentre.eplica.is/f/fb-share.css" rel="stylesheet" type="text/css" />' +
-                      '<link href="/codecentre/f/fb-share.css" rel="stylesheet" type="text/css" />' +
+                      '<link href="https://codecentre.eplica.is/f/fb-share.css" rel="stylesheet" type="text/css" />' +
                       '</head><body class="'+ (b.color||'') +'">' +
                       b.$lnk + encURI(b.url) +'">'+ b.txt +'</a>' +
                       '</body></html>'
