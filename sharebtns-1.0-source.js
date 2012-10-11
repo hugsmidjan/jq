@@ -17,10 +17,12 @@
 //
 //
 // Plugin Options (defaults):
-//    twitter:   true,     // Boolean|Number(non-zero order index)|Object(button config)  - non-falsy values insert Twitter "Tweet" button
-//    facebook:  true,     // Boolean|Number(non-zero order index)|Object(button config)  - non-falsy values insert Facebook "Like" button
-//    gplus:     false,    // Boolean|Number(non-zero order index)|Object(button config)  - non-falsy values insert Google+ "+1" button
-//    pinterest: false,    // Boolean|Number(non-zero order index)|Object(button config)  - non-falsy values insert Pinterest "PinIt" button
+//    twitter:   true,     // Boolean|Number(non-zero position index)|Object(button config)  - non-falsy values insert Twitter "Tweet" button
+//    facebook:  true,     // Boolean|Number(non-zero position index)|Object(button config)  - non-falsy values insert Facebook "Like" button
+//    fbshare:   false,    // Boolean|Number(non-zero position index)|Object(button config)  - non-falsy values insert Facebook "Share" button
+//    fbshare2:  false,    // Boolean|Number(non-zero position index)|Object(button config)  - non-falsy values insert *customized* Facebook "Share" button
+//    gplus:     false,    // Boolean|Number(non-zero position index)|Object(button config)  - non-falsy values insert Google+ "+1" button
+//    pinterest: false,    // Boolean|Number(non-zero position index)|Object(button config)  - non-falsy values insert Pinterest "PinIt" button
 //
 //    process:   function ( btnHTML, btnName, btnCfg ) { // allows modifying each button before injection
 //                    // do stuff - like adding a wrapper, or modifying the HTML, or whatever...
@@ -35,19 +37,19 @@
 //    countV:    false,    // Boolean  - true displays vertically positioned share-counter ballonons.
 //
 //    ...additionally each button type has its own config object.
-//    See "btnDefeaults" below for details.
+//    See "btnDefaults" below for details.
 //
 //
 //
 
-(function($, doc, script){
+(function($, doc, encURI){
 
   var sharebtns = $.fn.sharebtns = function ( cfg ) {
           var buttonsToInsert = [];
           if ( this.length )
           {
             cfg = $.extend(true, {}, defaultCfg, cfg);
-            $.each(btnDefeaults, function (btnName, btnDefaultCfg) {
+            $.each(btnDefaults, function (btnName, btnDefaultCfg) {
                 var cfgBtnName = cfg[btnName];
                 if ( cfgBtnName )
                 {
@@ -60,21 +62,21 @@
                   $.extend(bCfg, cfgBtnName);
                   // allow cfgBtnName itself to be a $pos number
                   bCfg.$pos = bCfg.$pos || 1*cfgBtnName || 0;
-                  bCfg.$prep && bCfg.$prep( bCfg, cfg );
+                  bCfg.$prep && bCfg.$prep( cfg );
                   var newBtn = bCfg.$tmpl.replace(/(%=?)?\{(.+?)\}/g, function(m,p1,p2){
                                                                           var val = bCfg[p2];
                                                                           return  !p1 ?
                                                                                       val:
                                                                                   p1==='%' ?
-                                                                                      encodeURIComponent(val):
+                                                                                      encURI(val):
                                                                                   val ?
-                                                                                      p2+'='+encodeURIComponent(val)+'&':
+                                                                                      p2+'='+encURI(val)+'&':
                                                                                       '';
                                                                         });
                   newBtn = $( cfg.process ? cfg.process(newBtn, btnName, bCfg) : newBtn );
                   newBtn.$pos = bCfg.$pos;
                   buttonsToInsert.push( newBtn );
-                  bCfg.$init && setTimeout(function(){ bCfg.$init(); }, 0);
+                  bCfg.$init && setTimeout(function(){ bCfg.$init(newBtn, cfg); }, 0);
                 }
               });
             buttonsToInsert = $.map(
@@ -87,12 +89,14 @@
         },
 
       defaultCfg = sharebtns.defaults = {
-          twitter:   true, // or a non-zero Number to indicate $pos
-          facebook:  true,
-          //gplus:   false,
-          //process:   function ( btnHTML, btnName, btnCfg ) {
-          //                // do stuff - like adding a wrapper, or modifying the HTML, or whatever...
-          //                return updatedHTMLorElm || btnHTML;
+          twitter:  true, // or a non-zero Number to indicate $pos
+          facebook: true,
+          // fbshare:  false,
+          // fbshare2: false,
+          // gplus:    false,
+          // process:  function ( btnHTML, btnName, btnCfg ) {
+          //               // do stuff - like adding a wrapper, or modifying the HTML, or whatever...
+          //               return updatedHTMLorElm || btnHTML;
           //             }
           insertion: 'append',
           //countNone: false,
@@ -100,13 +104,18 @@
           //large:     false,
           url: ''
         },
+      countNone={ count:'none' },
+      countVertical={ count:'vertical' },
       presets = {
-          large:     { twitter:{size:'l'},         facebook:{},                   gplus:{size:''},               pinterest:{} },
-          countNone: { twitter:{count:'none'},     facebook:{count:'standard'},   gplus:{count:'none'},          pinterest:{count:'none'} },
-          countV:    { twitter:{count:'vertical'}, facebook:{count:'box_count'},  gplus:{count:'',size:'tall'},  pinterest:{count:'vertical'} }
+          large:     { twitter:{size:'l'},     facebook:{},                   gplus:{size:''},               pinterest:{} },
+          countNone: { twitter:countNone,      facebook:{count:'standard'},   gplus:countNone,               pinterest:countNone },
+          countV:    { twitter:countVertical,  facebook:{count:'box_count'},  gplus:{count:'',size:'tall'},  pinterest:countVertical }
         },
 
-      btnDefeaults = sharebtns.btnDefeaults = {
+
+
+
+      btnDefaults = sharebtns.btnDefaults = {
 
           twitter: {
               size:     'm', // or 'l'
@@ -118,17 +127,65 @@
               text:     '',       // defaults to <title>
               url:      '',       // defaults to document.location.href
 
-              // we must inject a manually-sized iframe because Twitter doesn't provide an API for initing/parsing ajax-injected buttons
-              $prep: function( b/*, pluginCfg*/ ) { // b is buttonConfig
-                  var hCount = !b.count || b.count === 'horizontal',
+            // private
+              $prep: function( /*pluginCfg*/ ) {
+                  var b = this,
+                      hCount = !b.count || b.count === 'horizontal',
                       vCount = b.count === 'vertical',
                       large = b.size === 'l';
+                  // we must size the iframe manually because Twitter doesn't provide an API for initing/parsing ajax-injected buttons
                   b.width =  (hCount && large) ? '138px' : hCount ? '110px' : large ? '76px' : '58px';
                   b.height = large ?  '28px' : vCount ?  '62px' : '20px'; // vercial && large seems not to be supported by Twitter
                 },
               $tmpl:  '<iframe src="//platform.twitter.com/widgets/tweet_button.html?%={size}%={count}%={via}%={related}%={hashtags}%={text}%={url}%={lang}" style="width:{width}; height:{height};" allowtransparency="true" frameborder="0" scrolling="no" />',
-              $pos:  10 // highest $pos comes first
+              $pos:  10 // lowest $pos comes first
             },
+
+
+          fbshare: {
+              color: '', // 'dark',
+              url:   '', // defaults to document.location.href
+
+            // private
+              $prep: function ( /*pluginCfg*/) {
+                  var b = this;
+                  b.width =  '5.6363em'; // 62px @ 11px font-size
+                  b.height = '2.1818em'; // 24px @ 11px font-size
+                  b.$prep2();
+                },
+              $prep2: function () {
+                  var b = this,
+                      txts = { en: 'Share',  is: 'Deila' };
+                  if ( !b.txt )
+                  {
+                    b.lang = $('html').attr('lang').substr(0,2);
+                    b.txt = txts[ b.lang ];
+                    if ( !b.txt )
+                    {
+                      b.lang = 'en';
+                      b.txt = txts.en;
+                    }
+                  }
+                  b.url = b.url || document.location.href;
+                },
+              $lnk: '<a onclick="window.open(this.href,null,\'toolbar=0,status=0,width=626,height=436\');return false;" target="fbshare" href="//www.facebook.com/sharer.php?u=',
+              $init: function ( btn/*, cfg*/ ) {
+                  var b = this,
+                      iframe = btn.find('iframe').andSelf().filter('iframe').first(); // btn might have been wrapped or otherwise modified by the optional custom "process" method
+                  iframe.contents()[0].write(
+                      '<!DOCTYPE html><html lang="'+ b.lang +'">' +
+                      '<head><meta charset="UTF-8" /><title>.</title>' +
+                      //'<link href="https://codecentre.eplica.is/f/fb-share.css" rel="stylesheet" type="text/css" />' +
+                      '<link href="/codecentre/f/fb-share.css" rel="stylesheet" type="text/css" />' +
+                      '</head><body class="'+ (b.color||'') +'">' +
+                      b.$lnk + encURI(b.url) +'">'+ b.txt +'</a>' +
+                      '</body></html>'
+                    );
+                },
+              $tmpl: '<iframe style="width:{width};height:{height};font-size:11px;" allowtransparency="true" frameborder="0" scrolling="no" />',
+              $pos:  40
+            },
+
 
           facebook: {
               width:   100,            // min-width for the iframe
@@ -139,15 +196,19 @@
               verb:    '', // 'recommend' (default text is "like")
               url:     '', // defaults to document.location.href
 
+            // private
               $tmpl: '<div class="fb-like" data-send="{sendBtn}" data-layout="{count}" data-width="{width}" data-show-faces="{faces}" data-action="{verb}" data-colorscheme="{color}" data-href="{url}" />',
-              $init: function () {
+              $init: function (/* btn, cfg */) {
                   // https://developers.facebook.com/docs/reference/plugins/like/
                   if ( !$('#fb-root')[0] )
                   {
                     $('body').prepend('<div id="fb-root"/>');
-                    injectScriptIfNeeded( 'facebook-jssdk', '//connect.facebook.net/'+ this.$locale() +'/all.js#xfbml=1' );
                   }
-                  window.FB  &&  FB.XFBML.parse();
+                  injectScriptIfNeeded(
+                      'https://connect.facebook.net/'+ this.$locale() +'/all.js#xfbml=1',
+                      function(){  window.FB  &&  FB.XFBML.parse();  },
+                      this
+                    );
                 },
               $loc: '',
               $locs: {
@@ -163,22 +224,28 @@
                   this.$loc = this.$loc  ||  this.$locs[ $('html').attr('lang').substr(0,2) ]  ||  'en_US';
                   return this.$loc;
                 },
-              $pos:  40 // defaults to last position because when 'count' is set to '' - loads of text appear to the right of the button
+              $pos:  50 // defaults to last position because when 'count' is set to '' - loads of text appear to the right of the button
             },
+
 
           gplus: {
               url:   '', //  defaults to document.location.href
               count: '', //  'inline' (facebook-style) or 'none' (defaults to "bubble" (== '') )
               size:  'medium', // 'small', 'medium', '' (large), 'tall' (tall combined with count:'bubble' displays a vertically positioned counter)
 
+            // private
               $tmpl: '<div class="g-plusone" data-size="{size}" data-annotation="{count}" data-href="{url}"/>',
-              $init: function () {
+              $init: function (/* btn, cfg */) {
                   // https://www.google.com/intl/en/webmasters/+1/button/index.html
-                  injectScriptIfNeeded( 'gplus-script', 'https://apis.google.com/js/plusone.js' );
-                  window.gapi  &&  gapi.plusone.go();
+                  injectScriptIfNeeded(
+                      'https://apis.google.com/js/plusone.js',
+                      function(){  window.gapi  &&  gapi.plusone.go();  },
+                      this
+                    );
                 },
               $pos:  20
             },
+
 
           pinterest: {
               url:   '',  //  defaults to document.location.href
@@ -187,10 +254,11 @@
               //imgSrcAttr: '',  // defaults to 'src'
               imgSelector: '.pgmain img',  // The `imgSrcAttr` value of the first image matching this selector will be used
 
+            // private
               $tmpl: '<a href="http://pinterest.com/pin/create/button/?url=%{url}&amp;media=%{imgsrc}" class="pin-it-button" count-layout="{count}" lang="en">Pin It</a>',
                         //<img border="0" src="//assets.pinterest.com/images/PinExt.png" title="Pin It" />
-
-              $prep: function( b/*, pluginCfg*/ ) { // b is buttonConfig
+              $prep: function( /*pluginCfg*/ ) {
+                  var b = this;
                   b.url = b.url || doc.location.href;
                   if ( !b.imgsrc )
                   {
@@ -199,25 +267,50 @@
                                 $('img').attr('src');
                   }
                 },
-              $init: function () {
+              $init: function (/* btn, cfg */) {
                   // http://pinterest.com/about/goodies/#button_for_websites
-                  injectScriptIfNeeded( 'pinterest-script', 'https://assets.pinterest.com/js/pinit.js' );
+                  injectScriptIfNeeded( 'https://assets.pinterest.com/js/pinit.js' );
                 },
               $pos:  30
             }
         },
 
-      injectScriptIfNeeded = function ( id, url ) {
-          if ( !doc.getElementById( id ) )
+
+
+      loadedScripts = {},
+      injectScriptIfNeeded = function ( scriptURL, callback ) {
+          var scriptState = loadedScripts[scriptURL];
+          if ( !scriptState )
           {
-            var firstScript = doc.getElementsByTagName(script)[0],
-                js = doc.createElement(script);
-            js.id = id;
-            js.src = url;
-            firstScript.parentNode.insertBefore(js, firstScript);
+            loadedScripts[scriptURL] = scriptState = {};
+            $.getScript(scriptURL, function(){
+                scriptState.loaded = 1;
+                if ( callback )
+                {
+                  clearTimeout( scriptState.timeout );
+                  scriptState.timeout = setTimeout(callback, 100);
+                }
+              });
+          }
+          else if ( callback  &&  scriptState.loaded )
+          {
+            clearTimeout( scriptState.timeout );
+            scriptState.timeout = setTimeout(callback, 100);
           }
         };
 
 
+  btnDefaults.fbshare2 = {
+      url: '', // defaults to document.location.href
 
-})(jQuery, document, 'script');
+      $prep: function( /*pluginCfg*/ ) {
+          btnDefaults.fbshare.$prep2.call(this);
+        },
+      $tmpl: btnDefaults.fbshare.$lnk+'%{url}" class="fbsharebtn">{txt}</a>',
+      $pos:  40
+    };
+
+
+
+
+})(jQuery, document, encodeURIComponent);
