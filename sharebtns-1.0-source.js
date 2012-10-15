@@ -61,7 +61,7 @@
                   bCfg.url = bCfg.url || cfg.url; // button-specific custom URLs take precendence over global cfg.url settings
                   $.extend(bCfg, cfgBtnName);
                   // allow cfgBtnName itself to be a $pos number
-                  bCfg.$pos = bCfg.$pos || 1*cfgBtnName || 0;
+                  bCfg.$pos = typeof cfgBtnName === 'number' ? cfgBtnName : bCfg.$pos || 0;
                   bCfg.$prep && bCfg.$prep( cfg );
                   var newBtn = bCfg.$tmpl.replace(/(%=?)?\{(.+?)\}/g, function(m,p1,p2){
                                                                           var val = bCfg[p2];
@@ -149,8 +149,8 @@
             // private
               $prep: function ( /*pluginCfg*/) {
                   var b = this;
-                  b.width =  '5.6363em'; // 62px @ 11px font-size
-                  b.height = '2.1818em'; // 24px @ 11px font-size
+                  b.width =  '5.636em'; // 62px @ 11px font-size
+                  b.height = '1.818em'; // 20px @ 11px font-size
                   b.$prep2();
                 },
               $prep2: function () {
@@ -171,8 +171,9 @@
               $lnk: '<a onclick="window.open(this.href,null,\'toolbar=0,status=0,width=626,height=436\');return false;" target="fbshare" href="//www.facebook.com/sharer.php?u=',
               $init: function ( btn/*, cfg*/ ) {
                   var b = this,
-                      iframe = btn.find('iframe').andSelf().filter('iframe').first(); // btn might have been wrapped or otherwise modified by the optional custom "process" method
-                  iframe.contents()[0].write(
+                      iframeDoc = btn.find('iframe').andSelf().filter('iframe').first() // btn might have been wrapped or otherwise modified by the optional custom "process" method
+                                      .contents()[0];
+                  iframeDoc.write(
                       '<!DOCTYPE html><html lang="'+ b.lang +'">' +
                       '<head><meta charset="UTF-8" /><title>.</title>' +
                       '<link href="https://codecentre.eplica.is/f/fb-share.css" rel="stylesheet" type="text/css" />' +
@@ -180,6 +181,7 @@
                       b.$lnk + encURI(b.url) +'">'+ b.txt +'</a>' +
                       '</body></html>'
                     );
+                  iframeDoc.close();
                 },
               $tmpl: '<iframe style="width:{width};height:{height};font-size:11px;" allowtransparency="true" frameborder="0" scrolling="no" />',
               $pos:  40
