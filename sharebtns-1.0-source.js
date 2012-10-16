@@ -189,7 +189,7 @@
 
 
           facebook: {
-              width:   100,            // min-width for the iframe
+              width:   null,           // min-width for the iframe
               count:   'button_count', // 'standard', 'box_count'
               sendBtn: false,
               faces:   false,
@@ -198,6 +198,10 @@
               url:     '', // defaults to document.location.href
 
             // private
+              $prep: function ( /*pluginCfg*/) {
+                  var b = this;
+                  b.width = b.width ||  (b.count==='box_count' ? 85 : 120);
+                },
               $tmpl: '<div class="fb-like" data-send="{sendBtn}" data-layout="{count}" data-width="{width}" data-show-faces="{faces}" data-action="{verb}" data-colorscheme="{color}" data-href="{url}" />',
               $init: function (/* btn, cfg */) {
                   // https://developers.facebook.com/docs/reference/plugins/like/
