@@ -1,8 +1,7 @@
-// encoding: utf-8
 // ----------------------------------------------------------------------------------
 // Miscellaneous jQuery utilities collection v 1.2
 // ----------------------------------------------------------------------------------
-// (c) 2010-2011 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+// (c) 2010-2012 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
 //  written by:
 //   * Már Örlygsson        -- http://mar.anomy.net
 // ----------------------------------------------------------------------------------
@@ -12,8 +11,7 @@
   // depends on jQuery 1.7
 
 
-  var _dummyTarget,  // dummy element used by $.setFrag();
-      _win = window,
+  var _win = window,
       _doc = document,
       _location = _doc.location,
 
@@ -27,7 +25,7 @@
       _F = function(){},
 
       _injectRegExpCache = {}, // used by $.inject(); to store regexp objects.
-      _RegExpEscape = function(s) { return s.replace(/([\\\^\$*+[\]?{}.=!:(|)])/g, '\\$1'); };
+      _RegExpEscape = function(s) { return s.replace(/([\\\^\$*+\[\]?{}.=!:(|)])/g, '\\$1'); };
 
 
 
@@ -149,7 +147,7 @@
 
     // Clones the jQuery object and wipes out the it's `.prevObject` stack, and other instance-properties.
     // This allows the garbage collector to free up memory. (In some cases gobs of it!)
-    fin: function(){ return $(this) },
+    fin: function(){ return $(this); },
 
     // collection should be .detached() for this to work properly (as many jQuery methods will automtaically resort the collection)
     shuffle: function (/* inline */) { // `inline` parameter not supported yet - will update the DOM position of the elements directly.
@@ -268,7 +266,7 @@
     // collection.scroll(xPos);                // scrolls to xPos - maintaining the current pageYOffset
     // collection.scroll(null, yPos);          // scrolls to yPos - maintaining the current pageXOffset
     // collection.scroll({ left:xPos, top:yPos });  // scrolls to xPos, yPos
-    scroll: function (x, y)
+    scrollPos: function (x, y)
     {
       if ( x == undefined  &&  y == undefined )
       {
@@ -498,10 +496,10 @@
     },
 
 
-    // shorthand for $(document).scroll()
-    scroll: function (x, y)
+    // shorthand for $(document).scrollPos()
+    scrollPos: function (x, y)
     {
-      return $(_doc).scroll(x, y);
+      return $(_doc).scrollPos(x, y);
     },
 
 
@@ -520,35 +518,21 @@
       _fragment = (_fragment||'').replace(/^#/, '');
       // check if there exists an element with .id same as _fragment
       var _elm = _fragment  &&  _doc.getElementById(_fragment),
-          _prePos = !_fragment  &&  $.scroll();
-      if ( _elm )
-      {
-        // temporaily defuse the element's id
-        _elm.id = '';
-        // then insert and position a hidden dummy element to make sure that
-        //   a) the hash-change populates the browser's history buffer.
-        //   b) the viewport doesn't scroll/jump
-        // (NOTE: This may be buggy in IE5 - but that's life)
-        _dummyTarget = _dummyTarget || $('<i style="position:absolute;margin:0;visibility:hidden;" />');
-        _dummyTarget
-            .attr('id', _fragment)
-            .css('top', $.scroll().top)
-            .appendTo(_doc.body);
-      }
-      //_location.hash = _fragment;  // set the damn hash...
-      _location.href = _location.href.split("#")[0] +'#'+ (_isEncoded ? _fragment : $.encodeFrag(_fragment) );  // set the damn hash... (Note: Safari 3 & Chrome barf if frag === '#'.)
-      if ( !_fragment )
-      {
-        $.scroll(_prePos);
-      }
-      if ( _elm )
-      {
-        _dummyTarget[0].id = "";
-        //_dummyTarget.remove();
-        // put the old tab-id back in it's place
-        _elm.id = _fragment;
-      }
+          _prePos = !_fragment  &&  $.scrollPos();
+
+      // temporaily defuse the element's id
+      _elm  &&  (_elm.id = '');
+
+      // set the damn hash... (Note: Safari 3 & Chrome barf if frag === '#'.)
+      _location.href = '#'+ (_isEncoded ? _fragment : $.encodeFrag(_fragment) );
+
+      // scrollpos will have changed if fragment was set to an empty "#"
+      !_fragment  &&  $.scrollPos(_prePos);
+
+      // put the old tab-id back in it's place
+      _elm  &&  (_elm.id = _fragment);
     },
+
 
     // encodes a plain-text string to a URL #fragment friendly format (compatible with .getFrag())
     encodeFrag: function ( _fragment )
@@ -564,6 +548,8 @@
       var _fragment = ( url || _location.href ).split('#')[1] || '';
       return _returnRaw ? _fragment : decodeURIComponent(_fragment);
     },
+
+
 
 
 
@@ -735,7 +721,7 @@
       if (_theString.indexOf('%{')>-1)
       {
         // NOTE: this is a fairly ugly way to collect the "keys" depending on if _vars is a List or an Object.
-        if (isNaN(l)) { for (i in _vars)    { _keys.push(i); } }
+        if (isNaN(l)) { for (i in _vars) { _keys.push(i); } }
         else          { while (l--) { _keys.push(l); } }
         // now loop through the _keys and perform the replacement
         i = _keys.length;
@@ -755,6 +741,10 @@
   });
 
   $.setHash = $.setFrag;
+
+  // DEPRICATED! (Because our $.fn.scroll overwrites the native method of same name. Oops!)
+  $.scroll =    $.scrollPos;
+  $.fn.scroll = $.fn.scrollPos;
 
 
 })(jQuery);
