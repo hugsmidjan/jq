@@ -42,7 +42,7 @@
 //
 //
 
-(function($, doc, encURI){
+(function($, docLoc, encURI){
 
   var sharebtns = $.fn.sharebtns = function ( cfg ) {
           var buttonsToInsert = [];
@@ -87,6 +87,8 @@
           }
           return this.pushStack( buttonsToInsert );
         },
+
+      protocol = docLoc.protocol,
 
       defaultCfg = sharebtns.defaults = {
           twitter:  true, // or a non-zero Number to indicate $pos
@@ -210,7 +212,7 @@
                     $('body').prepend('<div id="fb-root"/>');
                   }
                   injectScriptIfNeeded(
-                      'https://connect.facebook.net/'+ this.$locale() +'/all.js#xfbml=1',
+                      protocol+'://connect.facebook.net/'+ this.$locale() +'/all.js#xfbml=1',
                       function(){  window.FB  &&  FB.XFBML.parse();  },
                       this
                     );
@@ -243,7 +245,7 @@
               $init: function (/* btn, cfg */) {
                   // https://www.google.com/intl/en/webmasters/+1/button/index.html
                   injectScriptIfNeeded(
-                      'https://apis.google.com/js/plusone.js',
+                      protocol+'://apis.google.com/js/plusone.js',
                       function(){  window.gapi  &&  gapi.plusone.go();  },
                       this
                     );
@@ -264,7 +266,7 @@
                         //<img border="0" src="//assets.pinterest.com/images/PinExt.png" title="Pin It" />
               $prep: function( /*pluginCfg*/ ) {
                   var b = this;
-                  b.url = b.url || doc.location.href;
+                  b.url = b.url || docLoc.href;
                   if ( !b.imgsrc )
                   {
                     b.imgsrc =  (b.imgSelector  &&  $(b.imgSelector).attr(b.imgSrcAttr||'src'))  ||
@@ -318,4 +320,4 @@
 
 
 
-})(jQuery, document, encodeURIComponent);
+})(jQuery, document.location, encodeURIComponent);
