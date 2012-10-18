@@ -168,7 +168,7 @@
                       b.txt = txts.en;
                     }
                   }
-                  b.url = b.url || document.location.href;
+                  b.url = b.url || docLoc.href;
                 },
               $lnk: '<a onclick="window.open(this.href,null,\'toolbar=0,status=0,width=626,height=436\');return false;" target="fbshare" href="//www.facebook.com/sharer.php?u=',
               $init: function ( btn/*, cfg*/ ) {
@@ -212,7 +212,7 @@
                     $('body').prepend('<div id="fb-root"/>');
                   }
                   injectScriptIfNeeded(
-                      protocol+'://connect.facebook.net/'+ this.$locale() +'/all.js#xfbml=1',
+                      protocol+'//connect.facebook.net/'+ this.$locale() +'/all.js#xfbml=1',
                       function(){  window.FB  &&  FB.XFBML.parse();  },
                       this
                     );
@@ -245,7 +245,7 @@
               $init: function (/* btn, cfg */) {
                   // https://www.google.com/intl/en/webmasters/+1/button/index.html
                   injectScriptIfNeeded(
-                      protocol+'://apis.google.com/js/plusone.js',
+                      protocol+'//apis.google.com/js/plusone.js',
                       function(){  window.gapi  &&  gapi.plusone.go();  },
                       this
                     );
