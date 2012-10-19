@@ -1,4 +1,3 @@
-// encoding: utf-8
 // ----------------------------------------------------------------------------------
 // jQuery.fn.fieldsetCloner v 1.0
 // ----------------------------------------------------------------------------------
@@ -175,7 +174,7 @@
           var _fieldset = $(this),
               _num = 0,
               _rowName = cfg.rowName =
-                            ( _fieldset.attr(cfg.rowNameSel) ||
+                            ( _fieldset.attr(cfg.rowNameSel||'') ||
                               _fieldset.find(cfg.rowNameSel).eq(0).text() ||
                               cfg.rowName )
                                 .replace(/:/g,''),
