@@ -42,7 +42,7 @@
 //
 //
 
-(function($, docLoc, encURI){
+(function($, docLoc, encURI, readystateevents){
 
   var sharebtns = $.fn.sharebtns = function ( cfg ) {
           var buttonsToInsert = [];
@@ -87,8 +87,6 @@
           }
           return this.pushStack( buttonsToInsert );
         },
-
-      protocol = docLoc.protocol,
 
       defaultCfg = sharebtns.defaults = {
           twitter:  true, // or a non-zero Number to indicate $pos
@@ -212,9 +210,8 @@
                     $('body').prepend('<div id="fb-root"/>');
                   }
                   injectScriptIfNeeded(
-                      protocol+'//connect.facebook.net/'+ this.$locale() +'/all.js#xfbml=1',
-                      function(){  window.FB  &&  FB.XFBML.parse();  },
-                      this
+                      '//connect.facebook.net/'+ this.$locale() +'/all.js#xfbml=1',
+                      function(){  window.FB  &&  FB.XFBML.parse();  }
                     );
                 },
               $loc: '',
@@ -245,9 +242,8 @@
               $init: function (/* btn, cfg */) {
                   // https://www.google.com/intl/en/webmasters/+1/button/index.html
                   injectScriptIfNeeded(
-                      protocol+'//apis.google.com/js/plusone.js',
-                      function(){  window.gapi  &&  gapi.plusone.go();  },
-                      this
+                      '//apis.google.com/js/plusone.js',
+                      function(){  window.gapi  &&  gapi.plusone.go();  }
                     );
                 },
               $pos:  20
@@ -290,14 +286,27 @@
           if ( !scriptState )
           {
             loadedScripts[scriptURL] = scriptState = {};
-            $.getScript(scriptURL, function(){
-                scriptState.loaded = 1;
-                if ( callback )
-                {
-                  clearTimeout( scriptState.timeout );
-                  scriptState.timeout = setTimeout(callback, 100);
-                }
-              });
+
+            $('<script/>')
+                .attr('src', scriptURL)
+                .each(function () {
+                    // This seems like the only way to insert a <script> element with jQuery...
+                    // normal appendTo or insertBefore methods seem not to work
+                    $('head')[0].appendChild(this);
+                  })
+                .on(readystateevents, function (e) {
+                    var js = this;
+                    if ( !js.readyState || /^(loaded|complete)$/.test(js.readyState) )
+                    {
+                      scriptState.loaded = 1;
+                      if ( callback )
+                      {
+                        clearTimeout( scriptState.timeout );
+                        scriptState.timeout = setTimeout(callback, 100);
+                      }
+                      $(js).off(readystateevents)
+                    }
+                  });
           }
           else if ( callback  &&  scriptState.loaded )
           {
@@ -320,4 +329,6 @@
 
 
 
-})(jQuery, document.location, encodeURIComponent);
+})(jQuery, document.location, encodeURIComponent, 'load readystatechange');
+
+jQuery.fn.log=function(){if(window.console){arguments.length&&console.log.call(console,arguments);console.log(this);}return this;};
