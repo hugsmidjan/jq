@@ -102,7 +102,7 @@
           //countNone: false,
           //countV:    false,
           //large:     false,
-          url: docLoc.href.split('#')[0]
+          url: $('link[rel="canonical"]').prop('href') || docLoc.href.split('#')[0]
         },
       countNone={ count:'none' },
       countVertical={ count:'vertical' },
