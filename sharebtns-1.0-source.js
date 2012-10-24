@@ -102,7 +102,7 @@
           //countNone: false,
           //countV:    false,
           //large:     false,
-          url: ''
+          url: docLoc.href.split('#')[0]
         },
       countNone={ count:'none' },
       countVertical={ count:'vertical' },
@@ -125,7 +125,7 @@
               lang:     '',       // defaults to 'en'
               hashtags: '',       //
               text:     '',       // defaults to <title>
-              url:      '',       // defaults to document.location.href
+              //url:      '',       // defaults to document.location.href
 
             // private
               $prep: function( /*pluginCfg*/ ) {
@@ -144,7 +144,7 @@
 
           fbshare: {
               color: '', // 'dark',
-              url:   '', // defaults to document.location.href
+              //url:   '', // defaults to document.location.href
 
             // private
               $prep: function ( /*pluginCfg*/) {
@@ -166,7 +166,6 @@
                       b.txt = txts.en;
                     }
                   }
-                  b.url = b.url || docLoc.href;
                 },
               $lnk: '<a onclick="window.open(this.href,null,\'toolbar=0,status=0,width=626,height=436\');return false;" target="fbshare" href="//www.facebook.com/sharer.php?u=',
               $init: function ( btn/*, cfg*/ ) {
@@ -195,7 +194,7 @@
               faces:   false,
               color:   '', // 'dark',
               verb:    '', // 'recommend' (default text is "like")
-              url:     '', // defaults to document.location.href
+              //url:     '', // defaults to document.location.href
 
             // private
               $prep: function ( /*pluginCfg*/) {
@@ -233,7 +232,7 @@
 
 
           gplus: {
-              url:   '', //  defaults to document.location.href
+              //url:   '', //  defaults to document.location.href
               count: '', //  'inline' (facebook-style) or 'none' (defaults to "bubble" (== '') )
               size:  'medium', // 'small', 'medium', '' (large), 'tall' (tall combined with count:'bubble' displays a vertically positioned counter)
 
@@ -251,7 +250,7 @@
 
 
           pinterest: {
-              url:   '',  //  defaults to document.location.href
+              //url:   '',  //  defaults to document.location.href
               imgsrc:'',  //  defaults to the first image on the page or the opengraph image
               count: '',       // '' == 'horizontal'. Other options: 'none', 'vertical'
               //imgSrcAttr: '',  // defaults to 'src'
@@ -262,7 +261,6 @@
                         //<img border="0" src="//assets.pinterest.com/images/PinExt.png" title="Pin It" />
               $prep: function( /*pluginCfg*/ ) {
                   var b = this;
-                  b.url = b.url || docLoc.href;
                   if ( !b.imgsrc )
                   {
                     b.imgsrc =  (b.imgSelector  &&  $(b.imgSelector).attr(b.imgSrcAttr||'src'))  ||
@@ -330,5 +328,3 @@
 
 
 })(jQuery, document.location, encodeURIComponent, 'load readystatechange');
-
-jQuery.fn.log=function(){if(window.console){arguments.length&&console.log.call(console,arguments);console.log(this);}return this;};
