@@ -24,7 +24,7 @@
         emptyFields.each(function (i, field) {
             iframeHTML += '<input name="'+ field.name +'" type="'+ field.type +'"/>';
           });
-        //var iframe = jQuery('<iframe/>').appendTo('body'),
+        //var iframe = jQuery('<iframe style="position:fixed;top:0;"/>').appendTo('body'),
         var iframe = jQuery('<iframe style="width:0;height:0;position:fixed;visibility:hidden;"/>').appendTo('body'),
             idoc = iframe.contents()[0];
         idoc.write( '<form>'+iframeHTML+'</form>' );
@@ -36,7 +36,7 @@
                     orgField.value  ||  (orgField.value = this.value);
                   });
             iframe.remove();
-          }, 0);
+          }, 100); // some delay seems neccessary...
       }
       return this;
     };
