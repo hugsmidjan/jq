@@ -12,7 +12,8 @@
 (function($){
 
   $.fn.autoFillup = function () {
-      if (!$.browser.msie) // no need for this in MSIE (at least version 9). Yay for microsoft!
+      var browser = $.browser;
+      if (!browser.msie && !browser.opera) // no need for this in MSIE (at least version 9). Yay for microsoft!
       {
         var form = this.find('form').andSelf().filter('form'),
             emptyFields = form.find('input')
