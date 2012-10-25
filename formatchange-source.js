@@ -25,61 +25,80 @@
     Otherwise you need to run $.formatChange(true); re-trigger the initial event.
 
         jQuery(window)
-            .on('formatchange', function (e, s, oldFormat) {
-                if ( s.format == 'mobile-landscape'  &&  oldFormat != 'tablet-portrait' )
+            .on('formatchange', function (e, F, oldFormat) {
+                F.format // 'named'
+                if ( F.format == 'mobile-landscape'  &&  oldFormat != 'tablet-portrait' )
                 {
                   // do stuff
                 }
-                else if ( !s.isMobile[ oldFormat ] )
+                else if ( !F.isMobile[ oldFormat ] )
                 {
                   // do stuff
                 }
               })
 
+
     Initialization:
+
         jQuery.formatChange();
-      ...or...
+
+        //...or...
+
         jQuery.formatChange({
             // default options:
-            tagName: 'del',
-            elmId:   'mediaformat',
-            before:  false
+            tagName: 'del',         //
+            elmId:   'mediaformat', //
+            before:  false,         // set to `true` to use ':before' instead of the default ':after'
+            // S is a lookup hash for "formats" that classify as "small". All other are defined as big.
+            // set it to null or false to disable the simple small/large checking
+            S:       { 'narrow':1, 'mobile':1 }
           });
-      ...or...
-        jQuery.formatChange(null, {
-            isMobile: { 'mobile-portrait':true, 'mobile-landscape':true }
-          });
-      ...or...
-        var S = jQuery.formatChange();
-        alert(S.format);
 
-    Trigger manual refresh/format check any time (useful after scripted CSS changes):
+        //...or...
+
+        var S = jQuery.formatChange();
+        alert( S.format );
+
+        //...or...
+
+        var S = jQuery.formatChange(null, { someProp: 'Some value for S' });
+        alert( S.someProp );
+
+
+    Trigger manual refresh/format check any time:
+    (Useful after scripted CSS changes)
+
         jQuery.formatChange();
 
+
     Teardown:
+
         jQuery.formatChange('disengage'); // does NOT unbind window.onformatchange handlers
 
 
 
 */
-(function($, window, evName, getComputedStyle, s, elm, undefined){
+(function($, window, evName, getComputedStyle, F, elm, undefined){
 
   $.formatChange = function (cfg, extras) {
 
-      if ( cfg == 'disengage' )
+      if ( cfg === 'disengage' )
       {
         $(window).unbind(evName);
         elm && elm.remove();
-        s = elm = undefined;
+        F = elm = undefined;
       }
-      else if ( !s )
+      else if ( !F )
       {
-        cfg = cfg || {
+        cfg = $.extend({
                   // tagName: 'del',
                   // elmId:   'mediaformat',
-                  // before:  false  // set to `true` to use ':before' instead of the default ':after'
-                };
-        s = $.extend({/* format: null */}, extras);
+                  // before:  false,  // set to `true` to use ':before' instead of the default ':after'
+                  S: { 'narrow':1, 'mobile':1 }
+                }, cfg);
+
+        F = $.extend({/* format:null */}, extras);
+
         if ( window[getComputedStyle] )
         {
           $(window).bind(evName, function (e, forceTrigger) {
@@ -92,27 +111,41 @@
               var newFormat = window[getComputedStyle]( elm, cfg.before?':before':':after' )
                                   .getPropertyValue('content').replace(/['"]/g,'')  // some browsers return a quoted string.
                             || window[getComputedStyle]( elm, null ).getPropertyValue('font-family');
-              if ( newFormat != s.format  ||  forceTrigger )
+              if ( (newFormat !== F.format)  ||  forceTrigger )
               {
-                var oldFormat = forceTrigger ? undefined : s.format;
-                s.format = newFormat;
-                $(window).trigger('formatchange', [s, oldFormat]);
+                var oldFormat = forceTrigger ? undefined : F.format;
+                F.format = newFormat;
+
+                // Sugar: set simple flags grouping formats into either "small" or "large" categories.
+                if ( cfg.S )
+                {
+                  F.isSmall =  cfg.S[F.format];
+                  F.isLarge =  !F.isSmall;
+                  // NOTE: `was(Small|Large)` are both false if oldFormat is undefined
+                  // (i.e. on first run)
+                  F.wasSmall = oldFormat  &&  cfg.S[oldFormat];
+                  F.wasLarge = oldFormat  &&  !F.wasSmall;
+                  F.becameSmall = F.isSmall  &&  !F.wasSmall;
+                  F.becameLarge = F.isLarge  &&  !F.wasLarge;
+                }
+
+                $(window).trigger('formatchange', [F, oldFormat]);
               }
             });
         }
         else
         {
           $(window)
-              .one(evName, function (e) {
-                  s.format = null;
-                  $(window).trigger('formatchange', [s]);
+              .one(evName, function (/* e */) {
+                  F.format = null;
+                  $(window).trigger('formatchange', [F]);
                 });
         }
       }
-      if ( s )
+      if ( F )
       {
         $(window).trigger(evName, [cfg===true]); // $.formatChange( true );  force-triggers an window.onformatchange event
-        return s;
+        return F;
       }
 
     };
