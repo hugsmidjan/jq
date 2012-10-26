@@ -11,13 +11,10 @@
     (falling back to `#mediaformat`'s `font-family` name when needed),
     triggering custom window.onformatchange events when needed.
 
-    NOTE: The current version always reports the format as `null`
-    in IE8 and other browsers that don't support `window.getCurrentStyle()`
-    or don't otherwise allow reading an element's `:before/:after` content.
-    Android Browser on Gingerbread (2.3) and older also doesn't allow access
+    IE7-8 and Android Browser on Gingerbread (2.3), and other older browsers don't allow access
     to `:before/:after` so we fall back to reading 'font-family' on the the element itself.
-    That trick doesn't work on it's own as Opera wont report imaginary font-faces,
-    only the actual displayed font-face. They're doing it right, but in this case it's really annoying.
+    That trick doesn't work on it's own as Opera wont report imaginary font-faces, only the
+    actual displayed font-face. (Opera is doing it right, however annoying it seems.)
 
 
     Event Binding:
@@ -25,16 +22,19 @@
     Otherwise you need to run $.formatChange(true); re-trigger the initial event.
 
         jQuery(window)
-            .on('formatchange', function (e, F, oldFormat) {
-                F.format // 'named'
-                if ( F.format == 'mobile-landscape'  &&  oldFormat != 'tablet-portrait' )
-                {
-                  // do stuff
-                }
-                else if ( !F.isMobile[ oldFormat ] )
-                {
-                  // do stuff
-                }
+            .on('formatchange', function (e, F) {
+                F.format      // the given name of the current format
+                F.lastFormat  // the given name of the previous format (undefined at first)
+
+                // Sugar flags: (available only if the `S` settings object is not disabled)
+                F.isSmall     // true of the current format's name is a property of `S`
+                F.isLarge     // true if not isSmall
+                F.wasSmall    // true if oldFormat was defined as Small.
+                F.wasLarge    // true if oldFormat was defined as Large.
+                F.becameSmall // true when Small and oldFormat was either Large or undefined.
+                F.becameLarge // true when Large and oldFormat was either Small or undefined.
+
+                // do stuff
               })
 
 
@@ -77,8 +77,10 @@
 
 
 
+
 */
-(function($, window, evName, getComputedStyle, F, elm, undefined){
+(function($, window, evName, getComputedStyle, F, elm, $elm, undefined){
+  getComputedStyle = window.getComputedStyle;
 
   $.formatChange = function (cfg, extras) {
 
@@ -99,48 +101,39 @@
 
         F = $.extend({/* format:null */}, extras);
 
-        if ( window[getComputedStyle] )
-        {
-          $(window).bind(evName, function (e, forceTrigger) {
-              if ( !elm )
-              {
-                elm = $('<'+ (cfg.tagName||'del') +' style="position:absolute;visibility:hidden;width:0;height:0;overflow:hidden;"/>')
-                          .appendTo('body')[0];
-                elm.id = cfg.elmId || 'mediaformat';
-              }
-              var newFormat = window[getComputedStyle]( elm, cfg.before?':before':':after' )
-                                  .getPropertyValue('content').replace(/['"]/g,'')  // some browsers return a quoted string.
-                            || window[getComputedStyle]( elm, null ).getPropertyValue('font-family');
-              if ( (newFormat !== F.format)  ||  forceTrigger )
-              {
-                var oldFormat = forceTrigger ? undefined : F.format;
-                F.format = newFormat;
+        $(window).bind(evName, function (e, forceTrigger) {
+            if ( !elm )
+            {
+              $elm = $('<'+ (cfg.tagName||'del') +' style="position:absolute;visibility:hidden;width:0;height:0;overflow:hidden;">f</del>')
+                        .appendTo('body');
+              elm = $elm[0];
+              elm.id = cfg.elmId || 'mediaformat';
+            }
+            var oldFormat = forceTrigger ? undefined : F.format,
+                newFormat = (getComputedStyle && getComputedStyle( elm, cfg.before?':before':':after' )
+                                    .getPropertyValue('content').replace(/['"]/g,'')  // some browsers return a quoted string.
+                            ) || $elm.css('font-family');
+            if ( (newFormat !== oldFormat)  ||  forceTrigger )
+            {
+              F.format = newFormat;
+              F.lastFormat = oldFormat;
 
-                // Sugar: set simple flags grouping formats into either "small" or "large" categories.
-                if ( cfg.S )
-                {
-                  F.isSmall =  cfg.S[F.format];
-                  F.isLarge =  !F.isSmall;
-                  // NOTE: `was(Small|Large)` are both false if oldFormat is undefined
-                  // (i.e. on first run)
-                  F.wasSmall = oldFormat  &&  cfg.S[oldFormat];
-                  F.wasLarge = oldFormat  &&  !F.wasSmall;
-                  F.becameSmall = F.isSmall  &&  !F.wasSmall;
-                  F.becameLarge = F.isLarge  &&  !F.wasLarge;
-                }
-
-                $(window).trigger('formatchange', [F, oldFormat]);
+              // Sugar: set simple flags grouping formats into either "small" or "large" categories.
+              if ( cfg.S  &&!(extras&&extras.isSmall) )
+              {
+                F.isSmall =  cfg.S[newFormat];
+                F.isLarge =  !F.isSmall;
+                // NOTE: `was(Small|Large)` are both false if oldFormat is undefined
+                // (i.e. on first run)
+                F.wasSmall = oldFormat  &&  cfg.S[oldFormat];
+                F.wasLarge = oldFormat  &&  !F.wasSmall;
+                F.becameSmall = F.isSmall  &&  !F.wasSmall;
+                F.becameLarge = F.isLarge  &&  !F.wasLarge;
               }
-            });
-        }
-        else
-        {
-          $(window)
-              .one(evName, function (/* e */) {
-                  F.format = null;
-                  $(window).trigger('formatchange', [F]);
-                });
-        }
+
+              $(window).trigger('formatchange', [F, oldFormat/* oldFormat is left in for backwards compatibility */]);
+            }
+          });
       }
       if ( F )
       {
@@ -150,4 +143,4 @@
 
     };
 
-})(jQuery, window, 'resize.formatchange', 'getComputedStyle');
+})(jQuery, window, 'resize.formatchange');
