@@ -25,64 +25,68 @@
             .on('formatchange', function (e, F) {
                 F.format      // the given name of the current format
                 F.lastFormat  // the given name of the previous format (undefined at first)
+              // Methods that check if the current format and/or lastformat
+              // match a given formatCategoryName and/or formatName
+                F.is( formatName_or_formatCategoryName )  // matches against F.format
+                F.was( formatName_or_formatCategoryName ) // matches against F.lastFormat - if defined
+                F.became( formatCategoryName )   // returns true when current format has just entered a formatCategory
+                F.left( formatCategoryName )     // returns true when current format has just exited a formatCategory
 
-                // Sugar flags: (available only if the `S` settings object is not disabled)
-                F.isSmall     // true of the current format's name is a property of `S`
-                F.isLarge     // true if not isSmall
-                F.wasSmall    // true if oldFormat was defined as Small.
-                F.wasLarge    // true if oldFormat was defined as Large.
-                F.becameSmall // true when Small and oldFormat was either Large or undefined.
-                F.becameLarge // true when Large and oldFormat was either Small or undefined.
-
-                // do stuff
+                // do stuff...
               })
 
 
+
     Initialization:
+    (should normally happen after the Event binding - unless the event is Re-triggered later)
 
-        jQuery.formatChange();
-
-        //...or...
-
-        jQuery.formatChange({
+        var options = {
             // default options:
             tagName: 'del',         //
             elmId:   'mediaformat', //
             before:  false,         // set to `true` to use ':before' instead of the default ':after'
-            // S is a lookup hash for "formats" that classify as "small". All other are defined as big.
-            // set it to null or false to disable the simple small/large checking
-            S:       { 'narrow':1, 'mobile':1 }
-          });
+            // Small and Large are named format categories that can be used with the is|was|became|left methods.
+            Small: { 'narrow':1, 'mobile':1 },
+            Large: { 'tablet':1, 'desktop':1, 'wide':1 }
+          };
+        var S = jQuery.formatChange( options );
 
-        //...or...
-
-        var S = jQuery.formatChange();
         alert( S.format );
 
-        //...or...
-
-        var S = jQuery.formatChange(null, { someProp: 'Some value for S' });
-        alert( S.someProp );
 
 
-    Trigger manual refresh/format check any time:
-    (Useful after scripted CSS changes)
+    Trigger "soft" format check on-demand:
+    (only triggers a "formatchange" event if the format
+     has really changed since last time.)
 
         jQuery.formatChange();
 
 
-    Teardown:
 
-        jQuery.formatChange('disengage'); // does NOT unbind window.onformatchange handlers
+    Re-trigger (forcefully) a format check:
+    (F.lastFormat becomes undefined)
+    (optional namespace gets added to the formatchange event trigger)
+
+        var forceEventTrigger = true; // <-- MUST be Boolean true
+        var optionalEventNamespace = 'myNamespace';
+
+        jQuery.formatChange( forceEventTrigger, optionalEventNamespace );
+
+
+
+    Teardown:
+    (NOTE: does NOT unbind window.onformatchange handlers)
+
+        jQuery.formatChange( 'disengage' );
 
 
 
 
 */
-(function($, window, evName, getComputedStyle, F, elm, $elm, undefined){
+(function($, window, evName, getComputedStyle, check, F, elm, $elm, undefined){
   getComputedStyle = window.getComputedStyle;
 
-  $.formatChange = function (cfg, extras) {
+  $.formatChange = function (cfg, triggerNS ) {
 
       if ( cfg === 'disengage' )
       {
@@ -90,54 +94,58 @@
         elm && elm.remove();
         F = elm = undefined;
       }
-      else if ( !F )
+      else
       {
-        cfg = $.extend({
-                  // tagName: 'del',
-                  // elmId:   'mediaformat',
-                  // before:  false,  // set to `true` to use ':before' instead of the default ':after'
-                  S: { 'narrow':1, 'mobile':1 }
-                }, cfg);
+        var forceTrigger  = cfg===true;
 
-        F = $.extend({/* format:null */}, extras);
+        if ( !F )
+        {
+          cfg = $.extend({
+                    // tagName: 'del',
+                    // elmId:   'mediaformat',
+                    // before:  false,  // set to `true` to use ':before' instead of the default ':after'
+                    Small: { 'narrow':1, 'mobile':1 },
+                    Large: { 'tablet':1, 'desktop':1, 'wide':1 }
+                  }, cfg);
 
-        $(window).bind(evName, function (e, forceTrigger) {
-            if ( !elm )
-            {
-              $elm = $('<'+ (cfg.tagName||'del') +' style="position:absolute;visibility:hidden;width:0;height:0;overflow:hidden;">f</del>')
-                        .appendTo('body');
-              elm = $elm[0];
-              elm.id = cfg.elmId || 'mediaformat';
-            }
-            var oldFormat = forceTrigger ? undefined : F.format,
-                newFormat = (getComputedStyle && getComputedStyle( elm, cfg.before?':before':':after' )
-                                    .getPropertyValue('content').replace(/['"]/g,'')  // some browsers return a quoted string.
-                            ) || $elm.css('font-family');
-            if ( (newFormat !== oldFormat)  ||  forceTrigger )
-            {
-              F.format = newFormat;
-              F.lastFormat = oldFormat;
+          F = $.extend({
+                  is:     function ( query, format ) {
+                                format = format||F.format;
+                                return  query===format  ||  !!(cfg[query] && cfg[query][format]);
+                              },
+                  was:    function (fmt) {  return F.is(fmt,F.lastFormat);  },
+                  became: function (fmt) {  return F.is(fmt)  &&  !F.is(fmt,F.lastFormat);  },
+                  left:   function (fmt) {  return F.is(fmt,F.lastFormat)  &&  !F.is(fmt);  }
+                },
+                // mix triggerNS into the F object to support the depricated "extras" paramter for $.formatChange()
+                !forceTrigger&&triggerNS
+              );
 
-              // Sugar: set simple flags grouping formats into either "small" or "large" categories.
-              if ( cfg.S  &&!(extras&&extras.isSmall) )
+          $(window).bind(evName, function (e, evOpts) {
+              evOpts = evOpts || {};
+              if ( !elm )
               {
-                F.isSmall =  cfg.S[newFormat];
-                F.isLarge =  !F.isSmall;
-                // NOTE: `was(Small|Large)` are both false if oldFormat is undefined
-                // (i.e. on first run)
-                F.wasSmall = oldFormat  &&  cfg.S[oldFormat];
-                F.wasLarge = oldFormat  &&  !F.wasSmall;
-                F.becameSmall = F.isSmall  &&  !F.wasSmall;
-                F.becameLarge = F.isLarge  &&  !F.wasLarge;
+                $elm = $('<'+ (cfg.tagName||'del') +' style="position:absolute;visibility:hidden;width:0;height:0;overflow:hidden;"/>')
+                          .appendTo('body');
+                elm = $elm[0];
+                elm.id = cfg.elmId || 'mediaformat';
               }
+              var oldFormat = F.lastFormat =
+                                  evOpts.force ? undefined : F.format,
+                  newFormat = F.format =
+                                  (getComputedStyle && getComputedStyle( elm, cfg.before?':before':':after' )
+                                          .getPropertyValue('content').replace(/['"]/g,'')  // some browsers return a quoted string.
+                                  ) || $elm.css('font-family');
 
-              $(window).trigger('formatchange', [F, oldFormat/* oldFormat is left in for backwards compatibility */]);
-            }
-          });
-      }
-      if ( F )
-      {
-        $(window).trigger(evName, [cfg===true]); // $.formatChange( true );  force-triggers an window.onformatchange event
+              if ( (newFormat !== oldFormat)  ||  evOpts.force )
+              {
+                $(window).trigger('formatchange'+(evOpts.ns||''), [F, oldFormat] ); /* oldFormat is left in for backwards compatibility */
+              }
+            });
+        }
+        $(window)
+            .trigger(evName, [ forceTrigger?{ force:1, ns:'.'+triggerNS }:undefined ] ); // $.formatChange( true );  force-triggers an window.onformatchange event
+
         return F;
       }
 
