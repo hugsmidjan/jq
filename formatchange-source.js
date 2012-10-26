@@ -83,7 +83,7 @@
 
 
 */
-(function($, window, evName, getComputedStyle, check, F, elm, $elm, undefined){
+(function($, window, evName, getComputedStyle, checkFormat, F, elm, $elm, undefined){
   getComputedStyle = window.getComputedStyle;
 
   $.formatChange = function (cfg, triggerNS ) {
@@ -110,12 +110,12 @@
 
           F = $.extend({
                   is:     function ( query, format ) {
-                                format = format||F.format;
+                                format = format===0 ? undefined : format||F.format;
                                 return  query===format  ||  !!(cfg[query] && cfg[query][format]);
                               },
-                  was:    function (fmt) {  return F.is(fmt,F.lastFormat);  },
-                  became: function (fmt) {  return F.is(fmt)  &&  !F.is(fmt,F.lastFormat);  },
-                  left:   function (fmt) {  return F.is(fmt,F.lastFormat)  &&  !F.is(fmt);  }
+                  was:    function (fmt) {  return F.is(fmt,F.lastFormat||0);  },
+                  became: function (fmt) {  return F.is(fmt)  &&  !F.is(fmt,F.lastFormat||0);  },
+                  left:   function (fmt) {  return F.is(fmt,F.lastFormat||0)  &&  !F.is(fmt);  }
                 },
                 // mix triggerNS into the F object to support the depricated "extras" paramter for $.formatChange()
                 !forceTrigger&&triggerNS
