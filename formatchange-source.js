@@ -23,12 +23,12 @@
 
         jQuery(window)
             .on('formatchange', function (e, F) {
-                F.format      // the given name of the current format
-                F.lastFormat  // the given name of the previous format (undefined at first)
+                F[format]      // the given name of the current format
+                F[lastFormat]  // the given name of the previous format (undefined at first)
               // Methods that check if the current format and/or lastformat
               // match a given formatCategoryName and/or formatName
-                F.is( formatName_or_formatCategoryName )  // matches against F.format
-                F.was( formatName_or_formatCategoryName ) // matches against F.lastFormat - if defined
+                F.is( formatName_or_formatCategoryName )  // matches against F[format]
+                F.was( formatName_or_formatCategoryName ) // matches against F[lastFormat] - if defined
                 F.became( formatCategoryName )   // returns true when current format has just entered a formatCategory
                 F.left( formatCategoryName )     // returns true when current format has just exited a formatCategory
 
@@ -64,7 +64,7 @@
 
 
     Re-trigger (forcefully) a format check:
-    (F.lastFormat becomes undefined)
+    (F[lastFormat] becomes undefined)
     (optional namespace gets added to the formatchange event trigger)
 
         var forceEventTrigger = true; // <-- MUST be Boolean true
@@ -83,7 +83,7 @@
 
 
 */
-(function($, window, evName, getComputedStyle, checkFormat, F, elm, $elm, undefined){
+(function($, window, evName, format, lastFormat, getComputedStyle, checkFormat, F, elm, $elm, undefined){
   getComputedStyle = window.getComputedStyle;
 
   $.formatChange = function (cfg, triggerNS ) {
@@ -108,14 +108,15 @@
                     Large: { 'tablet':1, 'desktop':1, 'wide':1 }
                   }, cfg);
 
+          checkFormat = function ( query, format ) {
+              return  query===format  ||  !!(cfg[query] && cfg[query][format]);
+            };
+
           F = $.extend({
-                  is:     function ( query, format ) {
-                                format = format===0 ? undefined : format||F.format;
-                                return  query===format  ||  !!(cfg[query] && cfg[query][format]);
-                              },
-                  was:    function (fmt) {  return F.is(fmt,F.lastFormat||0);  },
-                  became: function (fmt) {  return F.is(fmt)  &&  !F.is(fmt,F.lastFormat||0);  },
-                  left:   function (fmt) {  return F.is(fmt,F.lastFormat||0)  &&  !F.is(fmt);  }
+                  is:     function (fmt) {  return checkFormat(fmt,F[format]);  },
+                  was:    function (fmt) {  return checkFormat(fmt,F[lastFormat]);  },
+                  became: function (fmt) {  return checkFormat(fmt,F[format])  &&  !checkFormat(fmt,F[lastFormat]);  },
+                  left:   function (fmt) {  return checkFormat(fmt,F[lastFormat])  &&  !checkFormat(fmt,F[format]);  }
                 },
                 // mix triggerNS into the F object to support the depricated "extras" paramter for $.formatChange()
                 !forceTrigger&&triggerNS
@@ -130,9 +131,9 @@
                 elm = $elm[0];
                 elm.id = cfg.elmId || 'mediaformat';
               }
-              var oldFormat = F.lastFormat =
-                                  evOpts.force ? undefined : F.format,
-                  newFormat = F.format =
+              var oldFormat = F[lastFormat] =
+                                  evOpts.force ? undefined : F[format],
+                  newFormat = F[format] =
                                   (getComputedStyle && getComputedStyle( elm, cfg.before?':before':':after' )
                                           .getPropertyValue('content').replace(/['"]/g,'')  // some browsers return a quoted string.
                                   ) || $elm.css('font-family');
@@ -151,4 +152,4 @@
 
     };
 
-})(jQuery, window, 'resize.formatchange');
+})(jQuery, window, 'resize.formatchange', 'format', 'lastFormat');
