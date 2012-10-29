@@ -105,7 +105,7 @@
                     // elmId:   'mediaformat',
                     // before:  false,  // set to `true` to use ':before' instead of the default ':after'
                     Small: { 'narrow':1, 'mobile':1 },
-                    Large: { 'tablet':1, 'desktop':1, 'wide':1 }
+                    Large: { 'tablet':1, 'full':1, 'wide':1 }
                   }, cfg);
 
           checkFormat = function ( query, format ) {
