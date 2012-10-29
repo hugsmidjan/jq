@@ -109,6 +109,7 @@
                   }, cfg);
 
           checkFormat = function ( query, format ) {
+              ;;;window.console&&console.log( ['ff '+query+' '+format] );
               return  query===format  ||  !!(cfg[query] && cfg[query][format]);
             };
 
@@ -134,9 +135,8 @@
               var oldFormat = F[lastFormat] =
                                   evOpts.force ? undefined : F[format],
                   newFormat = F[format] =
-                                  (getComputedStyle && getComputedStyle( elm, cfg.before?':before':':after' )
-                                          .getPropertyValue('content').replace(/['"]/g,'')  // some browsers return a quoted string.
-                                  ) || $elm.css('font-family');
+                                  ( (getComputedStyle && getComputedStyle( elm, cfg.before?':before':':after' ).getPropertyValue('content')) ||
+                                    $elm.css('font-family') ).replace(/['"]/g,''); // some browsers return a quoted strings.
 
               if ( (newFormat !== oldFormat)  ||  evOpts.force )
               {
