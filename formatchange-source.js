@@ -145,7 +145,7 @@
             });
         }
         $(window)
-            .trigger(evName, [ forceTrigger?{ force:1, ns:'.'+triggerNS }:undefined ] ); // $.formatChange( true );  force-triggers an window.onformatchange event
+            .trigger(evName, [ forceTrigger?{ force:1, ns:triggerNS?('.'+triggerNS):'' }:undefined ] ); // $.formatChange( true );  force-triggers an window.onformatchange event
 
         return F;
       }
