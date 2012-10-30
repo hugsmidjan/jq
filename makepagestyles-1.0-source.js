@@ -1,4 +1,3 @@
-// encoding: utf-8
 // ----------------------------------------------------------------------------------
 // jQuery.fn.makePageStyles v 1.0
 // ----------------------------------------------------------------------------------
@@ -6,7 +5,8 @@
 //  written by:
 //   * Már Örlygsson        -- http://mar.anomy.net
 // ----------------------------------------------------------------------------------
-
+//
+//
 (function($, makePageStyles){
 
   $[makePageStyles] = function (cfg) {
@@ -52,7 +52,7 @@
       if ( cfg.userstyles )
       {
         var menuUS = menuFB.clone().empty(),
-            userstylesOn = !!(cfg.userstyles  &&  $.cookie('userstyles')),
+            userstylesOn = !!(cfg.userstyles  &&  $.cookie('userstyles')!=='on'),
             toggleMode = function (e) {
                 if ( e )
                 {
@@ -119,7 +119,7 @@
           cookieExpires:  365,
           cookiePath:     '/',
           fontsizerCfg:   { doClientSide:true }
-        };
+        },
 
       i18n = $[makePageStyles].i18n = {
           is: {
