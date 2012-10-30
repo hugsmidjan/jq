@@ -52,7 +52,7 @@
       if ( cfg.userstyles )
       {
         var menuUS = menuFB.clone().empty(),
-            userstylesOn = !!(cfg.userstyles  &&  $.cookie('userstyles')!=='on'),
+            userstylesOn = !!(cfg.userstyles  &&  $.cookie('userstyles')==='on'),
             toggleMode = function (e) {
                 if ( e )
                 {
