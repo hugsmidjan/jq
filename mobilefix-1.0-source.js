@@ -1,15 +1,12 @@
-// encoding: utf-8
 // Implement common tricks for mobile devices
 
-(function(win, doc, ua, addEv) {
+(function(win, doc, ua, addEv, qsa) {
 
   // fix orientation change zoom bug in Safari Mobile on iOS devices
   // based on: https://gist.github.com/901295
-  if (  /iPhone|iPad/.test(ua) && !/Opera Mini/.test(ua) ) {
+  if (  /iPhone|iPad/.test(ua) && !/Opera Mini/.test(ua) /* && doc[qsa] */ ) {
 
-    var qsa = 'querySelectorAll',
-        meta = doc[qsa] ? doc[qsa]('meta[name=viewport]') : [];
-
+    var meta = doc[qsa]('meta[name=viewport]');
     if ( meta[0] ) {
       var type = 'gesturestart',
           s = [1, 1],
@@ -21,6 +18,18 @@
       s = [.25, 1.6];
       doc[addEv](type, fix, true);
 
+    }
+
+    // counter the input[placeholder] orientationchange layout bug in iPhone+iOS6
+    // http://stackoverflow.com/q/12670931/16271
+    if (  /iPhone/.test(ua) ) {
+      win[addEv]('orientationchange', function(){
+          var s = doc[qsa]('html')[0].style;
+          s.display = 'none';
+          setTimeout(function(){
+              s.display = 'block';
+            }, 0);
+        }, true);
     }
   }
 
@@ -41,11 +50,11 @@
               clearInterval( bodycheck );
               topVal = getScrTop();
               win[scrTo]( 0, topVal === 1 ? 0 : 1 );
-            }	
+            }
           }, 15 );
     //scroll to 1
     win[scrTo]( 0, 1 );
-    win[addEv]( "load", function(){
+    win[addEv]( 'load', function(){
       setTimeout(function(){
         //at load, if user hasn't scrolled more than 20 or so...
         if( getScrTop() < 20 ){
@@ -58,9 +67,10 @@
 
 
 })(
-  window,
-  document,
-  navigator.userAgent,
-  'addEventListener'
+  /* win =   */ window,
+  /* doc =   */ document,
+  /* ua =    */ navigator.userAgent,
+  /* addEV = */ 'addEventListener',
+  /* qsa =   */ 'querySelectorAll'
 );
 
