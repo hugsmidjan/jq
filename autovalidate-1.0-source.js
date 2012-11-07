@@ -1,4 +1,3 @@
-/// encoding: utf-8
 // ----------------------------------------------------------------------------------
 // jQuery.fn.autoValidate/.defangEnter/.defangReset  v. 1.0
 // ----------------------------------------------------------------------------------
@@ -76,7 +75,7 @@
       id : function ( jq ) {
         jq = $(jq);
         var id = jq.attr('id');
-        return (id) ? id : jq.attr('id', idPrefix + '_' + (idSuffix++)).attr('id')
+        return (id) ? id : jq.attr('id', idPrefix + '_' + (idSuffix++)).attr('id');
       },
 
       cleanLabelString : function( t, maxlength ) {
@@ -572,6 +571,15 @@
       });
 
       // we've passed through every control - time to sort out the results
+      if ( invalids.length )
+      {
+        var field = $(invalids[0]).find('*').andSelf().filter('input, select, textarea');
+        field.focusHere ?
+            field.focusHere():
+        field.setFocus ?
+            field.focusHere():
+            field[0].focus();
+      }
       if (report && displayAlert && invalids.length) {
         $.av.alertErrors( $.unique( invalids ), this );
       }
@@ -588,7 +596,6 @@
 
 
 // Icelandic translation
-// encoding: utf-8
 jQuery.av.lang.is = {
 
   bullet:           ' • ',
@@ -613,7 +620,6 @@ jQuery.av.lang.is = {
 
 
 
-// encoding: utf-8
 (function($){
 
 $.extend($.av.lang.en, {
