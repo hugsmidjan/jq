@@ -7,7 +7,7 @@
 //   * Borgar Þorsteinsson  -- http://borgar.undraland.com
 // ----------------------------------------------------------------------------------
 
-(function($, undefined, idDataKey){
+(function($, idDataKey, undefined){
 
   var _quirkyOldIE = !!($.browser.msie  && ( parseInt($.browser.version, 10) < 7 || document.compatMode === 'BackCompat' ) ),
       _heightAttribute = (_quirkyOldIE) ? 'height' : 'min-height',
