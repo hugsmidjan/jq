@@ -1,24 +1,20 @@
 // ----------------------------------------------------------------------------------
 // jQuery.fn.equalizeHeights v 1.0
 // ----------------------------------------------------------------------------------
-// (c) 2009 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+// (c) 2009-2012 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
 //  written by:
 //   * Már Örlygsson        -- http://mar.anomy.net
 //   * Borgar Þorsteinsson  -- http://borgar.undraland.com
 // ----------------------------------------------------------------------------------
 
-// TODO:
-//  - remove reliance on $.browser and use $.support instead
-//  - remove destroyed/ sets and configs from the cache.
-
-(function($, undefined){
+(function($, undefined, idDataKey){
 
   var _quirkyOldIE = !!($.browser.msie  && ( parseInt($.browser.version, 10) < 7 || document.compatMode === 'BackCompat' ) ),
       _heightAttribute = (_quirkyOldIE) ? 'height' : 'min-height',
-      _evSet,
-      setsIdx = 0,
-      _sets = [],
-      _cfgs = [],
+      nextSetId = 0,
+      _numSets = 0,
+      _sets = {},
+      _cfgs = {},
       _resetLock,    // ...to keep MSIE from spinning out of control
       _resetTimerRef, // ...to keep MSIE from spinning out of control
       _reRun = function (/*e*/) { // ...delayed run of _resetHeights() (to cut MSIE some slack for quickfire events like .onresize)
@@ -30,10 +26,9 @@
         },
       _resetHeights = function (/*e*/) { // Instantly reset the heights
           _resetLock = 1;
-          var i = _sets.length;
-          while (i--)
+          for (var id in _sets)
           {
-            _equalizeHeights(_sets[i], _cfgs[i].margins);
+            _equalizeHeights(_sets[id], _cfgs[id].margins);
           }
           setTimeout(function(){ _resetLock = 0; }, 0);
         },
@@ -65,42 +60,42 @@
           }
         };
 
-
   $.fn.equalizeHeights = function ( cfg ) {
-      var set = this;
+      var set = this,
+          setId;
       if ( cfg === 'destroy' )
       {
         set.each(function (i) {
-            var elm = $(this),
-                setIdx = elm.data('eqh_setsIdx'),
-                theSet = _sets[ setIdx ];
-            if ( theSet )
+            var elm = $(this);
+            setId = elm.data(idDataKey);
+            var elmSet = _sets[ setId ];
+            if ( elmSet )
             {
-              var elmIdx = $.inArray(this, theSet);
+              var elmIdx = $.inArray(this, elmSet);
               if ( elmIdx > -1 )
               {
                 elm
-                    .removeData('eqh_setsIdx')
+                    .removeData(idDataKey)
                     .css( _heightAttribute, '');
-                theSet.splice( elmIdx, 1 );
-                if ( theSet.length === 1  &&  0 > $.inArray( theSet[0], set.slice(i) ) )
+                elmSet.splice( elmIdx, 1 );
+                if ( elmSet.length === 1  &&  $.inArray( elmSet[0], set.slice(i) )<0 )
                 {
                   // destroy single-item sets whose leftover element is not contained
                   // in the rest of the 'destroy' set `set`,
                   // and are thus doomed to be left dangling.
-                  $(theSet).equalizeHeights( 'destroy' );
+                  $(elmSet).equalizeHeights( 'destroy' );
                 }
-                else if ( !theSet.length )
+                else if ( !elmSet.length )
                 {
                   //  remove any trace of empty sets
-                  _sets = _sets.splice(setIdx,1);
-                  _cfgs = _cfgs.splice(setIdx,1);
+                  delete _sets[setId];
+                  delete _cfgs[setId];
+                  _numSets--;
                 }
-                if ( !_sets.length )
+                if ( !_numSets )
                 {
                   // when no sets are left unbind the window resize and fontsize event handlers.
                   $( window ).unbind('.eqh');
-                  _evSet = 0;
                 }
               }
             }
@@ -108,9 +103,9 @@
       }
       else if (set.length>1)
       {
-        var eqh_setIdx = set.data('eqh_setsIdx');
+        setId = set.data(idDataKey);
         cfg = cfg === 'refresh' ?
-                  _cfgs[ eqh_setIdx ]:
+                  _cfgs[ setId ]:
               cfg && cfg.$$done ?
                   cfg:
                   $.extend({
@@ -123,18 +118,20 @@
 
         if ( cfg )
         {
-          if (!cfg.onceOnly  &&  eqh_setIdx == undefined )  // only set reize and fontresize events when cfg.onceOnly is false (default)
+          if ( !_numSets )
           {
-            set.data('eqh_setsIdx', setsIdx); // prevent inifinite loops when looping through the _sets
-            _sets[setsIdx] = set.toArray();
-            _cfgs[setsIdx] = cfg;
-            setsIdx++;
+            $( window )
+                .bind( 'resize.eqh', _reRun )
+                .bind( 'load.eqh fontresize.eqh', _resetHeights );
           }
-
-          $( window )
-              .bind( 'resize.eqh', _reRun )
-              .bind( 'load.eqh fontresize.eqh', _resetHeights );
-
+          if (!cfg.onceOnly  &&  setId == undefined )  // only set reize and fontresize events when cfg.onceOnly is false (default)
+          {
+            set.data(idDataKey, nextSetId); // prevent inifinite loops when looping through the _sets
+            _sets[nextSetId] = set.toArray();
+            _cfgs[nextSetId] = cfg;
+            _numSets++;
+            nextSetId++;
+          }
           _equalizeHeights(set, cfg.margins);
         }
       }
@@ -144,5 +141,5 @@
 
   $.equalizeHeights = _reRun;
 
-})(jQuery);
+})(jQuery, 'eqh_setId');
 
