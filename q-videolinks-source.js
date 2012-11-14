@@ -30,18 +30,25 @@
 
       iframeTempl = '<iframe title="YouTube video player" width="%{vidwi}" height="%{vidhe}" src="%{vidurl}" frameborder="0" allowfullscreen></iframe>',
 
-      docLocPC = document.location.protocol,
-      docLocPC = docLocPC == 'file:' ? 'http:' : docLocPC,
+      calcHeight = function (width, aspect4x3) {
+        var vdHeight = aspect4x3 ? (width/4)*3 :
+                       (width/16)*9;
+        return Math.round(vdHeight);
+      },
 
       playVideo = function(e) {
           var item = $(this),
               data = item.data('playvideo_data'),
               videoHref = data.videoHref,
               type = data.type,
+              vidWidth = data.vidWidth != 'auto' ? data.vidWidth : item.closest('div, p').width(),
+              newWidth, // used for responsive
+              vidHeight = data.vidHeight != 'auto' ? data.vidHeight : calcHeight(vidWidth, data.aspect4x3),
               videoUrl,
+              videoId,
               autoplay,
-              useIframe = false,
-              vidFinHeight = data.videoHeight;
+              playerHeight = 0,
+              useIframe = false;
 
           if ( type == 'youtube' || type == 'youtu' )
           {
@@ -53,11 +60,11 @@
               http://www.youtube.com/embed/nTasT5h0LEg
               http://youtu.be/nTasT5h0LEg
             */
-            var youtubeId = type == 'youtube' ? videoHref.match(/(?:embed\/|watch\/?\?v=)([^&?\/]+)/i) : videoHref.match(/\.be\/(.+)$/);
-            youtubeId = youtubeId && youtubeId[1];
+            videoId = type == 'youtube' ? videoHref.match(/(?:embed\/|watch\/?\?v=)([^&?\/]+)/i) : videoHref.match(/\.be\/(.+)$/);
+            videoId = videoId && videoId[1];
             autoplay = data.autostart ? '&autoplay=1' : '';
-            videoUrl = docLocPC + '//www.youtube.com/embed/' + youtubeId + '?rel=0' + autoplay;
-            vidFinHeight = vidFinHeight + 30; //add player height to video height
+            videoUrl = docLocPC + '//www.youtube.com/embed/' + videoId + '?rel=0' + autoplay;
+            playerHeight = 30;
             useIframe = true;
           }
           else if ( type == 'vimeo' )
@@ -69,7 +76,7 @@
               http://vimeo.com/3274372?title=1
               http://vimeo.com/3274372
             */
-            var videoId = videoHref.match(/\/([0-9a-z]{5,10})\/?(?:[#?]|$)/i);
+            videoId = videoHref.match(/\/([0-9a-z]{5,10})\/?(?:[#?]|$)/i);
             videoId = videoId && videoId[1];
             autoplay = data.autostart ? '&autoplay=1' : '';
             videoUrl = docLocPC + '//player.vimeo.com/video/'+ videoId +'?title=1&amp;byline=0&amp;portrait=0' + autoplay;
@@ -83,10 +90,10 @@
               https://www.facebook.com/video/video.php?v=10150469623167067
               http://www.facebook.com/video/video.php?v=2246424718688
               http://www.facebook.com/photo/photo.php?v=2246424718688
-              http://www.facebook.com/photo.php?v=2246424718688                
+              http://www.facebook.com/photo.php?v=2246424718688
               https://www.facebook.com/photo.php?v=2427791652748&set=vb.144567668911104&type=2&theater
             */
-            var videoId = videoHref.match(/(?:\/v\/|[?&]v=)(\d{10,20})/); // matches v/nnnnn or v=nnnnn
+            videoId = videoHref.match(/(?:\/v\/|[?&]v=)(\d{10,20})/); // matches v/nnnnn or v=nnnnn
             videoId = videoId && videoId[1];
             videoUrl = docLocPC + '//www.facebook.com/v/'+ videoId;
           }
@@ -94,28 +101,48 @@
           {
             autoplay = data.autostart ? '&autostart=true' : '';
             videoUrl = '/bitar/common/media/mediaplayer.swf?file=' + videoHref + autoplay;
-            vidFinHeight = vidFinHeight + 20; //add player height to video height
+            playerHeight = 20;
+
           }
-          
+
+          vidHeight = vidHeight + playerHeight; //add player height to video height
+
           if (useIframe)
           {
             item.html($.inject(iframeTempl, {
                           vidurl : videoUrl,
-                          vidwi  : data.videoWidth,
-                          vidhe  : vidFinHeight
-                        }))
-          } 
-          else 
+                          vidwi  : vidWidth,
+                          vidhe  : vidHeight
+                        }));
+          }
+          else
           {
             item.html($.inject(objectTempl, {
                           vidurl : videoUrl,
-                          vidwi  : data.videoWidth,
-                          vidhe  : vidFinHeight
-                        }))
+                          vidwi  : vidWidth,
+                          vidhe  : vidHeight
+                        }));
           }
 
           item.append('<span class="videocaption">'+  data.vidCapt +'</span>');
-        }; // end fn
+
+          if (useIframe && data.vidWidth == 'auto')
+          {
+            $(window).on('resize', function (e) {
+                newWidth = item.closest('div, p').width();
+                if (newWidth != vidWidth)
+                {
+                  vidWidth = newWidth;
+                  vidWidth = item.closest('div, p').width();
+                  vidHeight = calcHeight(vidWidth, data.aspect4x3) + playerHeight;
+                  item.find('iframe').attr('height',vidHeight).attr('width',vidWidth);
+                }
+              });
+          }
+
+      }, // end fn
+      docLocPC = document.location.protocol;
+  docLocPC = docLocPC == 'file:' ? 'http:' : docLocPC;
 
   $.fn.videoLinks = function ( cfg ) {
     var videoLinks = this;
@@ -140,17 +167,14 @@
                           (/youtu\.be/i.test( videoHref ) && 'youtu') ||
                           (/facebook\.com/i.test( videoHref ) && 'facebook') ||
                           undefined,
-                  cntWidth = (cfg.vidWidth == 'auto') ? link.closest('div, p').width() : cfg.vidWidth,
-                  vdHeight = (cfg.vidHeight == 'auto' && cfg.aspect4x3) ? (cntWidth/4)*3 :  
-                             (cfg.vidHeight == 'auto' && !cfg.aspect4x3) ? (cntWidth/16)*9 : 
-                             cfg.vidHeight,
                   data = {
                       videoHref:   videoHref,
                       type:        type,
                       vidCapt:     link.text(),
-                      videoWidth:  cntWidth,
-                      videoHeight: Math.round(vdHeight),
-                      autostart:   !!cfg.autostart
+                      vidWidth:    cfg.vidWidth,
+                      vidHeight:   cfg.vidHeight,
+                      autostart:   !!cfg.autostart,
+                      aspect4x3:   cfg.aspect4x3
                     };
 
               if (type)
