@@ -39,8 +39,10 @@
                                 })
                               .bind('change keypress', function (e) {
                                   var sel = $(this);
-                                  sel.data( selectyButton )
-                                      .text( sel.find('option:selected').text() || cfg.emptyVal );
+                                  setTimeout(function(){
+                                      sel.data( selectyButton )
+                                          .text( sel.find('option:selected').text() || cfg.emptyVal );
+                                    }, 0);
                                 })
                               .css({ opacity: .0001 })
                               .css( cfg.selectCSS )
