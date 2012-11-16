@@ -32,10 +32,10 @@
                 media.lastFormat  // the given name of the previous format (undefined at first)
               // Methods that check if the current format and/or lastformat
               // match a given formatCategoryName and/or formatName
-                media.is( formatName_or_formatCategoryName )  // matches against media.format
-                media.was( formatName_or_formatCategoryName ) // matches against media.lastFormat - if defined
-                media.became( formatCategoryName )   // returns true when current format has just entered a formatCategory
-                media.left( formatCategoryName )     // returns true when current format has just exited a formatCategory
+                media.is( format_or_formatCategoryName )  // matches against media.format
+                media.was( format_or_formatCategoryName ) // matches against media.lastFormat
+                media.became( formatCategoryName )   // has current format has just entered a formatCategory?
+                media.left( formatCategoryName )     // has current format has just exited a formatCategory?
 
                 // do stuff...
               });
@@ -65,8 +65,7 @@
 
     Trigger "soft" format check on-demand:
     --------------------------------------------------------------------------
-    (only triggers a "formatchange" event if the format
-     has really changed since last time.)
+    (only triggers a "formatchange" event if the format has really changed since last time.)
 
         jQuery.formatChange();
 
@@ -86,7 +85,7 @@
 
     Teardown:
     --------------------------------------------------------------------------
-    (NOTE: does NOT unbind window.onformatchange handlers)
+    (NOTE: Does NOT unbind any window.onformatchange handlers - only the onResize CSS-polling)
 
         jQuery.formatChange( 'disengage' );
 
