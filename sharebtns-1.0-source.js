@@ -31,6 +31,7 @@
 //    insertion: 'append', // String  - jQuery method used to insert the buttons.  Accepted values: 'append', 'prepend', 'after', 'before'
 //
 //    url:       '',       // String  - Url to share. Defaults to document.location.href
+//    color:     '',       // String  - Basic color-scheme.  Accepted values: '', 'dark'
 //
 //    large:     false,    // Boolean  - true prints a large version of the button, where supported (not supported by Facebook)
 //    countNone: false,    // Boolean  - true suppresses the display of tweet-/like-/share counter balloons. (not supported by Facebook)
@@ -59,6 +60,7 @@
                       cfg[propName]  &&   presetVals  &&  $.extend(bCfg, presetVals);
                     });
                   bCfg.url = bCfg.url || cfg.url; // button-specific custom URLs take precendence over global cfg.url settings
+                  (bCfg.color===undefined)  &&  (bCfg.color = cfg.url);
                   $.extend(bCfg, cfgBtnName);
                   // allow cfgBtnName itself to be a $pos number
                   bCfg.$pos = typeof cfgBtnName === 'number' ? cfgBtnName : bCfg.$pos || 0;
@@ -102,6 +104,7 @@
           //countNone: false,
           //countV:    false,
           //large:     false,
+          //color:     dark,
           url: $('link[rel="canonical"]').prop('href') || docLoc.href.split('#')[0]
         },
       countNone={ count:'none' },
@@ -292,7 +295,7 @@
                     // normal appendTo or insertBefore methods seem not to work
                     $('head')[0].appendChild(this);
                   })
-                .on(readystateevents, function (e) {
+                .on(readystateevents, function (/*e*/) {
                     var js = this;
                     if ( !js.readyState || /^(loaded|complete)$/.test(js.readyState) )
                     {
