@@ -31,11 +31,11 @@
 //    insertion: 'append', // String  - jQuery method used to insert the buttons.  Accepted values: 'append', 'prepend', 'after', 'before'
 //
 //    url:       '',       // String  - Url to share. Defaults to document.location.href
-//    color:     '',       // String  - Basic color-scheme.  Accepted values: '', 'dark'
 //
 //    large:     false,    // Boolean  - true prints a large version of the button, where supported (not supported by Facebook)
 //    countNone: false,    // Boolean  - true suppresses the display of tweet-/like-/share counter balloons. (not supported by Facebook)
 //    countV:    false,    // Boolean  - true displays vertically positioned share-counter ballonons.
+//    dark:      false,    // Boolean  - true hints that the buttons should use a "dark" color-scheme.
 //
 //    ...additionally each button type has its own config object.
 //    See "btnDefaults" below for details.
@@ -60,7 +60,6 @@
                       cfg[propName]  &&   presetVals  &&  $.extend(bCfg, presetVals);
                     });
                   bCfg.url = bCfg.url || cfg.url; // button-specific custom URLs take precendence over global cfg.url settings
-                  (bCfg.color===undefined)  &&  (bCfg.color = cfg.url);
                   $.extend(bCfg, cfgBtnName);
                   // allow cfgBtnName itself to be a $pos number
                   bCfg.$pos = typeof cfgBtnName === 'number' ? cfgBtnName : bCfg.$pos || 0;
@@ -110,6 +109,7 @@
       countNone={ count:'none' },
       countVertical={ count:'vertical' },
       presets = {
+          dark:      { fbshare:{color:'dark'}, facebook:{color:'dark'}  },
           large:     { twitter:{size:'l'},     facebook:{},                   gplus:{size:''},               pinterest:{} },
           countNone: { twitter:countNone,      facebook:{count:'standard'},   gplus:countNone,               pinterest:countNone },
           countV:    { twitter:countVertical,  facebook:{count:'box_count'},  gplus:{count:'',size:'tall'},  pinterest:countVertical }
