@@ -273,7 +273,7 @@
                 },
               $init: function (/* btn, cfg */) {
                   // http://pinterest.com/about/goodies/#button_for_websites
-                  injectScriptIfNeeded( 'https://assets.pinterest.com/js/pinit.js' );
+                  injectScript( 'https://assets.pinterest.com/js/pinit.js' );
                 },
               $pos:  30
             }
@@ -282,12 +282,25 @@
 
 
       loadedScripts = {},
+      injectScript = function (url/*, callback */) {
+          clearTimeout( loadedScripts[url] );
+          loadedScripts[url] = setTimeout(function(){
+              $.ajax({
+                  dataType: 'script',
+                  cache: true,
+                  //success: callback,
+                  url: url
+                });
+            }, 100);
+        },
       injectScriptIfNeeded = function ( scriptURL, callback ) {
           var scriptState = loadedScripts[scriptURL];
           if ( !scriptState )
           {
             loadedScripts[scriptURL] = scriptState = {};
 
+            // we do this instead of $.getScript() to avoid an annoying
+            // cross-frame access violation error in Google Chrome. Ack!
             $('<script/>')
                 .attr('src', scriptURL)
                 .each(function () {
@@ -305,7 +318,7 @@
                         clearTimeout( scriptState.timeout );
                         scriptState.timeout = setTimeout(callback, 100);
                       }
-                      $(js).off(readystateevents)
+                      $(js).off(readystateevents);
                     }
                   });
           }
