@@ -22,7 +22,7 @@
       _guid = 1,
 
       // used by $.beget()
-      _F = function(){},
+      F = function(){},
 
       _injectRegExpCache = {}, // used by $.inject(); to store regexp objects.
       _RegExpEscape = function(s) { return s.replace(/([\\\^\$*+\[\]?{}.=!:(|)])/g, '\\$1'); };
@@ -49,7 +49,7 @@
         },
 
       target: function (a, h) {
-          return ( a.id  &&  (h = _location.hash)  &&  h == '#'+a.id );
+          return ( a.id  &&  (h = _location.hash)  &&  h === '#'+a.id );
         }
 
     });
@@ -62,7 +62,7 @@
       _lastSize,
       _monitorFontSize = function(){
           var _spanSize = _body.css('fontSize');
-          if (_spanSize != _lastSize)
+          if (_spanSize !== _lastSize)
           {
             _lastSize = _spanSize;
             $(window).trigger('fontresize');
@@ -74,14 +74,14 @@
   // TODO: allow binding to elements other than just window/body
   $.event.special.fontresize = {
     setup: function () {
-        if (this == _win  || this == _doc.body) {
+        if (this === _win  || this === _doc.body) {
           _body = $('body');
           _lastSize = _body.css('fontSize');
           _fontresizeInterval = setInterval(_monitorFontSize, 500);
         }
       },
     teardown: function () {
-        if (this == _win  ||  this == _doc.body) {
+        if (this === _win  ||  this === _doc.body) {
           clearTimeout( _fontresizeInterval );
         }
       }
@@ -97,7 +97,7 @@
       collection.each(function(){
           for (var next = this[method], isElm; next; next = next[method] )
           {
-            isElm = (next.nodeType == 1);
+            isElm = (next.nodeType === 1);
             if ( inclTextNodes || isElm )
             {
               if (isElm && !$(next).not(expr).length )
@@ -164,7 +164,7 @@
 
 
     imgUnsuppress: function (attr) {
-        $.imgUnsuppress(this);
+        $.imgUnsuppress(this, attr);
         return this;
       },
 
@@ -310,8 +310,8 @@
     // prototypal inheritence under jquery
     beget: function (proto, props)
     {
-      _F.prototype = proto;
-      return props ? $.extend(new _F, props) : new _F;
+      F.prototype = proto;
+      return props ? $.extend(new F(), props) : new F();
     },
 
 
@@ -325,7 +325,7 @@
     {
       var base = _win,
           name, i = 0;
-      if (typeof path != 'string')
+      if (typeof path !== 'string')
       {
         // Assume first argument is a base object (to add the namespace to).
         // Shift all arguments to the right.
@@ -335,7 +335,7 @@
         splitter = _;
       }
       path = path.split(splitter || '.');
-      while (name = path[i++])
+      while ((name = path[i++]))
       {
         base = base[name] || (base[name] = {});
       }
@@ -359,7 +359,7 @@
     //
     aquireId: function (el, prefDefaultId) // el is an optional parameter.
     {
-      if (typeof el == 'string')
+      if (typeof el === 'string')
       {
         prefDefaultId = el;
         el = undefined;
@@ -387,6 +387,44 @@
       }
       return el.id;
     },
+
+
+
+    cssSupport: (function(div, vendors, i, cache, ret) {
+
+        return function(prop) {
+
+            if ( !div )
+            {
+              div = $('<div/>')[0];
+              vendors = 'Khtml Ms O Moz Webkit'.split(' ');
+              cache = {};
+            }
+            ret = prop in cache ?
+                      cache[prop]:
+                      prop in div.style || undefined;
+            if ( ret===undefined )
+            {
+              prop = prop.replace(/^[a-z]/, function(val) {
+                  return val.toUpperCase();
+                });
+              i = vendors.length;
+              while (i--)
+              {
+                if ( vendors[i]+prop in div.style )
+                {
+                  // browser supports box-shadow. Do what you need.
+                  // Or use a bang (!) to test if the browser doesn't.
+                  ret = true;
+                  break;
+                }
+              }
+            }
+            return (cache[prop] = ret||false);
+
+          };
+
+      })(),
 
 
 
@@ -434,7 +472,7 @@
                             return cfg['keep'+p2] ?
                                       p1+p2+p3:
                                       p1 + tagName +
-                                        ((p1=='<') ? tagAttrs+p2+'"' : '')+
+                                        ((p1==='<') ? tagAttrs+p2+'"' : '')+
                                         p3;
                           })
                       ;
@@ -454,7 +492,7 @@
     // Reinserts img[src] values escaped by $.imgSuppress()
     imgUnsuppress: function (dom, attr) {
         attr = attr || 'data-srcAttr';
-        if ( typeof dom == 'string')
+        if ( typeof dom === 'string')
         {
           dom = dom.replace( new RegExp('(<img[^>]*? )'+attr+'=', 'gi') ,'$1src=' );
         }
@@ -484,7 +522,7 @@
     //
     lang: function (elm, returnFull)
     {
-      if ( elm === !0 || elm === !1 )
+      if ( typeof elm === 'boolean' )
       {
         returnFull = elm;
         elm = null;
@@ -584,7 +622,7 @@
           $(_focusElm)[0].focus();
 
           // Check for new scroll position
-          if ($$.scrollTop() != _before)  // if the browser jumped to the anchor...  (the browser only scrolls the page if the _focusElm was outside the viewport)
+          if ($$.scrollTop() !== _before)  // if the browser jumped to the anchor...  (the browser only scrolls the page if the _focusElm was outside the viewport)
           {
             // ...then scroll the window to place the anchor at the top of the viewport.
             // (NOTE: We do this because most browsers place the artificially .focus()ed link at the *bottom* of the viewport.)
@@ -617,7 +655,7 @@
         _elm.trigger('focus');
 
         // Check for new scroll position
-        if ( doc.scrollTop() != _before )  // if the browser jumped to the anchor...  (the browser only scrolls the page if the _focusElm was outside the viewport)
+        if ( doc.scrollTop() !== _before )  // if the browser jumped to the anchor...  (the browser only scrolls the page if the _focusElm was outside the viewport)
         {
           // ...then scroll the window to place the anchor at the top of the viewport.
           // (NOTE: We do this because most browsers place the artificially .focus()ed link at the *bottom* of the viewport.)
@@ -634,7 +672,7 @@
       $(document).delegate(selector||'a[href^="#"]', 'click', function (e) {
           if ( !e.isDefaultPrevented() )
           {
-            var id = $(this).attr("href").substr(1);
+            var id = $(this).attr('href').substr(1);
             if ( id )
             {
               $('#'+id).focusHere();
@@ -667,7 +705,7 @@
     //      ==>  { }
     parseParams: function (paramString)
     {
-      paramString = $.trim( paramString!=undefined ? paramString : document.location.search )
+      paramString = $.trim( paramString!==undefined ? paramString : document.location.search )
                         .replace(/^[?&]|&$/g, '');
       var map = {};
       if ( paramString )
