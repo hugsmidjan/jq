@@ -9,8 +9,11 @@
 
 (function($, idDataKey, undefined){
 
-  var _quirkyOldIE = !!($.browser.msie  && ( parseInt($.browser.version, 10) < 7 || document.compatMode === 'BackCompat' ) ),
-      _heightAttribute = (_quirkyOldIE) ? 'height' : 'min-height',
+  var B = $.browser,
+      _msie8dn = !!B.msie  &&  parseInt(B.version, 10) < 9,
+      _msie6dn = _msie8dn  &&  ( parseInt(B.version, 10) < 7 || document.compatMode === 'BackCompat' ),
+      _heightAttribute = (_msie6dn) ? 'height' : 'min-height',
+      box_sizing = 'box-sizing',
       nextSetId = 0,
       _numSets = 0,
       _sets = {},
@@ -45,8 +48,34 @@
                 .each(function ( i ) {
                     var _this = $( this );
                     _this.css( _heightAttribute, '' );
-                    var _totalHeight = _this.outerHeight(!!_margins);
-                    _paddings[i] = _totalHeight - _this.height();
+                    var _totalHeight = _this.outerHeight(),
+                        _marginHeight = 0,
+                        _boxSizing,
+                        _newJquery = $.fn.jquery.substr(0,3) >= 1.8;
+                    if ( _margins )
+                    {
+                      _marginHeight = (parseInt( _this.css('margin-top'), 10 ) || 0) +
+                                      (parseInt( _this.css('margin-bottom'), 10 ) || 0);
+                    }
+                    if ( _msie8dn )
+                    {
+                      if ( _newJquery )
+                      {
+                        _boxSizing = _this.css(box_sizing);
+                      }
+                      else
+                      {
+                        _boxSizing = _this.data('cache-'+box_sizing);
+                        if ( !_boxSizing )
+                        {
+                          _boxSizing = _this.css(box_sizing) || _this.css((B.mozilla?'-moz-':'')+box_sizing);
+                          _this.data('cache-'+box_sizing, _boxSizing||'x');
+                        }
+                      }
+                    }
+                    _paddings[i] = ( _msie8dn  ||  _boxSizing!=='border-box' ) ?
+                                      _marginHeight + _totalHeight - _this.height():
+                                      _marginHeight;
                     _maxHeight = Math.max( _totalHeight, _maxHeight );
                   })
                 // assign new min-heights to visible elements of _collection
