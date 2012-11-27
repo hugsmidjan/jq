@@ -1,0 +1,2 @@
+// $.fn.uniquifyIds 1.0  -- (c) 2010 Hugsmiðjan ehf.
+(function(f){f.fn.uniquifyIds=function(a){return this.each(function(){var b=a(this);b.find('*').andSelf().filter('[id]').each(function(){var c=this.id,d=a.aquireId(c),g=a(this).attr('id',d);a.each({'input, select, textarea':'label[for','area':'img[usemap'},function(h,e){if(g.is(h)){b.find(e+'="'+c+'"]').attr(e.split('[')[1],d)}})})})}})(jQuery);
