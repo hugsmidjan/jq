@@ -57,7 +57,7 @@
                       _marginHeight = (parseInt( _this.css('margin-top'), 10 ) || 0) +
                                       (parseInt( _this.css('margin-bottom'), 10 ) || 0);
                     }
-                    if ( _msie8dn )
+                    if ( !_msie8dn )
                     {
                       if ( _newJquery )
                       {
