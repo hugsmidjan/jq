@@ -15,8 +15,6 @@
 
 (function($){
 
-  jQuery.fn.log=function(){if(window.console){arguments.length&&console.log.call(console,arguments);console.log(this);}return this;};
-
   // returns the first variation that matches all the selectedTags
   var deriveSelectedVariation = function ( allVariations, selectedTags ) {
           var selectedVariation,
