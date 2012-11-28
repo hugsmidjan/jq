@@ -177,7 +177,7 @@
               methods[doOpen?'open':'close'].call(this, data, extras);
             },
           isOpen: function(data/*, extras */){
-              return !!(data || data._isOpen);
+              return !!(data && data._isOpen);
             },
           isFickle: function (data) {
               return !!data;

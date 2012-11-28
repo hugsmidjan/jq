@@ -138,13 +138,13 @@
           toggle: function(data, extras){
               var doOpen =  typeof extras == 'boolean' ?
                                 extras:
-                            extras && extras.doOpen !== undefined? 
+                            extras && extras.doOpen !== undefined?
                                 extras.doOpen:
                                 !data._isOpen;
               methods[doOpen?'open':'close'].call(this, data, extras);
             },
           isOpen: function(data/*, extras */){
-              return !!(data || data._isOpen);
+              return !!(data && data._isOpen);
             },
           isFickle: function (data) {
               return !!data;
@@ -234,7 +234,7 @@
                 .bind('focusin focusout', function (e) { // keeps track of whether the fickle element has focus. Determines whether .setFocus() is needed on `fickleopened` (see above)
                     data._gotFocus = e.type=='focusin';
                   });
-            
+
             // if cfg.fickle is set to false, the element becomes a very simple "open/close" window without any "fickly" properties to make it special.
             if (cfg.fickle)
             {
