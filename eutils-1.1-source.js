@@ -1,4 +1,3 @@
-// encoding: utf-8
 // ----------------------------------------------------------------------------------
 // Miscellaneous jQuery utilities collection v 1.1
 // ----------------------------------------------------------------------------------
@@ -10,7 +9,7 @@
 (function($, undefined){
 
   // depends on jQuery 1.3
-  
+
 /*
  TODO:
 
@@ -38,8 +37,9 @@
       // used by $.beget()
       _F = function(){},
 
-      _injectRegExpCache = {}, // used by $.inject(); to store regexp objects.
-      _RegExpEscape = function(s) { return s.replace(/([\\\^\$*+[\]?{}.=!:(|)])/g, '\\$1'); };
+      _injectRegExpCache = {}; // used by $.inject(); to store regexp objects.
+
+  RegExp.escape = RegExp.escape  ||  function(s) { return s.replace(/([\\\^\$*+\[\]?{}.=!:(|)])/g, '\\$1'); };
 
 
 
@@ -513,7 +513,7 @@
     },
 
     // encodes a plain-text string to a URL #fragment friendly format (compatible with .getFrag())
-    encodeFrag: function ( _fragment ) 
+    encodeFrag: function ( _fragment )
     {
       return encodeURI(_fragment).replace(/#/g, '%23').replace(/%7C/g, '|');
     },
@@ -676,7 +676,7 @@
         while (i--)
         {
           var _key = _keys[i],
-              re   = _injectRegExpCache[_key] || (_injectRegExpCache[_key] = new RegExp(_RegExpEscape('%{'+_key+'}'),'g')); // retieve the corresponding RegExp from the cache.
+              re   = _injectRegExpCache[_key] || (_injectRegExpCache[_key] = new RegExp(RegExp.escape('%{'+_key+'}'),'g')); // retieve the corresponding RegExp from the cache.
           _theString = _theString.replace(re, _vars[_key]);
         }
       }

@@ -24,8 +24,9 @@
       // used by $.beget()
       F = function(){},
 
-      _injectRegExpCache = {}, // used by $.inject(); to store regexp objects.
-      _RegExpEscape = function(s) { return s.replace(/([\\\^\$*+\[\]?{}.=!:(|)])/g, '\\$1'); };
+      _injectRegExpCache = {}; // used by $.inject(); to store regexp objects.
+
+  RegExp.escape = RegExp.escape  ||  function(s) { return s.replace(/([\\\^\$*+\[\]?{}.=!:(|)])/g, '\\$1'); };
 
 
 
@@ -766,7 +767,7 @@
         while (i--)
         {
           var _key = _keys[i],
-              re   = _injectRegExpCache[_key] || (_injectRegExpCache[_key] = new RegExp(_RegExpEscape('%{'+_key+'}'),'g')); // retieve the corresponding RegExp from the cache.
+              re   = _injectRegExpCache[_key] || (_injectRegExpCache[_key] = new RegExp(RegExp.escape('%{'+_key+'}'),'g')); // retieve the corresponding RegExp from the cache.
           _theString = _theString.replace(re, _vars[_key]);
         }
       }
