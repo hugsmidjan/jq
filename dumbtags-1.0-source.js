@@ -125,7 +125,7 @@
 
               addCurrentValue = function () {
                   var val = input.val();
-                  if ( !cfg.limitVocab  &&  val  &&  !input.autocomplete('widget').find('a.ui-state-hover')[0] )
+                  if ( !cfg.limitVocab  &&  val  &&  !input.autocomplete('widget').find('a.ui-state-hover,a.ui-state-focus')[0] )
                   {
                     val = $.trim( val.replace(/\s+/g, ' ') );
                     addItem({ value:val });
