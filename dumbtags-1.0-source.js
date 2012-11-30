@@ -93,7 +93,7 @@
                       activeTags.splice( pos , 1);
                     }
                     tagElm.remove();
-                    input.trigger('focus');
+                    !autoDelete  &&  input.trigger('focus');
                     // IDEA: trigger 'dumbTagRemoved' event  here!
                     return true;
                   }
@@ -121,6 +121,18 @@
                                    // saving that text as tag.
                     tagElm.trigger('dumbTagAdded');
                   }
+                },
+
+              addCurrentValue = function () {
+                  var val = input.val();
+                  if ( !cfg.limitVocab  &&  val  &&  !input.autocomplete('widget').find('a.ui-state-hover')[0] )
+                  {
+                    val = $.trim( val.replace(/\s+/g, ' ') );
+                    addItem({ value:val });
+                  }
+                  setTimeout(function(){
+                      input.autocomplete('close');
+                    }, 0);
                 },
 
               selectBox;
@@ -201,9 +213,9 @@
               .attr( 'autocomplete', 'off' ) // need to do this explictly because of the lazy deployment of the autocomplete functionality (otherwise first contact with the field has autocomplete="on"
               // make the `.tagswrap` respond to focus/blur like an input field
               .bind('focus', function (/*e*/) {
-                  $(this)
-                      .parent()
-                          .addClass( cfg.focusClass );
+                  clearTimeout( cfg.blurTimeout );
+                  $(this.parentNode)
+                      .addClass( cfg.focusClass );
                 })
               .one('focus', function (/*e*/) {
                   input
@@ -231,26 +243,18 @@
                           if ( e.which === 13/* ENTER */ )
                           {
                             e.preventDefault();
-                            if ( !cfg.limitVocab  &&  this.value  &&  !$(this).autocomplete('widget').find('a.ui-state-hover')[0] )
-                            {
-                              var val = $.trim( this.value.replace(/\s+/g, ' ') );
-                              addItem({ value:val });
-                            }
-                            var field = $(this);
-                            setTimeout(function(){
-                                field.autocomplete('close');
-                              }, 0);
+                            addCurrentValue();
                           }
                         })
                       .bind('blur', function (/*e*/) {
                           // add the current value on blur
-                          var fakeEnterEvent = jQuery.Event('keydown');
-                          fakeEnterEvent.which = 13; // enter
-                          $(this)
-                              .trigger(fakeEnterEvent)
-                              .val('')
-                              .parent()
-                                  .removeClass( cfg.focusClass );
+                          cfg.blurTimeout = setTimeout(function(){
+                              addCurrentValue();
+                              input
+                                  .val('')
+                                  .parent()
+                                      .removeClass( cfg.focusClass );
+                            }, 150);
                         });
                   if ( cfg.splitter )
                   {
@@ -259,10 +263,7 @@
                             if ( cfg.splitter.test( String.fromCharCode(e.which) ) )
                             {
                               e.preventDefault();
-                              var fakeEnterEvent = jQuery.Event('keydown');
-                              fakeEnterEvent.which = 13; // enter
-                              $(this)
-                                  .trigger(fakeEnterEvent);
+                              addCurrentValue();
                             }
                           });
                   }
@@ -358,7 +359,7 @@
                         .bind('autocompleteopen', function (/*e, ui*/) {
                             input.autocomplete('widget').width( input.parent().outerWidth() );
                           })
-                        // prevent focusing an item in the ac-menu updating the input field.
+                        // prevent focus-ing an item in the ac-menu updating the input field.
                         .bind('autocompletefocus', function (/*e, ui*/) {
                             return false;
                           })
