@@ -887,14 +887,15 @@ $.extend(avTypes, {
   fi_time:  function ( v, w, lang ) {
     if (v) {
       var error = $.av.getError( 'fi_time', lang );
-      if ( /^([01]?\d|2[01234])(:([0-5]\d))?(:([0-5]\d))?\s*([ap]\.?m\.?)?$/i.test( v ) ) {
-        var h = parseInt( RegExp.$1, 10 ),
-            m = parseInt( RegExp.$3 || '0', 10 ),
-            s = parseInt( RegExp.$5 || '0', 10 ),
-            t = (RegExp.$6 + '').replace('.', '').toLowerCase();
-        if (t == 'pm') { h += 12; }
-        var time = (h * 60 * 60) + (m * 60) + (s * 60);
-        return (time <= 86400) || error;
+      if ( /^([01]?\d|2[01234])(?:[:.]([0-5]\d))?(?:[:.]([0-5]\d))?\s*([ap]\.?m\.?)?$/i.test( v ) ) {
+        var h = RegExp.$1,
+            m = RegExp.$2 || '00',
+            s = RegExp.$3,
+            t = (RegExp.$4 + '').replace((/\./g, '').toLowerCase();
+        if (t == 'pm') { h = 1*h+12; }
+        var timeOK = (h*60*60 + m*60 + (s||0)*60) <= 86400;
+        timeOK  &&  $(this).val( h+':'+m+(s?':'+s:'')+t );
+        return timeOK || error;
       }
       else {
         return error;

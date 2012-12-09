@@ -1,4 +1,3 @@
-//encoding: utf-8
 !window.datePicker && (function($){
 
   var oldIe = $.browser.msie   &&  parseInt($.browser.version,10)<8,
@@ -29,7 +28,7 @@
       popBtnLong : 'Veldu dagsetningu',
       close      : 'Fela',
       closeLong  : 'Fela dagatalið',
-      prevM      : 'Fyrri', 
+      prevM      : 'Fyrri',
       prevMLong  : 'Fyrri mánuður',
       nextM      : 'Næsti',
       nextMLong  : 'Næsti mánuður',
@@ -102,11 +101,11 @@
         {
           var id = $.aquireId(_inpt),
               _classStr = "",
-              _elm = _inpt; 
+              _elm = _inpt;
           while (!/^(form|body)$/.test(_elm.tagName.toLowerCase()))
           {
             _classStr += " " + _elm.className;
-            _elm = _elm.parentNode; 
+            _elm = _elm.parentNode;
           }
           if (_classNameTriggers.test(_classStr+" "))
           {
@@ -191,7 +190,7 @@
         {
           var _mNames = this[this.fields[myId].lang].months;
           _tmpStr = _dateStr.substr(_fStart).toLowerCase();
-          
+
           for (var i = 0; i < _mNames.length; i++)
           {
             var _mName = _mNames[i].toLowerCase();
@@ -290,7 +289,6 @@
         + '</ul>'
       );
       _monthNav.find('.prev a').bind('click', function (e) {
-          ;;;window.console&&console.log( 'prev' );
           datePicker.flipCal(myId,-1,"m");
           e.preventDefault();
         });
@@ -406,7 +404,7 @@
 
           if (i == 1) { td.addClass('su'); }
           else if (i == 7) { td.addClass('sa'); }
-          
+
           tr.append(td);
         }
       }
@@ -441,12 +439,12 @@
       if (_myField.isOpen) { return false; }
 
       _myField.isOpen = true;
-      $(_myField._input.parentNode).append(_myField._calendar);
+      $(_myField._button).after(_myField._calendar);
       $('body').bind('click', this.delayedCloseAll);
     },
 
 
-    closeCalendar : function(myId) 
+    closeCalendar : function(myId)
     {
       var _myField = this.fields[myId];
       if (!_myField.isOpen) { return false; }
@@ -524,7 +522,7 @@
     {
       var _myField = this.fields[myId];
       var _theCal = _myField._calendar;
-      
+
       $(_theCal).find("h4").text( this.getMY(_myField.dateActive, _myField.lang) );
       $(_theCal).find("tbody").replaceWith( this.buildCalendarDays(myId) )
     },
@@ -626,7 +624,7 @@
       {
         _bDate = _boundry;
       }
-      
+
       if (!_bDate) { return null; }
 
       dd.y = _bDate.getFullYear();
@@ -668,7 +666,7 @@
           return false;
         });
 
-      $(this._input).parent().append(btn);
+      $(this._input).after(btn);
       this._button = btn;
 
 
