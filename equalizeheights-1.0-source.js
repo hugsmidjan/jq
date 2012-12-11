@@ -10,8 +10,8 @@
 (function($, idDataKey, undefined){
 
   var B = $.browser,
-      _msie8dn = !!B.msie  &&  parseInt(B.version, 10) < 9,
-      _msie6dn = _msie8dn  &&  ( parseInt(B.version, 10) < 7 || document.compatMode === 'BackCompat' ),
+      _msie7dn = !!B.msie  &&  parseInt(B.version, 10) < 8,
+      _msie6dn = _msie7dn  &&  ( parseInt(B.version, 10) < 7 || document.compatMode === 'BackCompat' ),
       _heightAttribute = (_msie6dn) ? 'height' : 'min-height',
       box_sizing = 'box-sizing',
       nextSetId = 0,
@@ -57,7 +57,9 @@
                       _marginHeight = (parseInt( _this.css('margin-top'), 10 ) || 0) +
                                       (parseInt( _this.css('margin-bottom'), 10 ) || 0);
                     }
-                    if ( !_msie8dn )
+                    // TODO: Read http://blog.jquery.com/2012/08/16/jquery-1-8-box-sizing-width-csswidth-and-outerwidth/
+                    // and figure out how we might use it in future point-versions of this plugin
+                    if ( !_msie7dn )
                     {
                       if ( _newJquery )
                       {
@@ -73,7 +75,7 @@
                         }
                       }
                     }
-                    _paddings[i] = ( _msie8dn  ||  _boxSizing!=='border-box' ) ?
+                    _paddings[i] = ( _msie7dn  ||  _boxSizing!=='border-box' ) ?
                                       _marginHeight + _totalHeight - _this.height():
                                       _marginHeight;
                     _maxHeight = Math.max( _totalHeight, _maxHeight );
