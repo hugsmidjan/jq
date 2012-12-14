@@ -82,7 +82,8 @@
         {
           pager.find('.prev').addClass('nav-end');
         }
-        else if (currentPos == imgCount - 1)
+
+        if (currentPos == imgCount - 1)
         {
           pager.find('.next').addClass('nav-end');
         }
