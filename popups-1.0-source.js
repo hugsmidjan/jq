@@ -56,7 +56,7 @@
           var _Elm = $(_elm);
           _Elm.data(dataKey, cfg);
 
-          if (cfg.markTitle  &&  _elm.tagName != 'FORM')
+          if (cfg.markTitle  &&  _elm.tagName !== 'FORM')
           {
             var _elmLang = ( $.lang && $.lang(_elm) ) || $('html').attr('lang')  || 'en';
             _elm.title = (_elm.title || _Elm.text() || _elm.value) +' '+ (cfg.titleSuffix[_elmLang] || cfg.titleSuffix.en);
@@ -94,7 +94,6 @@
 
 
   var dataKey  = 'pop'+(new Date()).getTime(),
-       i = 0,
 
       _pop = function (e) {
           if ( e.isDefaultPrevented  &&  !e.isDefaultPrevented() )
@@ -103,10 +102,19 @@
                 cfg = $(_elm).data(dataKey),
                 _target = _elm.target || cfg.target || uscore+blank;
 
-            if (cfg.url || _target.indexOf(uscore)!=0 )  // don't do window.open for targets '_blank', '_top', '_parent', '_self', etc.
+            if (cfg.url  ||  _target.indexOf(uscore) !== 0 )  // don't do window.open for targets '_blank', '_top', '_parent', '_self', etc.
             {                                             // ...since we're passing the event through (i.e. not stopping it w. `return false;`)
                                                           // if target starts with '_' all window settings are ignored.
-              var _newWin = (cfg.window || window).open(cfg.url || 'about:'+blank, _target, cfg._wSettings);
+              var _newWin,
+                  _win = cfg.window || window,
+                  _url = cfg.url || 'about:'+blank;
+              try { // try because sometimes browsers (read MSIE) throws error on named windows.
+                _newWin = _win.open(_url, _target, cfg._wSettings);
+              }
+              catch (ex) {
+                _newWin = _win.open(_url, null, cfg._wSettings);
+                _newWin.name = _target;
+              }
               setTimeout(function(){  $(_elm).trigger('popupsopen', [_newWin, cfg]);  }, 0);
               setTimeout(function(){  _newWin.focus();  }, 150);
             }
@@ -125,7 +133,7 @@
 
 
 
-      _popButton = function (e) {
+      _popButton = function (/*e*/) {
           var _Form = $(this.form),
               originalCfg = _Form.data(dataKey);
 
