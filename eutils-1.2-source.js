@@ -676,7 +676,9 @@
             var id = $(this).attr('href').substr(1);
             if ( id )
             {
-              $('#'+id).focusHere();
+              setTimeout(function(){
+                  $('#'+id).focusHere();
+                }, 0);
               e.preventDefault();
             }
           }
