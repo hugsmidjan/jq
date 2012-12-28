@@ -891,7 +891,7 @@ $.extend(avTypes, {
         var h = RegExp.$1,
             m = RegExp.$2 || '00',
             s = RegExp.$3,
-            t = (RegExp.$4 + '').replace((/\./g, '').toLowerCase();
+            t = (RegExp.$4 + '').replace(/\./g, '').toLowerCase();
         if (t == 'pm') { h = 1*h+12; }
         var timeOK = (h*60*60 + m*60 + (s||0)*60) <= 86400;
         timeOK  &&  $(this).val( h+':'+m+(s?':'+s:'')+t );
