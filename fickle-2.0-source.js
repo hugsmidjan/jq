@@ -182,7 +182,7 @@
               return data && data.c;
             },
           destroy: function (data) {
-              $(_document)
+              $(doc)
                   .off('focusin click', data._confirmFocusLeave)
                   .off('keydown', data._listenForEsc);
               this
