@@ -180,10 +180,11 @@
               if (type)
               {
                 var wrapper = link.wrap('<span class="videoblock" />').parent();
-                do {
-                  data.contElm = wrapper;
+                data.contElm = $(wrapper);
+                while ( data.contElm[0]  &&  data.contElm.css('display')==='inline' )
+                {
+                  data.contElm = $(data.contElm.parent());
                 }
-                while ( data.contElm.css('display')==='inline' );
                 wrapper
                     .data( 'playvideo_data', data )
                     .run(playVideo);
