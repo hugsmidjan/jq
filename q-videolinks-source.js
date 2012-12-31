@@ -36,21 +36,21 @@
         return Math.round(vdHeight);
       },
 
-      playVideo = function(e) {
+      playVideo = function(/*e*/) {
           var item = $(this),
               data = item.data('playvideo_data'),
               videoHref = data.videoHref,
               type = data.type,
-              vidWidth = data.vidWidth != 'auto' ? data.vidWidth : item.closest('div, p').width(),
+              vidWidth = data.vidWidth !== 'auto' ? data.vidWidth : data.contElm.width(),
               newWidth, // used for responsive
-              vidHeight = data.vidHeight != 'auto' ? data.vidHeight : calcHeight(vidWidth, data.aspect4x3),
+              vidHeight = data.vidHeight !== 'auto' ? data.vidHeight : calcHeight(vidWidth, data.aspect4x3),
               videoUrl,
               videoId,
               autoplay,
               playerHeight = 0,
               useIframe = false;
 
-          if ( type == 'youtube' || type == 'youtu' )
+          if ( type === 'youtube' || type === 'youtu' )
           {
             /*
               urls to handle:
@@ -60,14 +60,14 @@
               http://www.youtube.com/embed/nTasT5h0LEg
               http://youtu.be/nTasT5h0LEg
             */
-            videoId = type == 'youtube' ? videoHref.match(/(?:embed\/|watch\/?\?v=)([^&?\/]+)/i) : videoHref.match(/\.be\/(.+)$/);
+            videoId = type === 'youtube' ? videoHref.match(/(?:embed\/|watch\/?\?v=)([^&?\/]+)/i) : videoHref.match(/\.be\/(.+)$/);
             videoId = videoId && videoId[1];
             autoplay = data.autostart ? '&autoplay=1' : '';
             videoUrl = docLocPC + '//www.youtube.com/embed/' + videoId + '?rel=0' + autoplay;
             playerHeight = 30;
             useIframe = true;
           }
-          else if ( type == 'vimeo' )
+          else if ( type === 'vimeo' )
           {
             /*
               urls to handle:
@@ -82,7 +82,7 @@
             videoUrl = docLocPC + '//player.vimeo.com/video/'+ videoId +'?title=1&amp;byline=0&amp;portrait=0' + autoplay;
             useIframe = true;
           }
-          else if ( type == 'facebook' )
+          else if ( type === 'facebook' )
           {
             /*
               urls to handle:
@@ -97,7 +97,7 @@
             videoId = videoId && videoId[1];
             videoUrl = docLocPC + '//www.facebook.com/v/'+ videoId;
           }
-          else if ( type == 'file' )
+          else if ( type === 'file' )
           {
             autoplay = data.autostart ? '&autostart=true' : '';
             videoUrl = '/bitar/common/media/mediaplayer.swf?file=' + videoHref + autoplay;
@@ -126,14 +126,14 @@
 
           item.append('<span class="videocaption">'+  data.vidCapt +'</span>');
 
-          if (useIframe && data.vidWidth == 'auto')
+          if (useIframe && data.vidWidth === 'auto')
           {
-            $(window).on('resize', function (e) {
-                newWidth = item.closest('div, p').width();
-                if (newWidth != vidWidth)
+            $(window).on('resize', function (/*e*/) {
+                newWidth = data.contElm.width();
+                if (newWidth !== vidWidth)
                 {
                   vidWidth = newWidth;
-                  vidWidth = item.closest('div, p').width();
+                  vidWidth = data.contElm.width();
                   vidHeight = calcHeight(vidWidth, data.aspect4x3) + playerHeight;
                   item.find('iframe').attr('height',vidHeight).attr('width',vidWidth);
                 }
@@ -142,7 +142,7 @@
 
       }, // end fn
       docLocPC = document.location.protocol;
-  docLocPC = docLocPC == 'file:' ? 'http:' : docLocPC;
+  docLocPC = docLocPC === 'file:' ? 'http:' : docLocPC;
 
   $.fn.videoLinks = function ( cfg ) {
     var videoLinks = this;
@@ -179,9 +179,12 @@
 
               if (type)
               {
-                link
-                    .wrap('<span class="videoblock" />')
-                    .parent()
+                var wrapper = link.wrap('<span class="videoblock" />').parent();
+                do {
+                  data.contElm = wrapper;
+                }
+                while ( data.contElm.css('display')==='inline' );
+                wrapper
                     .data( 'playvideo_data', data )
                     .run(playVideo);
                 link.remove();
