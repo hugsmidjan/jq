@@ -591,10 +591,6 @@
   });
 
 })(jQuery);
-
-
-
-
 // Icelandic translation
 jQuery.av.lang.is = {
 
@@ -616,8 +612,6 @@ jQuery.av.lang.is = {
   fi_valuemismatch: 'Staðfesting stemmir ekki'
 
 };
-
-
 
 
 (function($){
@@ -697,7 +691,7 @@ $.extend(avTypes, {
       var ret = avTypes.fi_kt.call( this, v, w, lang );
       if ( ret === true )
       {
-        ret = typeof avTypes.fi_kt_einst.call( this, v, w, lang ) == 'string';
+        ret = typeof avTypes.fi_kt_einst.call( this, v, w, lang ) === 'string';
         if ( !ret )
         {
           ret = $.av.getError( 'fi_kt_fyrirt', lang );
@@ -711,7 +705,7 @@ $.extend(avTypes, {
   // ====[ internet & communication ]====
 
   fi_email:  function ( v, w, lang ) {
-    if (v && !/^[a-z0-9-._+]+@(?:[a-z0-9-_]+\.)+[a-z0-9-_]{2,99}$/i.test(v)) {
+    if (v && !/^[a-z0-9\-._+]+@(?:[a-z0-9\-_]+\.)+[a-z0-9\-_]{2,99}$/i.test(v)) {
       return $.av.getError( 'fi_email', lang );
     }
     return !!v;
@@ -725,7 +719,7 @@ $.extend(avTypes, {
         $(this).val(v);
       }
       if ( !/^[a-z]+:\/\/.+\..+$/.test( v ) ||
-           /[\(\)\<\>\,\"\[\]\\\s]/.test( v ) ) {
+           /[\(\)<\>\,\"\[\]\\\s]/.test( v ) ) {
         return $.av.getError( 'fi_url', lang );
       }
       return true;
@@ -734,16 +728,16 @@ $.extend(avTypes, {
   },
 
   // Returns true if valid telephone number (further development needed)
-  fi_tel:  function( v, w, lang ) {
+  fi_tel:  function( v, w/*, lang */) {
     if (v) {
       // This function simply removes all *legal* characters from the string
       // and then returns false if there are any left overs afterwards.
       var m = w.className.match(/(?:^| )fi_tel_min_(\d+)(?: |$)/);
       return  (
-                !v.replace( /(?:\s|[-+()]|\d)/g, '' )  &&
+                !v.replace( /(?:\s|[\-+()]|\d)/g, '' )  &&
                 ( !m  ||  m[1] <= v.replace( /\D/g, '' ).length )
-              )
-              || '';
+              ) ||
+              '';
     }
     return false;
   },
@@ -751,9 +745,9 @@ $.extend(avTypes, {
 
   // Returns true if it approximates an icelandic telephone number
   //  (with or without the +354 country code)
-  fi_tel_is:  function( v, w, lang ) {
+  fi_tel_is:  function( v/*, w, lang */) {
     if (v) {
-      return /^(?:\+354)?\d{7}$/.test( v.replace(/[ -()]/g, '') )  || '';
+      return (/^(?:\+354)?\d{7}$/).test( v.replace(/[ -()]/g, '') )  || '';
     }
     return false;
   },
@@ -768,7 +762,7 @@ $.extend(avTypes, {
       // have no DB -- fallback to a simple 3-digits test
       var codes = $.av.postCodes && $.av.postCodes.is;
       if (!codes) {
-        return /^\d\d\d$/.test( v ) || $.av.getError( 'fi_pnr', lang );
+        return (/^\d\d\d$/).test( v ) || $.av.getError( 'fi_pnr', lang );
       }
       // have DB and code is present in it --
       else if ( codes[v] ) {
@@ -800,9 +794,8 @@ $.extend(avTypes, {
   fi_pnrs:  function ( v, w, lang ) {
     if ( v ) {
       var pnrs = v.replace(/(^[ ,;]+|[ ,;]+$)/g,'').split(/[ ,;]+/);
-      var v, valid = false;
       for (var i=0; i < pnrs.length; i++) {
-        v = $.av.type['fi_postal_is']( pnrs[i], null, lang );
+        v = $.av.type.fi_postal_is( pnrs[i], null, lang );
         if (v !== true) {
         return v;  // passes error exception through
         }
@@ -818,14 +811,14 @@ $.extend(avTypes, {
   // ====[ numerics ]====
 
   // Returns true only on a positive integer value.
-  fi_qty:  function( v, w, lang ) {
+  fi_qty:  function( v/*, w, lang */) {
     $( this ).val( v );  // set field to trimmed value
     return !v || /^\d+$/.test(v) || '';
   },
 
   // Returns true only on any numeric value (floats, negative values, etc.).
-  fi_num:  function( v, w, lang ) {
-    var v = v.replace(/^-\s+/, '-').replace(/[,.]$/, '');
+  fi_num:  function( v/*, w, lang */) {
+    v = v.replace(/^-\s+/, '-').replace(/[,.]$/, '');
     $( this ).val( v );
     return !v || (/\d/.test(v) && /^-?\d*[.,]?\d*$/.test(v)) || '';
   },
@@ -854,7 +847,8 @@ $.extend(avTypes, {
       var error = $.av.getError( 'fi_year', lang );
 
       // has datepicker
-      if (window.datePicker && datePicker.VERSION < 2) {
+      var datePicker = window.datePicker;
+      if (datePicker && datePicker.VERSION < 2) {
         var _id = $.av.id( this ),
             _dateUI = datePicker.fields[_id];
         if ( _dateUI ) {
@@ -868,7 +862,7 @@ $.extend(avTypes, {
               v = v.toLowerCase();
               _dateStr = _dateStr.toLowerCase();
             }
-            return (_dateStr == v) || datePicker.printDateValue(new Date(2000,4,27), _dateUI.dateFormat, lang);
+            return (_dateStr === v) || datePicker.printDateValue(new Date(2000,4,27), _dateUI.dateFormat, lang);
           }
         }
       }
@@ -876,7 +870,7 @@ $.extend(avTypes, {
       // we can get to here if: we have no datepicker, we have datepicker but no config for this field
       v = v.replace(/[ .-\/]+/g, '.').replace(/\.(\d\d)$/, '.20$1');
       // $(this).val( v );
-      return /^(3[01]|[12]?[0-9]|(0)?[1-9])\.(1[012]|(0)?[1-9])\.(19|20)?\d\d$/.test(v) || error;
+      return (/^(3[01]|[12]?[0-9]|(0)?[1-9])\.(1[012]|(0)?[1-9])\.(19|20)?\d\d$/).test(v) || error;
 
     }
     return !!v;
@@ -887,12 +881,12 @@ $.extend(avTypes, {
   fi_time:  function ( v, w, lang ) {
     if (v) {
       var error = $.av.getError( 'fi_time', lang );
-      if ( /^([01]?\d|2[01234])(?:[:.]([0-5]\d))?(?:[:.]([0-5]\d))?\s*([ap]\.?m\.?)?$/i.test( v ) ) {
+      if ( (/^([01]?\d|2[01234])(?:[:.]([0-5]\d))?(?:[:.]([0-5]\d))?\s*([ap]\.?m\.?)?$/i).test( v ) ) {
         var h = RegExp.$1,
             m = RegExp.$2 || '00',
             s = RegExp.$3,
             t = (RegExp.$4 + '').replace(/\./g, '').toLowerCase();
-        if (t == 'pm') { h = 1*h+12; }
+        if (t === 'pm') { h = 1*h+12; }
         var timeOK = (h*60*60 + m*60 + (s||0)*60) <= 86400;
         timeOK  &&  $(this).val( h+':'+m+(s?':'+s:'')+t );
         return timeOK || error;
@@ -916,7 +910,7 @@ $.extend(avTypes, {
     var error = $.av.getError( 'fi_ccnum', lang );
     if (v) {
       // Strip out the optional space|dash delimiters
-      var ccNum = v.replace(/[ -]/g, '');
+      var ccNum = v.replace(/[ \-]/g, '');
       // make sure there are 16 digits (or 15 for AmEx cards (starting with 34 or 37))
       if ( !/^(\d{16}|3[47]\d{13})$/.test( ccNum ) ) {
         return error;
@@ -942,7 +936,7 @@ $.extend(avTypes, {
 
   // Fake AmEx number for testing: 341-2341-2341-2341
   fi_ccnum_noamex: function ( v, w, lang ) {
-    if (v && v.replace(/[ -]/g, '').length == 15 ) {
+    if (v && v.replace(/[ \-]/g, '').length === 15 ) {
       return $.av.getError( 'fi_ccnum_noamex', lang );
     }
     return !!v;
@@ -956,7 +950,7 @@ $.extend(avTypes, {
       // accept space and dash, and change them into "/". Then remove all spaces
       v = v.replace(/(\d\d)\s*[ -\/]?\s*(\d\d)/, '$1/$2').replace(/\s+/g, '');
       // ...then test against the pattern "mm/yy"
-      return /^(0\d|1[012])\/(\d\d)$/.test(v) || $.av.getError( 'fi_ccexp', lang );
+      return (/^(0\d|1[012])\/(\d\d)$/).test(v) || $.av.getError( 'fi_ccexp', lang );
     }
     return !!v;
   },
@@ -969,7 +963,7 @@ $.extend(avTypes, {
     {
       var allFields = $(this.form).find('.fi_txt>input,select,textarea'),
           pos = allFields.index(this),
-          prevVal = pos>0 ? allFields.eq( pos-1 ).val() : "";
+          prevVal = pos>0 ? allFields.eq( pos-1 ).val() : '';
       if ( prevVal  &&  v !== prevVal )
       {
         return $.av.getError('fi_valuemismatch', lang);
