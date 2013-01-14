@@ -1,12 +1,6 @@
 ;(function($) {
 
-/*
- * jQuery Color Animations
- * Copyright 2007 John Resig
- * Released under the MIT and GPL licenses.
- */
-
-// Imported from jQuery UI Effects 1.8.16 (and modified)
+// Imported from jQuery UI Effects 1.8.24 (and modified)
 
 // override the animation for color styles
 $.each(['backgroundColor', 'borderBottomColor', 'borderLeftColor',
@@ -72,7 +66,8 @@ function getColor(elem, attr) {
 		var color;
 
 		do {
-				color = $.curCSS(elem, attr);
+				// jQuery <1.4.3 uses curCSS, in 1.4.3 - 1.7.2 curCSS = css, 1.8+ only has css
+				color = ($.curCSS || $.css)(elem, attr);
 
 				// Keep going until we find an element that has color, or we hit the body
 				if ( color != '' && color != 'transparent' || $.nodeName(elem, "body") ) {
