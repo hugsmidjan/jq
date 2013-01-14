@@ -23,8 +23,8 @@
 
     Event Binding:
     --------------------------------------------------------------------------
-    (Should occur before running $.formatChange() to capture the initial event.
-    Otherwise you need to run $.formatChange(true); re-trigger the initial event.
+    (Should occur before running `$.formatChange()` to capture the initial event.
+    Otherwise you need to run `$.formatChange(true)` to re-trigger the initial event.
 
         jQuery(window)
             .on('formatchange', function (e, media) {
@@ -47,11 +47,13 @@
     (should normally happen after the Event binding - unless the event is Re-triggered later)
 
         var options = {
-              // Small and Large are named Format Categories that
+              // `Small` and `Large`  are named Format Categories that
               // can be used with the is|was|became|left methods.
-              // These can be overridden, deleted or renamed at will.
+              // These can be overridden, deleted or renamed, and new ones
+              // can be added at will.
                 Small: { 'narrow':1, 'mobile':1 },
                 Large: { 'tablet':1, 'desktop':1, 'wide':1 }
+                
               // Default config options:
                 $tagName: 'del',         // tagname for the generated hidden element
                 $elmId:   'mediaformat', // id for the generated element
@@ -76,10 +78,10 @@
     (media.lastFormat becomes undefined)
     (optional namespace gets added to the formatchange event trigger)
 
-        var forceEventTrigger = true; // <-- MUST be Boolean true
-        var optionalEventNamespace = 'myNamespace';
+        var forceEventTrigger = true; // <-- MUST be a Boolean true
+        var eventNamespace = 'myNamespace'; // optional limiter on which event handlers get triggered.
 
-        jQuery.formatChange( forceEventTrigger, optionalEventNamespace );
+        jQuery.formatChange( forceEventTrigger, eventNamespace );
 
 
 

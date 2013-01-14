@@ -46,12 +46,12 @@
                   var col = 0,
                       cells = $(this).children();
                   cells
-                      .each(function (i) {
+                      .each(function () {
                           var cell = $(this),
                               padWidth = cell.data('padWidth'),
                               span = (parseInt( cell.attr('colspan'), 10 ) || 1),
                               newOuterWidth = 0;
-                          if ( padWidth == undefined )
+                          if ( padWidth === undefined )
                           {
                             padWidth = cell.outerWidth() - cell.width();
                             cell.data( 'padWidth', padWidth );
@@ -90,7 +90,7 @@
                                         .append( original.is('thead') ? original.prevAll('caption').clone() : undefined )
                                         .append( clonedSection )
                                         .addClass( tagName+' '+(elmData._cloneClass) )
-                                        ['insert'+ (tagName=='thead' ? 'Before' : 'After') ]( elmData.tbWrap );
+                                        ['insert'+ (tagName==='thead' ? 'Before' : 'After') ]( elmData.tbWrap );
                                     var allElms = tableClone.find('*').andSelf();
                                     // reimplementation of the $.fn.uniquifyIds plugin
                                     // remove onclick attributes to pervent double triggers...
@@ -110,12 +110,12 @@
                                                       tableClone.find(selector+'="'+ orgId +'"]')
                                                           .attr( selector.split('[')[1], newId );
                                                     }
-                                                    
+
                                                   }
                                               );
                                           });
 
-                                    
+
                                     if ( elmData._hasEvAttrs )
                                     {
                                       // remove oneventtype attributes to pervent double triggers...
@@ -123,7 +123,7 @@
                                           allElms.removeAttr( 'on'+eventtype );
                                         });
                                     }
-                                            
+
                                     return tableClone[0];
                                   });
         },
@@ -136,7 +136,7 @@
               original = $(cloneElm).data( scrollTable+'-org' ),
               linage = [],
               elm = e.target;
-          while ( elm != cloneElm )
+          while ( elm !== cloneElm )
           {
             linage.unshift( elm.tagName.toLowerCase() + ':nth-child('+ ($(elm).index()+1) +')' );
             elm = elm.parentNode;
@@ -154,7 +154,7 @@
 
       scrollTables = [],
 
-      refreshColWidths = function (e) {
+      refreshColWidths = function (/*e*/) {
           var i = scrollTables.length;
           while (i--)
           {
@@ -181,12 +181,11 @@
 
   $.fn[scrollTable] = function (cfg, methodOpts) {
       // Capture method call
-      if ( cfg == 'refresh' )
+      if ( cfg === 'refresh' )
       {
         methodOpts = methodOpts || {};
         this.each(function () {
-            var table = $(this),
-                elmData = $(this).data( scrollTable );
+            var elmData = $(this).data( scrollTable );
             if ( methodOpts.reclone )
             {
               makeClones( elmData );
@@ -203,7 +202,7 @@
             .filter(function () {
                 return !$(this).data( scrollTable );
               })
-                .each(function (i) {
+                .each(function () {
                     var table = $( this ),
                         elmData = {
                             table:         table,
@@ -216,9 +215,9 @@
                           };
                     if ( cfg.wrap )
                     {
-                      elmData.wrap =  wrapElm = $( cfg.wrap )
-                                                    .data( scrollTable, elmData );
-                      elmData.tbWrap.wrap( wrapElm );
+                      elmData.wrap = $( cfg.wrap )
+                                        .data( scrollTable, elmData );
+                      elmData.tbWrap.wrap( elmData.wrap );
                     }
                     makeClones( elmData );
                     table

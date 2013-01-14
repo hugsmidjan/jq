@@ -147,5 +147,21 @@ document.body.innerHTML = '<pre>\'' + output.replace(/</g, '&lt;') + '\'</pre>';
 
   // ===========================================================
 
+Alternative names:
+
+    101;Reykjavík - Miðbær
+    103;Reykjavík - Kringlan/Hvassaleiti
+    104;Reykjavík - Vogar
+    105;Reykjavík - Austubær
+    107;Reykjavík - Vesturbær
+    108;Reykjavík - Austurbær
+    109;Reykjavík - Austurbær
+    110;Reykjavík - Bakkar/Seljahverfi
+    111;Reykjavík - Ábær/Selás
+    112;Reykjavík - Berg/Hólar/Fell
+    113;Reykjavík - Grafarvogur
+    116;Reykjavík - Grafarholt
+    121;Reykjavík - Kjalarnes
+
 
 */

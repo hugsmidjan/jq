@@ -53,12 +53,12 @@
             .addClass( cfg.className )
             .on('click', function (e) {
                 var targ = e.target;
-                if ( ( !cfg.modal  && 
-                        ( targ == this  ||  
-                          ( cfg.curtainSel  &&  targ == $(this).find(cfg.curtainSel)[0] )
+                if ( ( !cfg.modal  &&
+                        ( targ === this  ||
+                          ( cfg.curtainSel  &&  targ === $(this).find(cfg.curtainSel)[0] )
                         )
-                      )  ||  
-                      $(targ).closest(cfg.closebtnSel)[0] 
+                      )  ||
+                      $(targ).closest(cfg.closebtnSel)[0]
                     )
                 {
                   $(this).fickle('close');
@@ -120,7 +120,7 @@
         bodySel:     '.popbody',
         closebtnSel: '.closebtn'
       };
-    
+
     getModal.i18n = {
         dk: {
             closeT: 'Close popup',
