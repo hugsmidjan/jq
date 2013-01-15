@@ -1,7 +1,7 @@
 // ----------------------------------------------------------------------------------
 // jQuery.fn.makePageStyles v 1.0
 // ----------------------------------------------------------------------------------
-// (c) 2011 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+// (c) 2011-2012 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
 //  written by:
 //   * Már Örlygsson        -- http://mar.anomy.net
 // ----------------------------------------------------------------------------------
@@ -56,12 +56,17 @@
             toggleMode = function (e) {
                 if ( e )
                 {
+                  e.preventDefault();
+                  // toggle style cookie and refresh the page.
                   userstylesOn = !userstylesOn;
                   $.cookie('userstyles', (userstylesOn?'on':null), { path:cfg.cookiePath, expires:cfg.cookieExpires });
-                  e.preventDefault();
+                  $.reloadPage ?
+                      $.reloadPage():
+                      location.replace(location.href.split('#')[0]); // quick and dirty method
                 }
-                if ( userstylesOn )
+                else if ( userstylesOn )
                 {
+                  // turn userstyles on
                   menuFB
                       .before( menuUS )
                       .detach();
@@ -72,16 +77,8 @@
                           'media': cfg.userstyleMedia,
                           'href':  $('meta[name="X-UserstyleURL"]').attr('content')
                         });
+                  $('body').addClass('userstyles-on');
                 }
-                else if (e)
-                {
-                  menuUS
-                      .before( menuFB )
-                      .detach();
-                  $('link.userstylesheet').remove();
-                  $('link[rel="disabledstylesheet"]').attr('rel', 'stylesheet');
-                }
-                $('body').toggleClass('userstyles-on', userstylesOn);
               };
 
         makeItem('uon',  3, menuFB)

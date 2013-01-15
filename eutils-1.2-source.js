@@ -345,6 +345,24 @@
 
 
 
+
+    reloadPage: function (url) {
+        // juggling ?/& suffixes is neccessary to 100% guarantee a reload.
+        if ( !url || url===_location.href )
+        {
+          url = url || _location.href;
+          var blah =  !/\?/.test(url) ?
+                          '?':
+                      !/[&?](?:#|$)/.test(url) ?
+                          '&':
+                          '';
+          url = url.replace(/[&?]?(#.*)?$/, blah+'$1');
+        }
+        _location.replace( url );
+      },
+
+
+
     // Returns window.innerWidth in all browsers (fixes IE8/7 quirks)
     winWidth: function () {
         var de = _doc.documentElement;
