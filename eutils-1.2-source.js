@@ -661,8 +661,7 @@
       if (_elm)
       {
         _elm = $(_elm);
-        var tabindex = _elm.attr('tabindex');
-        if ( tabindex == undefined )
+        if ( _elm.attr('tabindex') == undefined )
         {
           _elm.attr('tabindex', -1);
         }
@@ -687,20 +686,22 @@
 
 
     // fixes this issue: http://terrillthompson.com/blog/161
-    fixSkiplinks: function (selector) {
-      $(document).delegate(selector||'a[href^="#"]', 'click', function (e) {
-          if ( !e.isDefaultPrevented() )
-          {
-            var id = $(this).attr('href').substr(1);
-            if ( id )
-            {
-              setTimeout(function(){
-                  $('#'+id).focusHere();
-                }, 0);
-              e.preventDefault();
-            }
-          }
-        });
+    // with this method:
+    //     http://www.nczonline.net/blog/2013/01/15/fixing-skip-to-content-links/
+    fixSkiplinks: function () {
+      $(document)
+          .off('hashchange.fixSkipLinks')
+          .on('hashchange.fixSkipLinks', function () {
+              var elm = $(_location.href.split('#'));
+              if (elm[0])
+              {
+                if ( elm.attr('tabindex') == undefined )
+                {
+                  _elm.attr('tabindex', -1);
+                }
+                elm.trigger('focus');
+              }
+            });
     },
 
 
