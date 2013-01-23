@@ -131,10 +131,10 @@
             };
 
           M = $.extend({
-                  is:     function (fmt) {  return checkFormat(fmt,M[format]);  },
-                  was:    function (fmt) {  return checkFormat(fmt,M[lastFormat]);  },
-                  became: function (fmt) {  return checkFormat(fmt,M[format])  &&  !checkFormat(fmt,M[lastFormat]);  },
-                  left:   function (fmt) {  return checkFormat(fmt,M[lastFormat])  &&  !checkFormat(fmt,M[format]);  }
+                  is:     function (fmt) {  return checkFormat(fmt,this[format]);  },
+                  was:    function (fmt) {  return checkFormat(fmt,this[lastFormat]);  },
+                  became: function (fmt) {  return checkFormat(fmt,this[format])  &&  !checkFormat(fmt,this[lastFormat]);  },
+                  left:   function (fmt) {  return checkFormat(fmt,this[lastFormat])  &&  !checkFormat(fmt,this[format]);  }
                 },
                 // TEMPORARY: mix triggerNS into the F object to support
                 // the DEPRICATED "extras" paramter for $.formatChange()
