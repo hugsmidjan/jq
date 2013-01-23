@@ -53,7 +53,7 @@
               // can be added at will.
                 Small: { 'narrow':1, 'mobile':1 },
                 Large: { 'tablet':1, 'desktop':1, 'wide':1 }
-                
+
               // Default config options:
                 $tagName: 'del',         // tagname for the generated hidden element
                 $elmId:   'mediaformat', // id for the generated element
@@ -149,16 +149,16 @@
 
           $(window).on(resize_formatchange, function (e, evOpts) {
               evOpts = evOpts || {};
-              var oldFormat = M[lastFormat] =
-                                  evOpts.force ? undefined : M[format],
-                  newFormat = M[format] =
-                                  ( (getComputedStyle && getComputedStyle( elm[0], cfg.$before?':before':':after' ).getPropertyValue('content')) ||
-                                    elm.css('font-family') )
-                                        // some browsers return a quoted strings.
-                                        .replace(/['"]/g,'');
+              var oldFormat = evOpts.force ? undefined : M[format],
+                  newFormat = ( (getComputedStyle && getComputedStyle( elm[0], cfg.$before?':before':':after' ).getPropertyValue('content')) ||
+                                elm.css('font-family') )
+                                    // some browsers return a quoted strings.
+                                    .replace(/['"]/g,'');
 
               if ( (newFormat !== oldFormat)  ||  evOpts.force )
               {
+                M[format] = newFormat;
+                M[lastFormat] = oldFormat;
                 $(window).trigger(
                     'formatchange'+(evOpts.ns||''),
                     [M, oldFormat] // TEMPORARY: `oldFormat` is temporarily left in for backwards compatibility
