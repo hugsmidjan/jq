@@ -149,19 +149,19 @@
 
           $(window).on(resize_formatchange, function (e, evOpts) {
               evOpts = evOpts || {};
-              var oldFormat = evOpts.force ? undefined : M[format],
-                  newFormat = ( (getComputedStyle && getComputedStyle( elm[0], cfg.$before?':before':':after' ).getPropertyValue('content')) ||
+              var tempM = {},
+                  oldFormat = tempM[lastFormat] = M[lastFormat] = evOpts.force ? undefined : M[format],
+                  newFormat = tempM[format] = M[format] = ( (getComputedStyle && getComputedStyle( elm[0], cfg.$before?':before':':after' ).getPropertyValue('content')) ||
                                 elm.css('font-family') )
                                     // some browsers return a quoted strings.
                                     .replace(/['"]/g,'');
 
               if ( (newFormat !== oldFormat)  ||  evOpts.force )
               {
-                M[format] = newFormat;
-                M[lastFormat] = oldFormat;
+                tempM = $.extend({}, M, tempM);
                 $(window).trigger(
                     'formatchange'+(evOpts.ns||''),
-                    [M, oldFormat] // TEMPORARY: `oldFormat` is temporarily left in for backwards compatibility
+                    [tempM, oldFormat] // TEMPORARY: `oldFormat` is temporarily left in for backwards compatibility
                   );
               }
             });
