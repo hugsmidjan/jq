@@ -519,12 +519,13 @@
         {
           dom = $(dom);
           dom.find('img').add( dom.filter('img') )
-              .attr('src', function () {
-                  var img = $(this),
-                      src = img.attr(attr);
-                  img.removeAttr(attr);
-                  return src;
-                });
+              .filter('['+attr+']')
+                  .each(function () {
+                      var img = $(this);
+                      img
+                          .attr( 'src', img.attr(attr) )
+                          .removeAttr( attr );
+                    });
         }
         return dom;
       },
@@ -697,7 +698,7 @@
               {
                 if ( elm.attr('tabindex') == undefined )
                 {
-                  _elm.attr('tabindex', -1);
+                  elm.attr('tabindex', -1);
                 }
                 elm.trigger('focus');
               }
