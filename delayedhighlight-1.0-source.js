@@ -1,8 +1,7 @@
-// encoding: utf-8
 // ----------------------------------------------------------------------------------
 // jQuery.fn.delayedHighlight v 1.0
 // ----------------------------------------------------------------------------------
-// (c) 2010 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+// (c) 2010-2013 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
 //  written by:
 //   * Már Örlygsson        -- http://mar.anomy.net
 // ----------------------------------------------------------------------------------
@@ -18,7 +17,7 @@
   Usage:
 
       jQuery('ul').delayedHighlight({
-          delegate:     'li',             // the elements to highlight ... 
+          delegate:     'li',             // the elements to highlight ...
                                           // Set `delegate` to `''` or `null` to highlight the collection itself.
           holes:        null,             // sub-selector for elements that should work as holes in the delegate element
           className:    'focused',        // for highlighted elements
@@ -49,6 +48,7 @@
       jQuery('ul')
           .delayedHighlight()
           .bind('beforehighlighton', function (e) {
+              // When applicable `e.fromTarget` points to the element that just turned off
               if ( $(e.target).is('.disabled') ) {
                 e.preventDefault();
               }
@@ -59,6 +59,7 @@
               }
             })
           .bind('highlighton', function (e) {
+              // When applicable `e.fromTarget` points to the element that just turned off
               $(e.target).prepend('<img class="icon" src="star.gif" alt=""/>');
             })
           .bind('highlightoff', function (e) {
@@ -92,9 +93,8 @@
           );
         var list = this,
             className =  cfg.className,
-            delegate =   !('delegate' in cfg) ? 'li' : cfg.delegate, // make sure the default doesn't override explicitly falsy cfg.delegate values 
+            delegate =   !('delegate' in cfg) ? 'li' : cfg.delegate, // make sure the default doesn't override explicitly falsy cfg.delegate values
             holes =      cfg.holes,
-            holeSelector = (delegate?delegate+' ':'')+holes,
             evPrefix =   'highlight',
             _mouseover_focusin = 'mouseover focusin',
             _mosueout_focusout = 'mouseout focusout',
@@ -108,7 +108,7 @@
         if ( cfg.noBubble )
         {
           list
-              .bind( evPrefix+'on '+evPrefix+'off', false ) // don't have the custom events bubble upwards from the list
+              .bind( evPrefix+'on '+evPrefix+'off', false ); // don't have the custom events bubble upwards from the list
         }
 
 
@@ -122,11 +122,14 @@
                   var item = $(this);
                   clrTimeout( inTimeout );
                   clrTimeout( outTimeout );
-                  (e.type.charAt(0)=='m')  &&  (currentHover = this);
+                  (e.type.charAt(0)==='m')  &&  (currentHover = this);
                   inTimeout = setTimeout(function(){
-                      if ( !activeItem  ||  item[0] != activeItem[0] )
+                      var activeElm = activeItem && activeItem[0],
+                          beforeEv;
+                      if ( item[0] !== activeElm )
                       {
-                        var beforeEv = jQuery.Event('before'+evPrefix+'on');
+                        beforeEv = jQuery.Event('before'+evPrefix+'on');
+                        beforeEv.fromTarget = activeElm;
                         item.trigger(beforeEv);
                         if ( !beforeEv[_isDefaultPrevented]() )
                         {
@@ -139,22 +142,22 @@
                           activeItem = item;
                           item
                               .addClass( className )
-                              .trigger( evPrefix+'on' );
+                              .trigger({ type:evPrefix+'on', fromTarget:activeElm });
                         }
                       }
-                    }, e.delayOut || cfg.delay);
+                    }, e.delayOut || cfg.delay );
                 }
               },
 
             highlightOff = function (e) {
-                var isClick = e.type=='click';
+                var isClick = e.type==='click';
                 clrTimeout( inTimeout );
                 clrTimeout( outTimeout );
                 if ( !cfg.sticky  ||  isClick )
                 {
-                  (e.type.charAt(0)=='m')  &&  (currentHover = undefined);
+                  (e.type.charAt(0)==='m')  &&  (currentHover = undefined);
                   outTimeout = setTimeout(function(){
-                      if ( activeItem  &&  activeItem[0] != currentHover  ||  isClick )
+                      if ( activeItem  &&  activeItem[0] !== currentHover  ||  isClick )
                       {
                         var beforeEv = jQuery.Event('before'+evPrefix+'off');
                         activeItem.trigger(beforeEv);
@@ -171,7 +174,7 @@
               },
 
             handleClick = function (e) {
-                var method = ( !activeItem  ||  this != activeItem[0] ) ?
+                var method = ( !activeItem  ||  this !== activeItem[0] ) ?
                                   highlightOn:
                               ( cfg.clickToggles  &&  !$(e.target).closest( cfg.cancelOff||'' )[0]  ) ?
                                   highlightOff:
