@@ -269,6 +269,10 @@
                     b.imgsrc =  (b.imgSelector  &&  $(b.imgSelector).attr(b.imgSrcAttr||'src'))  ||
                                 $('meta[property="og:image"]').attr('content')  || // fallback to using the open-graph image
                                 $('img').attr('src');
+                    if ( !/^(https?:)?\/\//.test(b.imgsrc) )
+                    {
+                      b.imgsrc = docLoc.protocol +'//'+ docLoc.host +'/'+ b.imgsrc.replace(/^\//,'');
+                    }
                   }
                 },
               $init: function (/* btn, cfg */) {
