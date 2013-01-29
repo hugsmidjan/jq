@@ -14,12 +14,12 @@
 
  ---------------------------------------------------------------------------
   NOTE TO THE FUTURE:
-  We considered the extensive use of linkElm.host, linkElm.hostname, 
+  We considered the extensive use of linkElm.host, linkElm.hostname,
   linkelm.port, linkElm.protocol, etc. to make checks faster.
   We then ran into the following problems:
-    * Opera (at least) reports linkElm.hostname as 'localhost' when 
+    * Opera (at least) reports linkElm.hostname as 'localhost' when
       other browsers report ''
-    * IE (6-8 at least) report linkElm.port on *all* urls with protocol 
+    * IE (6-8 at least) report linkElm.port on *all* urls with protocol
       set (i.e. http://www.foo.com/ has port==':80').
  ---------------------------------------------------------------------------
 
@@ -63,13 +63,14 @@
         localDomains = localDomains.concat(cfg.baseDomains);
 
         _locreg = new RegExp( '^([a-z]{3,12}):\/\/('+ localDomains.join('|').replace( /\./g,'\.' ).replace( /\\\./g, '.' ) + ')(/|$)', 'i' );
+        var tmpLinkElm = $('<a />').hide().appendTo('body')[0]; // fixes weird bug in MSIE 8-10 where some link elements don't report a protocol... sometimes... ack!
         while (i--)
         {
           var linkElm = links[i],
               link = $(linkElm),
-              _href = linkElm.href,
+              _href = tmpLinkElm.href = linkElm.href,
               _isExternal = 0,
-              _protocol = linkElm.protocol;
+              _protocol = tmpLinkElm.protocol;
 
           if (_protocol == 'mailto:') // mailto links
           {
@@ -126,6 +127,7 @@
           }
 
         } // end while
+        $(tmpLinkElm).detach();
 
       }
       return this;
@@ -134,7 +136,7 @@
 
   anchorTags.config = {
       baseDomains:   hostname ? [hostname+(port? ':'+port: '')] : [],
-      //usePatterns: ['pdf', 'doc', 'xsl'],  // list of keys to use from `$.fn.anchorTags.patterns` 
+      //usePatterns: ['pdf', 'doc', 'xsl'],  // list of keys to use from `$.fn.anchorTags.patterns`
                                              // `null`/`undefined` defaults to using all patterns.
     /*
       patterns:      {
