@@ -409,7 +409,7 @@
 
 
 
-    cssSupport: (function(div, vendors, i, cache, ret) {
+    cssSupport: (function(div, vendors, i, cache, ret, Prop) {
 
         return function(prop) {
 
@@ -424,16 +424,14 @@
                       prop in div.style || undefined;
             if ( ret===undefined )
             {
-              prop = prop.replace(/^[a-z]/, function(val) {
+              Prop = prop.replace(/^[a-z]/, function(val) {
                   return val.toUpperCase();
                 });
               i = vendors.length;
               while (i--)
               {
-                if ( vendors[i]+prop in div.style )
+                if ( vendors[i]+Prop in div.style )
                 {
-                  // browser supports box-shadow. Do what you need.
-                  // Or use a bang (!) to test if the browser doesn't.
                   ret = true;
                   break;
                 }
