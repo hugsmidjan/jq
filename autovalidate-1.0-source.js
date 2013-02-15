@@ -445,7 +445,7 @@
         // find controls that need validation
         var controls = context.is(':input') ? context : context.find(':input');
 
-        controls.not(conf.includeDisabled?'':':disabled').each(function(){
+        controls.not(conf.includeDisabled?'':':disabled').not(':submit,:reset,:button').each(function(){
 
           var control = $( this );
           control.removeData( 'av-malformed' );
