@@ -95,7 +95,13 @@
             className =  cfg.className,
             delegate =   !('delegate' in cfg) ? 'li' : cfg.delegate, // make sure the default doesn't override explicitly falsy cfg.delegate values
             holes =      cfg.holes,
+
             evPrefix =   'highlight',
+            onEvent =     evPrefix+'on',
+            offEvent =    evPrefix+'off',
+            befOnEvent =  'before'+onEvent,
+            befOffEvent = 'before'+offEvent,
+
             _mouseover_focusin = 'mouseover focusin',
             _mosueout_focusout = 'mouseout focusout',
             _isDefaultPrevented = 'isDefaultPrevented',
@@ -107,8 +113,12 @@
 
         if ( cfg.noBubble )
         {
+          // don't have the custom events bubble upwards from the list
           list
-              .bind( evPrefix+'on '+evPrefix+'off', false ); // don't have the custom events bubble upwards from the list
+              .bind(
+                  befOnEvent+' '+befOffEvent+' '+onEvent+' '+offEvent,
+                  function (e) {  e.stopPropagation();  }
+                );
         }
 
 
@@ -128,7 +138,7 @@
                           beforeEv;
                       if ( item[0] !== activeElm )
                       {
-                        beforeEv = jQuery.Event('before'+evPrefix+'on');
+                        beforeEv = jQuery.Event( befOnEvent );
                         beforeEv.fromTarget = activeElm;
                         item.trigger(beforeEv);
                         if ( !beforeEv[_isDefaultPrevented]() )
@@ -137,12 +147,13 @@
                           {
                             activeItem
                                 .removeClass( className )
-                                .trigger( evPrefix+'off' );
+                                // IDEA: shouldn't we trigger befOffEvent here!?
+                                .trigger( offEvent );
                           }
                           activeItem = item;
                           item
                               .addClass( className )
-                              .trigger({ type:evPrefix+'on', fromTarget:activeElm });
+                              .trigger({ type:onEvent, fromTarget:activeElm });
                         }
                       }
                     }, e.delayOut || cfg.delay );
@@ -159,13 +170,13 @@
                   outTimeout = setTimeout(function(){
                       if ( activeItem  &&  activeItem[0] !== currentHover  ||  isClick )
                       {
-                        var beforeEv = jQuery.Event('before'+evPrefix+'off');
+                        var beforeEv = jQuery.Event( befOffEvent );
                         activeItem.trigger(beforeEv);
                         if ( !beforeEv[_isDefaultPrevented]() )
                         {
                           activeItem
                               .removeClass( className )
-                              .trigger( evPrefix+'off' );
+                              .trigger( offEvent );
                           activeItem = undefined;
                         }
                       }

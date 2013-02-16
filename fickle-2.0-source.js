@@ -28,6 +28,7 @@
       closeDelay:  300,      // Specifies a "grace period" before a `focusout` causes a .fickle(`close`).
       startOpen:   false,    // Instantly shows and `open`s the fickle element.  No fadeIns or any fancy effects.
       silent:      false,    // when true, focus is not transferred on open/close.
+      bubble:      false,    // when true, custom open/close events bubble normally up the dom tree (causes problems with nested fickle objects.)
       opener:      element/collection/selector,  // the opener receives focus again when `fickleclosed` has been triggered.
 
       fadein:      0,        // ms fadeIn duration  -- shorthand for .on('fickleopen', function(){ $(this).fadeIn( fadeinMs ) });
@@ -203,6 +204,8 @@
           //trapFocus:   false,
           closeDelay:  300
           //startOpen:   false,
+          //silent:      false,
+          //bubble:      false,
           //opener:      element/collection/selector,
           //fadein:      0,
           //fadeout:     0,
@@ -244,9 +247,11 @@
             _this.data(_dataId)  &&  _this.fickle('destroy');
 
             // Bind onEvent handles specified in cfg.
-            $.each(['Open','Opened','Close','Closed'], function (i, type) {
-                var handler = cfg['on'+type];
-                handler  &&  _this.on( fickle+type.toLowerCase()+'.'+_dataId, handler );
+            $.each(['Open','Opened','Close','Closed'], function (i, Type) {
+                var type = fickle+Type.toLowerCase()+'.'+_dataId,
+                    handler = cfg['on'+Type];
+                !cfg.bubble  &&  _this.on( type, function(e){ e.stopPropagation(); });
+                handler  &&  _this.on( type, handler );
               });
 
             var data = {
