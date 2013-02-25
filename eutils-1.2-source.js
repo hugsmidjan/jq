@@ -751,9 +751,9 @@
     cropText: function (str, length, e)
     {
       e = e || ' ...';
-      if (length  &&  str.length >  length+e.length)
+      str = $.trim(str).replace(/\s+/g, ' ');
+      if ( length  &&  str.length > length+e.length )
       {
-        str = $.trim(str).replace(/\s+/g, ' ');
         var cache = $.cropText.re || ($.cropText.re = {}),
             hash = length +'~~'+e,
             re = cache[hash] || (cache[hash] = new RegExp('^(.{0,'+length+'})\\s.+$')),
