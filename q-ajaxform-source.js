@@ -1,4 +1,3 @@
-// encoding: utf-8
 // ----------------------------------------------------------------------------------
 // jQuery.fn.imgPopper v 1.0
 // ----------------------------------------------------------------------------------
@@ -19,10 +18,12 @@
   $.fn.ajaxForm = function () {
     return this.submit(function(e) {
 
-        if (!e.isDefaultPrevented()) {
+        if (!e.isDefaultPrevented())
+        {
           var theForm = $(this);
           theForm.trigger('beforeSubmit');
 
+          $('body').addClass('ajax-wait');
           $.get(
               theForm.attr('action'),
               theForm.serialize(),
@@ -39,8 +40,14 @@
                 theForm
                     .addClass('submitted')
                     .trigger('afterSubmit');
+
+                $('body').removeClass('ajax-wait');
               }
             );
+
+          setTimeout(function(){
+            $('body').removeClass('ajax-wait');
+          }, 1500);
 
           return false;
         }
