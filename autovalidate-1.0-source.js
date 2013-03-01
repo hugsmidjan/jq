@@ -112,10 +112,10 @@
           var id = input.attr('id');
           if (!labelData && id) {
             // label can take the following forms:
-            //   input.parents('form').find('label[for={id}]')
+            //   input.closest('form').find('label[for={id}]')
             //   input.parent('label')
             //   control.find('label').eq(0)
-            var l = input.parents('form').find('label[for='+id+']').text() ||
+            var l = input.closest('form').find('label[for='+id+']').text() ||
                     input.parent('label').text() ||
                     control.find('label').eq(0).text();
 
@@ -162,7 +162,7 @@
       config : function ( ctx, config ) {
 
         var context = $( ctx ),
-            form = $( context.filter('form')[0]  ||  context.parents('form')[0]  ||  context.find('form')[0] );
+            form = $( context.closest('form')[0]  ||  context.find('form')[0] );
 
         if ( config ) { // setting
           form.data( 'av-config', config );
@@ -187,7 +187,7 @@
         $.each(ctrllist, function(i){
 
           var ctrl = $( this );
-          var lang = ctrl.attr('lang') || ctrl.parents('[lang]').attr('lang');
+          var lang = ctrl.closest('[lang]').attr('lang');
 
           // my language?
           ctrl.attr( 'lang', lang );
@@ -209,7 +209,7 @@
       alertErrors : function ( ctrllist, contexts ) {
 
         var conf = $.av.config( ctrllist[0] );
-        var lang = $( ctrllist[0] ).attr('lang') || $( ctrllist[0] ).parents('[lang]').attr('lang');
+        var lang = $( ctrllist[0] ).closest('[lang]').attr('lang');
         $( ctrllist[0] ).attr( 'lang', lang );
 
         var missing   = [];
@@ -217,7 +217,7 @@
         var msg       = '';
 
         // sort through invalid inputs and build error messages
-        $.each(ctrllist, function(i){
+        $.each(ctrllist, function(){
 
           var ctrl  = $( this ),
               label = $.av.getLabel( ctrl, contexts, conf ),
@@ -260,7 +260,7 @@
         // find our current one
         var n = $.inArray( refNode, elms );
         // find next control that doesn't have tabindex -1
-        while (elms[++n] && elms[n].tabIndex == -1) {}
+        while (elms[++n] && elms[n].tabIndex === -1) {}
         // loop to first one if we have no target
         var felm = $( elms[n] || elms[0] );
         setTimeout(function () {
@@ -274,9 +274,9 @@
   });
 
   var _defaultCheck      = function ( v/*, w, lang */) { return !!v; },
-      _defaultToggleCheck = function ( v/*, w, lang */) {
+      _defaultToggleCheck = function (/* v, w, lang */) {
           var inp = $(this),
-              checked = inp.parents('form').find('input[name=' + inp.attr('name') + ']:checked');
+              checked = inp.closest('form').find('input[name=' + inp.attr('name') + ']:checked');
           return !!checked[0]  &&  // at least one must be :checked
                   // and if these are :radios, then the :checked must have a non-empty value
                   (!checked.is(':radio') || !!checked.filter(function () { return !!$(this).val(); })[0]);
@@ -285,13 +285,13 @@
   // space for types
   $.extend( $.av, {
     type: {
-      'fi_btn':  function ( v/*, w, lang */) { return true; }, // prevents nonsense requirements
-      'fi_txt':  _defaultCheck,
-      'fi_sel':  _defaultCheck,
-      'fi_bdy':  _defaultCheck,
-      'fi_file': _defaultCheck,
-      'fi_chk':  _defaultToggleCheck,
-      'fi_rdo':  _defaultToggleCheck
+      fi_btn:  function (/* v, w, lang */) { return true; }, // prevents nonsense requirements
+      fi_txt:  _defaultCheck,
+      fi_sel:  _defaultCheck,
+      fi_bdy:  _defaultCheck,
+      fi_file: _defaultCheck,
+      fi_chk:  _defaultToggleCheck,
+      fi_rdo:  _defaultToggleCheck
     }
   });
 
@@ -302,15 +302,14 @@
     // defangReset can may be run against any collection of elements to defang
     // them OR, in case of non reset buttons, turn them into reset buttons.
     defangReset : function () {
-      return this.bind('click', function(e){
+      return this.bind('click', function(/* e */){
           var btn = $( this );
-          var lang = btn.attr('lang') || btn.parents('[lang]').attr('lang') || 'en';
+          var lang = btn.closest('[lang]').attr('lang') || 'en';
           btn.attr( 'lang', lang );
           if ( confirm($.av.getText( 'resetAlert', lang )) ) {
             // call a reset function if this isn't an actual reset button
-            if (btn.attr('type') !== "reset") {
-              var form = btn.parents('form').get(0);
-              if (form) { form.trigger('reset'); }
+            if (btn.attr('type') !== 'reset') {
+              btn.closest('form').trigger('reset');
             }
             return true;  // accept the click
           }
@@ -322,7 +321,7 @@
     defangEnter : function () {
       return this.bind('keydown', function(e){
           var target = e.target;
-          return ( e.which != 13  ||  target.tagName != 'INPUT'  ||  /^(button|reset|submit)$/i.test(target.type) );
+          return ( e.which !== 13  ||  target.tagName !== 'INPUT'  ||  /^(button|reset|submit)$/i.test(target.type) );
         });
     },
 
@@ -333,7 +332,7 @@
       return this.each(function(){
 
         var context = $( this ),
-            form = $( context.filter('form')[0]  ||  context.parents('form')[0]  ||  context.find('form')[0] );
+            form = $( context.closest('form')[0]  ||  context.find('form')[0] );
         if (!form.length) { return false; }
 
         var conf = $.extend( {}, defaultConfig, config );
@@ -356,7 +355,7 @@
         // turn the enter key into tab for all inputs except textareas, and buttons
         if (conf.emulateTab) {
           form.bind('keydown', function(e){
-            if (e.keyCode == 13 &&
+            if (e.keyCode === 13 &&
                 $(e.target).is(':input:not(:button):not(:reset):not(:submit):not(textarea)')) {
               $.av.focusNext( e.target );
               return false;
@@ -370,19 +369,20 @@
             var t = $(e.target);
             var w = e.which;
             // only trigger with keycodes (not scancodes), and where keycode isn't backspace,tab,enter,
-            if ( (w > 0 && w != 8 && w != 9 && w != 13 && w != 16 && w != 17) &&
-                 t.attr('maxlength') == t.val().length ) {
+            if ( ( w > 0  &&  w!==8  &&  w!==9  &&  w!==13  &&  w!==16  &&  w!==17 ) &&
+                 t.attr('maxlength') === t.val().length ) {
               $.av.focusNext( e.target );
             }
           });
           // TODO: consider adding the reverse for backspace
         }
 
-
+/* delete?
         if (/blur|change/.test(conf.validateEachField)) {
           // $( this ).isValid();
           // what context should the validation be called on?
         }
+*/
 
         form.bind('submit', function(e){
             var f = $( this );
@@ -451,24 +451,26 @@
           control.removeData( 'av-malformed' );
 
           // get this control's types (defaulting to fi_txt for everything except checkboxes)
-          var tests =  (this.type == 'checkbox') ?
-                            { 'fi_chk' : $.av.type['fi_chk'] }:
-                        (this.type == 'radio') ?
-                            { 'fi_rdo' : $.av.type['fi_rdo'] }:
-                            { 'fi_txt' : $.av.type['fi_txt'] },
+          var tests =  (this.type === 'checkbox') ?
+                            { fi_chk: $.av.type.fi_chk }:
+                        (this.type === 'radio') ?
+                            { fi_rdo: $.av.type.fi_rdo }:
+                            { fi_txt: $.av.type.fi_txt },
 
-              wrap =      control.parents( '[class^="fi_"], [class*=" fi_"]' ).eq(0),  // jQuery 1.3 way: wrap.closest('[class^="fi_"], [class*=" fi_"]').attr('lang')
+              wrap =      control.closest('[class^="fi_"], [class*=" fi_"]'),
 
-              lang =      wrap.attr( 'lang' ) || wrap.parents( '[lang]' ).attr( 'lang' ),  // jQuery 1.3 way: wrap.closest('[lang]').attr('lang')
+              lang =      wrap.closest('[lang]').attr('lang'),
               required =  wrap.hasClass( conf.reqClassPattern ) || control.hasClass( conf.reqClassPattern );
 
           // purge wrapper of old error notifications
           wrap.removeClass( conf.reqErrorClass );
           wrap.removeClass( conf.typeErrorClass );
 
-          if (wrap.length !== 0) {
-            var c, cls = $.trim( wrap.attr('class') ).split(' ');
-            while (c = cls.pop()) {
+          if (wrap.length !== 0)
+          {
+            var c, cls = $.trim( wrap.attr('class') ).split(/\s+/);
+            while ( (c = cls.pop()) )
+            {
               if (/^fi_/.test(c) && $.isFunction( $.av.type[c] )) {
                 tests[c] = $.av.type[c];
               }
@@ -478,21 +480,23 @@
           // extra requirement check
           var name = control.attr('name'),
               reqchk = conf.customReqCheck && conf.customReqCheck[name];
-          if (reqchk && $.isFunction( reqchk )) {
+          if ( reqchk && $.isFunction( reqchk ) )
+          {
             required = reqchk.call( this,
                                     $.trim( control.val() ),
                                     wrap.get(0) || this,
                                     lang
                                   );
           }
-          else if (reqchk && typeof(reqchk) === 'string') {
+          else if (reqchk && typeof(reqchk) === 'string')
+          {
             var m = /^(!)?(.*)$/.exec(reqchk);
             var t = $(':input[name=' + m[2] + ']', this.form);  // use context rather than form?
             if (t.length)
             {
               required = t.is(':checkbox, :radio') ?
-                            !m[1] ^ !t.filter(':checked').length:
-                            !m[1] ^ (t.val() == '');
+                            !m[1] ^ !t.filter(':checked').length:  // ^ is XOR (either but not both)
+                            !m[1] ^ (t.val() === '');
             }
           }
 
@@ -526,7 +530,7 @@
               //var id = $.av.id( this );
 
               // returned value was: a string (error message / exception) or Object { inline:'...', alert:'...' }
-              var resIsString = typeof res == 'string';
+              var resIsString = typeof res === 'string';
               if ( res || resIsString) {
                 // Message should detail how to complete the field
 
@@ -538,7 +542,7 @@
                 }
                 contextInvalids.push( wrap.get(0) );
                 wrap.data( 'av-error', res );
-                wrap.data( 'av-error-short', (typeof shortErr == 'string' ? shortErr : res) );
+                wrap.data( 'av-error-short', (typeof shortErr === 'string' ? shortErr : res) );
 
                 // mark wrapper (or control) with error class
                 wrap.removeClass( conf.reqErrorClass );
@@ -591,6 +595,9 @@
   });
 
 })(jQuery);
+
+
+
 // Icelandic translation
 jQuery.av.lang.is = {
 
