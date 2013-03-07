@@ -1,12 +1,12 @@
 // Implement common tricks for mobile devices
 
-(function(win, doc, ua, addEv, qsa) {
+(function(win, doc, ua, addEv) {
 
   // fix orientation change zoom bug in Safari Mobile on iOS devices
   // based on: https://gist.github.com/901295
-  if (  /iPhone|iPad/.test(ua) && !/Opera Mini/.test(ua) /* && doc[qsa] */ ) {
+  if (  /iPhone|iPad/.test(ua) && !/Opera Mini/.test(ua) /* && doc[querySelectorAll] */ ) {
 
-    var meta = doc[qsa]('meta[name=viewport]');
+    var meta = doc.querySelectorAll('meta[name=viewport]');
     if ( meta[0] ) {
       var type = 'gesturestart',
           s = [1, 1],
@@ -24,7 +24,7 @@
     // http://stackoverflow.com/q/12670931/16271
     if (  /iPhone/.test(ua) ) {
       win[addEv]('orientationchange', function(){
-          var s = doc[qsa]('html')[0].style;
+          var s = doc.documentElement.style;
           s.display = 'none';
           setTimeout(function(){
               s.display = 'block';
@@ -70,7 +70,6 @@
   /* win =   */ window,
   /* doc =   */ document,
   /* ua =    */ navigator.userAgent,
-  /* addEV = */ 'addEventListener',
-  /* qsa =   */ 'querySelectorAll'
+  /* addEV = */ 'addEventListener'
 );
 
