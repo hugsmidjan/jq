@@ -104,7 +104,7 @@
           //countV:    false,
           //large:     false,
           //color:     dark,
-          url: $('link[rel="canonical"]').prop('href') || docLoc.href.split('#')[0]
+          url: $('link[rel="canonical"]').prop('href') || docLoc.href.split('#')[0].replace(/[?&]fb_action_ids=.+/,'')
         },
       countNone={ count:'none' },
       countVertical={ count:'vertical' },
