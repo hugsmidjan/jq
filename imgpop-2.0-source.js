@@ -97,7 +97,7 @@
 
         _imgPop
             .empty()
-            .append( $.imgPopper.getImage( _hrefElms[_idx] ) )
+            .append( $.imgPopper.getImage( _hrefElms.eq(_idx) ) )
             .append( _paging );
 
         _modal = $.getModal({
@@ -121,7 +121,7 @@
                   var atStart = !_idx,
                       atEnd = _idx===_hrefElms.length-1;
 
-                  _imgPop.find('.image').replaceWith( $.imgPopper.getImage( _hrefElms[_idx] ) );
+                  _imgPop.find('.image').replaceWith( $.imgPopper.getImage( _hrefElms.eq(_idx) ) );
                   _paging.find('li.prev').toggleClass( 'nav-end', atStart );
                   _paging.find('li.next').toggleClass( 'nav-end', atEnd );
                   _paging.find('b').text( _idx + 1  );
