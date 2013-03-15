@@ -97,7 +97,7 @@
 
         _imgPop
             .empty()
-            .append( $.imgPopper.getImage( _hrefElms, _idx ) )
+            .append( $.imgPopper.getImage( _hrefElms[_idx] ) )
             .append( _paging );
 
         _modal = $.getModal({
