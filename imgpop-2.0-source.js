@@ -20,8 +20,7 @@
 
     defaultConfig: {
         fadeInSpeed : 250, // set 1 for almost no animation
-        fadeOutSpeed : 200, // set 1 for almost no animation
-        setContainerWidth :0 //apply img outerwidth to the container-wrapper
+        fadeOutSpeed : 200 // set 1 for almost no animation
     },
 
     i18n: {
@@ -49,26 +48,20 @@
 
     pagingTempl : '<div class="status">' +
                     '<strong>%{imageText}</strong> ' +
-                    '<span><b>%{num}</b> %{ofTotalText} %{total}</span>' +
+                    '<span><b class="count">%{num}</b> %{ofTotalText} %{total}</span>' +
                   '</div>' +
                   '<ul class="stepper">' +
                     '<li class="next"><a href="#">%{nextText}</a></li>' +
                     '<li class="prev"><a href="#">%{prevText}</a></li>' +
                   '</ul>',
 
-    getImage : function( images, currentPos ) {
-      var curImg = images.eq(currentPos),
-          prevImg = new Image(),
-          nextImg = new Image();
-      prevImg.src = images.eq( currentPos - 1 ).attr('href'); // preload prev
-      nextImg.src = images.eq( currentPos + 1 ).attr('href'); // preload next
-
-      return $.inject($.imgPopper.imgTempl, {
-                              img   : curImg.attr('href'),
-                              alt   : curImg.find('img').attr('alt')   || '',
-                              title : curImg.find('img').attr('title') || ''
-                            });
-    }
+    getImage : function( linkElm ) {
+        return $.inject(this.imgTempl, {
+                    img   : linkElm.attr('href'),
+                    alt   : linkElm.find('img').attr('alt')   || '',
+                    title : linkElm.find('img').attr('title') || ''
+                  });
+      }
   };
 
   $.fn.imgPopper = function ( cfg ) {
@@ -97,7 +90,7 @@
                               nextText    : cfg.nextText,
                               prevText    : cfg.prevText,
                               total       : _hrefElms.length,
-                              num         : (_idx + 1)
+                              num         : _idx+1
                             })
               );
         _paging.find('b').text(_idx + 1  );
@@ -120,39 +113,39 @@
 
         _paging
             .delegate('li', 'click', function (e) {
-                if ( $(this).is('.next') )
+                var li = $(this);
+                if ( !li.is('.nav-end') )
                 {
-                  _idx = _idx != _hrefElms.length - 1 ? _idx + 1 : _idx;
-                }
-                else
-                {
-                  _idx = _idx != 0 ? _idx - 1 : _idx;
-                }
+                  var delta = li.is('.next') ? 1 : -1;
+                  _idx = Math.min( Math.max( 0, _idx+delta ), _hrefElms.length-1 );
+                  var atStart = !_idx,
+                      atEnd = _idx===_hrefElms.length-1;
 
-                _imgPop.find('.image').replaceWith( $.imgPopper.getImage( _hrefElms, _idx  ) );
-                _paging.find('b').text( _idx + 1  );
+                  _imgPop.find('.image').replaceWith( $.imgPopper.getImage( _hrefElms[_idx] ) );
+                  _paging.find('li.prev').toggleClass( 'nav-end', atStart );
+                  _paging.find('li.next').toggleClass( 'nav-end', atEnd );
+                  _paging.find('b').text( _idx + 1  );
+                  // preload ajacent images
+                  if (!atStart) { (new Image()).src = _hrefElms[_idx-1].href; }
+                  if (!atEnd)   { (new Image()).src = _hrefElms[_idx+1].href; }
+                }
                 e.preventDefault();
               });
 
         e.preventDefault();
       });
 
-    var keynav = function(e) {
-        var keycode = e.which;
-        if ( keycode == 27 ) // close on esc
-        {
-          _modal.fickle('close');
-        }
-        if ( keycode == 37 ) // prev image
-        {
-          _paging.find('.prev').trigger('click');
-        }
-        if ( keycode == 39 ) // next image
-        {
-          _paging.find('.next').trigger('click');
-        }
-      };
-    $(window).on('keyup', keynav);
+    $(window)
+        .on('keyup', function(e) {
+            var keycode = e.which;
+            keycode===27 ? // close on esc
+                _modal.fickle('close'):
+            keycode===37 ? // LEFT arrow == prev image
+                _paging.find('.prev').trigger('click'):
+            keycode===39 ? // RIGHT arrow == next image
+                _paging.find('.next').trigger('click'):
+                null;
+          });
 
     return this;
   };
