@@ -27,6 +27,7 @@
           noBubble:     false,            // set to `true` to prevent the custom events from bubbling upwards from the list container
           click:        false,            // allow clicks to set highlight on without delay
           clickToggles: false,            // true makes clicks toggle the highlight on/off/on/off/etc.
+          clickCancels: false,            // true makes clicks prevent the element to get highlighted  (useful for navigation menus with mega-menus)
           cancelOff:    'a, area, :input' // exceptions for click-triggered `highlightoff` when `clickToggles` is set
         });
 
@@ -101,6 +102,8 @@
             offEvent =    evPrefix+'off',
             befOnEvent =  'before'+onEvent,
             befOffEvent = 'before'+offEvent,
+
+            wasClicked = evPrefix+'-wasclicked',
 
             _mouseover_focusin = 'mouseover focusin',
             _mosueout_focusout = 'mouseout focusout',
@@ -191,24 +194,49 @@
                                   highlightOff:
                                   undefined;
                 method  &&  method.call( this, { type:'click', delayOut: 1 } );
+              },
+
+            cancelOnClick = function (/*e*/) {
+                if ( !activeItem  ||  this !== activeItem[0] )
+                {
+                  var item = $(this);
+                  item.data(wasClicked, true);
+                  clearTimeout(item.data(wasClicked+'to'));
+                  item.data(wasClicked+'to',
+                      setTimeout(function(){ item.removeData(wasClicked); }, cfg.delay)
+                    );
+                }
               };
 
 
-        if ( delegate )
+        delegate ?
+            list
+                .delegate(delegate, _mouseover_focusin, highlightOn)
+                .delegate(delegate, _mosueout_focusout, highlightOff):
+            list
+                .bind(_mouseover_focusin, highlightOn)
+                .bind(_mosueout_focusout, highlightOff);
+        if ( cfg.click )
         {
-          list
-              .delegate(delegate, _mouseover_focusin, highlightOn)
-              .delegate(delegate, _mosueout_focusout, highlightOff);
-          cfg.click  &&  list.delegate(delegate, 'click', handleClick);
+          delegate ?
+              list.delegate(delegate, 'click', handleClick):
+              list.bind('click', handleClick);
         }
-        else
+        else if ( cfg.clickCancels )
         {
+          delegate ?
+              list.delegate(delegate, 'click', cancelOnClick):
+              list.bind('click', cancelOnClick);
           list
-              .bind(_mouseover_focusin, highlightOn)
-              .bind(_mosueout_focusout, highlightOff);
-          cfg.click  &&  list.bind('click', handleClick);
+              .bind(befOnEvent, function (e) {
+                  var item = $(e.target);
+                  if ( item.data(wasClicked) )
+                  {
+                    e.preventDefault();
+                    item.removeData(wasClicked);
+                  }
+                });
         }
-
       }
 
       return this;
