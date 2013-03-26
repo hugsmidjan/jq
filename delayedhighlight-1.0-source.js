@@ -88,6 +88,7 @@
               //noBubble:     false,
               //click:        false,
               //clickToggles: false,
+              //clickCancels: false,
               cancelOff:    'a, area, :input'
             },
             cfg
