@@ -105,9 +105,16 @@
     checkFormat,
     M,
     elm,
+    F, // used by $.beget (if needed)
     undefined
 ){
   getComputedStyle = window.getComputedStyle;
+
+  $.beget = $.beget || (F=function(){}) && function (proto, props) { // prototypal inheritence under jquery
+      F.prototype = proto;
+      return props ? $.extend(new F(), props) : new F();
+    },
+
 
   $.formatChange = function (cfg, triggerNS ) {
 
@@ -149,19 +156,17 @@
 
           $(window).on(resize_formatchange, function (e, evOpts) {
               evOpts = evOpts || {};
-              var tempM = {},
-                  oldFormat = tempM[lastFormat] = M[lastFormat] = evOpts.force ? undefined : M[format],
-                  newFormat = tempM[format] = M[format] = ( (getComputedStyle && getComputedStyle( elm[0], cfg.$before?':before':':after' ).getPropertyValue('content')) ||
+              var oldFormat = M[lastFormat] = evOpts.force ? undefined : M[format],
+                  newFormat = M[format] = ( (getComputedStyle && getComputedStyle( elm[0], cfg.$before?':before':':after' ).getPropertyValue('content')) ||
                                 elm.css('font-family') )
                                     // some browsers return a quoted strings.
                                     .replace(/['"]/g,'');
 
               if ( (newFormat !== oldFormat)  ||  evOpts.force )
               {
-                tempM = $.extend({}, M, tempM);
                 $(window).trigger(
                     'formatchange'+(evOpts.ns||''),
-                    [tempM, oldFormat] // TEMPORARY: `oldFormat` is temporarily left in for backwards compatibility
+                    [$.beget(M), oldFormat] // TEMPORARY: `oldFormat` is temporarily left in for backwards compatibility
                   );
               }
             });
