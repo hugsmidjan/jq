@@ -1,7 +1,7 @@
 // ----------------------------------------------------------------------------------
 // Miscellaneous jQuery utilities collection v 1.2
 // ----------------------------------------------------------------------------------
-// (c) 2010-2012 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+// (c) 2010-2013 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
 //  written by:
 //   * Már Örlygsson        -- http://mar.anomy.net
 // ----------------------------------------------------------------------------------
@@ -344,6 +344,31 @@
     },
 
 
+
+    // returns a throttled function that never runs more than every `delay` seconds
+    throttleFn: function (func, skipFirst, delay) {
+        if ( typeof skipFirst === 'number' )
+        {
+          delay = skipFirst;
+          skipFirst = false;
+        }
+        delay = delay || 50;
+        var throttled = 0;
+        return function () {
+            var args = arguments;
+            if ( throttled===0 )
+            {
+              skipFirst ?
+                  throttled++:
+                  func.apply(func, args);
+              setTimeout(function(){
+                  throttled>1  &&  func.apply(func, args);
+                  throttled = 0;
+                }, delay);
+            }
+            throttled++;
+          };
+      },
 
 
     reloadPage: function (url) {
