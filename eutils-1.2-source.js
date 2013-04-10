@@ -300,7 +300,27 @@
     lang: function (returnFull)
     {
       return $.lang(this[0], returnFull);
+    },
+
+
+    // ensure 'load' event triggers for already loaded (cached) images
+    whenImageReady: function (eventHandler, noTriggering)
+    {
+      if ( eventHandler )
+      {
+        this.one('load.whenImageReady readystatechange.whenImageReady', function (e) {
+            // if ( e.type==='load'||this.readyState==='complete')
+            eventHandler.call(this, e);
+            $(this).off('.whenImageReady');
+          });
+      }
+      if ( !noTriggering )
+      {
+        this.each(function(){ this.src += ''; });
+      }
+      return this;
     }
+
 
   });
 
@@ -342,6 +362,7 @@
       }
       return obj ? $.extend(base, obj) : base;
     },
+
 
 
 
