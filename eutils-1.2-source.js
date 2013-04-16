@@ -309,14 +309,20 @@
       if ( eventHandler )
       {
         this.one('load.whenImageReady readystatechange.whenImageReady', function (e) {
-            // if ( e.type==='load'||this.readyState==='complete')
-            eventHandler.call(this, e);
-            $(this).off('.whenImageReady');
+            //if ( e.type==='load'||this.readyState==='complete')
+            //{
+              eventHandler.call(this, e);
+              $(this).off('.whenImageReady');
+            //}
           });
       }
       if ( !noTriggering )
       {
-        this.each(function(){ this.src += ''; });
+        this.each(function(){
+            var src = this.src;
+            this.src = 'about:blank';
+            this.src = src;
+          });
       }
       return this;
     }
