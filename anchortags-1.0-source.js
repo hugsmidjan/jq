@@ -118,7 +118,7 @@
               // internal/same-page fragment links
               if (!is.external && cfg.internalClass)
               {
-                _fragmReg = _fragmReg || new RegExp( '^(?:'+location.toString().replace(/^https?:/, 'https?:').split('#')[0].replace( /\./g,'\\.' )+')?#.', 'i' );
+                _fragmReg = _fragmReg || new RegExp( '^(?:'+location.toString().replace(/^https?:/, 'https?:').split('#')[0].replace(/([\\\^\$*+\[\]?{}.=!:(|)])/g, '\\$1')+')?#.', 'i' );
                 if ( _fragmReg.test(_href) )
                 {
                   link.addClass(cfg.internalClass);
