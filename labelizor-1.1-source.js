@@ -1,4 +1,3 @@
-// encoding: utf-8
 // ----------------------------------------------------------------------------------
 // jQuery.fn.labelizor v 1.1
 // ----------------------------------------------------------------------------------
@@ -7,7 +6,7 @@
 //   * Már Örlygsson             -- http://mar.anomy.net
 // ----------------------------------------------------------------------------------
 //
-// Requires jQuery 1.4+
+// Requires jQuery 1.8+
 
 (function ($) {
   var labelizor = 'labelizor',
@@ -15,8 +14,8 @@
 
   $.fn[labelizor] = function ( cfg, b ) {
 
-   var a = cfg && cfg.charAt ? cfg : '',    // <-- also support the old `$(':input').labelizor(hideClass, blurClass)` syntax
- 
+    var a = cfg && cfg.charAt ? cfg : '',    // <-- also support the old `$(':input').labelizor(hideClass, blurClass)` syntax
+
       cfg = $.extend({
           lRe:         /(\*|:[\W\S]*$)/g,     // pattern used to clean the <label> text.
           //lPlace:      '',                    // replacement text/pattern for cfg.lRe
@@ -71,7 +70,7 @@
                     .val('');
           };
 
-    this.filter(':text, :password, textarea')
+    this.filter('textarea, input:not(:checkbox,:radio,:submit,:button,:reset)')
         .each(function(){
             var fieldElm = this,
                 field = $(fieldElm),
@@ -90,7 +89,7 @@
               if ( _hideClass  ||  (_useLabel  &&  !(_labelText || _inpTitle)) )
               {
                 // NOTE: we only seek out <label> if we intend to either a) use _hideClass,
-                // or b) we don't have _labelText candidates already and want to _useLabel 
+                // or b) we don't have _labelText candidates already and want to _useLabel
                 _label = field.closest('label', form);
                 if ( !_label[0]  &&  fieldElm.id )
                 {
@@ -120,7 +119,7 @@
                 field
                     .data( labelizorlabel, _labelText);
                 form
-                    .bind('submit', _hideAllPlaceholders);
+                    .on('submit', _hideAllPlaceholders);
               }
               else if ( !_placeholder )
               {
@@ -134,8 +133,8 @@
                     .attr('title', _inpTitle||_labelText);
               }
               field
-                  .bind('focus', _hidePlaceholder)
-                  .bind('blur change', _showPlaceholder);
+                  .on('focus', _hidePlaceholder)
+                  .on('blur change', _showPlaceholder);
 
               _showPlaceholder.call( fieldElm, labelizor );
             }
