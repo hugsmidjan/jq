@@ -1,4 +1,3 @@
-// encoding: utf-8
 // ----------------------------------------------------------------------------------
 // jQuery.fn.expandTable v 1.0
 // ----------------------------------------------------------------------------------
@@ -11,7 +10,7 @@
 
 // usage:
 //   $('div.persona').expandTable( options );
-// 
+//
 (function($){
 
   // this method will be part of jQuery 1.3.3, so until then...
@@ -66,7 +65,7 @@
                       if (!subrow)
                       {
                         var colspan = 0;
-                        tr.children().each(function(){ colspan += this.colSpan||0; });
+                        tr.children().each(function(){ colspan += this.colSpan||1; });
 
                         subrow = $( cfg.subrowHtml.replace("%{colspan}", colspan) );
                         subrow.find(cfg.loadMsgSelector)
