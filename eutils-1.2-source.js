@@ -6,7 +6,7 @@
 //   * Már Örlygsson        -- http://mar.anomy.net
 // ----------------------------------------------------------------------------------
 
-(function($, undefined){
+(function($, document, undefined){
 
   // depends on jQuery 1.7
 
@@ -20,9 +20,6 @@
       _guidPrefix = 'tmp_' + (new Date()).getTime() + '_',
       // a counter that should be incremented with each use.
       _guid = 1,
-
-      // used by $.beget()
-      F = function(){},
 
       _injectRegExpCache = {}; // used by $.inject(); to store regexp objects.
 
@@ -111,14 +108,25 @@
         });
       return collection.pushStack(match);
     };
+  // different from the built-in jQuery 1.4 methods, because it (optionally) also collects textNodes as well as Elements
+  $.fn.extend({
+    nextUntil: function(expr, inclTextNodes) { return findUntil(this, expr, inclTextNodes); },
+    prevUntil: function(expr, inclTextNodes) { return findUntil(this, expr, inclTextNodes, 1); }
+  });
+
+
+
+
+
+  // Un-opinionated .show()
+  // simply removes style="display:none" and hands things over to the CSS
+  $.fn.unhide = function () {
+      return this.css('display', '');
+    };
+
 
 
   $.fn.extend({
-
-    // different from the built-in jQuery 1.4 methods, because it (optionally) also collects textNodes as well as Elements
-    nextUntil: function(expr, inclTextNodes) { return findUntil(this, expr, inclTextNodes); },
-    prevUntil: function(expr, inclTextNodes) { return findUntil(this, expr, inclTextNodes, 1); },
-
 
     // The method that officially does nothing! -
     // useful trick when you wish to conditionally do something in a chain... like
@@ -169,10 +177,6 @@
         return this;
       },
 
-
-    unhide: function () {
-        return this.css('display', '');
-      },
 
     pause: function (speed, callback)
     {
@@ -250,12 +254,6 @@
       return this;
     },
 
-    focusHere: function ()
-    {
-      $.focusHere(this[0]);
-      return this;
-    },
-
 
 
     // Yes this is strictly speaking completely redundant,
@@ -296,13 +294,6 @@
     },
 
 
-    // returns the lang="" value of the first item in the collection
-    lang: function (returnFull)
-    {
-      return $.lang(this[0], returnFull);
-    },
-
-
     // ensure 'load' event triggers for already loaded (cached) images
     whenImageReady: function (eventHandler, noTriggering)
     {
@@ -331,16 +322,130 @@
   });
 
 
-
-  $.extend({
-
-    // prototypal inheritence under jquery
-    beget: function (proto, props)
-    {
+  // Prototypal inheritance
+  $.beget = function (proto, props) {
+      var F = $.beget.F;
       F.prototype = proto;
       return props ? $.extend(new F(), props) : new F();
-    },
+    };
+  $.beget.F = function(){};
 
+
+
+
+  // Finds and returns the language of an element - caching the results on the element itself.
+  //
+  // Usage:
+  // jQuery.lang();          // returns the document language.
+  // jQuery.lang(true);      // returns full document language code. e.g. "en-uk"
+  // jQuery.lang(elm);       // returns the language of elm.
+  // jQuery.lang(elm, true); // returns full language code of elm. e.g. "en-uk"
+  // jQuery.lang( jQuery(elm) ); // returns the language of the *first* element in the jquery object/array.
+  //
+  $.lang = function (elm, returnFull) {
+      if ( typeof elm === 'boolean' )
+      {
+        returnFull = elm;
+        elm = null;
+      }
+      var lang = $(elm||'html').closest('[lang]').attr('lang') || '';
+      return lang ?
+                  (returnFull ? lang.substr(0,2) : lang).toLowerCase():
+                  null;
+    };
+  // returns the lang="" value of the first item in the collection
+  $.fn.lang = function (returnFull) {
+      return $.lang(this[0], returnFull);
+    };
+
+
+
+
+  // place keyboard focus on _elm - setting tabindex="" when needed
+  // and make sure any window scrolling is both sane and useful
+  $.focusHere = function (_elm) {
+      if (_elm)
+      {
+        _elm = $(_elm);
+        if ( _elm.attr('tabindex') == undefined )
+        {
+          _elm.attr('tabindex', -1);
+        }
+        // Make note of current scroll position
+        var doc = $(document),
+            _before = doc.scrollTop();
+
+        // Focus the element!
+        _elm.trigger('focus');
+
+        // Check for new scroll position
+        if ( doc.scrollTop() !== _before )  // if the browser jumped to the anchor...  (the browser only scrolls the page if the _focusElm was outside the viewport)
+        {
+          // ...then scroll the window to place the anchor at the top of the viewport.
+          // (NOTE: We do this because most browsers place the artificially .focus()ed link at the *bottom* of the viewport.)
+          var _newTop = $(_elm).offset().top - 30;
+          if (_newTop < 10) { _newTop = 0; }
+          doc.scrollTop(_newTop);
+        }
+      }
+    };
+  $.fn.focusHere = function () {
+      $.focusHere(this[0]);
+      return this;
+    };
+
+
+
+  // fixes this issue: http://terrillthompson.com/blog/161
+  // with this method:
+  //     http://www.nczonline.net/blog/2013/01/15/fixing-skip-to-content-links/
+  $.fixSkiplinks = function (evName) {
+      evName = 'hashchange.fixSkipLinks';
+      $(document)
+          .off(evName)
+          .on(evName, function () {
+              var elm = $(_location.href.split('#'));
+              if (elm[0])
+              {
+                if ( elm.attr('tabindex') == undefined )
+                {
+                  elm.attr('tabindex', -1);
+                }
+                elm.trigger('focus');
+              }
+            });
+    };
+
+
+
+  // returns a throttled function that never runs more than every `delay` seconds
+  $.throttleFn = function (func, skipFirst, delay) {
+      if ( typeof skipFirst === 'number' )
+      {
+        delay = skipFirst;
+        skipFirst = false;
+      }
+      delay = delay || 50;
+      var throttled = 0;
+      return function () {
+          var args = arguments;
+          if ( throttled===0 )
+          {
+            skipFirst ?
+                throttled++:
+                func.apply(func, args);
+            setTimeout(function(){
+                throttled>1  &&  func.apply(func, args);
+                throttled = 0;
+              }, delay);
+          }
+          throttled++;
+        };
+    };
+
+
+
+  $.extend({
 
     // Usage examples:
     // jQuery.namespace('foo.bar.baz');             // finds/builds the object `foo.bar.baz`.
@@ -369,33 +474,6 @@
       return obj ? $.extend(base, obj) : base;
     },
 
-
-
-
-    // returns a throttled function that never runs more than every `delay` seconds
-    throttleFn: function (func, skipFirst, delay) {
-        if ( typeof skipFirst === 'number' )
-        {
-          delay = skipFirst;
-          skipFirst = false;
-        }
-        delay = delay || 50;
-        var throttled = 0;
-        return function () {
-            var args = arguments;
-            if ( throttled===0 )
-            {
-              skipFirst ?
-                  throttled++:
-                  func.apply(func, args);
-              setTimeout(function(){
-                  throttled>1  &&  func.apply(func, args);
-                  throttled = 0;
-                }, delay);
-            }
-            throttled++;
-          };
-      },
 
 
     reloadPage: function (url) {
@@ -581,29 +659,6 @@
       },
 
 
-    // Finds and returns the language of an element - caching the results on the element itself.
-    //
-    // Usage:
-    // jQuery.lang();          // returns the document language.
-    // jQuery.lang(true);      // returns full document language code. e.g. "en-uk"
-    // jQuery.lang(elm);       // returns the language of elm.
-    // jQuery.lang(elm, true); // returns full language code of elm. e.g. "en-uk"
-    // jQuery.lang( jQuery(elm) ); // returns the language of the *first* element in the jquery object/array.
-    //
-    lang: function (elm, returnFull)
-    {
-      if ( typeof elm === 'boolean' )
-      {
-        returnFull = elm;
-        elm = null;
-      }
-      var lang = $(elm||'html').closest('[lang]').attr('lang') || '';
-      return lang ?
-                  (returnFull ? lang.substr(0,2) : lang).toLowerCase():
-                  null;
-    },
-
-
     // shorthand for $(document).scrollPos()
     scrollPos: function (x, y)
     {
@@ -705,55 +760,6 @@
       }
     },
 
-
-    // place keyboard focus on _elm - setting tabindex="" when needed - and make sure any window scrolling is both sane and useful
-    focusHere: function (_elm)
-    {
-      if (_elm)
-      {
-        _elm = $(_elm);
-        if ( _elm.attr('tabindex') == undefined )
-        {
-          _elm.attr('tabindex', -1);
-        }
-        // Make note of current scroll position
-        var doc = $(_doc),
-            _before = doc.scrollTop();
-
-        // Focus the element!
-        _elm.trigger('focus');
-
-        // Check for new scroll position
-        if ( doc.scrollTop() !== _before )  // if the browser jumped to the anchor...  (the browser only scrolls the page if the _focusElm was outside the viewport)
-        {
-          // ...then scroll the window to place the anchor at the top of the viewport.
-          // (NOTE: We do this because most browsers place the artificially .focus()ed link at the *bottom* of the viewport.)
-          var _newTop = $(_elm).offset().top - 30;
-          if (_newTop < 10) { _newTop = 0; }
-          doc.scrollTop(_newTop);
-        }
-      }
-    },
-
-
-    // fixes this issue: http://terrillthompson.com/blog/161
-    // with this method:
-    //     http://www.nczonline.net/blog/2013/01/15/fixing-skip-to-content-links/
-    fixSkiplinks: function () {
-      $(document)
-          .off('hashchange.fixSkipLinks')
-          .on('hashchange.fixSkipLinks', function () {
-              var elm = $(_location.href.split('#'));
-              if (elm[0])
-              {
-                if ( elm.attr('tabindex') == undefined )
-                {
-                  elm.attr('tabindex', -1);
-                }
-                elm.trigger('focus');
-              }
-            });
-    },
 
 
     // For people who hate parseInt()
@@ -858,4 +864,4 @@
   $.fn.scroll = $.fn.scrollPos;
 
 
-})(jQuery);
+})(jQuery, document);
