@@ -125,6 +125,33 @@
     };
 
 
+  // the reverse of $.fn.wrap()
+  // only works if the target element is in the DOM.
+  $.fn.zap = function () {
+      return this
+                .each(function(){
+                    this.parentNode  &&  $(this.childNodes).insertBefore(this);
+                  })
+                .remove();
+    };
+
+
+
+
+
+  $.fn.if_ = function (cond) {
+      if ($.isFunction(cond)) { cond = cond.call(this); }
+      this.if_CondMet = !!cond;
+      return this.pushStack(cond ? this : []);
+    };
+  $.fn.else_ = function (cond) {
+      var _this = this.end();
+      return _this.if_CondMet ?
+                  _this.pushStack([]):
+                  _this.if_(arguments.length ? cond : 1);
+    };
+
+
 
   $.fn.extend({
 
@@ -139,20 +166,6 @@
     //
     'null': function () {  return this;  },
 
-
-    if_: function (cond)
-    {
-      if ($.isFunction(cond)) { cond = cond.call(this); }
-      this.if_CondMet = !!cond;
-      return this.pushStack(cond ? this : []);
-    },
-    else_: function (cond)
-    {
-      var _this = this.end();
-      return _this.if_CondMet ?
-                  _this.pushStack([]):
-                  _this.if_(arguments.length ? cond : 1);
-    },
 
     // Clones the jQuery object and wipes out the it's `.prevObject` stack, and other instance-properties.
     // This allows the garbage collector to free up memory. (In some cases gobs of it!)
@@ -196,15 +209,6 @@
       return this;
     },
 
-
-    // the reverse of $.fn.wrap()
-    // only works if the target element is in the DOM.
-    zap: function ()
-    {
-      return this.each(function(){
-          this.parentNode  &&  $(this.childNodes).insertBefore(this);
-        }).remove();
-    },
 
 
     // Finds and returns a collection of the (first) deepest child element...
