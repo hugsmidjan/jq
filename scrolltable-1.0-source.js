@@ -24,6 +24,7 @@
 
       setColWidths = function ( elmData ) {
           var table = elmData.table,
+              tableWidth = table.width(),
               scrollbarWidth = elmData._init  &&  (elmData.tbWrap.width() - table.outerWidth()),
               tbCells = table.find('>tbody>tr:first>*') // select the children every time to allow for dynamic changes to the table
                             .css('width', ''),
@@ -41,6 +42,8 @@
                   $(this).width( oWidths[i] - padWidth );
                 });
           headandfoot.css( 'display', '' );
+          elmData.clones
+              .width(tableWidth + scrollbarWidth);
           elmData.clones.find('>*>tr') // select the children every time to allow for dynamic changes to the table
               .each(function () {
                   var col = 0,
@@ -91,9 +94,8 @@
                                         .append( clonedSection )
                                         .addClass( tagName+' '+(elmData._cloneClass) )
                                         ['insert'+ (tagName==='thead' ? 'Before' : 'After') ]( elmData.tbWrap );
-                                    var allElms = tableClone.find('*').andSelf();
+                                    var allElms = tableClone.find('*').add(tableClone);
                                     // reimplementation of the $.fn.uniquifyIds plugin
-                                    // remove onclick attributes to pervent double triggers...
                                     allElms.filter('[id]')
                                         .each(function () {
                                             var orgId = this.id,
@@ -166,7 +168,7 @@
               // Anyways, let's remove it from future loops.
               scrollTables = scrollTables.splice( i, 1 );
             }
-            else if ( table.closest( 'html' )[0] ) // don't bother if table is .detach()ed from the dom.
+            else if ( table.is('html *') ) // don't bother if table is .detach()ed from the dom.
             {
               setColWidths( elmData );
             }
@@ -184,14 +186,16 @@
       if ( cfg === 'refresh' )
       {
         methodOpts = methodOpts || {};
-        this.each(function () {
-            var elmData = $(this).data( scrollTable );
-            if ( methodOpts.reclone )
+        this.each(function (elmData) {
+            if (elmData = $(this).data( scrollTable ))
             {
-              makeClones( elmData );
-              elmData._init = 1;
+              if ( methodOpts.reclone )
+              {
+                makeClones( elmData );
+                elmData._init = 1;
+              }
+              setColWidths( elmData );
             }
-            elmData  &&  setColWidths( elmData );
           });
       }
       else // default to initialization
@@ -206,7 +210,7 @@
                     var table = $( this ),
                         elmData = {
                             table:         table,
-                            tbWrap:        $( table.wrap( cfg.tbWrap||'<div class="tbody"/>' ).parent() ),
+                            tbWrap:        $( table.wrap( cfg.tbWrap ).parent() ),
                             _cloneClass:   cfg.cloneClass,
                             _proxyEvents:  cfg.proxyEvents,
                             _proxyEvProps: cfg.proxyEvProps.split(/\s*,\s*/),
@@ -225,7 +229,7 @@
                         .data( scrollTable, elmData );
                     setColWidths( elmData );
                     scrollTables.push( table );
-                    $( window ).bind( 'resize', refreshColWidths);
+                    $(window).bind( 'resize', refreshColWidths);
                   });
       }
         return this;
@@ -236,7 +240,7 @@
       proxyEvents: 'click focusin focusout mouseup mousedown',  // Event types that are automatically proxied from the cloned to the actual (but hidden) table sections
       proxyEvProps: 'pageX pageY which',          // Event object properties that get proxied
       wrap:        '<div class="scrollable" />',  // Wrapper element around the table and it's clones. may be disabled
-      //tbWrap:      '<div class="tbody"/>',        // The element that has the scrollbar. Required
+      tbWrap:      '<div class="tbody"/>',        // The element that has the scrollbar. Required
       cloneClass:  'screen-only'                  // extra className that gets added to the cloned tables.
     };
 
