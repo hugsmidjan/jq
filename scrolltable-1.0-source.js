@@ -9,7 +9,6 @@
 //
 // Requires:
 //  * jQuery 1.4
-//  * $.fn.aquireId() (eutils 1.1)
 //
 // TODO:
 //   * `destroy` method to un-wrap the table and return it to it's original state.
@@ -99,7 +98,7 @@
                                     allElms.filter('[id]')
                                         .each(function () {
                                             var orgId = this.id,
-                                                newId = $.aquireId( orgId ),
+                                                newId = orgId + (Math.random()+'').substr(2),
                                                 elm = $(this).attr( 'id', newId );
                                             $.each(
                                                 {
