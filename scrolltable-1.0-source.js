@@ -18,23 +18,23 @@
 //
 (function($, undefined){
 
-
   var scrollTable = 'scrollTable',
 
       setColWidths = function ( elmData ) {
           var table = elmData.table,
-              tableWidth = table.width(),
               scrollbarWidth = elmData._init  &&  Math.max(0, elmData.tbWrap.width() - table.outerWidth()),
               tbCells = table.find('>tbody>tr:first>*') // select the children every time to allow for dynamic changes to the table
                             .css('width', ''),
               headandfoot = table.find('>thead,>tfoot').show(),
               iWidths = [],
-              oWidths = [];
+              oWidths = [],
+              tableWidth = 0;
           tbCells
               .each(function (i) {
                   var cell = $(this);
                   oWidths[i] = cell.outerWidth();
                   iWidths[i] = cell.width();
+                  tableWidth += oWidths[i];
                 })
               .each(function (i) {
                   var padWidth = oWidths[i] - iWidths[i];
@@ -42,7 +42,7 @@
                 });
           headandfoot.css( 'display', '' );
           elmData.clones
-              .width(tableWidth + scrollbarWidth);
+              .width(tableWidth);
           elmData.clones.find('>*>tr') // select the children every time to allow for dynamic changes to the table
               .each(function () {
                   var col = 0,
