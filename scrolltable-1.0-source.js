@@ -24,7 +24,7 @@
       setColWidths = function ( elmData ) {
           var table = elmData.table,
               tableWidth = table.width(),
-              scrollbarWidth = elmData._init  &&  (elmData.tbWrap.width() - table.outerWidth()),
+              scrollbarWidth = elmData._init  &&  Math.max(0, elmData.tbWrap.width() - table.outerWidth()),
               tbCells = table.find('>tbody>tr:first>*') // select the children every time to allow for dynamic changes to the table
                             .css('width', ''),
               headandfoot = table.find('>thead,>tfoot').show(),
