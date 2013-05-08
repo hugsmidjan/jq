@@ -1,14 +1,13 @@
 // ----------------------------------------------------------------------------------
-// jQuery.fn.scrollTable v 1.0
+// jQuery.fn.scrollTable v 1.1
 // ----------------------------------------------------------------------------------
-// (c) 2010 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+// (c) 2010-2013 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
 //  written by:
 //   * Már Örlygsson        -- http://mar.anomy.net
 // ----------------------------------------------------------------------------------
 //
 // Requires:
-//  * jQuery 1.4
-//  * $.fn.aquireId() (eutils 1.1)
+//  * jQuery 1.8
 //
 // TODO:
 //   * `destroy` method to un-wrap the table and return it to it's original state.
@@ -18,60 +17,84 @@
 //
 (function($, undefined){
 
-
   var scrollTable = 'scrollTable',
 
       setColWidths = function ( elmData ) {
-          var table = elmData.table,
-              scrollbarWidth = elmData._init  &&  (elmData.tbWrap.width() - table.outerWidth()),
-              tbCells = table.find('>tbody>tr:first>*') // select the children every time to allow for dynamic changes to the table
-                            .css('width', ''),
-              headandfoot = table.find('>thead,>tfoot').show(),
-              iWidths = [],
-              oWidths = [];
-          tbCells
-              .each(function (i) {
-                  var cell = $(this);
-                  oWidths[i] = cell.outerWidth();
-                  iWidths[i] = cell.width();
-                })
-              .each(function (i) {
-                  var padWidth = oWidths[i] - iWidths[i];
-                  $(this).width( oWidths[i] - padWidth );
-                });
-          headandfoot.css( 'display', '' );
-          elmData.clones.find('>*>tr') // select the children every time to allow for dynamic changes to the table
-              .each(function () {
-                  var col = 0,
-                      cells = $(this).children();
-                  cells
-                      .each(function (i) {
-                          var cell = $(this),
-                              padWidth = cell.data('padWidth'),
-                              span = (parseInt( cell.attr('colspan'), 10 ) || 1),
-                              newOuterWidth = 0;
-                          if ( padWidth == undefined )
-                          {
-                            padWidth = cell.outerWidth() - cell.width();
-                            cell.data( 'padWidth', padWidth );
-                          }
-                          while ( span-- )
-                          {
-                            newOuterWidth += oWidths[ col++ ];
-                          }
-                          cell.width( newOuterWidth - padWidth );
-                        });
-
-                  if ( elmData._init )
-                  {
-                    cells.last()
-                        .css( 'padding-right', function (i, pRight) {
-                            return parseInt( pRight, 10 ) + scrollbarWidth;
+          var table = elmData.table;
+          if ( table.is(':visible') )
+          {
+            var tbCells = table.find('>tbody>tr:first>*') // select the children every time to allow for dynamic changes to the table
+                              .css('width', ''),
+                headandfoot = table.find('>thead,>tfoot').show(),
+                iWidths = [],
+                oWidths = [];
+            if (elmData._init)
+            {
+              elmData._scrlBW = elmData.tbWrap ?
+                                    Math.max(0, elmData.tbWrap.width() - parseInt(table.css('width'),10)):
+                                    0;
+            }
+            table
+                .css('width', '')
+                .css('table-layout', '');
+            tbCells
+                .each(function (i) {
+                    var cell = $(this);
+                    oWidths[i] = cell.outerWidth();
+                    iWidths[i] = cell.width();
+                  });
+            tbCells
+                .each(function (i) {
+                    $(this).width( iWidths[i] );
+                  });
+            var tWidth = parseInt(table.css('width'),10);
+            table
+                .css('width', tWidth)
+                .css('table-layout', 'fixed');
+            headandfoot.css( 'display', '' ); // negate .show() above
+            elmData.clones
+                .css('table-layout', '');
+            elmData.clones.find('>*>tr') // select the children every time to allow for dynamic changes to the table
+                .each(function () {
+                    var col = 0,
+                        cells = $(this).children(),
+                        lastIdx = cells.length - 1;
+                    if ( elmData._init && elmData._scrlBW )
+                    {
+                      cells.last()
+                          .css( 'padding-right', function (i, pRight) {
+                              return parseInt( pRight, 10 ) + elmData._scrlBW;
+                            });
+                    }
+                    cells
+                        .each(function (cellIdx) {
+                            var cell = $(this),
+                                //padWidth = cell.data('padWidth'),
+                                span = (parseInt( cell.attr('colspan'), 10 ) || 1),
+                                newOuterWidth = 0;
+                            //if ( padWidth === undefined )
+                            //{
+                              padWidth = cell.outerWidth() - cell.width();
+                              //cell.data( 'padWidth', padWidth );
+                            //}
+                            while ( span-- )
+                            {
+                              newOuterWidth += oWidths[ col++ ];
+                            }
+                            cell.width( newOuterWidth - padWidth
+                                        + (cellIdx===lastIdx ? elmData._scrlBW : 0) );
                           });
-                  }
-               });
-          elmData._init = undefined;
+
+                 });
+            elmData.clones
+                .css('width', tWidth + elmData._scrlBW)
+                .css('table-layout', 'fixed');
+            elmData._init = undefined;
+          }
+
         },
+
+
 
       makeClones = function ( elmData ) {
           var table = elmData.table;
@@ -85,18 +108,18 @@
                                         tableClone = $( table[0].cloneNode(false) );
                                     elmData._proxyEvents  &&  clonedSection.bind( elmData._proxyEvents, elmData, proxyEvents);
                                     tableClone
+                                        .css('table-layout', 'fixed')
                                         .attr( 'summary', 'Skip this table - it\'s for layout purposes only' )
                                         .append( original.is('thead') ? original.prevAll('caption').clone() : undefined )
                                         .append( clonedSection )
                                         .addClass( tagName+' '+(elmData._cloneClass) )
-                                        ['insert'+ (tagName=='thead' ? 'Before' : 'After') ]( elmData.tbWrap );
-                                    var allElms = tableClone.find('*').andSelf();
+                                        ['insert'+ (tagName==='thead' ? 'Before' : 'After') ]( elmData.tbWrap || table );
+                                    var allElms = tableClone.find('*').add(tableClone);
                                     // reimplementation of the $.fn.uniquifyIds plugin
-                                    // remove onclick attributes to pervent double triggers...
                                     allElms.filter('[id]')
                                         .each(function () {
                                             var orgId = this.id,
-                                                newId = $.aquireId( orgId ),
+                                                newId = orgId + (Math.random()+'').substr(2),
                                                 elm = $(this).attr( 'id', newId );
                                             $.each(
                                                 {
@@ -135,7 +158,7 @@
               original = $(cloneElm).data( scrollTable+'-org' ),
               linage = [],
               elm = e.target;
-          while ( elm != cloneElm )
+          while ( elm !== cloneElm )
           {
             linage.unshift( elm.tagName.toLowerCase() + ':nth-child('+ ($(elm).index()+1) +')' );
             elm = elm.parentNode;
@@ -153,7 +176,20 @@
 
       scrollTables = [],
 
-      refreshColWidths = function (e) {
+      refreshTimeout,
+      throttledRefreshColWidths = function (/*e*/) {
+          if ( refreshTimeout )
+          {
+            clearTimeout(refreshTimeout);
+            refreshTimeout = setTimeout(refreshColWidths, 75);
+          }
+          else
+          {
+            refreshColWidths();
+          }
+        },
+
+      refreshColWidths = function () {
           var i = scrollTables.length;
           while (i--)
           {
@@ -165,34 +201,28 @@
               // Anyways, let's remove it from future loops.
               scrollTables = scrollTables.splice( i, 1 );
             }
-            else if ( table.closest( 'html' )[0] ) // don't bother if table is .detach()ed from the dom.
-            {
-              setColWidths( elmData );
-            }
+            setColWidths( elmData );
           }
           if ( !scrollTables.length )
           {
             // stop resizing if no tables are left.
-            $(window).unbind( 'resize', refreshColWidths );
+            $(window).unbind( 'resize.scrolltable' );
           }
         };
 
 
   $.fn[scrollTable] = function (cfg, methodOpts) {
       // Capture method call
-      if ( cfg == 'refresh' )
+      if ( cfg === 'refresh' )
       {
-        methodOpts = methodOpts || {};
-        this.each(function () {
-            var table = $(this),
-                elmData = $(this).data( scrollTable );
-            if ( methodOpts.reclone )
+        this.each(function (elmData) {
+            if (elmData = $(this).data(scrollTable)  &&  methodOpts  &&  methodOpts.reclone )
             {
               makeClones( elmData );
               elmData._init = 1;
             }
-            elmData  &&  setColWidths( elmData );
           });
+        refreshColWidths();
       }
       else // default to initialization
       {
@@ -202,11 +232,14 @@
             .filter(function () {
                 return !$(this).data( scrollTable );
               })
-                .each(function (i) {
+                .each(function () {
                     var table = $( this ),
+                        tbWrap = cfg.tbWrap ?
+                                    $( table.wrap( cfg.tbWrap ).parent() ):
+                                    null,
                         elmData = {
                             table:         table,
-                            tbWrap:        $( table.wrap( cfg.tbWrap||'<div class="tbody"/>' ).parent() ),
+                            tbWrap:        tbWrap,
                             _cloneClass:   cfg.cloneClass,
                             _proxyEvents:  cfg.proxyEvents,
                             _proxyEvProps: cfg.proxyEvProps.split(/\s*,\s*/),
@@ -215,9 +248,9 @@
                           };
                     if ( cfg.wrap )
                     {
-                      elmData.wrap =  wrapElm = $( cfg.wrap )
-                                                    .data( scrollTable, elmData );
-                      elmData.tbWrap.wrap( wrapElm );
+                      elmData.wrap = $( cfg.wrap )
+                                        .data( scrollTable, elmData );
+                      (tbWrap||table).wrap( elmData.wrap );
                     }
                     makeClones( elmData );
                     table
@@ -225,7 +258,7 @@
                         .data( scrollTable, elmData );
                     setColWidths( elmData );
                     scrollTables.push( table );
-                    $( window ).bind( 'resize', refreshColWidths);
+                    $(window).bind( 'resize.scrolltable', throttledRefreshColWidths);
                   });
       }
         return this;
@@ -236,7 +269,7 @@
       proxyEvents: 'click focusin focusout mouseup mousedown',  // Event types that are automatically proxied from the cloned to the actual (but hidden) table sections
       proxyEvProps: 'pageX pageY which',          // Event object properties that get proxied
       wrap:        '<div class="scrollable" />',  // Wrapper element around the table and it's clones. may be disabled
-      //tbWrap:      '<div class="tbody"/>',        // The element that has the scrollbar. Required
+      tbWrap:      '<div class="tbody"/>',        // The element that has the scrollbar. (optional)
       cloneClass:  'screen-only'                  // extra className that gets added to the cloned tables.
     };
 
