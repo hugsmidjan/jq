@@ -15,12 +15,6 @@
       _doc = document,
       _location = _doc.location,
 
-
-      // suffix and prefix used to generate temporary @id-values for HTMLelements without an @id
-      _guidPrefix = 'tmp_' + (new Date()).getTime() + '_',
-      // a counter that should be incremented with each use.
-      _guid = 1,
-
       _injectRegExpCache = {}; // used by $.inject(); to store regexp objects.
 
   RegExp.escape = RegExp.escape  ||  function(s) { return s.replace(/([\\\^\$*+\[\]?{}.=!:(|)])/g, '\\$1'); };
@@ -245,12 +239,6 @@
     },
 
 
-    // enforces DOM-ids on all items in the collection
-    // and returns the id of the first item.
-    aquireId: function (prefDefaultId)
-    {
-      return this.each(function() { $.aquireId(this, prefDefaultId); }).attr('id');
-    },
 
     setFocus: function () // depricated. use focusHere() instead
     {
@@ -421,6 +409,53 @@
     };
 
 
+  // Usage:
+  // jQuery.aquireId();                         // returns a valid unique DOM id string that can be safely assigned to an element.
+  // jQuery.aquireId(prefDefaultIdString);      // returns a valid unique DOM id based on `prefDefaultIdString` (appending/autoincrementing a trailing integer if needed)
+  // jQuery.aquireId(elm);                      // returns the value of elm.id -- automatically assigning a unique id first, if needed.
+  // jQuery.aquireId(elm, prefDefaultIdString); // returns the value of elm.id -- if needed automatically assigning a unique id based on `prefDefaultIdString`.
+  //
+  $.aquireId = function (el, prefDefaultId) { // el is an optional parameter.
+      if (typeof el === 'string')
+      {
+        prefDefaultId = el;
+        el = undefined;
+      }
+      el = $(el||[])[0]; // if `el` is a jQuery collection $.aquireId only uses the first item...
+      if (!el || !el.id)
+      {
+        var id = prefDefaultId  ||  $.aquireId._guidPrefix + $.aquireId._guid++;
+        if (prefDefaultId)
+        {
+          var m = prefDefaultId.match(/\d+$/),
+              c = m ? parseInt(m[0],10) : 1;
+          while ( $('#'+id)[0] )
+          {
+            if (m)
+            {
+              prefDefaultId = prefDefaultId.replace(/\d+$/, '');
+              m = undefined;
+            }
+            id = prefDefaultId+(c++);
+          }
+        }
+        if (!el) { return id; }
+        if (!el.id) { el.id = id; }
+      }
+      return el.id;
+    };
+  // suffix and prefix used to generate temporary @id-values for HTMLelements without an @id
+  $.aquireId._guidPrefix = 'tmp_' + (new Date()).getTime() + '_',
+  // a counter that should be incremented with each use.
+  $.aquireId._guid = 1,
+  // enforces DOM-ids on all items in the collection
+  // and returns the id of the first item.
+  $.fn.aquireId = function (prefDefaultId) {
+      return this.each(function() { $.aquireId(this, prefDefaultId); }).attr('id');
+    };
+
+
+
 
   // returns a throttled function that never runs more than every `delay` seconds
   $.throttleFn = function (func, skipFirst, delay) {
@@ -499,47 +534,9 @@
 
     // Returns window.innerWidth in all browsers (fixes IE8/7 quirks)
     winWidth: function () {
-        var de = _doc.documentElement;
+        var de = document.documentElement;
         return _win.innerWidth || (de && de.clientWidth) || _doc.body.clientWidth;
       },
-
-
-    // Usage:
-    // jQuery.aquireId();                         // returns a valid unique DOM id string that can be safely assigned to an element.
-    // jQuery.aquireId(prefDefaultIdString);      // returns a valid unique DOM id based on `prefDefaultIdString` (appending/autoincrementing a trailing integer if needed)
-    // jQuery.aquireId(elm);                      // returns the value of elm.id -- automatically assigning a unique id first, if needed.
-    // jQuery.aquireId(elm, prefDefaultIdString); // returns the value of elm.id -- if needed automatically assigning a unique id based on `prefDefaultIdString`.
-    //
-    aquireId: function (el, prefDefaultId) // el is an optional parameter.
-    {
-      if (typeof el === 'string')
-      {
-        prefDefaultId = el;
-        el = undefined;
-      }
-      el = $(el||[])[0]; // if `el` is a jQuery collection $.aquireId only uses the first item...
-      if (!el || !el.id)
-      {
-        var id = prefDefaultId  ||  _guidPrefix + _guid++;
-        if (prefDefaultId)
-        {
-          var m = prefDefaultId.match(/\d+$/),
-              c = m ? parseInt(m[0],10) : 1;
-          while ( $('#'+id)[0] )
-          {
-            if (m)
-            {
-              prefDefaultId = prefDefaultId.replace(/\d+$/, '');
-              m = undefined;
-            }
-            id = prefDefaultId+(c++);
-          }
-        }
-        if (!el) { return id; }
-        if (!el.id) { el.id = id; }
-      }
-      return el.id;
-    },
 
 
 
