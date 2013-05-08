@@ -27,6 +27,7 @@
           noBubble:     false,            // set to `true` to prevent the custom events from bubbling upwards from the list container
           click:        false,            // allow clicks to set highlight on without delay
           clickToggles: false,            // true makes clicks toggle the highlight on/off/on/off/etc.
+          clickGrace:   300,              // ms, grace period after highlighton, during which clickToggles off is disabled.
           clickCancels: false,            // true makes clicks prevent the element to get highlighted  (useful for navigation menus with mega-menus)
           cancelOff:    'a, area, :input' // exceptions for click-triggered `highlightoff` when `clickToggles` is set
         });
@@ -69,7 +70,7 @@
 
 
   FIXME:
-    * highlightoff is not triggered on elements when auto-dimmed when highlighting a new element...
+    * beforehighlightoff is not triggered on elements when auto-dimmed when highlighting a new element...
       Needs more thought...
 
 */
@@ -88,6 +89,7 @@
               //noBubble:     false,
               //click:        false,
               //clickToggles: false,
+              clickGrace:   300,
               //clickCancels: false,
               cancelOff:    'a, area, :input'
             },
@@ -113,7 +115,11 @@
             inTimeout,
             outTimeout,
             activeItem,
-            currentHover;
+            currentHover,
+
+            clickGrace = cfg.clickGrace,
+            graceTimeout,
+            justHighlighted;
 
         if ( cfg.noBubble )
         {
@@ -158,9 +164,15 @@
                           item
                               .addClass( className )
                               .trigger({ type:onEvent, fromTarget:activeElm });
+                          if (clickGrace)
+                          {
+                            justHighlighted = item[0];
+                            clrTimeout( graceTimeout );
+                            graceTimeout = setTimeout(function(){ justHighlighted = undefined; }, clickGrace);
+                          }
                         }
                       }
-                    }, e.delayOut || cfg.delay );
+                    }, e.delay || cfg.delay );
                 }
               },
 
@@ -184,17 +196,17 @@
                           activeItem = undefined;
                         }
                       }
-                    }, e.delayOut || cfg.delayOut);
+                    }, e.delay || cfg.delayOut);
                 }
               },
 
             handleClick = function (e) {
                 var method = ( !activeItem  ||  this !== activeItem[0] ) ?
                                   highlightOn:
-                              ( cfg.clickToggles  &&  !$(e.target).closest( cfg.cancelOff||'' )[0]  ) ?
+                              ( cfg.clickToggles  &&  this!==justHighlighted  &&  !$(e.target).closest( cfg.cancelOff||'' )[0]  ) ?
                                   highlightOff:
                                   undefined;
-                method  &&  method.call( this, { type:'click', delayOut: 1 } );
+                method  &&  method.call( this, { type:'click', delay: 1 } );
               },
 
             cancelOnClick = function (/*e*/) {
