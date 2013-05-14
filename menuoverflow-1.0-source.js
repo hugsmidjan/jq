@@ -1,4 +1,3 @@
-// encoding: utf-8
 // ----------------------------------------------------------------------------------
 // jQuery.fn.menuOverflow v 1.0
 // ----------------------------------------------------------------------------------
@@ -12,7 +11,7 @@
   The `menuOverflow` plugin detects horizontal menus with items overflowing into a second
   row of height. It then adds an additional li to the end of the overflowable ul
   and moves the overflowing list items into this new menu:
-  
+
   <ul class="menu-overflowing"> <- 'this'
     (untouched list items)
     <li class="overflow">
@@ -40,7 +39,7 @@
                                                     will be monitoring. defaults to '*', i.e. the menu element itself.
         itemSelector        '>li',               // selector to find the menu items
         overflowingClass:   'menu-overflowing',  // class name added to the original menu when overflowing
-        overflowTempl:      '<li class="overflow"><a href="#" /><ul/></li>' 
+        overflowTempl:      '<li class="overflow"><a href="#" /><ul/></li>'
         togglerSelector:    'a',
         togglerText:        'More...',           // contents of menu-toggler link
         dropMenuSelector:   'ul',                // selector that finds the actual submenu container within `overflowTempl`
@@ -65,7 +64,7 @@
         cfg = $.extend({ // cfg may be shared - as long as it's read-only
               //wrapper:            '*',
               itemSelector:       '>li',
-              overflowingClass:   'menu-overflowing', 
+              overflowingClass:   'menu-overflowing',
               overflowTempl:      '<li class="overflow"><a href="#" /><ul/></li>',
               //togglerSelector:    'a',
               togglerText:        'More...',
@@ -135,7 +134,7 @@
                   moreItems.each(function(i){
                       dropMenu.before(this);
                       // insert a micro delay for IE7 to allow its CSS rendering engine to catch up before we measure dropMenu's offset
-                      if ( $.browser.msie  && parseInt($.browser.version, 10)<8 )
+                      if ( 8>parseInt((/(msie) ([\w.]+)/.exec(navigator.userAgent)||[])[1],10) )
                       {
                         dropMenu[0].className += '';
                       }

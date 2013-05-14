@@ -1,11 +1,10 @@
-// encoding: utf-8
 // ----------------------------------------------------------------------------------
 // jQuery.fn.switchlist v 1.0
 // ----------------------------------------------------------------------------------
 // (c) 2009 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
 //  written by:
 //   * Már Örlygsson        -- http://mar.anomy.net
-//   * Valur Sverrisson     
+//   * Valur Sverrisson
 // ----------------------------------------------------------------------------------
 
 (function($) {
@@ -31,19 +30,19 @@
 
 
   $.fn.switchlist = function ( options ) {
-      
+
       if ( options ) {
         _config = $.extend({}, _defaultConfig, options );
       }
 
       this.addClass( _config.contClass );
-  
+
       var _newsitems = this.find( _config.items ),
           _visibleIndex = 0,
           _switchHlTimeout,
           _headlinelist = $('<ul class="'+_config.listClass+'" />'),
           _headlines;
-      
+
       _newsitems
           .slice(1)
               .hide()
@@ -87,7 +86,16 @@
                                         _headlinelist.dequeue();
                                         _newsitems
                                             .eq( _thisHeadline.listIndex )
-                                                .fadeIn( _config.fadeinspeed , _config.fadeinease , function() { if( $.browser.msie && $.browser.version < 8 ) { this.style.removeAttribute('filter'); } }  );
+                                                .fadeIn(
+                                                    _config.fadeinspeed,
+                                                    _config.fadeinease,
+                                                    function() {
+                                                        if ( 8>parseInt((/(msie) ([\w.]+)/.exec(navigator.userAgent)||[])[1],10) )
+                                                        {
+                                                          this.style.removeAttribute('filter');
+                                                        }
+                                                      }
+                                                  );
                                       });
 
                               }, _config.switchdelay);
@@ -95,7 +103,7 @@
                         })
                       .bind('mouseleave', function (e) {
                           clearTimeout( _switchHlTimeout );
-                          _switchHlTimeout = null;                            
+                          _switchHlTimeout = null;
                         })
                       .appendTo( _headlinelist );
               _newsheadline[0].listIndex = i;

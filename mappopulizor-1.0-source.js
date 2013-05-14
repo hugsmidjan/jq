@@ -1,4 +1,3 @@
-// encoding: utf-8
 // ----------------------------------------------------------------------------------
 // jQuery.fn.mapPopulizor v 1.0
 // ----------------------------------------------------------------------------------
@@ -6,7 +5,7 @@
 //  written by:
 //   * Borgar Þorsteinsson  -- http://borgar.undraland.com
 //   * Már Örlygsson        -- http://mar.anomy.net
-//   * Valur Sverrisson     
+//   * Valur Sverrisson
 // ----------------------------------------------------------------------------------
 
 (function($){
@@ -70,7 +69,7 @@
       markerActiveClass:  'marker-active',
       liActiveClass:      'marker-active',
 
-      x_flip:              1000,         // relative x-coodinate where 
+      x_flip:              1000,         // relative x-coodinate where
       markerFlipClass:    'marker-flip',
       bubbleFlipClass:    'bubble-flip',
       dotOffset:          [0,0],          // x,y pixel offsets for marker placement (typically half the marker size)
@@ -88,7 +87,7 @@
         .each(function(){
             var mapcontainer = $(this),
                 map =          elementize(cfg.mapElm, mapcontainer),
-                listCont =     elementize(cfg.listCont, mapcontainer); 
+                listCont =     elementize(cfg.listCont, mapcontainer);
 
             $( cfg.itemselector, mapcontainer ).hide().each(function () {
                 var bubbleBox = $( this ),
@@ -101,8 +100,8 @@
                   $([ marker[0], bubbleBox.find('h3')[0], listItem.find('a')[0], close[0] ])
                       .bind('click', function (e){
                           if (bubbleBox.is(':visible')) {
-                            bubbleBox.stop().fadeOut(cfg.fadeSpeed[1], function (){ 
-                              $( this ).css( 'opacity', '' );  // FIXME: check and see if this is still needed in 1.3.* 
+                            bubbleBox.stop().fadeOut(cfg.fadeSpeed[1], function (){
+                              $( this ).css( 'opacity', '' );  // FIXME: check and see if this is still needed in 1.3.*
                               listItem.removeClass(cfg.liActiveClass);
                             });
                             marker.removeClass(cfg.markerActiveClass);
@@ -133,7 +132,7 @@
                         $( 'i', this )
                             .stop()
                             [e.type=='mouseenter'? 'fadeIn' : 'fadeOut']( e.type=='mouseenter' ? cfg.fadeSpeed[0] : cfg.fadeSpeed[1], function(){
-                                if($.browser.msie && $.browser.version <= 7) { e.type=='mouseenter' ? $('body').addClass('hovering') : $('body').removeClass('hovering'); } // IE6 & 7 kicktrick for z-index correction
+                                if (8>parseInt((/(msie) ([\w.]+)/.exec(navigator.userAgent)||[])[1],10)) { e.type=='mouseenter' ? $('body').addClass('hovering') : $('body').removeClass('hovering'); } // IE6 & 7 kicktrick for z-index correction
                                 $( this ).css( 'opacity', '' ); // FIXME: check and see if this is still needed in 1.3.*
                               });
                       });
@@ -152,7 +151,7 @@
 
                   map.append( bubbleBox );
                   map.prepend( marker );
-                  
+
                 }
 
               });
@@ -161,5 +160,5 @@
           });
     return this;
   }
-  
+
 })(jQuery);

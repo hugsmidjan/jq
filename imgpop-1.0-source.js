@@ -1,10 +1,9 @@
-// encoding: utf-8
 // ----------------------------------------------------------------------------------
 // jQuery.fn.imgPopper v 1.0
 // ----------------------------------------------------------------------------------
 // (c) 2009 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
 //  written by:
-//   * Valur Sverrisson          
+//   * Valur Sverrisson
 //   * Einar Kristján Einarsson  -- einarkristjan (at) gmail.com
 //   * Már Örlygsson             -- http://mar.anomy.net
 // ----------------------------------------------------------------------------------
@@ -65,11 +64,12 @@
             '</div>' +
           '</div>';
 
-    if(cfg.disableIeFading && $.browser.msie && parseInt($.browser.version,10) < 9) {
+    if(cfg.disableIeFading  &&  9>parseInt((/(msie) ([\w.]+)/.exec(navigator.userAgent)||[])[1],10) )
+    {
       cfg.fadeInSpeed = 0;
       cfg.fadeOutSpeed = 0;
     };
-    
+
     var _curtain = $(_curtainTemp).hide();
 
 

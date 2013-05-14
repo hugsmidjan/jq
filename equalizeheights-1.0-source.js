@@ -7,13 +7,16 @@
 //   * Borgar Þorsteinsson  -- http://borgar.undraland.com
 // ----------------------------------------------------------------------------------
 
-(function($, idDataKey, undefined){
+(function($, undefined){
 
-  var B = $.browser,
-      _msie7dn = !!B.msie  &&  parseInt(B.version, 10) < 8,
-      _msie6dn = _msie7dn  &&  ( parseInt(B.version, 10) < 7 || document.compatMode === 'BackCompat' ),
-      _heightAttribute = (_msie6dn) ? 'height' : 'min-height',
+
+
+  var
+      _msie7dn = 8>parseInt((/(msie) ([\w.]+)/.exec(navigator.userAgent)||[])[1],10),
+      doc = document,
+      mozPrefix = ('MozBoxSizing' in doc.createElement('p').style) ? '-moz-':'',
       box_sizing = 'box-sizing',
+      idDataKey = 'eqh_setId',
       nextSetId = 0,
       _numSets = 0,
       _sets = {},
@@ -47,7 +50,7 @@
                 // find highest 'natural' element-height
                 .each(function ( i ) {
                     var _this = $( this );
-                    _this.css( _heightAttribute, '' );
+                    _this.css( 'min-height', '' );
                     var _totalHeight = _this.outerHeight(),
                         _marginHeight = 0,
                         _boxSizing,
@@ -70,7 +73,7 @@
                         _boxSizing = _this.data('cache-'+box_sizing);
                         if ( !_boxSizing )
                         {
-                          _boxSizing = _this.css(box_sizing) || _this.css((B.mozilla?'-moz-':'')+box_sizing);
+                          _boxSizing = _this.css(box_sizing) || _this.css(mozPrefix+box_sizing);
                           _this.data('cache-'+box_sizing, _boxSizing||'x');
                         }
                       }
@@ -82,12 +85,12 @@
                   })
                 // assign new min-heights to visible elements of _collection
                 .each(function( i ){
-                    $(this).css( _heightAttribute,  _maxHeight - _paddings[i] + 0.5 ); // Adding 1px seems to fix some sub-pixel float-clearing calculation bugs in Firefox 3+
+                    $(this).css( 'min-height',  _maxHeight - _paddings[i] + 0.5 ); // Adding 1px seems to fix some sub-pixel float-clearing calculation bugs in Firefox 3+
                   })
                 .triggerHandler('equalizeheights', _maxHeight); // does not bubble!
 
             // kick the renderer
-            document.body.className += '';
+            doc.body.className += '';
           }
         };
 
@@ -107,7 +110,7 @@
               {
                 elm
                     .removeData(idDataKey)
-                    .css( _heightAttribute, '');
+                    .css( 'min-height', '');
                 elmSet.splice( elmIdx, 1 );
                 if ( elmSet.length === 1  &&  $.inArray( elmSet[0], set.slice(i) )<0 )
                 {
@@ -172,5 +175,5 @@
 
   $.equalizeHeights = _reRun;
 
-})(jQuery, 'eqh_setId');
+})(jQuery);
 

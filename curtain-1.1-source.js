@@ -1,4 +1,3 @@
-// encoding: utf-8
 // ----------------------------------------------------------------------------------
 // jQuery.fn.curtain v 1.1
 // ----------------------------------------------------------------------------------
@@ -52,12 +51,7 @@
 */
 
 (function($){
-
   var _strCurtain = 'curtain',
-      msie6 = $.browser.msie  &&  parseInt($.browser.version, 10)<7,
-      dimPrefix = !msie6 ? 'min-' : '', // default to min-width/min-height
-      widthProp = dimPrefix+'width',
-      heightProp = dimPrefix+'height',
       _opacity = 'opacity',
 
       _curtainList = [],
@@ -83,12 +77,9 @@
               // only calculate window+body dimensions once per _resizeCurtain run, and only if _curtainList.length>0
               W = (H>-1) ? W : Math.max( w.width(),  b.innerWidth()  );
               H = (H>-1) ? H : Math.max( w.height(), b.innerHeight() );
-              msie6  && curtain // silly IE6 workaround
-                            .css( widthProp,  0 )
-                            .css( heightProp, 0 );
               curtain
-                  .css( widthProp,  W )
-                  .css( heightProp, H );              
+                  .css( 'width',  W )
+                  .css( 'height', H );
             }
           }
         };
@@ -125,7 +116,6 @@
               { bg: '#888', opacity: .5, z:99 }:
               cfg || {}
         );
-      msie6 && (cfg.fixed = 0); // disable cfg.fixed in MSIE6
       var _curtain = $(elm || '<div />')
                           .hide()
                           .addClass( cfg.className )
@@ -144,8 +134,8 @@
       if (cfg.fixed)
       {
         _curtain
-            .css( widthProp,  '100%' )
-            .css( heightProp, '100%' );
+            .css( 'width',  '100%' )
+            .css( 'height', '100%' );
       }
       else
       {

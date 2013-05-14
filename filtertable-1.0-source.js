@@ -1,4 +1,3 @@
-// encoding: utf-8
 // ----------------------------------------------------------------------------------
 // jQuery.fn.filterTable v 1.0
 // ----------------------------------------------------------------------------------
@@ -10,7 +9,7 @@
 // TODO:
 //  * trigger a cancellable beforefilter event
 //  * expose "before" value array on filter events
-//  * support a public "filter" method that accepts value array or (input index + single value) 
+//  * support a public "filter" method that accepts value array or (input index + single value)
 //  * expose element.data() object with arrays of inputs and clear buttons.
 //  * noFound message + <tr> template
 //  * minChars support
@@ -343,8 +342,7 @@
                   headRows = isTHeadEmpty ? bodyRows.eq(0) : headRows;
                   headRows.each(function(){
                       var colIdx = 0,
-                          B = $.browser,
-                          msie67 = B.msie  &&  parseInt(B.version, 10);
+                          msie67 = 8>parseInt((/(msie) ([\w.]+)/.exec(navigator.userAgent)||[])[1],10);
                       $('>*', this).each(function(__x__, tCell){
                           while (colHeadRowSpans[colIdx])
                           {
@@ -355,7 +353,7 @@
                           var span = _getCellSpan(tCell),
                               colspan = span.cols;
                           // because old MSIEs report incorrect rowspans for cells with rowSpan greater than the number of remaining rows.
-                          msie67  &&  $(tCell).attr('rowspan', span.rows); 
+                          msie67  &&  $(tCell).attr('rowspan', span.rows);
                           colHeaders[colIdx] = tCell; // always enforce first cell
                           while (colspan--)
                           {

@@ -14,7 +14,7 @@
 
 (function($){
 
-  var _oldIe = $.browser.msie  &&  parseInt($.browser.version, 10) < 8,
+  var _oldIe = 8>parseInt((/(msie) ([\w.]+)/.exec(navigator.userAgent)||[])[1],10),
 
       _placeMethods = {
           before : 'insertBefore',
