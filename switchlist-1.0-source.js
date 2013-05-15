@@ -90,7 +90,7 @@
                                                     _config.fadeinspeed,
                                                     _config.fadeinease,
                                                     function() {
-                                                        if ( 8>parseInt((/(msie) ([\w.]+)/.exec(navigator.userAgent)||[])[1],10) )
+                                                        if ( 8>parseInt((/MSIE ([\w.]+)/.exec(navigator.userAgent)||[])[1],10) )
                                                         {
                                                           this.style.removeAttribute('filter');
                                                         }

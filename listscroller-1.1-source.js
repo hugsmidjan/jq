@@ -1,4 +1,3 @@
-// encoding: utf-8
 // ----------------------------------------------------------------------------------
 // jQuery.fn.listscroller v 1.1
 // ----------------------------------------------------------------------------------
@@ -383,12 +382,12 @@
         jumpMenu,
         status;
 
-    nextBtn.find( 'a' ).andSelf().eq(0)
+    $(nextBtn.find('a')[0]||nextBtn)
         .bind( 'click', cfg, moveNext )
         .attr( 'title', cfg.titleNext )
         .text( cfg.labelNext );
 
-    prevBtn.find( 'a' ).andSelf().eq(0)
+    $(prevBtn.find('a')[0]||prevBtn)
         .bind( 'click', cfg, movePrev )
         .attr( 'title', cfg.titlePrev )
         .text( cfg.labelPrev );
@@ -444,7 +443,7 @@
         for (var i=0; i<numWindows; i++)
         {
           var bt = $( cfg.jumpBtnTemplate ),
-              a = bt.find( 'a' ).andSelf().eq(0)
+              a = $(bt.find('a')[0]||bt)
                       .text( i + 1 )
                       .attr('title', cfg.statusLabel + (i + 1) )
                       .addClass('p' + (i+1))

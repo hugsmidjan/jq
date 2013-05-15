@@ -90,7 +90,7 @@
                                         .append( clonedSection )
                                         .addClass( tagName+' '+(elmData._cloneClass) )
                                         ['insert'+ (tagName=='thead' ? 'Before' : 'After') ]( elmData.tbWrap );
-                                    var allElms = tableClone.find('*').andSelf();
+                                    var allElms = tableClone.add(tableClone.find('*'));
                                     // reimplementation of the $.fn.uniquifyIds plugin
                                     // remove onclick attributes to pervent double triggers...
                                     allElms.filter('[id]')

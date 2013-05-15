@@ -134,7 +134,7 @@
                   moreItems.each(function(i){
                       dropMenu.before(this);
                       // insert a micro delay for IE7 to allow its CSS rendering engine to catch up before we measure dropMenu's offset
-                      if ( 8>parseInt((/(msie) ([\w.]+)/.exec(navigator.userAgent)||[])[1],10) )
+                      if ( 8>parseInt((/MSIE ([\w.]+)/.exec(navigator.userAgent)||[])[1],10) )
                       {
                         dropMenu[0].className += '';
                       }

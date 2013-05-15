@@ -18,6 +18,8 @@
 
 (function($){
 
+  $.fn.addBack = $.fn.addBack || $.fn.andSelf;
+
   var idPrefix = 'tmp_' + (new Date()).getTime();
   var idSuffix = 0;
 
@@ -577,7 +579,7 @@
       // we've passed through every control - time to sort out the results
       if ( invalids.length )
       {
-        var field = $(invalids[0]).find('*').andSelf().filter('input, select, textarea');
+        var field = $(invalids[0]).find('*').addBack().filter('input, select, textarea');
         field.focusHere ?
             field.focusHere():
         field.setFocus ?

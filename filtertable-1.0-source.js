@@ -16,6 +16,7 @@
 
 (function($, undefined){
 
+    var msie7 = 8>parseInt((/MSIE ([\w.]+)/.exec(navigator.userAgent)||[])[1],10);
 
 /*
   $.fn.normalizeTable = function (cfg) {
@@ -341,8 +342,7 @@
 
                   headRows = isTHeadEmpty ? bodyRows.eq(0) : headRows;
                   headRows.each(function(){
-                      var colIdx = 0,
-                          msie67 = 8>parseInt((/(msie) ([\w.]+)/.exec(navigator.userAgent)||[])[1],10);
+                      var colIdx = 0;
                       $('>*', this).each(function(__x__, tCell){
                           while (colHeadRowSpans[colIdx])
                           {
@@ -353,7 +353,7 @@
                           var span = _getCellSpan(tCell),
                               colspan = span.cols;
                           // because old MSIEs report incorrect rowspans for cells with rowSpan greater than the number of remaining rows.
-                          msie67  &&  $(tCell).attr('rowspan', span.rows);
+                          msie7  &&  $(tCell).attr('rowspan', span.rows);
                           colHeaders[colIdx] = tCell; // always enforce first cell
                           while (colspan--)
                           {

@@ -64,7 +64,7 @@
             '</div>' +
           '</div>';
 
-    if(cfg.disableIeFading  &&  9>parseInt((/(msie) ([\w.]+)/.exec(navigator.userAgent)||[])[1],10) )
+    if(cfg.disableIeFading  &&  9>parseInt((/MSIE ([\w.]+)/.exec(navigator.userAgent)||[])[1],10) )
     {
       cfg.fadeInSpeed = 0;
       cfg.fadeOutSpeed = 0;

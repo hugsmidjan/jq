@@ -13,8 +13,8 @@
 
   $.fn.autoFillup = function () {
       var ua = navigator.userAgent,
-          msie = !!/(msie) ([\w.]+)/.test(ua),
-          opera = /(opera)(?:.*version|)[ \/]([\w.]+)/.test(ua),
+          msie = !!/(MSIE) ([\w.]+)/.test(ua),
+          opera = /(Opera)(?:.*version|)[ \/]([\w.]+)/.test(ua),
           domify = $.parseHTML || $;
       if (!msie && !opera) // no need for this in MSIE (at least version 9). Yay for microsoft!
       {

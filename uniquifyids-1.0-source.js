@@ -16,7 +16,7 @@
       return this
                   .each(function () {
                       var container = $(this);
-                      container.find('*').andSelf().filter('[id]')
+                      container.filter('[id]').add( container.find('[id]') )
                           .each(function () {
                               var orgId = this.id,
                                   newId = $.aquireId( orgId ),

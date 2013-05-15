@@ -132,7 +132,7 @@
                         $( 'i', this )
                             .stop()
                             [e.type=='mouseenter'? 'fadeIn' : 'fadeOut']( e.type=='mouseenter' ? cfg.fadeSpeed[0] : cfg.fadeSpeed[1], function(){
-                                if (8>parseInt((/(msie) ([\w.]+)/.exec(navigator.userAgent)||[])[1],10)) { e.type=='mouseenter' ? $('body').addClass('hovering') : $('body').removeClass('hovering'); } // IE6 & 7 kicktrick for z-index correction
+                                if (8>parseInt((/MSIE ([\w.]+)/.exec(navigator.userAgent)||[])[1],10)) { e.type=='mouseenter' ? $('body').addClass('hovering') : $('body').removeClass('hovering'); } // IE6 & 7 kicktrick for z-index correction
                                 $( this ).css( 'opacity', '' ); // FIXME: check and see if this is still needed in 1.3.*
                               });
                       });

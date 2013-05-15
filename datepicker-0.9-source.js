@@ -1,6 +1,6 @@
 !window.datePicker && (function($){
 
-  var oldIe = 8>parseInt((/(msie) ([\w.]+)/.exec(navigator.userAgent)||[])[1],10),
+  var oldIe = 8>parseInt((/MSIE ([\w.]+)/.exec(navigator.userAgent)||[])[1],10),
       _capitalize = function(s) { return s  &&  (s.charAt(0).toUpperCase() + s.substr(1)); },
       _zeroClock = function(d)
       {

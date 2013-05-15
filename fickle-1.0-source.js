@@ -271,7 +271,7 @@
               if (document.body == _this.closest('body')[0])
               {
                 // FIXME: this is an ugly hack. let's find a more elegant solution to this.
-                var lastFocusableLineage = $('a,input,select,textarea,button,object,area').filter(':last').parents().andSelf();
+                var lastFocusableLineage = $('a,input,select,textarea,button,object,area').filter(':last').parents()[$.fn.addBack?'addBack':'andSelf']();
                       // check if the
                 // FIXME: this is an ugly hack. let's find a more elegant solution to this.
                 if ( lastFocusableLineage.index(this) > -1 )

@@ -12,7 +12,7 @@
 
 
   var
-      _msie7dn = 8>parseInt((/(msie) ([\w.]+)/.exec(navigator.userAgent)||[])[1],10),
+      _msie7dn = 8>parseInt((/MSIE ([\w.]+)/.exec(navigator.userAgent)||[])[1],10),
       doc = document,
       mozPrefix = ('MozBoxSizing' in doc.createElement('p').style) ? '-moz-':'',
       box_sizing = 'box-sizing',

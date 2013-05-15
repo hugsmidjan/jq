@@ -1,8 +1,7 @@
-//encoding: utf-8
 (function($){
 
   $.fn.prettySelect = function ( cfg ) {
-    
+
       cfg = $.extend({
               selectClass : 'prettysel',
               collapseSpeed : 200
@@ -25,7 +24,7 @@
                     })
                   .filter(':selected').each(function(){
                       currentOption = $(this);
-                      
+
                         selTempl
                             .find('strong a')
                                 .text( currentOption.text() )
@@ -33,9 +32,9 @@
                             .find('li')
                                 .eq( currentOption.index() )
                                     .addClass('selected');
-                      
+
                     });
-          
+
 
           selTempl
               .find('ul')
@@ -50,7 +49,7 @@
                       selTempl
                           .find('ul')
                               [isOpen ? 'slideUp' : 'slideDown' ](cfg.collapseSpeed);
-                    
+
                       isOpen = !isOpen;
 
                       e.preventDefault();
@@ -78,7 +77,7 @@
                       selectbox
                           .find('option')
                               .eq( currentOption.parent().index() )
-                                  .attr('selected', 'selected')
+                                  .prop('selected', true)
                                   .trigger('change');
 
                       isOpen = false;

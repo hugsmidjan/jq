@@ -173,7 +173,7 @@
               $lnk: '<a onclick="window.open(this.href,null,\'toolbar=0,status=0,width=626,height=436\');return false;" target="fbshare" href="//www.facebook.com/sharer.php?u=',
               $init: function ( btn/*, cfg*/ ) {
                   var b = this,
-                      iframeDoc = btn.find('iframe').andSelf().filter('iframe').first() // btn might have been wrapped or otherwise modified by the optional custom "process" method
+                      iframeDoc = btn.filter('iframe').add(btn.find('iframe')).eq(0) // btn might have been wrapped or otherwise modified by the optional custom "process" method
                                       .contents()[0];
                   iframeDoc.write(
                       '<!DOCTYPE html><html lang="'+ b.lang +'">' +
