@@ -14,25 +14,25 @@
 
   $.fn[labelizor] = function ( cfg, b ) {
 
-    var a = cfg && cfg.charAt ? cfg : '',    // <-- also support the old `$(':input').labelizor(hideClass, blurClass)` syntax
+    var a = (cfg && cfg.charAt) ? cfg : '';    // <-- also support the old `$(':input').labelizor(hideClass, blurClass)` syntax
 
-      cfg = $.extend({
-          lRe:         /(\*|:[\W\S]*$)/g,     // pattern used to clean the <label> text.
-          //lPlace:      '',                    // replacement text/pattern for cfg.lRe
-          //labelFilter: null,                  // label sub-selector  (may also be a function - see below)
-          //labelFilter: function(label, input){ return label.find('i').text() || input.title || label.text(); },
-          //labelText:   'My custom label text' // this text trumps all other texts...
+    cfg = $.extend({
+        lRe:         /(\*|:[\W\S]*$)/g,     // pattern used to clean the <label> text.
+        //lPlace:      '',                    // replacement text/pattern for cfg.lRe
+        //labelFilter: null,                  // label sub-selector  (may also be a function - see below)
+        //labelFilter: function(label, input){ return label.find('i').text() || input.title || label.text(); },
+        //labelText:   'My custom label text' // this text trumps all other texts...
 
-          //preferTitle: false,                 // true makes .labelizor favour input's title="" over its <label/>
-          //condHide:    false,                 // true causes <label> to only be hidden when it's text is used.
-          useLabel:     true,                   // false makes the script completely ignore the label element for any purposes.
+        //preferTitle: false,                 // true makes .labelizor favour input's title="" over its <label/>
+        //condHide:    false,                 // true causes <label> to only be hidden when it's text is used.
+        useLabel:     true,                   // false makes the script completely ignore the label element for any purposes.
 
-          blurClass:    b||'labelized',
-          hideClass:    a||'stream'
-        },
-        !a&&cfg),
+        blurClass:    b||'labelized',  // className applied to the <input> when its placeholder text is visible
+        hideClass:    a||'stream'      // className applied to <label>s when their input field is labelized.
+      },
+      !a&&cfg);
 
-        hasPlaceholderSupport = 'placeholder' in  $('<input/>')[0],
+    var hasPlaceholderSupport = 'placeholder' in  $('<input/>')[0],
         _hideClass   = cfg.hideClass,
         _blurClass   = cfg.blurClass,
         _labelFilter = cfg.labelFilter,
@@ -41,7 +41,7 @@
             var field = $(this),
                 val = field.val(),
                 llabel = field.data( labelizorlabel ),
-                labelize = !val  ||  (e==labelizor && val==llabel);
+                labelize = !val  ||  (e===labelizor && val===llabel);
             if ( labelize )
             {
               field
@@ -53,7 +53,7 @@
         _hidePlaceholder = function (e) {
             var field = $(this),
                 val = field.val();
-            if ( !val  ||  (field.is('.'+_blurClass) && val==field.data( labelizorlabel )) )
+            if ( !val  ||  (field.is('.'+_blurClass) && val===field.data( labelizorlabel )) )
             {
               field
                   .val('')
@@ -65,7 +65,7 @@
                 .filter(function () {
                     var input = $(this),
                         llabel = input.data(labelizorlabel);
-                    return llabel  &&  input.val()==llabel;
+                    return llabel  &&  input.val()===llabel;
                   })
                     .val('');
           };
@@ -105,7 +105,7 @@
                               $.isFunction(_labelFilter) ?
                                   _labelFilter(_label, field):
                                   _label.find(_labelFilter).text();
-                _labelUsed = _labelText != _inpTitle;
+                _labelUsed = _labelText !== _inpTitle;
                 _labelText = $.trim( _labelText.replace(cfg.lRe||'', cfg.lPlace||'') );
               }
 
@@ -127,10 +127,10 @@
                     .attr('placeholder', _labelText);
               }
 
-              if ( _inpTitle )
+              if ( !_inpTitle )
               {
                 field
-                    .attr('title', _inpTitle||_labelText);
+                    .attr('title', _labelText);
               }
               field
                   .on('focus', _hidePlaceholder)
