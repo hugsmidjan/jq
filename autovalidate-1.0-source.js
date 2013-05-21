@@ -262,7 +262,7 @@
         // find our current one
         var n = $.inArray( refNode, elms );
         // find next control that doesn't have tabindex -1
-        while (elms[++n] && elms[n].tabIndex === -1) {}
+        while (elms[++n] && elms[n].tabIndex === -1) {""}
         // loop to first one if we have no target
         var felm = $( elms[n] || elms[0] );
         setTimeout(function () {
@@ -296,6 +296,73 @@
       fi_rdo:  _defaultToggleCheck
     }
   });
+
+
+
+  // jQuery.fn.constrainNumberInput 1.2  -- (c) 2013 Hugsmiðjan ehf.
+  (function($){
+
+    $.fn.constrainNumberInput = function (opts) {
+        var selector = opts && (opts.selector || (opts.charAt && opts));
+        if ( selector )
+        {
+          this
+              .on('keydown',  selector, arrowCrement)
+              .on('keypress', selector, rejectInvalidKeystrokes);
+        }
+        else
+        {
+          this
+              .on('keydown',  arrowCrement)
+              .on('keypress', rejectInvalidKeystrokes);
+        }
+        return this;
+      };
+
+    var
+        // increment/decrement field value with up/down arrow
+        arrowCrement = function (e) {
+            var input = this,
+                delta = e.which===38 ? // up arrow
+                            1:
+                        e.which===40 ? // down arrow
+                            -1:
+                            0;
+            if ( delta )
+            {
+              delta = delta * (input.step || 1) * (e.shiftKey ? 10 : 1);
+              var min,max,
+                  val = (parseInt( $.trim(input.value), 10 )|| 0) + delta;
+              val = (delta<0 && input.min && !isNaN(min=parseInt(input.min,10)) ) ?
+                        Math.max(val, min):
+                    (delta>0 && input.max && !isNaN(max=parseInt(input.max,10)) ) ?
+                        Math.min(val, max):
+                        val;
+              input.value = val;
+              $(input)
+                  .one('blur', function(/*e*/){
+                      $(this).trigger('change');
+                    });
+            }
+          },
+
+        // reject non-digit character input
+        rejectInvalidKeystrokes =  function (e) {
+            // Cancel the keypress when
+            if ( e.which  &&                 // key has some keycode but is
+                e.which!==8  &&              // not Backspace
+                e.which!==13  &&             // not Enter
+                (e.which<48  ||  e.which>57) // not a Digit (0-9)
+                // FIXME: use pattern="" attribute to check for valid input...
+              )
+            {
+              e.preventDefault();
+            }
+          };
+
+  })(jQuery);
+
+
 
 
   // jq functions
