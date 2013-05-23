@@ -222,7 +222,7 @@
       // public method for manually setting/swicthing tabs.
       // newTab may be either string or a link element
       switchTo : function ( _newTab, silentSwitch ) {
-        var id     = _newTab.href ? $.getFrag(_newTab.href) : _newTab, // accepts: linkElm, URL, DOM-id
+        var id     = _newTab.href ? $.getFrag(_newTab.href) : _newTab+'', // accepts: linkElm, URL, DOM-id
             panel  = $( '#' + id ),
             d      = panel.data( _tabswitcherData ),
             c      = d.config,
