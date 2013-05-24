@@ -35,7 +35,7 @@
                                           $.inArray( variationId,  variations.split(cfg.varDelim) ) > -1:
                                           variationId == null;  // images with no variations defined -- are automatically active when variationId is undefined
 
-                      variations  &&  defaultImgs.push( imgItem[0] );
+                      !variations  &&  defaultImgs.push( imgItem[0] );
                       imgItem.toggleClass( cfg.disabledClass, !isActive );
                       // initiate virgin imgs
                       if ( (cfg.activateAll||isActive)  &&  !imgItem.data( dataKey+'init' ) )
