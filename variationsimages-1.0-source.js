@@ -34,10 +34,11 @@
                           isActive =  variations ?
                                           $.inArray( variationId,  variations.split(cfg.varDelim) ) > -1:
                                           variationId == null;  // images with no variations defined -- are automatically active when variationId is undefined
-                      !variations  &&  defaultImgs.push( imgItem[0] );
-                      imgItem.toggleClass( cfg.activeClass, isActive );
+
+                      variations  &&  defaultImgs.push( imgItem[0] );
+                      imgItem.toggleClass( cfg.disabledClass, !isActive );
                       // initiate virgin imgs
-                      if ( isActive  &&  !imgItem.data( dataKey+'init' ) )
+                      if ( (cfg.activateAll||isActive)  &&  !imgItem.data( dataKey+'init' ) )
                       {
                         imgItem.data( dataKey+'init', true);
                         cfg.onFirstActivate  &&  cfg.onFirstActivate(imgItem);
@@ -45,9 +46,9 @@
                       return isActive;
                     });
 
-              if ( !activeImgs[0] )
+              if ( !activeImgs[0]  &&  variationId!=null )
               {
-                $( defaultImgs ).addClass( cfg.activeClass );
+                $( defaultImgs ).removeClass( cfg.disabledClass );
               }
               if ( cfg.clickFirstImg  &&  (activeImgs[0] || imgContainer.data( dataKey+'first' )) )
               {
@@ -62,7 +63,7 @@
   pluginFunc.defaults = {
       itemSelector:       '>*',         // sub-selector inside imgCont - to find the image items (default + for each variation)
       containerClass:  'variated',
-      activeClass:     'active',     // classname for itemSelector that are active
+      disabledClass:   'disabled',     // classname for items (see. itemSelector) that are inactive
       // turns simpler image links into proper thumbnail images right before `variationImageActive`
       varAttr: 'data-forvariation',
       varDelim: '|',
@@ -80,6 +81,7 @@
                 .appendTo( link.empty() );
           }
         },
+      initAll: false, // true causes items to be initialized immediately - instead of only when they become "active" for the first time.
       clickFirstImg: !!$.fn.bigimgSwitcher // flags whether first :visible imgItem should be 'clicked' to trigger `newbigimg`
     };
 
