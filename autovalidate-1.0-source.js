@@ -327,6 +327,8 @@
                         e.which===40 ? // down arrow
                             -1:
                             0;
+
+            input.autocomplete = 'off'; // do this every time since the event might be delegated and the element dynamically added
             if ( delta )
             {
               delta = delta * (input.step || 1) * (e.shiftKey ? 10 : 1);
