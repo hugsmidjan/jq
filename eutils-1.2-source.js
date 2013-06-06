@@ -730,7 +730,7 @@
 
         if ( !_focusElm  &&  _elm.is(':visible') )
         {
-          _elm.each(function (i, elm) {
+          _elm.find('*').each(function (i, elm) {
               if ( _focusables.indexOf(','+elm.tagName+',') > -1  &&  $(elm).is(':visible') )
               {
                 _focusElm = elm;
