@@ -25,13 +25,17 @@
 
       _cloneFieldset =  function ( fieldset, num, cfg ) {
 
-          var _newFieldset = fieldset.clone( !!cfg.cloneEvents ),
+          var firstCloning = num === 1,
+              _newFieldset = fieldset.clone( !!cfg.cloneEvents ),
               _attr,
-              _newAttr;
+              _newAttr,
+              idSuffix = '-'+(cfg.cloneClass||'clone')+'-',
+              idRegExp = new RegExp('('+idSuffix+'\\d+)?$');
+          idSuffix += num;
 
           if ( cfg.addDelBtn )
           {
-            if ( cfg.fsets.length == 1 ) // then fieldset must be the original fieldset - and thus has no delBtn
+            if ( cfg.fsets.length === 1 ) // then fieldset must be the original fieldset - and thus has no delBtn
             {
               var delBtn = $($.inject( cfg.delBtnTemplate, {
                                   className : cfg.delBtnClass,
@@ -67,14 +71,13 @@
           _newFieldset.find('.'+cfg.addBtnClass).remove();
 
           // give new id's to elements
-          if (_attr = _newFieldset[0].id)
+          if ( (_attr = _newFieldset[0].id) )
           {
-            _newAttr = num == 1 ? _attr + '-'+ cfg.cloneClass +'-' + num : _attr.replace(/\d+$/, num);
-            _newFieldset.attr('id', _newAttr);
+            _newFieldset[0].id = _attr.replace(idRegExp, idSuffix);
           }
 
           //add cloned classes
-          if (num == 1)
+          if (firstCloning)
           {
             var classNames = _newFieldset[0].className.split(/\s+/g);
             for (var i=0; i<classNames.length; i++)
@@ -88,29 +91,22 @@
           _newFieldset.find('*')
               .each(function () {
                   var _elm = this;
-                  if (_attr = _elm.id)
+                  if ( (_attr = _elm.id) )
                   {
-                    _newAttr = (num == 1) ?
-                                  _attr +'-'+ cfg.cloneClass +'-'+ num:
-                                  _attr.replace(/\d+$/, num);
-                    _elm.id = _newAttr;
+                    _elm.id = _attr.replace(idRegExp, idSuffix);
                   }
 
-                  if (_attr = $(_elm).attr('for'))
+                  if ( (_attr = $(_elm).attr('for')) )
                   {
-                    _newAttr = (num == 1) ?
-                                  _attr +'-'+ cfg.cloneClass +'-'+ num:
-                                  _attr.replace(/\d+$/, num);
-                    $(_elm).attr('for', _newAttr);
+                    $(_elm).attr('for', _attr.replace(idRegExp, idSuffix));
                   }
 
-                  if (_attr = _elm.name)
+                  if ( (_attr = _elm.name) )
                   {
-                    var _nameMatch = _attr.match(/^(.+)(\d+)(\D*)$/);
-                    _newAttr = (_nameMatch) ?
-                                    _nameMatch[1] + (parseInt(_nameMatch[2],10)+1) + _nameMatch[3]:
+                    var m = _attr.match(/^(.*)(\d+)(\D*)$/);
+                    _elm.name = m ?
+                                    m[1] + (parseInt(m[2],10)+1) + m[3]:
                                     _attr + '-2'; // automatically add a numeric suffix if there's no number on the original.
-                    _elm.name = _newAttr;
                   }
 
                   /* MSIE 6&7 hack - because of field-cloning expando bug of doom.  (See also: http://www.quirksmode.org/dom/domform.html)  */
@@ -164,10 +160,10 @@
         };
 
 
-  $.fn.fieldsetCloner = function ( cfg ) {
+  $.fn.fieldsetCloner = function ( opts ) {
 
       var _txts =     fsC.i18n[ this.lang() ] || fsC.i18n.en,
-          cfg =      $.extend({}, fsC.defaults, _txts, cfg ),
+          cfg =      $.extend({}, fsC.defaults, _txts, opts ),
           _btnPlace = _placeMethods[cfg.buttonPlacement];
 
       return this.each(function(){
@@ -211,6 +207,6 @@
 
       });
 
-  }
+  };
 
 })(jQuery);
