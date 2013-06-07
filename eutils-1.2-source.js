@@ -359,9 +359,9 @@
       if (_elm)
       {
         _elm = $(_elm);
-        if ( _elm.attr('tabindex') == undefined )
+        if ( _elm.prop('tabindex') == undefined )
         {
-          _elm.attr('tabindex', -1);
+          _elm.prop('tabindex', -1);
         }
         // Make note of current scroll position
         var doc = $(document),
@@ -381,6 +381,7 @@
         }
       }
     };
+  // place .focusHere() on the first element in the collection
   $.fn.focusHere = function () {
       $.focusHere(this[0]);
       return this;
@@ -391,19 +392,34 @@
   // fixes this issue: http://terrillthompson.com/blog/161
   // with this method:
   //     http://www.nczonline.net/blog/2013/01/15/fixing-skip-to-content-links/
-  $.fixSkiplinks = function (evName) {
-      evName = 'hashchange.fixSkipLinks';
+  $.fixSkiplinks = function () {
+      var namespace = '.fixSkipLinks',
+          hashchangeEv = 'hashchange'+namespace,
+          clickEv = 'click'+namespace;
       $(document)
-          .off(evName)
-          .on(evName, function () {
-              var elm = $(_location.href.split('#'));
-              if (elm[0])
+          .off(clickEv)
+          .on(clickEv, function (e) {
+              var href = e.target.href;
+              if ( !e.isDefaultPrevented()  &&  href )
               {
-                if ( elm.attr('tabindex') == undefined )
+                href = href.split('#');
+                var elm = href[1]  &&  $('#'+href[1]);
+                if ( elm  &&  href[0] === document.location.href.split('#')[0] )
                 {
-                  elm.attr('tabindex', -1);
+                  if ( $.focusHere )
+                  {
+                    elm.focusHere();
+                  }
+                  else
+                  {
+                    if ( elm.prop('tabindex') == undefined )
+                    {
+                      elm.prop('tabindex', -1);
+                    }
+                    elm.trigger('focus');
+                  }
+                  e.preventDefault();
                 }
-                elm.trigger('focus');
               }
             });
     };
@@ -568,8 +584,8 @@
                 }
               }
             }
-            return (cache[prop] = ret||false);
-
+            ret = cache[prop] = ret||false;
+            return ret;
           };
 
       })(),
