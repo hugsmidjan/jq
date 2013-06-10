@@ -25,34 +25,42 @@
 
   var defaultConfig = {
 
-    lang                : 'en',              // Two digit language-code used for displaying error messgages, etc.
-    maxLabelLength      : 35,                // Cutoff-character-limit for <label> values listed in the error alert() window.
-    errorAction         : 'focus',           // available values: (anchor|focus) (Note: anchor is bound to be more irritating.)
-    focusElmClass       : 'stream',          // className for the placeholder <a href=""> element used to move the
-                                             // keyboard/screen-reader focus between inline error messages.
-    submittedClass      : 'issubmitted',     // className that gets added to the <form> element when it has been
-                                             // submitted and is waiting for the server to respond
-    validateEachField   : '',                // possible values:  "change"==onChange; ""==onSubmit (normal)
-    errorMsgType        : 'alertonly',       // How should error texts be displayed?
-                                             // Possible values: "alertonly", "inlineonly", "both". Defaults to alertonly.
-    inlineErrorClass    : 'errmsg',          // className for the inline "Error" message element
-    nextErrorLinkClass  : 'nexterror',       // className for the inline "Next Error" link element
+    lang                : 'en',             // Two digit language-code used for displaying error messgages, etc.
+    maxLabelLength      : 35,               // Cutoff-character-limit for <label> values listed in the error alert() window.
+    errorAction         : 'focus',          // available values: (anchor|focus) (Note: anchor is bound to be more irritating.)
+    focusElmClass       : 'stream',         // className for the placeholder <a href=""> element used to move the
+                                            // keyboard/screen-reader focus between inline error messages.
+    submittedClass      : 'issubmitted',    // className that gets added to the <form> element when it has been
+                                            // submitted and is waiting for the server to respond
+    validateEachField   : '',               // possible values:  "change"==onChange; ""==onSubmit (normal)
+    errorMsgType        : 'alertonly',      // How should error texts be displayed?
+                                            // Possible values: "alertonly", "inlineonly", "both". Defaults to alertonly.
+    inlineErrorClass    : 'errmsg',         // className for the inline "Error" message element
+    nextErrorLinkClass  : 'nexterror',      // className for the inline "Next Error" link element
 
-    customReqCheck      : {},                // Container for dynamic "required" checks for based on field @name attribute values.
-    reqClassPattern     : 'req',             // The `className` that designates a field to be "required".
-    reqErrorClass       : 'reqerror',        // The `className` put on field "container" elements when they trigger a "required" error.
-    typeErrorClass      : 'typeerror',       // The className put on field "container" elements that have a "invalid input" error.
+    customReqCheck      : {},               // Container for dynamic "required" checks for based on field @name attribute values.
+                                            // Example use:
+                                            //     var validationConfig = $.av.config( myform );
+                                            //     validateionConfig.customReqCheck = {
+                                            //         'fieldName':  'otherFieldname',
+                                            //         'fieldName2': '!otherFieldname2'
+                                            //         'fieldName3': function(){ /* do stuff */ return booleanValue; }
+                                            //       });
+
+    reqClassPattern     : 'req',            // The `className` that designates a field to be "required".
+    reqErrorClass       : 'reqerror',       // The `className` put on field "container" elements when they trigger a "required" error.
+    typeErrorClass      : 'typeerror',      // The className put on field "container" elements that have a "invalid input" error.
 
     //emulateTab:         false,
-    //includeDisabled:    false,             // true - means that [disabled] fields are not filtered out.
+    //includeDisabled:    false,            // true - means that [disabled] fields are not filtered out.
     //maxLengthTab:       false
 
-    defangReset         : true,              // assign a confirmation dialog to reset buttons to prevent accidental resets
-    defangEnter         : 'auto'             // disable form submitions on enter key.
-                                             // Values are (true|false|auto) where:
-                                             //  true  - disables all enter submits,
-                                             //  false - doesn't alter bowser defaults,
-                                             //  auto  - disables enter submitions if form has more than one submit button
+    defangReset         : true,             // assign a confirmation dialog to reset buttons to prevent accidental resets
+    defangEnter         : 'auto'            // disable form submitions on enter key.
+                                            // Values are (true|false|auto) where:
+                                            //  true  - disables all enter submits,
+                                            //  false - doesn't alter bowser defaults,
+                                            //  auto  - disables enter submitions if form has more than one submit button
   };
 
 
