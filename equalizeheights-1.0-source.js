@@ -7,7 +7,7 @@
 //   * Borgar Þorsteinsson  -- http://borgar.undraland.com
 // ----------------------------------------------------------------------------------
 
-(function($, undefined){
+(function($){
 
 
 
@@ -135,38 +135,43 @@
             }
           });
       }
-      else if (set.length>1)
+      else
       {
         setId = set.data(idDataKey);
-        cfg = cfg === 'refresh' ?
-                  _cfgs[ setId ]:
-              cfg && cfg.$$done ?
-                  cfg:
-                  $.extend({
-                        //margins: false,
-                        //onceOnly: false,
-                        $$done: 1
-                      },
-                      (typeof cfg === 'boolean') ? { margins:cfg } : cfg || {}
-                    );
-
-        if ( cfg )
+        var doRefresh = cfg === 'refresh';
+        if ( doRefresh  ||  set.length>1 )
         {
-          if ( !_numSets )
+          cfg = doRefresh ?
+                    _cfgs[ setId ]:
+                    $.extend(
+                        {/* margins: false, onceOnly: false */},
+                        (typeof cfg === 'boolean') ? { margins:cfg } : cfg
+                      );
+          if ( cfg )
           {
-            $( window )
-                .bind( 'resize.eqh', _reRun )
-                .bind( 'load.eqh fontresize.eqh', _resetHeights );
+            if ( doRefresh )
+            {
+              set = _sets[setId];
+            }
+            else
+            {
+              if ( !_numSets )
+              {
+                $( window )
+                    .bind( 'resize.eqh', _reRun )
+                    .bind( 'load.eqh fontresize.eqh', _resetHeights );
+              }
+              if (!cfg.onceOnly  &&  setId == null )  // only set reize and fontresize events when cfg.onceOnly is false (default)
+              {
+                set.data(idDataKey, nextSetId); // prevent inifinite loops when looping through the _sets
+                _sets[nextSetId] = set.toArray();
+                _cfgs[nextSetId] = cfg;
+                _numSets++;
+                nextSetId++;
+              }
+            }
+            _equalizeHeights(set, cfg.margins);
           }
-          if (!cfg.onceOnly  &&  setId == undefined )  // only set reize and fontresize events when cfg.onceOnly is false (default)
-          {
-            set.data(idDataKey, nextSetId); // prevent inifinite loops when looping through the _sets
-            _sets[nextSetId] = set.toArray();
-            _cfgs[nextSetId] = cfg;
-            _numSets++;
-            nextSetId++;
-          }
-          _equalizeHeights(set, cfg.margins);
         }
       }
 
