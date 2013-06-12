@@ -4,9 +4,12 @@
 // (c) 2012 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
 //  written by:
 //   * Már Örlygsson        -- http://mar.anomy.net
+//
+// Dual licensed under a MIT licence (http://en.wikipedia.org/wiki/MIT_License)
+// and GPL 2.0 or above (http://www.gnu.org/licenses/old-licenses/gpl-2.0.html).
 // ----------------------------------------------------------------------------------
 //
-// Allows simple styling of selectboxes in a way that is both a11y and mobile friendly.
+// Allows simple styling of <select> boxes in a way that is both accessible and mobile friendly.
 //
 //
 // Requires:  jQuery 1.6+
@@ -14,46 +17,72 @@
 //
 // Usage:
 //  $('select').selectybox({ /* options */ });
+//  $('select').selectybox({'destroy'});
 //
 //  Returns the wrapper elements.
 //
 //
-(function($, selectyButton){
+(function($){
 
-  var selectybox = $.fn.selectybox = function ( cfg ) {
-          cfg = $.extend({}, defaultCfg, cfg);
-          var button = $(cfg.button),
-              wrappers = this
-                              .wrap(cfg.wrapper)
-                              .each(function () {
-                                  var sel = $(this);
-                                      btn = $(cfg.button)
-                                                .text( sel.find('option:selected').text() || cfg.emptyVal );
-                                  sel
-                                      .data(selectyButton, btn)
-                                      .before( btn );
-                                })
-                              .bind('focus blur', function (e) {
-                                  $(this).parent()
-                                      .toggleClass( cfg.focusClass, e.type == 'focus' );
-                                })
-                              .bind('change keypress', function (e) {
-                                  var sel = $(this);
-                                  setTimeout(function(){
-                                      sel.data( selectyButton )
-                                          .text( sel.find('option:selected').text() || cfg.emptyVal );
-                                    }, 0);
-                                })
-                              .css({ opacity: .0001 })
-                              .css( cfg.selectCSS )
-                              .parent()
-                                  .css( cfg.wrapperCSS );
-            return this.pushStack( wrappers );
+  var dataKey = 'selecty-button-cfg',
+      selectybox = $.fn.selectybox = function ( cfg ) {
+          var selects = this;
+          if ( cfg === 'destroy' )
+          {
+            selects.each(function () {
+                var sel = $(this),
+                    conf = sel.data(dataKey);
+                if ( conf )
+                {
+                  sel
+                      .removeData(dataKey)
+                      .css('opacity', '')
+                      .parent()
+                          .after( sel )
+                          .remove();
+                  $.each(conf.selectCSS||{}, function(prop){ sel.css(prop, ''); });
+                }
+              });
+            return selects;
+          }
+          else
+          {
+            cfg = $.extend({}, defaultCfg, cfg);
+            return selects.pushStack(
+                selects.filter('select')
+                    .data(dataKey, cfg)
+                    .wrap(cfg.wrapper)
+                    .each(function () {
+                        var sel = $(this);
+                        $(cfg.button)
+                            .text( sel.find('option:selected').text() || cfg.emptyVal )
+                            .insertBefore( sel );
+                      })
+                    .css({ opacity: 0.0001 })
+                    .css( cfg.selectCSS )
+                    .parent()
+                        .css( cfg.wrapperCSS )
+                        .on('focusin focusout', 'select', function (e) {
+                            // update focus class
+                            $(this).parent()
+                                .toggleClass( cfg.focusClass, e.type === 'focusin' );
+                          })
+                        .on('change keypress', 'select', function (e) {
+                            // update selecty-button text
+                            var sel = $(this);
+                            setTimeout(function(){
+                                sel.prev()
+                                    .text( sel.find('option:selected').text() || cfg.emptyVal );
+                              }, 0);
+                          })
+                        .toArray()
+              );
+          }
         },
 
       defaultCfg = selectybox.defaults = {
           wrapper:        '<span class="selecty"/>',
-          button:         '<span class="'+selectyButton+'"/>',
+          button:         '<span class="selecty-button"/>',
           focusClass:     'focused',
           emptyVal:       '\u00a0 \u00a0 \u00a0',
           wrapperCSS:     { position: 'relative' },
@@ -61,4 +90,5 @@
         };
 
 
-})(jQuery, 'selecty-button');
+
+})(jQuery);

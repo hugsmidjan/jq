@@ -54,6 +54,7 @@
             _newFieldset
                 .undelegate(delBtnSelector, 'click.fsDelRow')
                 .delegate(delBtnSelector, 'click.fsDelRow', function (e) {
+                    e.preventDefault();
                     var addBtn = _newFieldset.find('.'+cfg.addBtnClass)
                                       .detach();
                     _newFieldset
@@ -64,7 +65,6 @@
                     cfg.fsets.splice( pos, 1);
                     addBtn
                         [_placeMethods[cfg.buttonPlacement]](cfg.fsets[0]);
-                    return false;
                   });
           }
 
@@ -130,14 +130,15 @@
               addBtnTemplate:    '<a class="%{className}" href="#" title="%{tooltip}">%{label}</a>',
               addBtnClass:       'addrow',
               cloneClass:        'clone',
-              //cloneEvents::      false,
+              //cloneEvents:       false,
               //rowNameSel:        '' , //hægt að nota selector string, eða attribute-name
               showSpeed:         'fast',          // 'fast', 'slow', integer -- 0 for instant -- >0 for milliseconds
               //addDelBtn:         false,
-              //delBtnAppendTo:  sub-selector for cloneBlock - if falsy then appendTo the cloneBlock itself.
+              //delBtnAppendTo:    sub-selector for cloneBlock - if falsy then appendTo the cloneBlock itself.
               delBtnTemplate:    '<a class="%{className}" href="#" title="%{tooltip}">%{label}</a>',
               delBtnClass:       'delrow',
-              afterClone:        function(newBlock) {} // callback funtion with refrence to newly cloned fieldset
+              //beforeClone:       function(newFS) {} // callback funtion with refrence to newly cloned fieldset
+              //afterClone:        function(newFS) {} // callback funtion with refrence to newly cloned fieldset
             },
 
           i18n: {
@@ -188,6 +189,8 @@
                   _num++;
                   var _newFieldset = _cloneFieldset(fsets[0], _num, cfg);
 
+                  cfg.beforeClone  &&  cfg.beforeClone(_newFieldset);
+
                   if ( /^(?:bottom|top)$/.test( cfg.buttonPlacement ) )
                   {
                     // How do we want to handle duplicated cloneBtn's?
@@ -200,7 +203,7 @@
                       .slideDown(cfg.showSpeed);
 
                   fsets.unshift( _newFieldset );
-                  cfg.afterClone(_newFieldset);
+                  cfg.afterClone  &&  cfg.afterClone(_newFieldset);
                   e.preventDefault();
                 })
               [_btnPlace](_fieldset);
