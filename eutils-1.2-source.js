@@ -289,9 +289,10 @@
     // ensure 'load' event triggers for already loaded (cached) images
     whenImageReady: function (eventHandler, noTriggering)
     {
+      var images = this;
       if ( eventHandler )
       {
-        this.one('load.whenImageReady readystatechange.whenImageReady', function (e) {
+        images.one('load.whenImageReady readystatechange.whenImageReady', function (e) {
             //if ( e.type==='load'||this.readyState==='complete')
             //{
               eventHandler.call(this, e);
@@ -301,13 +302,16 @@
       }
       if ( !noTriggering )
       {
-        this.each(function(){
-            var src = this.src;
-            this.src = 'about:blank';
-            this.src = src;
-          });
+        // timeout to guarantee async event triggering across all browsers... (IE8-10 was triggering immediately)
+        setTimeout(function(){
+            images.each(function(src, img){
+                src = img.src;
+                img.src = 'about:blank';
+                img.src = src;
+              });
+          }, 0);
       }
-      return this;
+      return images;
     }
 
 
