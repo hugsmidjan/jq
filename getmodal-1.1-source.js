@@ -1,4 +1,3 @@
-// encoding: utf-8
 // ----------------------------------------------------------------------------------
 // jQuery.getModal v 1.1
 // ----------------------------------------------------------------------------------
@@ -65,7 +64,7 @@
                   return false;
                 }
               })
-            .on('fickleopen', function (/* e */) {
+            .on('fickleopen', function (/*e*/) {
                 $(this).appendTo( cfg.appendTo || 'body' );
                 if ( cfg.marginTop !== null  )
                 {
@@ -78,11 +77,26 @@
                   $(this).find(cfg.winSel)
                       .css( 'margin-top', marginTop );
                 }
+
+                // prevent closing of this modal from also closing its parent modal (ESC button - I'm looking at you!)
+                var parentModal = !cfg.parentModal ?
+                                      []:
+                                  cfg.parentModal.charAt ?
+                                      $(cfg.opener||[]).closest('.modalpop'):
+                                      $(cfg.parentModal);
+                if ( parentModal[0] )
+                {
+                  setTimeout(function(){
+                      parentModal
+                          .one('fickleclose.getmodal',  function (e) {  e.preventDefault(); })
+                          .on('mousemove.getmodal focusin.getmodal',  function (/*e*/) {  parentModal.unbind('.getmodal');  });
+                    }, 100);
+                }
               })
             .fickle(
                 $.extend({
                     focusElm: cfg.winSel,
-                    onClosed: function (/* e */) {
+                    onClosed: function (/*e*/) {
                         popup.remove();
                       }
                   },
@@ -115,6 +129,9 @@
                       '<a class="closebtn" href="#"/>'+
                     '</div>'+
                   '</div>',
+        parentModal: '.modalpop',   // Element/Collection or Selector to match against $(cfg.opener).parents()
+                                    // The matched parent modal is then prevented from auto-closing when this modal is closed
+                                    // Set to false|'' to disable
         curtainSel:  '.curtain',    // Selector: describing the "curtain" element - defaults to '' - i.e. the .modalpop container itself.
         winSel:      '.popwin',
         bodySel:     '.popbody',
