@@ -27,7 +27,7 @@
                             .each(function () {
                                 //add cloned classes
                                 var clNames = $.trim(this.className);
-                                clNames  &&  (clNames += (clNames+' ').replace(/\s+/g, '-'+cfg.cloneClass+' '));
+                                clNames  &&  (clNames = (clNames+' ').replace(/\s+/g, '-'+cfg.cloneClass+' ') + clNames);
                                 clNames += ' '+cfg.cloneClass;
                                 this.className = clNames;
                               });
@@ -111,7 +111,7 @@
         }
     };
 
-jQuery.fn.log=function(){if(window.console){arguments.length&&console.log.call(console,arguments);console.log(this);}return this;};
+
   var msie7 = 8>parseInt((/MSIE ([\w.]+)/.exec(navigator.userAgent)||[])[1],10),
 
       _cloneFieldset =  function ( cfg ) {
