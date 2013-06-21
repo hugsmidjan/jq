@@ -31,7 +31,7 @@
             if (elmData._init)
             {
               elmData._scrlBW = elmData.tbWrap ?
-                                    Math.max(0, elmData.tbWrap.width() - parseInt(table.css('width'),10)):
+                                    Math.max( 0, elmData.tbWrap.width() - table.outerWidth() ):
                                     0;
             }
             table
