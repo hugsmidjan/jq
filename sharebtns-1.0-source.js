@@ -185,7 +185,7 @@
                     );
                   iframeDoc.close();
                 },
-              $tmpl: '<iframe style="width:{width};height:{height};font-size:11px;" allowtransparency="true" frameborder="0" scrolling="no" />',
+              $tmpl: '<iframe data-sharebtns="fbshare" style="width:{width};height:{height};font-size:11px;" allowtransparency="true" frameborder="0" scrolling="no" />',
               $pos:  40
             },
 
