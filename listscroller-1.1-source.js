@@ -492,7 +492,7 @@
 
       clearTimeout( oldCfg.scrollTimeout );
 
-      var oldDisplay = _block.css('display');
+      var oldDisplay = _block[0].style.display || ''; // Recent versions of jQuery always return a nno-empty value on .css('display')
       _block
           .hide()
           .removeClass( oldCfg.classPrefix + '-active' )
