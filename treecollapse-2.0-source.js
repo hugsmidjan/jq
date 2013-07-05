@@ -24,7 +24,7 @@
       cfg = $.extend({
           rootClass:    'tree-active',
 
-          branch:       'li.branch',
+          branch:       'li:has(>ul)',
           toggler:      '> a',
           openClass:    'open',
           closedClass:  'closed',
