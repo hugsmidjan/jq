@@ -102,14 +102,27 @@
 
         _modal = $.getModal({
                     opener:  _img,
+                    className: 'imgpopper',
                     content: _imgPop,
                     fickle: {
                         fadein:  cfg.fadeInSpeed,
-                        fadeout: cfg.fadeOutSpeed
+                        fadeout: cfg.fadeOutSpeed,
+                        onClosed: function(){
+                            $(window).off('keyup.imgpopper');
+                            $(this).remove();
+                          }
                       }
-                  });
+                  })
+                    .fickle('open');
 
-        _modal.addClass('imgpopper').fickle('open');
+        $(window)
+            .on('keyup.imgpopper', function(e) {
+                e.which===37 ? // LEFT arrow == prev image
+                    _paging.find('.prev').trigger('click'):
+                e.which===39 ? // RIGHT arrow == next image
+                    _paging.find('.next').trigger('click'):
+                    null;
+              });
 
         _paging
             .delegate('li', 'click', function (e) {
@@ -135,17 +148,6 @@
         e.preventDefault();
       });
 
-    $(window)
-        .on('keyup', function(e) {
-            var keycode = e.which;
-            keycode===27 ? // close on esc
-                _modal.fickle('close'):
-            keycode===37 ? // LEFT arrow == prev image
-                _paging.find('.prev').trigger('click'):
-            keycode===39 ? // RIGHT arrow == next image
-                _paging.find('.next').trigger('click'):
-                null;
-          });
 
     return this;
   };

@@ -30,12 +30,12 @@
             .on('formatchange', function (e, media) {
                 media.format      // the given name of the current format
                 media.lastFormat  // the given name of the previous format (undefined at first)
-              // Methods that check if the current format and/or lastformat
+              // static flags that indicate whether the current format and/or lastformat
               // match a given formatCategoryName and/or formatName
-                media.is( format_or_formatCategoryName )  // matches against media.format
-                media.was( format_or_formatCategoryName ) // matches against media.lastFormat
-                media.became( formatCategoryName )   // has current format has just entered a formatCategory?
-                media.left( formatCategoryName )     // has current format has just exited a formatCategory?
+                media.isGroupname       // matched against media.format
+                media.wasGroupname      // matched against media.lastFormat
+                media.becameGroupname   // is but was not?
+                media.leftGroupname     // was but is not?
 
                 // do stuff...
               });
@@ -65,17 +65,20 @@
 
 
 
-    Trigger "soft" format check on-demand:
+    Trigger "refresh" whenever you feel like you might need it
     --------------------------------------------------------------------------
     (only triggers a "formatchange" event if the format has really changed since last time.)
+    (but always updates the static media-format group flags .becameLarge, .leftSmall, etc...)
+    (userful when CSS changes may have caused the format-names changes without any resize happening
+    or when you have modified the contents of media.groups.)
 
         jQuery.formatChange();
 
 
 
-    Re-trigger (forcefully) a format check:
+    Forcefully re-trigger a format check:
     --------------------------------------------------------------------------
-    (media.lastFormat becomes undefined)
+    (media.lastFormat becomes undefined - just like this event is being triggered for the first time)
     (optional namespace gets added to the formatchange event trigger)
 
         var forceEventTrigger = true; // <-- MUST be a Boolean true
@@ -87,7 +90,8 @@
 
     Teardown:
     --------------------------------------------------------------------------
-    (NOTE: Does NOT unbind any window.onformatchange handlers - only the onResize CSS-polling)
+    (NOTE: This does NOT unbind any window.onformatchange handlers
+    - only the onResize CSS-polling and triggering of formatchage events.)
 
         jQuery.formatChange( 'disengage' );
 
@@ -102,88 +106,116 @@
     format,
     lastFormat,
     getComputedStyle,
-    checkFormat,
-    M,
+    media,
+    _setStaticFlags,
+    _checkFormat,
+    oldFormat,
     elm,
-    F, // used by $.beget (if needed)
     undefined
 ){
   getComputedStyle = window.getComputedStyle;
 
-  $.beget = $.beget || (F=function(){}) && function (proto, props) { // prototypal inheritence under jquery
-      F.prototype = proto;
-      return props ? $.extend(new F(), props) : new F();
-    },
+  // update the static group-related flags.
+  _setStaticFlags = function () {
+      for (var grpName in media.groups)
+      {
+        var grp = media.groups[grpName],
+            was = media['is'+grpName], // this weird-looking trick allows soft 'refresh' to correctly determine became and left states of newly added/modified Groups
+            is;
+        media['is'+grpName] = is = !!grp[media.format];
+        media['was'+grpName] = !!grp[media.lastFormat];
+        media['became'+grpName] = is && !was;
+        media['left'+grpName] = !is && was;
+      }
+    };
+  _checkFormat = function ( query, format ) {
+      return  query===format  ||  !!(media.groups[query]  &&  media.groups[query][format]);
+    };
+
 
 
   $.formatChange = function (cfg, triggerNS ) {
 
-      if ( cfg !== 'disengage' )
+      if ( cfg === 'disengage' )
+      {
+        $(window).off(resize_formatchange);
+        elm && elm.remove();
+        media = elm = undefined;
+      }
+      else
       {
         var forceTrigger = cfg===true;
 
         // Define the Format Info object if needed
-        if ( !M )
+        if ( !media )
         {
           cfg = $.extend({
                     // $tagName: 'del',
                     // $elmId:   'mediaformat',
                     // $before:  false,  // set to `true` to use ':before' instead of the default ':after'
-                    Small: { 'narrow':1, 'mobile':1 },
-                    Large: { 'tablet':1, 'full':1, 'wide':1 }
                   }, cfg);
 
-          checkFormat = function ( query, format ) {
-              return  query===format  ||  !!(cfg[query] && cfg[query][format]);
-            };
-
-          M = $.extend({
-                  is:     function (fmt) {  return checkFormat(fmt,this[format]);  },
-                  was:    function (fmt) {  return checkFormat(fmt,this[lastFormat]);  },
-                  became: function (fmt) {  return checkFormat(fmt,this[format])  &&  !checkFormat(fmt,this[lastFormat]);  },
-                  left:   function (fmt) {  return checkFormat(fmt,this[lastFormat])  &&  !checkFormat(fmt,this[format]);  }
+          media = $.extend({
+                  groups: {
+                      Small: { 'narrow':1, 'mobile':1 },
+                      Large: { 'tablet':1, 'full':1, 'wide':1 }
+                    },
+                  // DEPRICATED methods: (Instead use static media.isLarge, media.becameSmall, etc. flags)
+                  is:     function (fmt) {  return  _checkFormat(fmt,this[format]);  },
+                  was:    function (fmt) {  return  _checkFormat(fmt,this[lastFormat]);  },
+                  became: function (fmt) {  return  _checkFormat(fmt,this[format]) && !_checkFormat(fmt,this[lastFormat]);  },
+                  left:   function (fmt) {  return !_checkFormat(fmt,this[format]) &&  _checkFormat(fmt,this[lastFormat]);  }
                 },
                 // TEMPORARY: mix triggerNS into the F object to support
                 // the DEPRICATED "extras" paramter for $.formatChange()
                 !forceTrigger && triggerNS
               );
+          // Treat all cfg properties starting with an Uppercase character
+          // as a media-format group names - and move them into media.groups.
+          $.each(cfg, function (key, value) {
+              if ( /^[A-Z]/.test(key) ) {
+                media.groups[key] = value;
+              }
+            });
+
 
           // build and inject the hidden monitoring element
           elm = $('<'+ (cfg.$tagName||'del') +' style="position:absolute;visibility:hidden;width:0;height:0;overflow:hidden;"/>')
                           .attr('id', cfg.$elmId || 'mediaformat')
                           .appendTo('body');
 
-
           $(window).on(resize_formatchange, function (e, evOpts) {
               evOpts = evOpts || {};
-              var oldFormat = M[lastFormat] = evOpts.force ? undefined : M[format],
-                  newFormat = M[format] = ( (getComputedStyle && getComputedStyle( elm[0], cfg.$before?':before':':after' ).getPropertyValue('content')) ||
-                                elm.css('font-family') )
-                                    // some browsers return a quoted strings.
-                                    .replace(/['"]/g,'');
+              var newFormat = (
+                                (getComputedStyle && getComputedStyle( elm[0], cfg.$before?':before':':after' ).getPropertyValue('content'))  ||
+                                elm.css('font-family')
+                              ).replace(/['"]/g,''); // some browsers return a quoted strings.
 
-              if ( (newFormat !== oldFormat)  ||  evOpts.force )
+              if ( newFormat !== oldFormat )
               {
+                media[format] = newFormat;
+                media[lastFormat] = oldFormat;
+                oldFormat = newFormat;
+                _setStaticFlags();
                 $(window).trigger(
                     'formatchange'+(evOpts.ns||''),
-                    [$.beget(M), oldFormat] // TEMPORARY: `oldFormat` is temporarily left in for backwards compatibility
+                    [media, oldFormat] // TEMPORARY: `oldFormat` is temporarily left in for backwards compatibility
                   );
+              }
+              else if ( evOpts )
+              {
+                _setStaticFlags();
               }
             });
         }
+        forceTrigger  &&  (oldFormat = undefined);
         $(window).trigger(
             resize_formatchange,
-            [ forceTrigger ? { force:1, ns:triggerNS?('.'+triggerNS):'' } : undefined ]
+            [{ refresh:1,  ns:triggerNS?('.'+triggerNS):'' }]
           );
       }
-      else
-      {
-        $(window).off(resize_formatchange);
-        elm && elm.remove();
-        M = elm = undefined;
-      }
 
-      return M;
+      return media;
 
     };
 
