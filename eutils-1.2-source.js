@@ -293,11 +293,11 @@
       if ( eventHandler )
       {
         images.one('load.whenImageReady readystatechange.whenImageReady', function (e) {
-            //if ( e.type==='load'||this.readyState==='complete')
-            //{
+            if ( e.type==='load'||this.readyState==='complete')
+            {
               eventHandler.call(this, e);
               $(this).off('.whenImageReady');
-            //}
+            }
           });
       }
       if ( !noTriggering )
@@ -654,6 +654,7 @@
 
 
     // Escape img[src] values in incoming Ajax html result bodies to avoid automatic preloading of all images.
+    // don't use data-src="" by default - to avoid conflict with data-src="" set on the server-side as a part of deliberate lazyloading, etc.
     imgSuppress: function (html, attr) {
         return html.replace( /(<img[^>]*? )src=/gi, '$1'+(attr||'data-srcAttr')+'=' );
       },
