@@ -487,14 +487,15 @@
       delay = delay || 50;
       var throttled = 0;
       return function () {
-          var args = arguments;
+          var args = arguments,
+              _this = this;
           if ( throttled===0 )
           {
             skipFirst ?
                 throttled++:
-                func.apply(func, args);
+                func.apply(_this, args);
             setTimeout(function(){
-                throttled>1  &&  func.apply(func, args);
+                throttled>1  &&  func.apply(_this, args);
                 throttled = 0;
               }, delay);
           }
