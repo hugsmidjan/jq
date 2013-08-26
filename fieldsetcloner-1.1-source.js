@@ -39,7 +39,7 @@
                             )
                               .on('click', function (e) {
                                   e.preventDefault();
-                                  var fsElm = $(this).data('$fsclnr')
+                                  var fsElm = $(this).data('$fsclnr');
                                   fsElm
                                       .slideUp(cfg.showSpeed, function(){ fsElm.remove(); });
                                   if ( cfg.$place==='appendTo' )
@@ -118,7 +118,6 @@
 
           var fieldset = cfg.$protoFS.clone( !!cfg.cloneEvents ),
               _attr,
-              _newAttr,
               idSuffix = '-'+(cfg.cloneClass||'clone')+'-',
               idRegExp = new RegExp('('+idSuffix+'\\d+)?$');
           idSuffix += cfg.$num++;
@@ -156,8 +155,8 @@
                   {
                     var m = _attr.match(/^(.*)(\d+)(\D*)$/);
                     _elm.name = m ?
-                                    m[1] + (parseInt(m[2],10)+1) + m[3]:
-                                    _attr + '-2'; // automatically add a numeric suffix if there's no number on the original.
+                                    m[1] + (parseInt(m[2],10) + cfg.$num) + m[3]:
+                                    _attr + '-' + cfg.$num;  // automatically add a numeric suffix if there's no number on the original.
                   }
 
                   /* MSIE 6&7 hack - because of field-cloning expando bug of doom.  (See also: http://www.quirksmode.org/dom/domform.html)  */
