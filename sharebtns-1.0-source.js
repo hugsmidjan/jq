@@ -240,7 +240,10 @@
               size:  'medium', // 'small', 'medium', '' (large), 'tall' (tall combined with count:'bubble' displays a vertically positioned counter)
 
             // private
-              $tmpl: '<div class="g-plusone" data-size="{size}" data-annotation="{count}" data-href="{url}"/>',
+              $prep: function ( /*pluginCfg*/ ) {
+                  this.count = this.count ? ' data-annotation="'+this.count+'"' : '';
+                },
+              $tmpl: '<div class="g-plusone" data-size="{size}"{count} data-href="{url}"/>',
               $init: function (/* btn, cfg */) {
                   // https://www.google.com/intl/en/webmasters/+1/button/index.html
                   injectScriptIfNeeded(
