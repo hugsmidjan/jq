@@ -132,12 +132,13 @@
           twitter: {
               size:     'm', // or 'l'
               count:    '',       // '' == 'horizontal'. Other options: 'none', 'vertical'
-              via:      '',       // Twitter username. Example: "foobar"
-              related:  '',       // Recommended usernames. Example: "anywhere:The Javascript API,sitestreams,twitter:The official account"
-              lang:     '',       // defaults to 'en'
-              hashtags: '',       //
-              text:     '',       // defaults to <title>
+              via:      '',       // Optional twitter username to mention/link to. Example: "foobar"
+              related:  '',       // Optional list of recommended usernames. Example: "anywhere:The Javascript API,sitestreams,twitter:The official account"
+              lang:     '',       // Optional language setting ??? defaults to 'en'
+              hashtags: '',       // Optional comma-delmited list of hashtags. (e.g. 'cooloption,hipster,socool')
+              text:     '',       // Optional default tweet body text.
               //url:      '',       // defaults to document.location.href
+              //txt:      null,     // Link text for customized links
 
             // private
               $prep: function( /*pluginCfg*/ ) {
@@ -167,14 +168,15 @@
 
           fbshare: {
               color: '', // 'dark',
-              //url:   '', // defaults to document.location.href
+              //url:   '',    // defaults to document.location.href
+              //txt:   null,  // Link text for customized links
 
             // private
               $prep: function ( /*pluginCfg*/ ) {
-                  var b = this,
-                      txts = { en: 'Share',  is: 'Deila' };
+                  var b = this;
                   if ( !b.txt )
                   {
+                    var txts = { en: 'Share',  is: 'Deila' };
                     b.txt = txts[ b.lang ];
                     if ( !b.txt )
                     {
@@ -259,8 +261,8 @@
 
           gplus: {
               //url:   '', //  defaults to document.location.href
-              count: '', //  'inline' (facebook-style) or 'none' (defaults to "bubble" (== '') )
-              size:  'medium', // 'small', 'medium', '' (large), 'tall' (tall combined with count:'bubble' displays a vertically positioned counter)
+              count:   '', //  'inline' (facebook-style) or 'none' (defaults to "bubble" (== '') )
+              size:    'medium', // 'small', 'medium', '' (large), 'tall' (tall combined with count:'bubble' displays a vertically positioned counter)
               custom:  false, // Google Plus +1 button CAN NOT be customized!
 
             // private
@@ -280,11 +282,12 @@
 
 
           pinterest: {
-              //url:   '',  //  defaults to document.location.href
-              imgsrc:'',  //  defaults to the first image on the page or the opengraph image
-              count: 'beside',       // '' (horizontal). Other options: 'none', 'above'
-              //imgSrcAttr: '',  // defaults to 'src'
+              //url:         '',  //  defaults to document.location.href
+              imgsrc:      '',  //  defaults to the first image on the page or the opengraph image
+              count:       'beside',       // '' (horizontal). Other options: 'none', 'above'
+              //imgSrcAttr:  '',  // defaults to 'src'
               imgSelector: '.pgmain img',  // The `imgSrcAttr` value of the first image matching this selector will be used
+              txt:         'Pin it',     // Link text for customized links
 
             // private
               $prep: function( /*pluginCfg*/ ) {
@@ -301,10 +304,10 @@
                   }
                   if ( b.custom )
                   {
-                    b.$tmpl = '<a href="http://pinterest.com/pin/create/button/?url=%{url}&amp;media=%{imgsrc}" class="pinitbtn" onclick="window.open(this.href,null,\'toolbar=0,status=0,width=626,height=436\');return false;" target="pinitwin" lang="en">Pin It</a>';
+                    b.$tmpl = '<a href="http://pinterest.com/pin/create/button/?url=%{url}&amp;media=%{imgsrc}" class="pinitbtn" onclick="window.open(this.href,null,\'toolbar=0,status=0,width=626,height=436\');return false;" target="pinitwin" lang="en">{txt}</a>';
                   }
                 },
-              $tmpl: '<a href="http://pinterest.com/pin/create/button/?url=%{url}&amp;media=%{imgsrc}" class="pin-it-button" data-pin-do="buttonPin" data-pin-config="{count}" lang="en">Pin It</a>',
+              $tmpl: '<a href="http://pinterest.com/pin/create/button/?url=%{url}&amp;media=%{imgsrc}" class="pin-it-button" data-pin-do="buttonPin" data-pin-config="{count}" lang="en">{txt}</a>',
                         //<img border="0" src="//assets.pinterest.com/images/PinExt.png" title="Pin It" />
               $init: function (/* btn, cfg */) {
                   // http://business.pinterest.com/widget-builder/#do_pin_it_button
