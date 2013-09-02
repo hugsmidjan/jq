@@ -72,7 +72,13 @@
         _img,
         _modal,
         _paging = $('<div class="paging" />'),
-        _imgPop = $('<div class="imgwrap" />');
+        _imgPop = $('<div class="imgwrap" />')
+
+        _updPager = function (pager, idx, total) {
+          pager.find('li.prev').toggleClass( 'nav-end', !idx ); // at start
+          pager.find('li.next').toggleClass( 'nav-end', idx===total-1 ); // at end
+          pager.find('b').text( idx + 1 );
+        };
 
     _i18n = _i18n[ $.lang() ] || _i18n.en;
     cfg = $.extend({}, $.imgPopper.defaultConfig, _i18n, cfg );
@@ -93,7 +99,8 @@
                               num         : _idx+1
                             })
               );
-        _paging.find('b').text(_idx + 1  );
+
+        _updPager(_paging, _idx, _hrefElms.length);
 
         _imgPop
             .empty()
@@ -131,16 +138,12 @@
                 {
                   var delta = li.is('.next') ? 1 : -1;
                   _idx = Math.min( Math.max( 0, _idx+delta ), _hrefElms.length-1 );
-                  var atStart = !_idx,
-                      atEnd = _idx===_hrefElms.length-1;
-
                   _imgPop.find('.image').replaceWith( $.imgPopper.getImage( _hrefElms.eq(_idx) ) );
-                  _paging.find('li.prev').toggleClass( 'nav-end', atStart );
-                  _paging.find('li.next').toggleClass( 'nav-end', atEnd );
-                  _paging.find('b').text( _idx + 1  );
+                  _updPager(_paging, _idx, _hrefElms.length);
+
                   // preload ajacent images
-                  if (!atStart) { (new Image()).src = _hrefElms[_idx-1].href; }
-                  if (!atEnd)   { (new Image()).src = _hrefElms[_idx+1].href; }
+                  if (!_idx) { (new Image()).src = _hrefElms[_idx-1].href; } // at start
+                  if (_idx===_hrefElms.length-1)   { (new Image()).src = _hrefElms[_idx+1].href; } // at end
                 }
                 e.preventDefault();
               });
