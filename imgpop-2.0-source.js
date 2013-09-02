@@ -72,7 +72,7 @@
         _img,
         _modal,
         _paging = $('<div class="paging" />'),
-        _imgPop = $('<div class="imgwrap" />')
+        _imgPop = $('<div class="imgwrap" />'),
 
         _updPager = function (pager, idx, total) {
           pager.find('li.prev').toggleClass( 'nav-end', !idx ); // at start
