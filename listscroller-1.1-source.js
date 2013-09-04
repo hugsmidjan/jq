@@ -606,13 +606,17 @@
       // set initial position
       setPos( cfg, cfg.startPos || 0, { _noFlash:True, _noFocus:True } );
 
+      var nextTrigger = function ( e ) {
+            setPos( cfg, cfg.index + cfg.stepSize, { _noFlash:True, _noFocus:True } );
+          },
+          prevTrigger = function ( e ) {
+            setPos( cfg, cfg.index - cfg.stepSize, { _noFlash:True, _noFocus:True } );
+          };
+
       var delay = cfg.autoScrollDelay;
       if ( delay )
       {
-        var nexttrigger = function ( e ) {
-              setPos( cfg, cfg.index + cfg.stepSize, { _noFlash:True, _noFocus:True } );
-            };
-        cfg.scrollTimeout = setTimeout( nexttrigger, delay );
+        cfg.scrollTimeout = setTimeout( nextTrigger, delay );
         _block
             .bind('mouseenter.lscr', function (e) {
                 _block.addClass('block-mouseover');
@@ -621,14 +625,35 @@
             .bind('mouseleave.lscr', function (e) {
                 _block.removeClass('block-mouseover');
                 clearTimeout(cfg.scrollTimeout);
-                cfg.scrollTimeout = setTimeout( nexttrigger, delay );
+                cfg.scrollTimeout = setTimeout( nextTrigger, delay );
               })
             .bind('afterMove.lscr', function (e) {
                 if ( !_block.is('.block-mouseover') )
                 {
                   clearTimeout(cfg.scrollTimeout);
-                  cfg.scrollTimeout = setTimeout( nexttrigger, delay );
+                  cfg.scrollTimeout = setTimeout( nextTrigger, delay );
                 }
+              });
+      }
+
+      if ( cfg.aspect == 'horizontal' )
+      {
+        _block
+            .on('swipeleft', function (e) {
+                nextTrigger();
+              })
+            .on('swiperight', function (e) {
+                prevTrigger();
+              });
+      }
+      else if ( cfg.aspect == 'vertical' )
+      {
+        _block
+            .on('swipeup', function (e) {
+                nextTrigger();
+              })
+            .on('swipedown', function (e) {
+                prevTrigger();
               });
       }
 
