@@ -359,7 +359,7 @@
 
   // place keyboard focus on _elm - setting tabindex="" when needed
   // and make sure any window scrolling is both sane and useful
-  $.focusHere = function (_elm) {
+  $.focusHere = function (_elm, opts) {
       if (_elm)
       {
         _elm = $(_elm);
@@ -379,15 +379,14 @@
         {
           // ...then scroll the window to place the anchor at the top of the viewport.
           // (NOTE: We do this because most browsers place the artificially .focus()ed link at the *bottom* of the viewport.)
-          var _newTop = $(_elm).offset().top - 30;
-          if (_newTop < 10) { _newTop = 0; }
-          doc.scrollTop(_newTop);
+          var offset = (opts&&('offset' in opts)) ? opts.offset : 30; // default to 30px offset from top of viewport
+          doc.scrollTop( $(_elm).offset().top - offset );
         }
       }
     };
   // place .focusHere() on the first element in the collection
-  $.fn.focusHere = function () {
-      $.focusHere(this[0]);
+  $.fn.focusHere = function (opts) {
+      $.focusHere(this[0], opts);
       return this;
     };
 
