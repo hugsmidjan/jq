@@ -259,7 +259,7 @@
     // collection.scroll({ left:xPos, top:yPos });  // scrolls to xPos, yPos
     scrollPos: function (x, y)
     {
-      if ( x == undefined  &&  y == undefined )
+      if ( x == null  &&  y == null )
       {
         return { left:this.scrollLeft()  , top:this.scrollTop()  };
       }
@@ -268,8 +268,8 @@
         y = x.top;
         x = x.left;
       }
-      x!=undefined  &&  this.scrollLeft(x);
-      y!=undefined  &&  this.scrollTop(y);
+      x!=null  &&  this.scrollLeft(x);
+      y!=null  &&  this.scrollTop(y);
       return this;
     },
 
@@ -363,7 +363,7 @@
       if (_elm)
       {
         _elm = $(_elm);
-        if ( _elm.prop('tabindex') == undefined )
+        if ( _elm.prop('tabindex') == null )
         {
           _elm.prop('tabindex', -1);
         }
@@ -394,35 +394,39 @@
 
 
   // fixes this issue: http://terrillthompson.com/blog/161
-  // with this method:
-  //     http://www.nczonline.net/blog/2013/01/15/fixing-skip-to-content-links/
-  $.fixSkiplinks = function () {
-      var namespace = '.fixSkipLinks',
-          hashchangeEv = 'hashchange'+namespace,
-          clickEv = 'click'+namespace;
-      $(document)
+  // Limitations:
+  //   Must always run last.
+  //   May cause unwanted scroll+focus in situations where multiple jQuery instances are running.
+  //   Nicely tolerant of multiple invocations (always unbinds the event from last run)
+  // Usage:
+  //   $.fixSkiplinks();
+  //   $.fixSkiplinks({ offset:40 }); // scroll offset/correction in px
+  //   $.fixSkiplinks({ offset:function(id,target){ return 40; }  });
+  //
+  $.fixSkiplinks = function (opts) {
+      var clickEv = 'click.fixSkipLinks',
+          doc = document;
+      $(doc)
           .off(clickEv)
           .on(clickEv, function (e) {
               var href = e.target.href;
-              if ( !e.isDefaultPrevented()  &&  href )
+              if ( href  &&  !e.isDefaultPrevented() )
               {
                 href = href.split('#');
-                var elm = href[1]  &&  $('#'+href[1]);
-                if ( elm  &&  href[0] === document.location.href.split('#')[0] )
+                var id = href[1],
+                    elm = id  &&  $('#'+id);
+                if ( elm[0]  &&  href[0]===doc.location.href.split('#')[0] )
                 {
-                  if ( $.focusHere )
-                  {
-                    elm.focusHere();
-                  }
-                  else
-                  {
-                    if ( elm.prop('tabindex') == undefined )
-                    {
-                      elm.prop('tabindex', -1);
-                    }
-                    elm.trigger('focus');
-                  }
                   e.preventDefault();
+                  if ( elm.prop('tabindex') == null )
+                  {
+                    elm.prop('tabindex', -1);
+                  }
+                  doc.location.href = '#'+id;
+                  var offs = opts && opts.offset;
+                  offs = $.isFunction(offs) ? offs(id,elm) : offs;
+                  offs && $(doc).scrollTop( $(doc).scrollTop() - offs );
+                  elm[0].focus();
                 }
               }
             });
