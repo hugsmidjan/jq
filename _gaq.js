@@ -1,0 +1,1 @@
+!function(t,c){t._gaq=c=t._gaq||[];c.loadScript=c.loadScript||(/(?:^|;)cookie=0/.test(document.cookie)?function(){}:function(t,e,o){t=document;e=t.getElementsByTagName("script")[0];o=t.createElement("script");o.async=1;o.src="//www.google-analytics.com/analytics.js";e.parentNode.insertBefore(o,e);c.loadScript=function(){}})}(window);
