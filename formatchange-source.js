@@ -120,10 +120,10 @@
       for (var grpName in media.groups)
       {
         var grp = media.groups[grpName],
-            was = media['is'+grpName], // this weird-looking trick allows soft 'refresh' to correctly determine became and left states of newly added/modified Groups
-            is;
-        media['is'+grpName] = is = !!grp[media.format];
-        media['was'+grpName] = !!grp[media.lastFormat];
+            is = !!grp[media.format],
+            was = !!grp[media.lastFormat];
+        media['is'+grpName] = is;
+        media['was'+grpName] = was;
         media['became'+grpName] = is && !was;
         media['left'+grpName] = !is && was;
       }
