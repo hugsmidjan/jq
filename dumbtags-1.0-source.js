@@ -199,12 +199,14 @@
                     .each(function () {
                         var elm = $(this),
                             itm = { id:elm.val(),  value:elm.text() };
-                        itm.label = itm.value;
-                        acLocalValues.push( itm );
-
-                        if ( elm.is('[selected]') )
+                        if ( itm.id )
                         {
-                          prefills.push({ id:elm.val(),  value:elm.text() } );
+                          itm.label = itm.value;
+                          acLocalValues.push( itm );
+                          if (  elm.is('[selected]') )
+                          {
+                            prefills.push({ id:elm.val(),  value:elm.text() } );
+                          }
                         }
                       });
 
@@ -445,7 +447,7 @@
       //limitVocab:   false,  // Boolean - indicates whether only a limited set of values can be chosen from - or if free-form tagging is allowed.
       wrapperTempl: '<span class="tagswrap"/>',
       disabledClass: 'disabled',
-      tagTempl:     '<span class="tag">',
+      tagTempl:     '<span class="tag"/>',
       //htmlTags:     false,                            // allows item.value to contain HTML to be displayed inside the tag...
       //processTag:   function ( $tagElm, acItem ) {},  // allows customization of the tagElm's content and className - before the delete-button and input field are injected.
       tagDelTempl:  '<a href="#" class="del">x</a>',
