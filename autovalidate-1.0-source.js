@@ -270,7 +270,7 @@
         // find our current one
         var n = $.inArray( refNode, elms );
         // find next control that doesn't have tabindex -1
-        while (elms[++n] && elms[n].tabIndex === -1) {""}
+        while (elms[++n] && elms[n].tabIndex === -1) {}
         // loop to first one if we have no target
         var felm = $( elms[n] || elms[0] );
         setTimeout(function () {
@@ -317,8 +317,8 @@
         if ( opts.arrows )
         {
           selector ?
-              inputs.on('keydown', selector,  arrowCrement).on('focus', selector, triggerChange):
-              inputs.on('keydown',  arrowCrement).on('focus', triggerChange);
+              inputs.on('keydown', selector,  arrowCrement).on('focusin', selector, triggerChange):
+              inputs.on('keydown',  arrowCrement).on('focusin', triggerChange);
         }
         selector ?
             inputs.on('keypress', selector,  rejectInvalidKeystrokes):
@@ -328,6 +328,7 @@
 
     var
         fieldIsFocused = 'cni_focused',
+        fieldIsChanged = 'cni_changed',
         // increment/decrement field value with up/down arrow
         arrowCrement = function (e) {
             var input = this,
@@ -351,10 +352,12 @@
                         val;
               input.value = val;
               // trigger "change" immediately - unless the field is focused - then wait for blur like normal
-              !$inp.data(fieldIsFocused)  &&  $inp.trigger('change');
+              $inp.data(fieldIsFocused) ?
+                  $inp.data(fieldIsChanged, true):
+                  $inp.trigger('change');
             }
           },
-        triggerChange = function (e) { // bound on "focus"
+        triggerChange = function (/*e*/) { // bound on "focus"
             var input = $(this);
             input
                 // mark the field as focused.
@@ -362,22 +365,25 @@
                 // remove previous blur/change handler just in case.
                 .off('.cni')
                 // if change happens first - then cancel the blur handler (and remove the focused marker)
-                .one('change.cni', function (e) {
+                .one('change.cni', function (/*e*/) {
                     input
                         .removeData(fieldIsFocused)
-                        .off('blur.cni');
+                        .removeData(fieldIsChanged)
+                        .off('focusout.cni');
                   })
                 // if blur happens first - then wait a while for change to happen naturally
                 // and if not (i.e. if input is still marked as focused) then remove the marker
                 // and trigger change manually.
-                .one('blur.cni', function (e) {
+                .one('focusout.cni', function (/*e*/) {
                     setTimeout(function(){
-                        if ( input.data(fieldIsFocused) )
+                        if ( input.data(fieldIsFocused) && input.data(fieldIsChanged) )
                         {
                           input
                               .removeData(fieldIsFocused)
                               .trigger('change');
                         }
+                        input
+                            .removeData(fieldIsChanged);
                       }, 100);
                   });
           },
