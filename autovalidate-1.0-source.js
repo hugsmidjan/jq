@@ -317,8 +317,8 @@
         if ( opts.arrows )
         {
           selector ?
-              inputs.on('keydown', selector,  arrowCrement):
-              inputs.on('keydown',  arrowCrement);
+              inputs.on('keydown', selector,  arrowCrement).on('focus', selector, triggerChange):
+              inputs.on('keydown',  arrowCrement).on('focus', triggerChange);
         }
         selector ?
             inputs.on('keypress', selector,  rejectInvalidKeystrokes):
@@ -327,6 +327,7 @@
       };
 
     var
+        fieldIsFocused = 'cni_focused',
         // increment/decrement field value with up/down arrow
         arrowCrement = function (e) {
             var input = this,
@@ -341,6 +342,7 @@
             {
               delta = delta * (input.step || 1) * (e.shiftKey ? 10 : 1);
               var min,max,
+                  $inp = $(input),
                   val = (parseInt( $.trim(input.value), 10 )|| 0) + delta;
               val = (delta<0 && input.min && !isNaN(min=parseInt(input.min,10)) ) ?
                         Math.max(val, min):
@@ -348,11 +350,36 @@
                         Math.min(val, max):
                         val;
               input.value = val;
-              $(input)
-                  .one('blur', function(/*e*/){
-                      $(this).trigger('change');
-                    });
+              // trigger "change" immediately - unless the field is focused - then wait for blur like normal
+              !$inp.data(fieldIsFocused)  &&  $inp.trigger('change');
             }
+          },
+        triggerChange = function (e) { // bound on "focus"
+            var input = $(this);
+            input
+                // mark the field as focused.
+                .data(fieldIsFocused, true)
+                // remove previous blur/change handler just in case.
+                .off('.cni')
+                // if change happens first - then cancel the blur handler (and remove the focused marker)
+                .one('change.cni', function (e) {
+                    input
+                        .removeData(fieldIsFocused)
+                        .off('blur.cni');
+                  })
+                // if blur happens first - then wait a while for change to happen naturally
+                // and if not (i.e. if input is still marked as focused) then remove the marker
+                // and trigger change manually.
+                .one('blur.cni', function (e) {
+                    setTimeout(function(){
+                        if ( input.data(fieldIsFocused) )
+                        {
+                          input
+                              .removeData(fieldIsFocused)
+                              .trigger('change');
+                        }
+                      }, 100);
+                  });
           },
 
         // reject non-digit character input
@@ -542,8 +569,10 @@
               required =  wrap.hasClass( conf.reqClassPattern ) || control.hasClass( conf.reqClassPattern );
 
           // purge wrapper of old error notifications
-          wrap.removeClass( conf.reqErrorClass );
-          wrap.removeClass( conf.typeErrorClass );
+          if ( report ) {
+            wrap.removeClass( conf.reqErrorClass );
+            wrap.removeClass( conf.typeErrorClass );
+          }
 
           if (wrap.length !== 0)
           {
@@ -624,8 +653,10 @@
                 wrap.data( 'av-error-short', (typeof shortErr === 'string' ? shortErr : res) );
 
                 // mark wrapper (or control) with error class
-                wrap.removeClass( conf.reqErrorClass );
-                wrap.addClass( conf.typeErrorClass );
+                if ( report ) {
+                  wrap.removeClass( conf.reqErrorClass );
+                  wrap.addClass( conf.typeErrorClass );
+                }
 
               }
               else if (required) {
@@ -634,7 +665,9 @@
                 contextInvalids.push( wrap.get(0) );
 
                 // mark wrapper (or control) with error class
-                wrap.addClass( conf.reqErrorClass );
+                if ( report ) {
+                  wrap.addClass( conf.reqErrorClass );
+                }
 
               }
 
@@ -654,7 +687,7 @@
       });
 
       // we've passed through every control - time to sort out the results
-      if ( invalids.length )
+      if ( report && invalids.length )
       {
         var field = $(invalids[0]).find('*').addBack().filter('input, select, textarea');
         field.focusHere ?
