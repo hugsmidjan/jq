@@ -120,12 +120,13 @@
       for (var grpName in media.groups)
       {
         var grp = media.groups[grpName],
-            is = !!grp[media.format],
-            was = !!grp[media.lastFormat];
+            is = !!(grp&&grp[media.format]),
+            was = !!(grp&&grp[media.lastFormat]);
         media['is'+grpName] = is;
         media['was'+grpName] = was;
         media['became'+grpName] = is && !was;
         media['left'+grpName] = !is && was;
+        !grp && (delete media.groups[grpName]); // delete when we've made sure all flags are set to false (cleanup)
       }
     };
   _checkFormat = function ( query, format ) {
