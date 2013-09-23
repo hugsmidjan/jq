@@ -552,7 +552,9 @@
 
         // purge wrapper of old error notifications
         errMsgSel = errMsgSel || 'strong.' + conf.inlineErrorClass + ', a.' + conf.nextErrorLinkClass;
-        context.find( errMsgSel ).remove();
+        if ( report ) {
+          context.find( errMsgSel ).remove();
+        }
 
         // find controls that need validation
         var controls = context.is(':input') ? context : context.find(':input');
@@ -560,7 +562,7 @@
         controls.not(conf.includeDisabled?'':':disabled').not(':submit,:reset,:button').each(function(){
 
           var control = $( this );
-          control.removeData( 'av-malformed' );
+
 
           // get this control's types (defaulting to fi_txt for everything except checkboxes)
           var tests =  (this.type === 'checkbox') ?
@@ -647,19 +649,19 @@
               var resIsString = typeof res === 'string';
               if ( res || resIsString) {
                 // Message should detail how to complete the field
-
-                var shortErr;
-                // handle Object
-                if (!resIsString) {
-                  shortErr = res.alert;
-                  res = res.inline;
-                }
                 contextInvalids.push( wrap.get(0) );
-                wrap.data( 'av-error', res );
-                wrap.data( 'av-error-short', (typeof shortErr === 'string' ? shortErr : res) );
+
+                if ( report ) {
+                  var shortErr;
+                  // handle Object
+                  if (!resIsString) {
+                    shortErr = res.alert;
+                    res = res.inline;
+                  }
+                  wrap.data( 'av-error', res );
+                  wrap.data( 'av-error-short', (typeof shortErr === 'string' ? shortErr : res) );
 
                 // mark wrapper (or control) with error class
-                if ( report ) {
                   wrap.removeClass( conf.reqErrorClass );
                   wrap.addClass( conf.typeErrorClass );
                 }
@@ -713,6 +715,8 @@
   });
 
 })(jQuery);
+
+
 
 
 
