@@ -118,7 +118,9 @@
 
 
           // Hvarvest data from inside the select box and store it in `variations` and `tags`
-          select.children(/*'option'*/).each(function (i) {
+          // (BUT before we harvest - remove empty options so single-option elements get autoselected)
+          select.children().filter(function(){ return !$(this).attr('value'); }).remove();
+          select.children(/*'option'*/).each(function(){
               var optElm = $(this),
                   variationId = optElm.attr('value');
               if ( variationId )
