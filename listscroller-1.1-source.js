@@ -449,7 +449,7 @@
                       .addClass('p' + (i+1))
                       .bind( 'click', cfg, movePage );
           if (cfg.index == i) { a.addClass( cfg.currentPageClass ); }
-          jmps.push( a[0] );
+          jmps.push( bt[0] );
         }
         cfg.jumps = $( jmps );
         $( cfg.jumpWrapTemplate || [] )
