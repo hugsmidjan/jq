@@ -47,11 +47,11 @@
 //    // Configuration:  =======================================================
 //
 //    // Set custom throttle time (time between recalculations on scroll/resize) (default: 50ms)
-//    sections.whenOnScreen.throttle = 200;
+//    $.whenOnScreen.throttle = 200;
 //    // Indicate that left/right boundries should also be checked by default (default: false)
-//    sections.whenOnScreen.leftright = true;
+//    $.whenOnScreen.leftright = true;
 //    // Set default ranges (default: 50 --> [{ radius:50 }] )
-//    sections.whenOnScreen.ranges = [{ radius:100 }];
+//    $.whenOnScreen.ranges = [{ radius:100 }];
 //
 //
 //    // Configuration:  =======================================================
@@ -79,7 +79,7 @@
 //          leftright: true,
 //          ranges: [
 //              { name:'lazyload',  radius:100,   customData:{foo:1} },
-//              { name:'animate',   live:true,  top:-100, bottom:-300, left:0, right:40 },
+//              { name:'animate',   top:-100, bottom:-300, left:0, right:40 },
 //              { name:'foo',       radius:50, bottom:-75 },
 //            ]
 //        });
@@ -88,15 +88,17 @@
 //    // Stop monitoring one or more of the elements
 //    sections.eq(3).whenOnScreen( 'stop' );
 //
-//
 //    // For elements that are not "live" measured - you can
 //    // request 'recalc'ulation of their size/position
 //    // triggering on-/off-screen events when neccessary
 //    sections.eq(3).whenOnScreen( 'recalc' );
 //
+//    // Update the data/config object (takes effect on next 'recalc'/scroll/resize)
+//    var config = sections.eq(3).whenOnScreen( 'data' );
+//    config.ranges[0].top = 100;
 //
 //    // Running the plugin again with new options will
-//    // update the options for each element and instantly
+//    // update (i.e. overwrite) the options for each element and instantly
 //    // revaluate their status on-/off-screen - firing events when neccessary
 //    sections.whenOnScreen( myNewOptionsObj );
 //
@@ -176,15 +178,15 @@
             method = opts;
             opts = arguments[1];
           }
+          opts = $.extend({
+                    // live:   false,
+                    // ranges: $.whenOnScreen.range
+                  }, opts);
 
           if ( method === 'run')
           {
             // Normalize the options and apply defaults.
             // We can safely skip this if method is 'stop' or 'recalc'
-            opts = opts || {
-                // live:   false,
-                // ranges: $.whenOnScreen.range
-              };
             ranges =  opts.ranges!=null ?
                           opts.ranges:
                       globalCfg.ranges!=null ?
@@ -205,10 +207,11 @@
             }
           }
 
+          var retValue = this;
           this.each(function () {
               var elm = this,
-                  idx = $.inArray(elements, elm),
-                  elmExisted = idx > 0;
+                  idx = $.inArray(elm, elements),
+                  elmExisted = idx > -1;
 
               if ( method === 'stop' )
               {
@@ -228,6 +231,11 @@
                 {
                   data = elementDatas[idx];
                 }
+                if ( method === 'data' )
+                {
+                  retValue = elmExisted ? data : undefined; // make the plugin return the data of the first item
+                  return false;    // immediately exit this.each() loop
+                }
                 if ( method !== 'recalc' )
                 {
                   // Initialize and normalize (or simply update!) the data object for the current element
@@ -235,7 +243,7 @@
                   if ( !elmExisted ) {
                     elements.push(elm);
                     elementDatas.push(data);
-                    data.elm = elm = $(elm);
+                    data.elm = $(elm);
                   }
                   data.leftright = !!opts.leftright || !!globalCfg.leftright;
                   data.live =      !!opts.live;
@@ -249,13 +257,14 @@
                   // Measure the element's current dimensions and position
                   // Skip this if opts.live (because then it happens inside checkElements())
                   // Skip this if element already existed -- unless we've explicitly asked for 'recalc'
-                  var offs = data.elm.offset();
+                  var dataElm = data.elm,
+                      offs = dataElm.offset();
                   data.elmTop =    offs.top;
-                  data.elmBottom = offs.top + elm.outerHeight();
+                  data.elmBottom = offs.top + dataElm.outerHeight();
                   if ( data.leftright )
                   {
                     data.elmLeft =  offs.left;
-                    data.elmRight = offs.left + elm.outerWidth();
+                    data.elmRight = offs.left + dataElm.outerWidth();
                   }
                 }
                 if ( method === 'run' || !data.live )
@@ -264,6 +273,7 @@
                   // as the live elements may be considered up to date and correct
                   checkElements([ data ]);
                 }
+                // WARNING: Early return above!
               }
             });
 
@@ -274,11 +284,15 @@
           }
           else if ( !scrollEvSet )
           {
-            $win.on('scroll.whenOnScreen resize.whenOnScreen', $.throttleFn(checkElements, true, globalCfg.throttle) );
+            $win.on('scroll.whenOnScreen resize.whenOnScreen',
+                globalCfg.throttle ?
+                    $.throttleFn(checkElements, true, globalCfg.throttle):
+                    checkElements
+              );
             scrollEvSet = true;
           }
 
-          return this;
+          return retValue;
       };
 
 
