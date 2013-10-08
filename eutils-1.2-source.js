@@ -379,7 +379,7 @@
             _before = doc.scrollTop();
 
         // Focus the element!
-        _elm.trigger('focus');
+        _elm[0].focus(); // NOTE: Can't use _elm.trigger('focus'); because it won't focus Zero width/height elements.
 
         // Check for new scroll position
         if ( doc.scrollTop() !== _before )  // if the browser jumped to the anchor...  (the browser only scrolls the page if the _focusElm was outside the viewport)
