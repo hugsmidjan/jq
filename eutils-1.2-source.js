@@ -415,12 +415,11 @@
       $(doc)
           .off(clickEv)
           .on(clickEv, function (e) {
-              var href = e.target.href;
-              if ( href  &&  !e.isDefaultPrevented() )
+              var href = e.target.href,
+                  id;
+              if ( href  &&  !e.isDefaultPrevented()  &&  (id = href.split('#')[1]) )
               {
-                href = href.split('#');
-                var id = href[1],
-                    elm = id  &&  $('#'+id);
+                var elm = $('#'+id);
                 if ( elm[0]  &&  href[0]===doc.location.href.split('#')[0] )
                 {
                   e.preventDefault();
