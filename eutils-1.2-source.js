@@ -417,7 +417,7 @@
           .on(clickEv, function (e) {
               var href = e.target.href,
                   id;
-              if ( href  &&  !e.isDefaultPrevented()  &&  (id = href.split('#')[1]) )
+              if ( href  &&  !e.isDefaultPrevented()  &&  (id = (href = href.split('#'))[1]) )
               {
                 var elm = $('#'+id);
                 if ( elm[0]  &&  href[0]===doc.location.href.split('#')[0] )
