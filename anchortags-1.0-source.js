@@ -76,6 +76,15 @@
               isTagged=0,
               is = { a:{} };
 
+          // There's this weirdo bug in MSIE 8-10 where some (otherwise normal) link elements
+          // don't report a protocol... sometimes... ack!
+          // This happens only once in a blue moon - but in those cases it's very consitent
+          if (_protocol === ':')
+          {
+            linkElm.href += '';
+            _protocol = linkElm.protocol;
+          }
+
           if (_protocol === 'mailto:') // mailto links
           {
             link.addClass(cfg.emailClass);
@@ -89,7 +98,9 @@
           }
           else
           {
-            if (!/^(javascript|data):/.test(_protocol)) // javascript: and data: urls are not tagged as either internal or external. Essentially they're in a category of their own...
+            // javascript: and data: urls are not tagged as either internal or external.
+            // They're really in a category of their own...
+            if (!/^(javascript|data):/.test(_protocol))
             {
               if (_protocol) // has protocol?
               {
