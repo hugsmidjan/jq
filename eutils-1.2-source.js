@@ -294,6 +294,7 @@
       if ( eventHandler )
       {
         images.on('load'+ns+' readystatechange'+ns, function (e) {
+            ;;;window.console&&console.log( e.type +' :: '+ this.readyState );
             if ( e.type==='load' || this.readyState==='complete')
             {
               eventHandler.call(this, e);
@@ -303,9 +304,9 @@
       }
       if ( !noTriggering )
       {
-        // timeout to guarantee async event triggering across all browsers... (IE8-10 was triggering immediately)
-        setTimeout(function(){
-            images.each(function(src, img){
+        images.each(function(src, img){
+            // timeout to guarantee async event triggering across all browsers... (IE8-10 was triggering immediately)
+            setTimeout(function(){
                 // In IE (which has .readystate) only kick the image if it is "complete"
                 // (otherwise IE9 and IE10 sometimes abort the image loading midway and cache a corrupted/broken image)
                 // In other browsers kick every time. (Unless we find a way to check the load state?)
@@ -315,8 +316,13 @@
                   img.src = 'about:blank';
                   img.src = src;
                 }
-              });
-          }, 0);
+              }, 0);
+            // There's a timing problem in IE8 where readyState is
+            // sometimes reported as 'loading' inside the (above) timeout
+            // but load/readystatechange events are still never triggered.
+            // Simply accessing img.readyState immediately seems to fix it. FUBAR!
+            img.readyState;
+          });
       }
       return images;
     }
