@@ -15,7 +15,7 @@
               doc.removeEventListener(type, fix, true);
             };
       fix();
-      s = [.25, 1.6];
+      s = [0.25, 1.6];
       doc[addEv](type, fix, true);
 
     }
@@ -39,27 +39,26 @@
   // If there's a hash, or addEventListener is undefined, stop here
   if( !location.hash && win[addEv] ) {
     var scrTo = 'scrollTo',
-        scrTop = scrTo+'p',
-        topVal = 1,
-        getScrTop = function(){
-            return scrTop in doc.body ? doc.body[scrTop] : 1;
+        getScrTop = function(pageYOffset){
+            return  (pageYOffset = win.pageYOffset)!=null ?
+                        pageYOffset:
+                        (doc.body&&doc.body.scrollTop)||0;
           },
+        scrollVal = 1,
         //reset to 0 on bodyready, if needed
         bodycheck = setInterval(function(){
             if( doc.body ){
               clearInterval( bodycheck );
-              topVal = getScrTop();
-              win[scrTo]( 0, topVal === 1 ? 0 : 1 );
+              win[scrTo]( 0, (scrollVal=getScrTop())===1 ? 0 : 1 );
             }
           }, 15 );
-    //scroll to 1
-    win[scrTo]( 0, 1 );
+    //scroll to 1 if user hasn't already scrolled
+    getScrTop()===0 && win[scrTo]( 0, 1 );
     win[addEv]( 'load', function(){
       setTimeout(function(){
-        //at load, if user hasn't scrolled more than 20 or so...
-        if( getScrTop() < 20 ){
+        if( getScrTop() < 5 ){
           //reset to hide addr bar at onload
-          win[scrTo]( 0, topVal === 1 ? 0 : 1 );
+          win[scrTo]( 0, scrollVal === 1 ? 0 : 1 );
         }
       }, 0);
     }, false );
