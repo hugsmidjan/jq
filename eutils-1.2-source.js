@@ -294,7 +294,6 @@
       if ( eventHandler )
       {
         images.on('load'+ns+' readystatechange'+ns, function (e) {
-            ;;;window.console&&console.log( e.type +' :: '+ this.readyState );
             if ( e.type==='load' || this.readyState==='complete')
             {
               eventHandler.call(this, e);
