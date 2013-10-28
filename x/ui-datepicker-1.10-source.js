@@ -2063,5 +2063,5 @@ $.datepicker.version = "1.10.3";
 		isRTL: false,
 		showMonthAfterYear: false,
 		yearSuffix: ''};
-	$.datepicker.setDefaults($.datepicker.regional['is']);
+  $.datepicker.setDefaults( $.datepicker.regional[ $('html').attr('lang')||'' ] );
 })(jQuery);
