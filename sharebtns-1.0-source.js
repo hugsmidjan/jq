@@ -45,14 +45,13 @@
 */
 
 
-(function($, docLoc, encURI, readystateevents){
+(function($, win, docLoc, encURI, readystateevents){
 
   var
       pageLang,
 
       sharebtns = $.fn.sharebtns = function ( cfg ) {
           pageLang = pageLang || $('html').attr('lang').substr(0,2) || 'en';
-
           var buttonsToInsert = [];
           if ( this.length )
           {
@@ -134,7 +133,7 @@
               count:    '',       // '' == 'horizontal'. Other options: 'none', 'vertical'
               via:      '',       // Optional twitter username to mention/link to. Example: "foobar"
               related:  '',       // Optional list of recommended usernames. Example: "anywhere:The Javascript API,sitestreams,twitter:The official account"
-              lang:     '',       // Optional language setting ??? defaults to 'en'
+              //lang:     '',       // Optional language setting ??? defaults to 'en'
               hashtags: '',       // Optional comma-delmited list of hashtags. (e.g. 'cooloption,hipster,socool')
               text:     '',       // Optional default tweet body text.
               //url:      '',       // defaults to document.location.href
@@ -176,7 +175,7 @@
                   var b = this;
                   if ( !b.txt )
                   {
-                    var txts = { en: 'Share',  is: 'Deila' };
+                    var txts = { en: 'Share on Facebook',  is: 'Deila á Facebook' };
                     b.txt = txts[ b.lang ];
                     if ( !b.txt )
                     {
@@ -201,7 +200,7 @@
                       iframeDoc = btn.filter('iframe').add(btn.find('iframe')).eq(0) // btn might have been wrapped or otherwise modified by the optional custom "process" method
                                       .contents()[0];
                   iframeDoc.write(
-                      '<!DOCTYPE html><html lang="'+ b.lang +'">' +
+                      '<!DOCTYPE html><html lang="'+ (b.lang||'en') +'">' +
                       '<head><meta charset="UTF-8" /><title>.</title>' +
                       '<link href="https://codecentre.eplica.is/f/fb-share.css" rel="stylesheet" type="text/css" />' +
                       '</head><body class="'+ (b.color||'') +'">' +
@@ -238,10 +237,10 @@
                   }
                   injectScriptIfNeeded(
                       '//connect.facebook.net/'+ this.$locale() +'/all.js#xfbml=1',
-                      function(){  window.FB  &&  FB.XFBML.parse();  }
+                      function(){  win.FB  &&  win.FB.XFBML.parse();  }
                     );
                 },
-              $loc: '',
+              $loc: null,
               $locs: {
                   is: 'is_IS',
                   dk: 'dk_DK',
@@ -252,8 +251,8 @@
                   de: 'de_DE'
                 },
               $locale: function () {
-                  this.$loc = this.$loc  ||  this.$locs[ $('html').attr('lang').substr(0,2) ]  ||  'en_US';
-                  return this.$loc;
+                  var b = this;
+                  return b.$loc || (b.$loc = b.$locs[ b.lang ]  ||  'en_US');
                 },
               $pos:  50 // defaults to last position because when 'count' is set to '' - loads of text appear to the right of the button
             },
@@ -274,7 +273,7 @@
                   // https://www.google.com/intl/en/webmasters/+1/button/index.html
                   injectScriptIfNeeded(
                       '//apis.google.com/js/plusone.js',
-                      function(){  window.gapi  &&  gapi.plusone.go();  }
+                      function(){  win.gapi  &&  win.gapi.plusone.go();  }
                     );
                 },
               $pos:  20
@@ -375,4 +374,4 @@
 
 
 
-})(jQuery, document.location, encodeURIComponent, 'load readystatechange');
+})(jQuery, window, document.location, encodeURIComponent, 'load readystatechange');
