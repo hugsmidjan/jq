@@ -49,6 +49,7 @@
 
   var
       pageLang,
+      link,
 
       sharebtns = $.fn.sharebtns = function ( cfg ) {
           pageLang = pageLang || $('html').attr('lang').substr(0,2) || 'en';
@@ -56,6 +57,7 @@
           if ( this.length )
           {
             cfg = $.extend(true, {}, defaultCfg, cfg);
+            link = link || $('<a/>')[0];
             $.each(btnDefaults, function (btnName, btnDefaultCfg) {
                 var cfgBtnName = cfg[btnName];
                 if ( cfgBtnName )
@@ -66,20 +68,23 @@
                       cfg[propName]  &&   presetVals  &&  $.extend(bCfg, presetVals);
                     });
                   $.extend(bCfg, cfgBtnName);
+                  link.href = bCfg.url; // normalize the url as a full URL
+                  bCfg.url = link.href;
                   // allow cfgBtnName itself to be a $pos number
                   bCfg.$pos = typeof cfgBtnName === 'number' ? cfgBtnName : bCfg.$pos || 0;
                   bCfg.$prep && bCfg.$prep( cfg );
-                  var newBtn = bCfg.$tmpl.replace(/(%=?)?\{(.+?)\}/g, function(m,p1,p2){
-                                                                          var val = bCfg[p2];
-                                                                          return  !p1 ? // we have a plain {key} marker (i.e. NOT preceeded by % or %=)
-                                                                                      val:
-                                                                                  p1==='%' ? // %{key} marker means we should URI encode
-                                                                                      encURI(val):
-                                                                                  // We must have a %={key} marker. (Prints a full (encoded) URL parameter -- i.e. "key=keyValue&amp;" )
-                                                                                  val!=null ? // but only if it has some value.
-                                                                                      p2+'='+encURI(val)+'&amp;':
-                                                                                      ''; // default to not printing anything...
-                                                                        });
+                  var newBtn = ((bCfg.custom&&bCfg.$tmpl2)||bCfg.$tmpl)
+                                  .replace(/(%=?)?\{(.+?)\}/g, function(m,p1,p2){
+                                      var val = bCfg[p2];
+                                      return  !p1 ? // we have a plain {key} marker (i.e. NOT preceeded by % or %=)
+                                                  val:
+                                              p1==='%' ? // %{key} marker means we should URI encode
+                                                  encURI(val):
+                                              // We must have a %={key} marker. (Prints a full (encoded) URL parameter -- i.e. "key=keyValue&amp;" )
+                                              val!=null ? // but only if it has some value.
+                                                  p2+'='+encURI(val)+'&amp;':
+                                                  ''; // default to not printing anything...
+                                      });
                   if ( cfg.wrap ) { newBtn = '<'+cfg.wrap+' class='+btnName+'>'+newBtn+'</'+cfg.wrap+'>'; }
                   newBtn = $( cfg.process ? cfg.process(newBtn, btnName, bCfg) : newBtn );
                   newBtn.$pos = bCfg.$pos;
@@ -125,6 +130,8 @@
 
 
 
+      dodgyPopupAttrs = ' onclick="window.open(this.href,null,\'toolbar=0,status=0,width=626,height=436\');return false;" target=',
+      fbshareLnk = '<a'+ dodgyPopupAttrs +'"fbshare" href="//www.facebook.com/sharer.php?u=',
 
       btnDefaults = sharebtns.btnDefaults = {
 
@@ -136,7 +143,6 @@
               //lang:     '',       // Optional language setting ??? defaults to 'en'
               hashtags: '',       // Optional comma-delmited list of hashtags. (e.g. 'cooloption,hipster,socool')
               text:     '',       // Optional default tweet body text.
-              //url:      '',       // defaults to document.location.href
               //txt:      null,     // Link text for customized links
 
             // private
@@ -146,9 +152,6 @@
                   {
                     var txt = { en:'Tweet this!', is:'Senda á Twitter' };
                     b.txt = b.txt || txt[b.lang] || txt.en;
-                    b.$tmpl = '<a onclick="window.open(this.href,null,\'toolbar=0,status=0,width=626,height=436\');return false;" target="tweetit"'+
-                                ' href="https://twitter.com/intent/tweet?%={via}%={related}%={hashtags}%={text}%={url}%={lang}"'+
-                              '>{txt}</a>';
                   }
                   else
                   {
@@ -161,14 +164,15 @@
                   }
                 },
               $tmpl:  '<iframe src="//platform.twitter.com/widgets/tweet_button.html?%={size}%={count}%={via}%={related}%={hashtags}%={text}%={url}%={lang}" style="width:{width}; height:{height};" allowtransparency="true" frameborder="0" scrolling="no" />',
+              $tmpl2: '<a'+ dodgyPopupAttrs +'"tweetit" href="https://twitter.com/intent/tweet?%={via}%={related}%={hashtags}%={text}%={url}%={lang}">{txt}</a>',
               $pos:  10 // lowest $pos comes first
             },
 
 
           fbshare: {
               color: '', // 'dark',
-              //url:   '',    // defaults to document.location.href
               //txt:   null,  // Link text for customized links
+              //width: cssLength // Defaults to '10.2em' or '11.2em' depending on language
 
             // private
               $prep: function ( /*pluginCfg*/ ) {
@@ -183,18 +187,14 @@
                       b.txt = txts.en;
                     }
                   }
-                  if ( b.custom )
-                  {
-                    b.$tmpl = btnDefaults.fbshare.$lnk+'%{url}" class="fbsharebtn">{txt}</a>';
-                  }
-                  else
-                  {
-                    b.width =  '5.636em'; // 62px @ 11px font-size
-                    b.height = '1.818em'; // 20px @ 11px font-size
-                  }
+                  // if ( !b.custom )
+                  // {
+                    b.height = '1.818em';  // Approx. 20px @ 11px font-size. Not over-ridable
+                    b.width =  b.width || (b.lang==='is' ? '10.2em' : '11.2em');
+                  // }
                 },
-              $lnk: '<a onclick="window.open(this.href,null,\'toolbar=0,status=0,width=626,height=436\');return false;" target="fbshare" href="//www.facebook.com/sharer.php?u=',
-              $tmpl: '<iframe data-sharebtns="fbshare" style="width:{width};height:{height};font-size:11px;" allowtransparency="true" frameborder="0" scrolling="no" />',
+              $tmpl:  '<iframe data-sharebtns="fbshare" style="width:{width};height:{height};font-size:11px;" allowtransparency="true" frameborder="0" scrolling="no" />',
+              $tmpl2: fbshareLnk+'%{url}" class="fbsharebtn">{txt}</a>',
               $init: function ( btn/*, cfg*/ ) {
                   var b = this,
                       iframeDoc = btn.filter('iframe').add(btn.find('iframe')).eq(0) // btn might have been wrapped or otherwise modified by the optional custom "process" method
@@ -204,7 +204,7 @@
                       '<head><meta charset="UTF-8" /><title>.</title>' +
                       '<link href="https://codecentre.eplica.is/f/fb-share.css" rel="stylesheet" type="text/css" />' +
                       '</head><body class="'+ (b.color||'') +'">' +
-                      b.$lnk + encURI(b.url) +'">'+ b.txt +'</a>' +
+                      fbshareLnk + encURI(b.url) +'">'+ b.txt +'</a>' +
                       '</body></html>'
                     );
                   iframeDoc.close();
@@ -221,7 +221,6 @@
               color:   '', // 'dark',
               verb:    '', // 'recommend' (default text is "like")
               custom:  false, // facebook like button CAN NOT be customized!
-              //url:     '', // defaults to document.location.href
 
             // private
               $prep: function ( /*pluginCfg*/) {
@@ -259,16 +258,25 @@
 
 
           gplus: {
-              //url:   '', //  defaults to document.location.href
               count:   '', //  'inline' (facebook-style) or 'none' (defaults to "bubble" (== '') )
               size:    'medium', // 'small', 'medium', '' (large), 'tall' (tall combined with count:'bubble' displays a vertically positioned counter)
-              custom:  false, // Google Plus +1 button CAN NOT be customized!
+              //txt:    null,     // Link text for customized links
 
             // private
               $prep: function ( /*pluginCfg*/ ) {
-                  this.count = this.count ? ' data-annotation="'+this.count+'"' : '';
+                  var b = this;
+                  if ( b.custom )
+                  {
+                    var txts = { en: 'Share on Google+',  is: 'Deila á Google+' };
+                    b.txt = b.txt || txts[ b.lang ] || txts.en;
+                  }
+                  else
+                  {
+                    b.count = b.count ? ' data-annotation="'+b.count+'"' : '';
+                  }
                 },
-              $tmpl: '<div class="g-plusone" data-size="{size}"{count} data-href="{url}"/>',
+              $tmpl:  '<div class="g-plusone" data-size="{size}"{count} data-href="{url}"/>',
+              $tmpl2: '<a href="https://plus.google.com/share?url=%{url}" class="gplusbtn"'+ dodgyPopupAttrs +'"gpluswin">{txt}</a>',
               $init: function (/* btn, cfg */) {
                   // https://www.google.com/intl/en/webmasters/+1/button/index.html
                   injectScriptIfNeeded(
@@ -281,7 +289,6 @@
 
 
           pinterest: {
-              //url:         '',  //  defaults to document.location.href
               imgsrc:      '',  //  defaults to the first image on the page or the opengraph image
               count:       'beside',       // '' (horizontal). Other options: 'none', 'above'
               //imgSrcAttr:  '',  // defaults to 'src'
@@ -301,13 +308,11 @@
                       b.imgsrc = docLoc.protocol +'//'+ docLoc.host +'/'+ b.imgsrc.replace(/^\//,'');
                     }
                   }
-                  if ( b.custom )
-                  {
-                    b.$tmpl = '<a href="http://pinterest.com/pin/create/button/?url=%{url}&amp;media=%{imgsrc}" class="pinitbtn" onclick="window.open(this.href,null,\'toolbar=0,status=0,width=626,height=436\');return false;" target="pinitwin" lang="en">{txt}</a>';
-                  }
                 },
               $tmpl: '<a href="http://pinterest.com/pin/create/button/?url=%{url}&amp;media=%{imgsrc}" class="pin-it-button" data-pin-do="buttonPin" data-pin-config="{count}" lang="en">{txt}</a>',
                         //<img border="0" src="//assets.pinterest.com/images/PinExt.png" title="Pin It" />
+              $tmpl2: '<a href="http://pinterest.com/pin/create/button/?url=%{url}&amp;media=%{imgsrc}" class="pinitbtn"'+ dodgyPopupAttrs +'"pinitwin" lang="en">{txt}</a>',
+
               $init: function (/* btn, cfg */) {
                   // http://business.pinterest.com/widget-builder/#do_pin_it_button
                   injectScript( 'https://assets.pinterest.com/js/pinit.js' );
