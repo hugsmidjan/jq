@@ -559,7 +559,7 @@
         // find controls that need validation
         var controls = context.is(':input') ? context : context.find(':input');
 
-        controls.not(conf.includeDisabled?'':':disabled').not(':submit,:reset,:button').each(function(){
+        controls.not(conf.includeDisabled?'':':disabled').not(':submit,:reset,:button,[type="hidden"]').each(function(){
 
           var control = $( this );
 
