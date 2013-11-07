@@ -5,7 +5,6 @@
   // fix orientation change zoom bug in Safari Mobile on iOS devices
   // based on: https://gist.github.com/901295
   if (  /iPhone|iPad/.test(ua) && !/Opera Mini/.test(ua) /* && doc[querySelectorAll] */ ) {
-
     var meta = doc.querySelectorAll('meta[name=viewport]');
     if ( meta[0] ) {
       var type = 'gesturestart',
@@ -17,17 +16,19 @@
       fix();
       s = [0.25, 1.6];
       doc[addEv](type, fix, true);
-
     }
 
     // counter the input[placeholder] orientationchange layout bug in iPhone+iOS6
     // http://stackoverflow.com/q/12670931/16271
     if (  /iPhone/.test(ua) ) {
       win[addEv]('orientationchange', function(){
+        /*
           var s = doc.documentElement.style;
           s.display = 'none';
-          setTimeout(function(){
-              s.display = 'block';
+          setTimeout(function(){ s.display = 'block'; }, 0);
+        */
+          setTimeout(function(d){
+              (d=document.documentElement).className = d.className;
             }, 0);
         }, true);
     }
