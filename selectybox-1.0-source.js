@@ -17,6 +17,7 @@
 //
 // Usage:
 //  $('select').selectybox({ /* options */ });
+//  $('select').selectybox({'val', '10'}); // silently updates <select>'s value
 //  $('select').selectybox({'destroy'});
 //
 //  Returns the wrapper elements.
@@ -25,9 +26,17 @@
 (function($){
 
   var dataKey = 'selecty-button-cfg',
-      selectybox = $.fn.selectybox = function ( cfg ) {
+      nsChangeEv = 'change.selectybox', // namespaced event to allow "quiet" updates.
+
+      selectybox = $.fn.selectybox = function ( cfg, value ) {
           var selects = this;
-          if ( cfg === 'destroy' )
+          if ( cfg === 'val' )
+          {
+            $(selects)
+                .val(value)
+                .trigger(nsChangeEv);
+          }
+          else if ( cfg === 'destroy' )
           {
             selects.each(function () {
                 var sel = $(this),
@@ -67,7 +76,7 @@
                             $(this).parent()
                                 .toggleClass( cfg.focusClass, e.type === 'focusin' );
                           })
-                        .on('change keypress', 'select', function (e) {
+                        .on(nsChangeEv+' keypress', 'select', function (e) {
                             // update selecty-button text
                             var sel = $(this);
                             setTimeout(function(){
