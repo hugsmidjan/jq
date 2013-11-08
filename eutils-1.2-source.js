@@ -619,8 +619,7 @@
         cfg = cfg || {};
         //return $('<body/>').append( // <-- this seems to cause crashes in IE8. (Note: Crash doesn't seem to happen on first run)
         return $('<div/>').append(
-                    ($.parseHTML||$)(responseText||'')
-                      .children()
+                    $(($.parseHTML||$)(responseText||''))
                         .not( cfg.stripFlat || myown.stripFlat || 'script,title,meta,link,style' )
                             .find( cfg.stripDeep || myown.stripDeep || 'script,style' )
                                 .remove()
