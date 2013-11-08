@@ -32,7 +32,7 @@
           var selects = this;
           if ( cfg === 'val' )
           {
-            $(selects)
+            selects
                 .val(value)
                 .trigger(nsChangeEv);
           }
@@ -52,7 +52,6 @@
                   $.each(conf.selectCSS||{}, function(prop){ sel.css(prop, ''); });
                 }
               });
-            return selects;
           }
           else
           {
@@ -87,6 +86,7 @@
                         .toArray()
               );
           }
+          return selects;
         },
 
       defaultCfg = selectybox.defaults = {
