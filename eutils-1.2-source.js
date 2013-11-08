@@ -619,7 +619,8 @@
         cfg = cfg || {};
         //return $('<body/>').append( // <-- this seems to cause crashes in IE8. (Note: Crash doesn't seem to happen on first run)
         return $('<div/>').append(
-                    $(responseText||[])
+                    ($.parseHTML||$)(responseText||'')
+                      .children()
                         .not( cfg.stripFlat || myown.stripFlat || 'script,title,meta,link,style' )
                             .find( cfg.stripDeep || myown.stripDeep || 'script,style' )
                                 .remove()
@@ -648,22 +649,22 @@
         cfg = cfg || {};
         var tagName = cfg.tagName || 'del',
             tagAttrs = ' ' + (cfg.tagAttrs || 'tagName="'),
-            result = String(html)
-                        .replace(/<\!DOCTYPE[^>]*>/i, '')
-                        .replace(/(<\/?)(html|head|body|title|meta|style|link|script)([\s\>])/gi, function (m, p1, p2, p3) {
-                            p2 = p2.toLowerCase();
-                            return cfg['keep'+p2] ?
-                                      p1+p2+p3:
-                                      p1 + tagName +
-                                        ((p1==='<') ? tagAttrs+p2+'"' : '')+
-                                        p3;
-                          })
+            resultStr = String(html)
+                          .replace(/<\!DOCTYPE[^>]*>/i, '')
+                          .replace(/(<\/?)(html|head|body|title|meta|style|link|script)([\s\>])/gi, function (m, p1, p2, p3) {
+                              p2 = p2.toLowerCase();
+                              return cfg['keep'+p2] ?
+                                        p1+p2+p3: // leave unchanged
+                                        p1 + tagName + // rewrite '<body ' to '<del tagName="body" '
+                                          ((p1==='<') ? tagAttrs+p2+'"' : '')+
+                                          p3;
+                            })
                       ;
-        result =  cfg.keepimgSrc ?
-                      result:
-                      $.imgSuppress(result, cfg.srcAttr)
+        resultStr =  cfg.keepimgSrc ?
+                      resultStr:
+                      $.imgSuppress(resultStr, cfg.srcAttr)
                     ;
-        return result;
+        return resultStr;
       },
 
 
