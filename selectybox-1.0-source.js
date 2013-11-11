@@ -17,7 +17,7 @@
 //
 // Usage:
 //  $('select').selectybox({ /* options */ });
-//  $('select').selectybox({'val', '10'}); // silently updates <select>'s value
+//  $('select').selectybox('val', '10'); // silently updates <select>'s value
 //  $('select').selectybox({'destroy'});
 //
 //  Returns the wrapper elements.
@@ -75,7 +75,8 @@
                             $(this).parent()
                                 .toggleClass( cfg.focusClass, e.type === 'focusin' );
                           })
-                        .on(nsChangeEv+' keypress', 'select', function (e) {
+                        // keypress breaks arrow keys in sone browsers (Firefox,)
+                        .on(nsChangeEv+' keyup', 'select', function (e) {
                             // update selecty-button text
                             var sel = $(this);
                             setTimeout(function(){
