@@ -22,6 +22,7 @@
      fbshare:   false,    // Boolean|Number(non-zero position index)|Object(button config)  - non-falsy values insert Facebook "Share" button
      gplus:     false,    // Boolean|Number(non-zero position index)|Object(button config)  - non-falsy values insert Google+ "+1" button
      pinterest: false,    // Boolean|Number(non-zero position index)|Object(button config)  - non-falsy values insert Pinterest "PinIt" button
+     linkedin:  false,    // Boolean|Number(non-zero position index)|Object(button config)  - non-falsy values insert LinkedIn "share" button
 
      wrap:      null,     // String(tagName) - if non-empty each button is wrapped in a "tagName" Element with "buttonName" as its className.
                           //                   i.e.  wrap:'li', -->  .wrap(<li class="twitter"/>);
@@ -122,12 +123,28 @@
         },
       countNone={ count:'none' },
       presets = {
-          dark:      { fbshare:{color:'dark'}, facebook:{color:'dark'}  },
-          large:     { twitter:{size:'l'},     facebook:{},                   gplus:{size:''},               pinterest:{} },
-          countNone: { twitter:countNone,      facebook:{count:'standard'},   gplus:countNone,               pinterest:countNone },
-          countV:    { twitter:{ count:'vertical' },  facebook:{count:'box_count'},  gplus:{count:'',size:'tall'},  pinterest:{ count:'above' } }
+          dark:      { fbshare:{color:'dark'},        facebook:{color:'dark'}  },
+          large:     { twitter:{size:'l'},                                           gplus:{size:''}  },
+          countNone: { twitter:countNone,             facebook:{count:'standard'},   gplus:countNone,               pinterest:countNone,          linkedin:{count:''} },
+          countV:    { twitter:{ count:'vertical' },  facebook:{count:'box_count'},  gplus:{count:'',size:'tall'},  pinterest:{ count:'above' },  linkedin:{count:'top'} }
         },
 
+
+      _locs = {
+          is: 'is_IS',
+          dk: 'dk_DK',
+          pl: 'pl_PL',
+          fo: 'fo_FO',
+          no: 'nn_NO',
+          se: 'sv_SE',
+          de: 'de_DE',
+          fr: 'fr_FR',
+          es: 'es_ES',
+          en: 'en_US'
+        },
+      _getLocale = function (lang, def) {
+          return _locs[lang] || _locs[def||'en'];
+        },
 
 
       dodgyPopupAttrs = ' onclick="window.open(this.href,null,\'toolbar=0,status=0,width=626,height=436\');return false;" target=',
@@ -235,25 +252,33 @@
                     $('body').prepend('<div id="fb-root"/>');
                   }
                   injectScriptIfNeeded(
-                      '//connect.facebook.net/'+ this.$locale() +'/all.js#xfbml=1',
+                      '//connect.facebook.net/'+ _getLocale(this.lang, 'en') +'/all.js#xfbml=1',
                       function(){  win.FB  &&  win.FB.XFBML.parse();  }
                     );
                 },
-              $loc: null,
-              $locs: {
-                  is: 'is_IS',
-                  dk: 'dk_DK',
-                  pl: 'pl_PL',
-                  fo: 'fo_FO',
-                  no: 'nn_NO',
-                  se: 'sv_SE',
-                  de: 'de_DE'
-                },
-              $locale: function () {
-                  var b = this;
-                  return b.$loc || (b.$loc = b.$locs[ b.lang ]  ||  'en_US');
-                },
               $pos:  50 // defaults to last position because when 'count' is set to '' - loads of text appear to the right of the button
+            },
+
+
+          linkedin: {
+              count:   'right', // (facebook-style) or 'top' or 'none' (defaults to "bubble" (== '') )
+
+            // private
+              $prep: function ( /*pluginCfg*/ ) {
+                  var b = this;
+                  b.count = b.count ? ' data-counter="'+b.count+'"' : '';
+                },
+              $tmpl: '<script type="IN/Share" data-url="{url}"{count} data-showzero="true"></script>',
+              $init: function (b/* , cfg */) {
+                  // http://developer.linkedin.com/plugins/share-plugin-generator
+                  // NOTE: LinkedIn's plugin is crap and can only be injected once,
+                  // and cann't be commanded to re-run for newly injected button templates.
+                  injectScriptIfNeeded(
+                      '//platform.linkedin.com/in.js',
+                      null,
+                      'lang: ' + _getLocale( b.lang )
+                    );
+                },
             },
 
 
@@ -329,50 +354,47 @@
   // =====================================================================
 
   var loadedScripts = {},
-      injectScript = function (url/*, callback */) {
-          clearTimeout( loadedScripts[url] );
-          loadedScripts[url] = setTimeout(function(){
-              $.ajax({
-                  dataType: 'script',
-                  cache: true,
-                  //success: callback,
-                  url: url
-                });
-            }, 100);
+      delay = 300,
+      injectScript = function (url, callback, html) {
+          injectScriptIfNeeded(url, callback, html, true);
         },
-      injectScriptIfNeeded = function ( scriptURL, callback ) {
+      injectScriptIfNeeded = function ( scriptURL, callback, body, _multiple ) {
           var scriptState = loadedScripts[scriptURL];
-          if ( !scriptState )
+          if ( _multiple || !scriptState )
           {
-            loadedScripts[scriptURL] = scriptState = {};
+            loadedScripts[scriptURL] = scriptState = scriptState || {};
 
-            // we do this instead of $.getScript() to avoid an annoying
-            // cross-frame access violation error in Google Chrome. Ack!
-            $('<script/>')
-                .attr('src', scriptURL)
-                .each(function () {
-                    // This seems like the only way to insert a <script> element with jQuery...
-                    // normal appendTo or insertBefore methods seem not to work
-                    $('head')[0].appendChild(this);
-                  })
-                .on(readystateevents, function (/*e*/) {
-                    var js = this;
-                    if ( !js.readyState || /^(loaded|complete)$/.test(js.readyState) )
-                    {
-                      scriptState.loaded = 1;
-                      if ( callback )
-                      {
-                        clearTimeout( scriptState.timeout );
-                        scriptState.timeout = setTimeout(callback, 100);
-                      }
-                      $(js).off(readystateevents);
-                    }
-                  });
+            clearTimeout( scriptState.s );
+            scriptState.s = setTimeout(function(){
+                // we do this instead of $.getScript() to avoid an annoying
+                // cross-frame access violation error in Google Chrome. Ack!
+                $('<script/>')
+                    .attr('src', scriptURL)
+                    .html( body||'' )
+                    .each(function () {
+                        // This seems like the only way to persistently insert a <script> element with jQuery...
+                        // normal appendTo or insertBefore methods seem not to work
+                        $('head')[0].appendChild(this);
+                      })
+                    .on(readystateevents, function (/*e*/) {
+                        var js = this;
+                        if ( !js.readyState || /^(loaded|complete)$/.test(js.readyState) )
+                        {
+                          scriptState.loaded = 1;
+                          if ( callback )
+                          {
+                            clearTimeout( scriptState.t );
+                            scriptState.t = setTimeout(callback, _multiple?0:delay);
+                          }
+                          $(js).off(readystateevents);
+                        }
+                      });
+              }, _multiple?delay:0);
           }
           else if ( callback  &&  scriptState.loaded )
           {
-            clearTimeout( scriptState.timeout );
-            scriptState.timeout = setTimeout(callback, 100);
+            clearTimeout( scriptState.t );
+            scriptState.t = setTimeout(callback, delay);
           }
         };
 
