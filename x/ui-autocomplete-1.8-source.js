@@ -645,6 +645,7 @@ $.widget("ui.menu", {
  *
  * http://github.com/scottgonzalez/jquery-ui-extensions
  */
+// + li.addClass( item.className ) added by Már Örlygsson
 (function( $ ) {
 
 var proto = $.ui.autocomplete.prototype,
@@ -669,7 +670,7 @@ $.extend( proto, {
 	},
 
 	_renderItem: function( ul, item) {
-		return $( "<li></li>" )
+		return $( "<li/>" )
 			.addClass( item.className )  // <-- Már's addition!!
 			.data( "item.autocomplete", item )
 			.append( $( '<a href="#"/>' )[ this.options.html ? "html" : "text" ]( item.label ) )
