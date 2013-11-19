@@ -131,6 +131,17 @@
 
 
 
+  $.fn.splitN = function (n, func) {
+      var i = 0,
+          len = this.length,
+          args = [].slice.call(arguments, 2);
+      while ( i<len )
+      {
+        func.apply( this.slice(i, i+n), args );
+        i += n;
+      }
+      return this;
+    };
 
 
   $.fn.if_ = function (cond) {
