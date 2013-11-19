@@ -492,6 +492,7 @@
 
 
   // returns a throttled function that never runs more than every `delay` milliseconds
+  // the returned function also has a nice .finish() method.
   $.throttleFn = function (func, skipFirst, delay) {
       if ( typeof skipFirst === 'number' )
       {
@@ -499,25 +500,32 @@
         skipFirst = false;
       }
       delay = delay || 50;
-      var throttled = 0;
-      return function () {
-          var args = arguments,
-              _this = this;
-          if ( throttled===0 )
-          {
-            skipFirst ?
-                throttled++:
-                func.apply(_this, args);
-            setTimeout(function(){
-                throttled>1  &&  func.apply(_this, args);
-                throttled = 0;
-              }, delay);
-          }
-          throttled++;
-        };
+      var throttled = 0,
+          timeout,
+          throttledFn = function () {
+              var args = arguments,
+                  _this = this;
+              if ( !throttled )
+              {
+                skipFirst ?
+                    throttled++:
+                    func.apply(_this, args);
+                timeout = setTimeout(function(){
+                    throttled>1  &&  throttledFn.finish();
+                  }, delay);
+                throttledFn.finish = function () {
+                    timeout && clearTimeout( timeout );
+                    throttled && func.apply(_this, args);
+                    throttled = 0;
+                  };
+              }
+              throttled++;
+            };
+      return throttledFn;
     };
 
   // returns a debounced function that only runs after `delay` milliseconds of quiet-time
+  // the returned function also has a nice .cancel() method.
   $.debounceFn = function (func, immediate, delay) {
       if ( typeof immediate === 'number' )
       {
@@ -525,18 +533,23 @@
         immediate = false;
       }
       delay = delay || 50;
-      var timeout;
-      return function () {
-          var args = arguments,
-              runNow = !timeout && immediate,
-              _this = this;
-          clearTimeout( timeout );
-          timeout = setTimeout(function(){
-                !runNow  &&  func.apply(_this, args); // don't re-invoke `func` if runNow is true
-                timeout = 0;
-              }, delay);
-          runNow  &&  func.apply(_this, args);
-       };
+      var timeout,
+          debouncedFn = function () {
+              var args = arguments,
+                  runNow = !timeout && immediate,
+                  _this = this;
+              debouncedFn.cancel();
+              timeout = setTimeout(function(){
+                    !runNow  &&  func.apply(_this, args); // don't re-invoke `func` if runNow is true
+                    timeout = 0;
+                  }, delay);
+              runNow  &&  func.apply(_this, args);
+           };
+      debouncedFn.cancel = function () {
+          clearTimeout(timeout);
+          timeout = 0;
+        };
+      return debouncedFn;
     };
 
 
