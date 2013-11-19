@@ -491,7 +491,7 @@
 
 
 
-  // returns a throttled function that never runs more than every `delay` seconds
+  // returns a throttled function that never runs more than every `delay` milliseconds
   $.throttleFn = function (func, skipFirst, delay) {
       if ( typeof skipFirst === 'number' )
       {
@@ -515,6 +515,28 @@
           }
           throttled++;
         };
+    };
+
+  // returns a debounced function that only runs after `delay` milliseconds of quiet-time
+  $.debounceFn = function (func, immediate, delay) {
+      if ( typeof immediate === 'number' )
+      {
+        delay = immediate;
+        immediate = false;
+      }
+      delay = delay || 50;
+      var timeout;
+      return function () {
+          var args = arguments,
+              runNow = !timeout && immediate,
+              _this = this;
+          clearTimeout( timeout );
+          timeout = setTimeout(function(){
+                !runNow  &&  func.apply(_this, args); // don't re-invoke `func` if runNow is true
+                timeout = 0;
+              }, delay);
+          runNow  &&  func.apply(_this, args);
+       };
     };
 
 
