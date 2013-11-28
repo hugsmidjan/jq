@@ -135,7 +135,7 @@
 
 
 
-  $.formatChange = function (cfg, triggerNS ) {
+  var formatChange  = $.formatChange = function (cfg, triggerNS ) {
 
       if ( cfg === 'disengage' )
       {
@@ -150,17 +150,10 @@
         // Define the Format Info object if needed
         if ( !media )
         {
-          cfg = $.extend({
-                    // $tagName: 'del',
-                    // $elmId:   'mediaformat',
-                    // $before:  false,  // set to `true` to use ':before' instead of the default ':after'
-                  }, cfg);
+          cfg = $.extend(formatChange.config, cfg);
 
           media = $.extend({
-                  groups: {
-                      Small: { 'narrow':1, 'mobile':1 },
-                      Large: { 'tablet':1, 'full':1, 'wide':1 }
-                    },
+                  groups: formatChange.groups,
                   // DEPRICATED methods: (Instead use static media.isLarge, media.becameSmall, etc. flags)
                   is:     function (fmt) {  return  _checkFormat(fmt,this[format]);  },
                   was:    function (fmt) {  return  _checkFormat(fmt,this[lastFormat]);  },
@@ -219,5 +212,16 @@
       return media;
 
     };
+
+  formatChange.config = {
+      // $tagName: 'del',
+      // $elmId:   'mediaformat',
+      // $before:  false,  // set to `true` to use ':before' instead of the default ':after'
+    };
+  formatChange.groups = {
+      Small: { 'narrow':1, 'mobile':1 },
+      Large: { 'tablet':1, 'full':1, 'wide':1 }
+    };
+
 
 })(jQuery, window, 'resize.formatchange', 'format', 'lastFormat');
