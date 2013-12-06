@@ -54,8 +54,9 @@
 
       sharebtns = $.fn.sharebtns = function ( cfg ) {
           pageLang = pageLang || $('html').attr('lang').substr(0,2) || 'en';
-          var buttonsToInsert = [];
-          if ( this.length )
+          var buttonsToInsert = [],
+              refElm = this.eq(0);
+          if ( refElm[0] )
           {
             cfg = $.extend(true, {}, defaultCfg, cfg);
             link = link || $('<a/>')[0];
@@ -98,7 +99,7 @@
                                   buttonsToInsert.sort(function(a,b){ var d = a.$pos-b.$pos; return d>0 ? 1 : d<0 ? -1 : 0; }),
                                   function (btnCollection) { return btnCollection.toArray(); }
                                 );
-            this[cfg.insertion]( buttonsToInsert );
+            refElm[cfg.insertion]( buttonsToInsert );
           }
           return this.pushStack( buttonsToInsert );
         },
