@@ -4,28 +4,28 @@
 jQuery(function($){
 
     var defaultCfg = {
-          itemSel: 'li',
-          colCount: 3,
-          wrap: '<ul class="col" />',
-          wrapPend: 'before'
+          itemSel: 'li', // String - items to group
+          colCount: 3, // Int - number of columns
+          colWrap: '<ul class="col" />', // column wrap markup
+          wrapPend: 'before' // String - where to put the columns "(after, append, before, prepend)"
         },
         columnizor = function (elm, cfg) {
             var items = elm.find(cfg.itemSel),
                 itmCount = items.length,
-                col = $(cfg.wrap),
+                col = $(cfg.colWrap),
                 itmsPerCol = Math.ceil(itmCount / cfg.colCount);
 
-            // TODO :: Add 'delete' option?
+            // TODO :: Add 'destroy' option?
             // elm.data({
             //     itemSel: cfg.itemSel,
-            //     wrap: cfg.wrap
+            //     colWrap: cfg.colWrap
             //   });
 
             items.each(function (i) {
                 if (i % itmsPerCol === 0 && i !== 0)
                 {
                   elm[cfg.wrapPend](col);
-                  col = $(cfg.wrap);
+                  col = $(cfg.colWrap);
                 }
 
                 col.append( $(this) );
