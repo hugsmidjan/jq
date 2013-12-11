@@ -1,7 +1,7 @@
 // $.fn.columnizor -- (c) 2013 Hugsmiðjan ehf.
 // Valur Sverrisson
 
-jQuery(function($){
+(function($){
 
     var defaultCfg = {
           itemSel: 'li', // String - items to group
@@ -50,4 +50,4 @@ jQuery(function($){
       });
     };
 
-});
+})(jQuery);
