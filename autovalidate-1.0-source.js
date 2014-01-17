@@ -350,11 +350,15 @@
                     (delta>0 && input.max && !isNaN(max=parseInt(input.max,10)) ) ?
                         Math.min(val, max):
                         val;
-              input.value = val;
-              // trigger "change" immediately - unless the field is focused - then wait for blur like normal
-              $inp.data(fieldIsFocused) ?
-                  $inp.data(fieldIsChanged, true):
-                  $inp.trigger('change');
+
+              if ( $inp.val() != val ) // skip unnessesary updates and change events
+              {
+                $inp.val( val );
+                // trigger "change" immediately - unless the field is focused - then wait for blur like normal
+                $inp.data(fieldIsFocused) ?
+                    $inp.data(fieldIsChanged, true):
+                    $inp.trigger('change');
+              }
             }
           },
         triggerChange = function (/*e*/) { // bound on "focus"
