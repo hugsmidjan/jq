@@ -265,7 +265,7 @@
 
             // private
               // $prep: function ( /*pluginCfg*/) {},
-              $tmpl: '<div class="fb-like"'/*data-send="{sendBtn}"*/+' data-share="{shareBtn}" data-layout="{count}" data-width="{width}" data-show-faces="{faces}" data-action="{verb}" data-href="{url} data-colorScheme="{color}""/>',
+              $tmpl: '<div class="fb-like"'/*data-send="{sendBtn}"*/+' data-share="{shareBtn}" data-layout="{count}" data-width="{width}" data-show-faces="{faces}" data-action="{verb}" data-href="{url}" data-colorScheme="{color}"/>',
               $init: function (/* btn, cfg */) {
                   // https://developers.facebook.com/docs/plugins/like-button/
                   if ( !$('#fb-root')[0] )
