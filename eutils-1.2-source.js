@@ -513,25 +513,25 @@
       delay = delay || 50;
       var throttled = 0,
           timeout,
+          _args,
+          _this,
           throttledFn = function () {
-              var args = arguments,
-                  _this = this;
+              _args = arguments;
+              _this = this;
               if ( !throttled )
               {
                 skipFirst ?
                     throttled++:
-                    func.apply(_this, args);
-                timeout = setTimeout(function(){
-                    throttled>1  &&  throttledFn.finish();
-                  }, delay);
-                throttledFn.finish = function () {
-                    timeout && clearTimeout( timeout );
-                    throttled && func.apply(_this, args);
-                    throttled = 0;
-                  };
+                    func.apply(_this, _args);
+                timeout = setTimeout(throttledFn.finish, delay);
               }
               throttled++;
             };
+      throttledFn.finish = function () {
+          timeout && clearTimeout( timeout );
+          throttled>1 && func.apply(_this, _args);
+          throttled = 0;
+        };
       return throttledFn;
     };
 

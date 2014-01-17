@@ -1,7 +1,7 @@
 // ----------------------------------------------------------------------------------
 // jQuery.fn.sharebtns v 1.0
 // ----------------------------------------------------------------------------------
-// (c) 2012 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+// (c) 2012-2014 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
 //  written by:
 //   * Már Örlygsson        -- http://mar.anomy.net
 // ----------------------------------------------------------------------------------
@@ -18,11 +18,49 @@
 
   Plugin Options (defaults):
      twitter:   true,     // Boolean|Number(non-zero position index)|Object(button config)  - non-falsy values insert Twitter "Tweet" button
+              size:     'm',    // or 'l'
+              count:    '',     // '' == 'horizontal'. Other options: 'none', 'vertical'
+              via:      '',     // Optional twitter username to mention/link to. Example: "foobar"
+              related:  '',     // Optional list of recommended usernames. Example: "anywhere:The Javascript API,sitestreams,twitter:The official account"
+              lang:     '',     // Optional language setting ??? defaults to 'en'
+              hashtags: '',     // Optional comma-delmited list of hashtags. (e.g. 'cooloption,hipster,socool')
+              text:     '',     // Optional default tweet body text.
+              custom:   false,  // Defaults to using the standard <iframe> embed code
+              txt:      null,   // Link text for customized links
+
      facebook:  true,     // Boolean|Number(non-zero position index)|Object(button config)  - non-falsy values insert Facebook "Like" button
+              width:    10,             // suggested width for the iframe
+              count:    'button_count', // 'standard', 'box_count'
+              //sendBtn:  false, <-- Seems to be depricated ??
+              shareBtn: false,
+              faces:    false,
+              color:    '',    // 'dark' or 'light' (default),
+              verb:     '',    // 'recommend' or 'like' (default)
+              // NOTE: Facebook like button CAN NOT be customized!
+
      fbshare:   false,    // Boolean|Number(non-zero position index)|Object(button config)  - non-falsy values insert Facebook "Share" button
+              width:    10,             // suggested width for the iframe
+              count:    'button_count', // 'button', 'box_count'
+              custom:   false,          // Defaults to using the standard <iframe> embed code
+              txt:      null,           // Link text for customized links
+
      gplus:     false,    // Boolean|Number(non-zero position index)|Object(button config)  - non-falsy values insert Google+ "+1" button
+              width:    null,     // width for the iframe
+              count:    '',       // 'inline' (facebook-style) or 'none' (defaults to "bubble" (== '') )
+              size:     'medium', // 'small', 'medium', 'standard', 'tall' (tall combined with count:'bubble' displays a vertically positioned counter)
+              txt:      null,     // Link text for customized links
+
      pinterest: false,    // Boolean|Number(non-zero position index)|Object(button config)  - non-falsy values insert Pinterest "PinIt" button
+              imgsrc:      '',  //  defaults to the first image on the page or the opengraph image
+              count:       'beside',       // '' (horizontal). Other options: 'none', 'above'
+              imgSelector: '.pgmain img',  // The `imgSrcAttr` value of the first image matching this selector will be used
+              imgSrcAttr:  '',  // defaults to 'src'
+              custom:      false,        // Defaults to using the standard <iframe> embed code
+              txt:         'Pin it',     // Link text for customized links
+
      linkedin:  false,    // Boolean|Number(non-zero position index)|Object(button config)  - non-falsy values insert LinkedIn "share" button
+              count:   'right', // (facebook-style) or 'top' or 'none' (defaults to "bubble" (== '') )
+
 
      wrap:      null,     // String(tagName) - if non-empty each button is wrapped in a "tagName" Element with "buttonName" as its className.
                           //                   i.e.  wrap:'li', -->  .wrap(<li class="twitter"/>);
@@ -37,7 +75,6 @@
      large:     false,    // Boolean  - true prints a large version of the button, where supported (not supported by Facebook)
      countNone: false,    // Boolean  - true suppresses the display of tweet-/like-/share counter balloons. (not supported by Facebook)
      countV:    false,    // Boolean  - true displays vertically positioned share-counter ballonons.
-     dark:      false,    // Boolean  - true hints that the buttons should use a "dark" color-scheme.
      custom:    false,    // Boolean  - true inserts plaintext links and skips the $init phase, where possible.
 
      ...additionally each button type has its own config object.
@@ -60,20 +97,20 @@
           {
             cfg = $.extend(true, {}, defaultCfg, cfg);
             link = link || $('<a/>')[0];
-            $.each(btnDefaults, function (btnName, btnDefaultCfg) {
-                var cfgBtnName = cfg[btnName];
-                if ( cfgBtnName )
+            $.each(btnDefaults, function (btnName, btnDefault) {
+                var btnSpecificCfg = cfg[btnName];
+                if ( btnSpecificCfg )
                 {
-                  var bCfg = cfg[btnName] = $.extend({ custom:cfg.custom, url:cfg.url, lang:pageLang }, btnDefaultCfg);
+                  var bCfg = cfg[btnName] = $.extend({ custom:cfg.custom, url:cfg.url, lang:pageLang }, btnDefault);
                   $.each(presets, function(propName, presetVals){
                       presetVals = presetVals[btnName];
                       cfg[propName]  &&   presetVals  &&  $.extend(bCfg, presetVals);
                     });
-                  $.extend(bCfg, cfgBtnName);
+                  $.isPlainObject(btnSpecificCfg) && $.extend(bCfg, btnSpecificCfg);
                   link.href = bCfg.url; // normalize the url as a full URL
                   bCfg.url = link.href;
-                  // allow cfgBtnName itself to be a $pos number
-                  bCfg.$pos = typeof cfgBtnName === 'number' ? cfgBtnName : bCfg.$pos || 0;
+                  // allow btnSpecificCfg itself to be a $pos number
+                  bCfg.$pos = typeof btnSpecificCfg === 'number' ? btnSpecificCfg : bCfg.$pos || 0;
                   bCfg.$prep && bCfg.$prep( cfg );
                   var newBtn = ((bCfg.custom&&bCfg.$tmpl2)||bCfg.$tmpl)
                                   .replace(/(%=?)?\{(.+?)\}/g, function(m,p1,p2){
@@ -124,10 +161,9 @@
         },
       countNone={ count:'none' },
       presets = {
-          dark:      { fbshare:{color:'dark'},        facebook:{color:'dark'}  },
-          large:     { twitter:{size:'l'},                                           gplus:{size:''}  },
-          countNone: { twitter:countNone,             facebook:{count:'standard'},   gplus:countNone,               pinterest:countNone,          linkedin:{count:''} },
-          countV:    { twitter:{ count:'vertical' },  facebook:{count:'box_count'},  gplus:{count:'',size:'tall'},  pinterest:{ count:'above' },  linkedin:{count:'top'} }
+          large:     { twitter:{size:'l'},            gplus:{size:''}      },
+          countNone: { twitter:countNone,             gplus:countNone,               fbshare:{count:'button'},/*  facebook:{count:'standard'}, */pinterest:countNone,          linkedin:{count:''} },
+          countV:    { twitter:{ count:'vertical' },  gplus:{count:'',size:'tall'},  fbshare:{count:'box_count'}, facebook:{count:'box_count'},  pinterest:{ count:'above' },  linkedin:{count:'top'} }
         },
 
 
@@ -154,14 +190,15 @@
       btnDefaults = sharebtns.btnDefaults = {
 
           twitter: {
-              size:     'm', // or 'l'
-              count:    '',       // '' == 'horizontal'. Other options: 'none', 'vertical'
-              via:      '',       // Optional twitter username to mention/link to. Example: "foobar"
-              related:  '',       // Optional list of recommended usernames. Example: "anywhere:The Javascript API,sitestreams,twitter:The official account"
-              //lang:     '',       // Optional language setting ??? defaults to 'en'
-              hashtags: '',       // Optional comma-delmited list of hashtags. (e.g. 'cooloption,hipster,socool')
-              text:     '',       // Optional default tweet body text.
-              //txt:      null,     // Link text for customized links
+              size:     'm',   // or 'l'
+              count:    '',    // '' == 'horizontal'. Other options: 'none', 'vertical'
+              via:      '',    // Optional twitter username to mention/link to. Example: "foobar"
+              related:  '',    // Optional list of recommended usernames. Example: "anywhere:The Javascript API,sitestreams,twitter:The official account"
+              //lang:     '',    // Optional language setting ??? defaults to 'en'
+              hashtags: '',    // Optional comma-delmited list of hashtags. (e.g. 'cooloption,hipster,socool')
+              text:     '',    // Optional default tweet body text.
+              //custom:   false, // Defaults to using the standard <iframe> embed code
+              //txt:      null,  // Link text for customized links
 
             // private
               $prep: function( /*pluginCfg*/ ) {
@@ -183,19 +220,20 @@
                 },
               $tmpl:  '<iframe src="//platform.twitter.com/widgets/tweet_button.html?%={size}%={count}%={via}%={related}%={hashtags}%={text}%={url}%={lang}" style="width:{width}; height:{height};" allowtransparency="true" frameborder="0" scrolling="no" />',
               $tmpl2: '<a'+ dodgyPopupAttrs +'"tweetit" href="https://twitter.com/intent/tweet?%={via}%={related}%={hashtags}%={text}%={url}%={lang}">{txt}</a>',
-              $pos:  10 // lowest $pos comes first
+              $pos:  20 // lowest $pos comes first
             },
 
 
           fbshare: {
-              color: '', // 'dark',
-              //txt:   null,  // Link text for customized links
-              //width: cssLength // Defaults to '10.2em' or '11.2em' depending on language
+              width:  10,             // suggested width for the iframe
+              count:  'button_count', // 'button', 'box_count'
+              //custom: false,          // Defaults to using the standard <iframe> embed code
+              //txt:    null,           // Link text for customized links
 
             // private
               $prep: function ( /*pluginCfg*/ ) {
                   var b = this;
-                  if ( !b.txt )
+                  if ( b.custom  &&  !b.txt )
                   {
                     var txts = { en: 'Share on Facebook',  is: 'Deila á Facebook' };
                     b.txt = txts[ b.lang ];
@@ -205,49 +243,31 @@
                       b.txt = txts.en;
                     }
                   }
-                  // if ( !b.custom )
-                  // {
-                    b.height = '1.818em';  // Approx. 20px @ 11px font-size. Not over-ridable
-                    b.width =  b.width || (b.lang==='is' ? '10.2em' : '11.2em');
-                  // }
                 },
-              $tmpl:  '<iframe data-sharebtns="fbshare" style="width:{width};height:{height};font-size:11px;" allowtransparency="true" frameborder="0" scrolling="no" />',
+              $tmpl:  '<div class="fb-share-button" data-href="{url}" data-width="{width}" data-type="{count}"/>',
               $tmpl2: fbshareLnk+'%{url}" class="fbsharebtn">{txt}</a>',
-              $init: function ( btn/*, cfg*/ ) {
-                  var b = this,
-                      iframeDoc = btn.filter('iframe').add(btn.find('iframe')).eq(0) // btn might have been wrapped or otherwise modified by the optional custom "process" method
-                                      .contents()[0];
-                  iframeDoc.write(
-                      '<!DOCTYPE html><html lang="'+ (b.lang||'en') +'">' +
-                      '<head><meta charset="UTF-8" /><title>.</title>' +
-                      '<link href="https://codecentre.eplica.is/f/fb-share.css" rel="stylesheet" type="text/css" />' +
-                      '</head><body class="'+ (b.color||'') +'">' +
-                      fbshareLnk + encURI(b.url) +'">'+ b.txt +'</a>' +
-                      '</body></html>'
-                    );
-                  iframeDoc.close();
+              $init: function ( /*btn, cfg*/ ) {
+                  btnDefaults.facebook.$init();
                 },
-              $pos:  40
+              $pos:  11
             },
 
 
           facebook: {
-              width:   null,           // min-width for the iframe
-              count:   'button_count', // 'standard', 'box_count'
-              sendBtn: false,
-              faces:   false,
-              color:   '', // 'dark',
-              verb:    '', // 'recommend' (default text is "like")
-              custom:  false, // facebook like button CAN NOT be customized!
+              width:    10,             // suggested width for the iframe
+              count:    'button_count', // 'standard', 'box_count'
+              //sendBtn:  false, <-- Seems to be depricated
+              shareBtn: false,
+              faces:    false,
+              color:   '', // 'dark' or 'light' (default),
+              verb:     '',    // 'recommend' or 'like' (default)
+              //custom:   false, // NOTE: facebook like button CAN NOT be customized!
 
             // private
-              $prep: function ( /*pluginCfg*/) {
-                  var b = this;
-                  b.width = b.width ||  (b.count==='box_count' ? 85 : 120);
-                },
-              $tmpl: '<div class="fb-like" data-send="{sendBtn}" data-layout="{count}" data-width="{width}" data-show-faces="{faces}" data-action="{verb}" data-colorscheme="{color}" data-href="{url}" />',
+              // $prep: function ( /*pluginCfg*/) {},
+              $tmpl: '<div class="fb-like"'/*data-send="{sendBtn}"*/+' data-share="{shareBtn}" data-layout="{count}" data-width="{width}" data-show-faces="{faces}" data-action="{verb}" data-href="{url} data-colorScheme="{color}""/>',
               $init: function (/* btn, cfg */) {
-                  // https://developers.facebook.com/docs/reference/plugins/like/
+                  // https://developers.facebook.com/docs/plugins/like-button/
                   if ( !$('#fb-root')[0] )
                   {
                     $('body').prepend('<div id="fb-root"/>');
@@ -257,35 +277,15 @@
                       function(){  win.FB  &&  win.FB.XFBML.parse();  }
                     );
                 },
-              $pos:  50 // defaults to last position because when 'count' is set to '' - loads of text appear to the right of the button
-            },
-
-
-          linkedin: {
-              count:   'right', // (facebook-style) or 'top' or 'none' (defaults to "bubble" (== '') )
-
-            // private
-              $prep: function ( /*pluginCfg*/ ) {
-                  var b = this;
-                  b.count = b.count ? ' data-counter="'+b.count+'"' : '';
-                },
-              $tmpl: '<script type="IN/Share" data-url="{url}"{count} data-showzero="true"></script>',
-              $init: function (b/* , cfg */) {
-                  // http://developer.linkedin.com/plugins/share-plugin-generator
-                  // NOTE: LinkedIn's plugin is crap and can only be injected once,
-                  // and cann't be commanded to re-run for newly injected button templates.
-                  injectScriptIfNeeded(
-                      '//platform.linkedin.com/in.js',
-                      null,
-                      'lang: ' + _getLocale( b.lang )
-                    );
-                },
+              $pos:  10 // defaults to last position because when 'count' is set to '' - loads of text appear to the right of the button
             },
 
 
           gplus: {
-              count:   '', //  'inline' (facebook-style) or 'none' (defaults to "bubble" (== '') )
-              size:    'medium', // 'small', 'medium', '' (large), 'tall' (tall combined with count:'bubble' displays a vertically positioned counter)
+              //width:  null,     // width for the iframe
+              count:  '',       //  'inline' (facebook-style) or 'none' (defaults to "bubble" (== '') )
+              size:   'medium', // 'small', 'medium', 'standard', 'tall' (tall combined with count:'bubble' displays a vertically positioned counter)
+              //custom: false,    // Defaults to using the standard <iframe> embed code
               //txt:    null,     // Link text for customized links
 
             // private
@@ -304,13 +304,37 @@
               $tmpl:  '<div class="g-plusone" data-size="{size}"{count} data-href="{url}"/>',
               $tmpl2: '<a href="https://plus.google.com/share?url=%{url}" class="gplusbtn"'+ dodgyPopupAttrs +'"gpluswin">{txt}</a>',
               $init: function (/* btn, cfg */) {
-                  // https://www.google.com/intl/en/webmasters/+1/button/index.html
+                  // https://developers.google.com/+/web/+1button/
+                  //win.___gcfg = win.___gcfg || {lang:b.lang};
                   injectScriptIfNeeded(
-                      '//apis.google.com/js/plusone.js',
+                      '//apis.google.com/js/platform.js',
                       function(){  win.gapi  &&  win.gapi.plusone.go();  }
                     );
                 },
-              $pos:  20
+              $pos:  30
+            },
+
+
+          linkedin: {
+              count:   'right', // (facebook-style) or 'top' or 'none' (defaults to "bubble" (== '') )
+
+            // private
+              $prep: function ( /*pluginCfg*/ ) {
+                  var b = this;
+                  b.count = b.count ? ' data-counter="'+b.count+'"' : '';
+                },
+              $tmpl: '<script type="IN/Share" data-url="{url}"{count} data-showzero="true"/>',
+              $init: function (b/* , cfg */) {
+                  // http://developer.linkedin.com/plugins/share-plugin-generator
+                  // NOTE: LinkedIn's plugin is crap and can only be injected once,
+                  // and cann't be commanded to re-run for newly injected button templates.
+                  injectScriptIfNeeded(
+                      '//platform.linkedin.com/in.js',
+                      null,
+                      'lang: ' + _getLocale( b.lang )
+                    );
+                },
+              $pos:  50
             },
 
 
@@ -319,6 +343,7 @@
               count:       'beside',       // '' (horizontal). Other options: 'none', 'above'
               //imgSrcAttr:  '',  // defaults to 'src'
               imgSelector: '.pgmain img',  // The `imgSrcAttr` value of the first image matching this selector will be used
+              custom:      false,        // Defaults to using the standard image-based button
               txt:         'Pin it',     // Link text for customized links
 
             // private
@@ -343,7 +368,7 @@
                   // http://business.pinterest.com/widget-builder/#do_pin_it_button
                   injectScript( 'https://assets.pinterest.com/js/pinit.js' );
                 },
-              $pos:  30
+              $pos:  40
             }
         };
 
