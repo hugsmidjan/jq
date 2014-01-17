@@ -7,7 +7,7 @@
 // ----------------------------------------------------------------------------------
 
 // Requires:
-//  - jQuery 1.7
+//  - jQuery 1.8
 //  - eutils 1.2
 //  - fickle 2.0
 //  - getmodal 1.1
@@ -84,6 +84,7 @@
     cfg = $.extend({}, $.imgPopper.defaultConfig, _i18n, cfg );
 
     _hrefElms.on('click', function (e) {
+        e.preventDefault();
         _img = $(this);
         _idx = _hrefElms.index(_img);
 
@@ -132,7 +133,8 @@
               });
 
         _paging
-            .delegate('li', 'click', function (e) {
+            .on('click', 'li', function (e) {
+                e.preventDefault();
                 var li = $(this);
                 if ( !li.is('.nav-end') )
                 {
@@ -142,13 +144,10 @@
                   _updPager(_paging, _idx, _hrefElms.length);
 
                   // preload ajacent images
-                  if (!_idx) { (new Image()).src = _hrefElms[_idx-1].href; } // at start
-                  if (_idx===_hrefElms.length-1)   { (new Image()).src = _hrefElms[_idx+1].href; } // at end
+                  if (_idx !== 0) { (new Image()).src = _hrefElms[_idx-1].href; } // at start
+                  if (_idx !== _hrefElms.length-1)   { (new Image()).src = _hrefElms[_idx+1].href; } // at end
                 }
-                e.preventDefault();
               });
-
-        e.preventDefault();
       });
 
 
