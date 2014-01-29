@@ -1,7 +1,7 @@
 // ----------------------------------------------------------------------------------
 // jQuery.fn.autoValidate/.defangEnter/.defangReset  v. 1.0
 // ----------------------------------------------------------------------------------
-// (c) 2009 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+// (c) 2009-2014 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
 //  written by:
 //   * Borgar Þorsteinsson  -- http://borgar.undraland.com
 //   * Már Örlygsson        -- http://mar.anomy.net
@@ -30,6 +30,7 @@
     errorAction         : 'focus',          // available values: (anchor|focus) (Note: anchor is bound to be more irritating.)
     focusElmClass       : 'stream',         // className for the placeholder <a href=""> element used to move the
                                             // keyboard/screen-reader focus between inline error messages.
+    formInvalidClass    : 'is-invalid',     // className toggled on the <form> element whenever $.fn.isValid() runs
     submittedClass      : 'issubmitted',    // className that gets added to the <form> element when it has been
                                             // submitted and is waiting for the server to respond
     validateEachField   : '',               // possible values:  "change"==onChange; ""==onSubmit (normal)
@@ -698,22 +699,39 @@
 
       });
 
-      // we've passed through every control - time to sort out the results
-      if ( report && invalids.length )
+      var isValid = !invalids.length;
+
+      if ( report )
       {
-        var field = $(invalids[0]).find('*').addBack().filter('input, select, textarea');
-        field.focusHere ?
-            field.focusHere():
-        field.setFocus ?
-            field.focusHere():
-            field[0].focus();
-      }
-      if (report && displayAlert && invalids.length) {
-        $.av.alertErrors( $.unique( invalids ), this );
+        // we've passed through every control - time to sort out the results
+        if ( !isValid )
+        {
+          var field = $(invalids[0]).find('*').addBack().filter('input, select, textarea');
+          field.focusHere ?
+              field.focusHere():
+          field.setFocus ?
+              field.focusHere():
+              field[0].focus();
+
+          if (displayAlert) {
+            $.av.alertErrors( $.unique( invalids ), this );
+          }
+
+        }
+
+        var form = $(invalids).closest('form'),
+            conf = form.data('av-config') || {};
+        form
+            .toggleClass( conf.formInvalidClass||'', !isValid )
+            .trigger({
+                type:     'autovalidated',
+                isValid:  isValid,
+                invalids: $(invalids),
+              });
       }
 
-      //
-      return !invalids.length;
+      return isValid;
+
     }
 
   });
