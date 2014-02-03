@@ -1,7 +1,7 @@
 // ----------------------------------------------------------------------------------
 // Miscellaneous jQuery utilities collection v 1.2
 // ----------------------------------------------------------------------------------
-// (c) 2010-2013 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+// (c) 2010-2014 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
 //  written by:
 //   * Már Örlygsson        -- http://mar.anomy.net
 // ----------------------------------------------------------------------------------
@@ -296,44 +296,26 @@
         });
     },
 
-
-    // ensure 'load' event triggers for already loaded (cached) images
+    // Bind one-time 'load' events to images and ensure they trigger for already loaded (i.e. cached) images
+    // NOTE: This plugin does not pretend to fix or trigger existing normally bound 'load' events.
+    // NOTE: If you update an <img>'s src="" - then you need to re-run the plugin and
+    //       re-bind the event handler if you also want it to handle the new image.
     whenImageReady: function (eventHandler, noTriggering)
     {
-      var images = this,
-          ns = '.whenImageReady';
-      if ( eventHandler )
-      {
-        images.on('load'+ns+' readystatechange'+ns, function (e) {
-            if ( e.type==='load' || this.readyState==='complete')
-            {
-              eventHandler.call(this, e);
-              $(this).off(ns);
-            }
-          });
-      }
-      if ( !noTriggering )
-      {
-        images.each(function(src, img){
-            // timeout to guarantee async event triggering across all browsers... (IE8-10 was triggering immediately)
-            setTimeout(function(){
-                // In IE (which has .readystate) only kick the image if it is "complete"
-                // (otherwise IE9 and IE10 sometimes abort the image loading midway and cache a corrupted/broken image)
-                // In other browsers kick every time. (Unless we find a way to check the load state?)
-                if ( !img.readyState || img.readyState==='complete' )
-                {
-                  src = img.src;
-                  img.src = 'about:blank';
-                  img.src = src;
-                }
-              }, 0);
-            // There's a timing problem in IE8 where readyState is
-            // sometimes reported as 'loading' inside the (above) timeout
-            // but load/readystatechange events are still never triggered.
-            // Simply accessing img.readyState immediately seems to fix it. FUBAR!
-            img.readyState;
-          });
-      }
+      var images = this;
+      eventHandler && images.one('load.j2x5u', eventHandler);
+      // use timeout to ensure a slightly more predictable behaviour
+      // across a mixed collection of load and not-loaded images
+      !noTriggering && setTimeout(function(){
+          images.each(function(src, img){
+              // Firefox and Chrome have (had?) tendency to report 404 images as complete -
+              // so we also check for .naturalWidth to make sure the image has really loaded.
+              if ( img.complete  &&  img.naturalWidth !== 0 ) {
+                // use namespace to avoid triggering existing (normally bound) load-events a second time
+                $(img).trigger('load.j2x5u');
+              }
+            });
+        }, 0);
       return images;
     }
 
