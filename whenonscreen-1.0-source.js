@@ -149,7 +149,7 @@
             live:       false,
             leftright:  false,
             range:      [{ radius:50 }],
-            throttle:   50,
+            throttle:   50
           },
 
         _percStrToFunc = function (rangeStr, side) {
