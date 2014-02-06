@@ -10,19 +10,19 @@
 // More info: https://github.com/maranomynet/whenonscreen/
 // ----------------------------------------------------------------------------------
 
-/** /
+/**/
 
-  jQuery.fn.whenOnScreen() v. 1.0 -- monitors if elements are positioned within page's scroll window
-  and triggers a 'whenonscreen' and 'whenoffscreen' events for each element as it crosses a set distance
-  (or one of several distances) from the viewport boundry
-
-
-  Optional dependency:
-    * $.throttleFn() -- https://gist.github.com/maranomynet/7090772
+  // jQuery.fn.whenOnScreen() v. 1.0 -- monitors if elements are positioned within page's scroll window
+  // and triggers a 'whenonscreen' and 'whenoffscreen' events for each element as it crosses a set distance
+  // (or one of several distances) from the viewport boundry
 
 
+  // Optional dependency:
+  //   * $.throttleFn() -- https://gist.github.com/maranomynet/7090772
 
-  Usage:
+
+
+  // Usage:
 
     var sections = $('div.section');
 
@@ -33,31 +33,31 @@
             // of its configured "range" objects (see below).
           });
 
-    The `event` object has the following properties:
-      * type        String - 'when(on|off)screen',
-      * range       A normalized version of the 'range' object that triggered this event,
-                    Examples:
-                     a) { top:-100, bottom:-300, left:0, right:40,   customVal:'foo' },
-                     b) { top:-100, bottom:-300, left:0, right:40,   customElm:[Object] },
-                     c) { radius:50, top:50, bottom:50, left:50, right:50  },
-      * scrTop      Number - Current window/viewport boundries in pixels
-        srcHeight   ...
-        scrBottom   ...
-        scrLeft     ... (if leftright is enabled)
-        srcWidth    ... (if leftright is enabled)
-        scrRight    ... (if leftright is enabled)
-      * elmTop      Number -  Current element boundries in pixels
-        elmHeight   ...
-        elmBottom   ...
-        elmLeft     ... (if leftright is enabled)
-        elmWidth    ... (if leftright is enabled)
-        elmRight    ... (if leftright is enabled)
-      * isElmBelow  Boolean - is the element outside (below|above|right of|left of) the viewport
-        isElmAbove  ...
-        isElmRight  ...
-        isElmLeft   ...
-      * leftright   Boolean - is horizontal boundry checking enabled for this element
-      * recalc      Boolean - was element position + size recalculated this time?
+    // The `event` object has the following properties:
+    //   * type        String - 'when(on|off)screen',
+    //   * range       A normalized version of the 'range' object that triggered this event,
+    //                 Examples:
+    //                  a) { top:-100, bottom:-300, left:0, right:40,   customVal:'foo' },
+    //                  b) { top:-100, bottom:-300, left:0, right:40,   customElm:[Object] },
+    //                  c) { radius:50, top:50, bottom:50, left:50, right:50  },
+    //   * scrTop      Number - Current window/viewport boundries in pixels
+    //     srcHeight   ...
+    //     scrBottom   ...
+    //     scrLeft     ... (if leftright is enabled)
+    //     srcWidth    ... (if leftright is enabled)
+    //     scrRight    ... (if leftright is enabled)
+    //   * elmTop      Number -  Current element boundries in pixels
+    //     elmHeight   ...
+    //     elmBottom   ...
+    //     elmLeft     ... (if leftright is enabled)
+    //     elmWidth    ... (if leftright is enabled)
+    //     elmRight    ... (if leftright is enabled)
+    //   * isElmBelow  Boolean - is the element outside (below|above|right of|left of) the viewport
+    //     isElmAbove  ...
+    //     isElmRight  ...
+    //     isElmLeft   ...
+    //   * leftright   Boolean - is horizontal boundry checking enabled for this element
+    //   * recalc      Boolean - was element position + size recalculated this time?
 
 
 
