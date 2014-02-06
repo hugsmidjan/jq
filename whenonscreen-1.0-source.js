@@ -10,7 +10,7 @@
 // More info: https://github.com/maranomynet/whenonscreen/
 // ----------------------------------------------------------------------------------
 
-/**/
+/** /
 
   // jQuery.fn.whenOnScreen() v. 1.0 -- monitors if elements are positioned within page's scroll window
   // and triggers a 'whenonscreen' and 'whenoffscreen' events for each element as it crosses a set distance
