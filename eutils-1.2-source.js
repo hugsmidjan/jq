@@ -361,7 +361,6 @@
 
 
 
-
   // place keyboard focus on _elm - setting tabindex="" when needed
   // and make sure any window scrolling is both sane and useful
   $.focusHere = function (_elm, opts) {
@@ -384,7 +383,8 @@
         {
           // ...then scroll the window to place the anchor at the top of the viewport.
           // (NOTE: We do this because most browsers place the artificially .focus()ed link at the *bottom* of the viewport.)
-          var offset = (opts&&('offset' in opts)) ? opts.offset : 30; // default to 30px offset from top of viewport
+          var offset = opts && opts.offset || $.focusOffset();
+          offset = $.isFunction(offset) ? offset(_elm) : offset || 0;
           doc.scrollTop( $(_elm).offset().top - offset );
         }
       }
@@ -394,6 +394,9 @@
       $.focusHere(this[0], opts);
       return this;
     };
+  // $.focusOffset provides a default scroll-offset value for $.focusHere()
+  $.focusOffset = function (/*elm*/) { return 30; };
+
 
 
 
@@ -405,7 +408,7 @@
   // Usage:
   //   $.fixSkiplinks();
   //   $.fixSkiplinks({ offset:40 }); // scroll offset/correction in px
-  //   $.fixSkiplinks({ offset:function(id,target){ return 40; }  });
+  //   $.fixSkiplinks({ offset:function(target){ return 40; }  });
   //
   $.fixSkiplinks = function (opts) {
       var clickEv = 'click.fixSkipLinks',
@@ -426,14 +429,19 @@
                     elm.prop('tabindex', -1);
                   }
                   doc.location.href = '#'+id;
-                  var offs = opts && opts.offset;
-                  offs = $.isFunction(offs) ? offs(id,elm) : offs;
-                  offs && $(doc).scrollTop( $(doc).scrollTop() - offs );
+                  var offset = opts && opts.offset || $.scrollOffset();
+                  offset = $.isFunction(offset) ? offset(elm) : offset;
+                  offset && $(doc).scrollTop( $(doc).scrollTop() - offset );
                   elm[0].focus();
                 }
               }
             });
     };
+
+  // $.focusOffset provides a default scroll-offset value for navigation-related scroll-position calculations
+  // esp. useful when pages have a fixed-position header
+  $.scrollOffset = function (/*elm*/) { return 0; };
+
 
 
   // Usage:
