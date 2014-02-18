@@ -28,7 +28,7 @@
                     '</object>',
 
       iframeTempl = '<iframe title="YouTube video player" width="%{vidwi}" height="%{vidhe}" src="%{vidurl}" frameborder="0" allowfullscreen></iframe>',
-      videoTempl =  '<video width="%{vidwi}" height="%{vidhe}" src="%{vidurl}" controls><source src="%{vidurl}" type="video/mp4"></source></video>',
+      videoTempl =  '<video width="%{vidwi}" height="%{vidhe}" src="%{vidurl}" controls %{auto}><source src="%{vidurl}" type="video/%{mime}"></source></video>',
 
       calcHeight = function (width, aspect4x3) {
         var vdHeight = aspect4x3 ? (width/4)*3 :
@@ -46,6 +46,7 @@
               vidHeight = data.vidHeight !== 'auto' ? data.vidHeight : calcHeight(vidWidth, data.aspect4x3),
               videoUrl,
               videoId,
+              mimetype,
               autoplay = '',
               playerHeight = 0,
               vidFrame = false;
@@ -101,18 +102,28 @@
           else if ( type === 'file' )
           {
             var mp4v = document.createElement('video'),
-                mp4support = !!mp4v.canPlayType && mp4v.canPlayType('video/mp4').replace(/no/, '');
-            if ( mp4support && !/\.flv(\?|$)/i.test( videoHref ) )
+                mp4Support = !!mp4v.canPlayType && mp4v.canPlayType('video/mp4').replace(/no/, ''),
+                movSupport = !!mp4v.canPlayType && mp4v.canPlayType('video/quicktime').replace(/no/, '');
+            if ( mp4Support && /\.(mp4|m4v)(\?|$)/i.test( videoHref ) )
             {
               videoUrl = videoHref;
               vidFrame = 'video';
               autoplay = data.autostart ? 'autoplay' : '';
+              mimetype = 'mp4';
+            }
+            else if ( movSupport && /\.mov(\?|$)/i.test( videoHref ) )
+            {
+              videoUrl = videoHref;
+              vidFrame = 'video';
+              autoplay = data.autostart ? 'autoplay' : '';
+              mimetype = 'quicktime';
             }
             else
             {
               autoplay = data.autostart ? '&autostart=true' : '';
               videoUrl = '/bitar/common/media/mediaplayer.swf?file=' + videoHref + autoplay;
               playerHeight = 20;
+              vidFrame = 'flash';
             }
 
 
