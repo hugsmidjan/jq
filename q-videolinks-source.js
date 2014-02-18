@@ -1,4 +1,3 @@
-// encoding: utf-8
 // ----------------------------------------------------------------------------------
 // jQuery.fn.videoLinks v 1.0
 // ----------------------------------------------------------------------------------
@@ -29,6 +28,7 @@
                     '</object>',
 
       iframeTempl = '<iframe title="YouTube video player" width="%{vidwi}" height="%{vidhe}" src="%{vidurl}" frameborder="0" allowfullscreen></iframe>',
+      videoTempl =  '<video width="%{vidwi}" height="%{vidhe}" src="%{vidurl}" controls><source src="%{vidurl}" type="video/mp4"></source></video>',
 
       calcHeight = function (width, aspect4x3) {
         var vdHeight = aspect4x3 ? (width/4)*3 :
@@ -46,9 +46,9 @@
               vidHeight = data.vidHeight !== 'auto' ? data.vidHeight : calcHeight(vidWidth, data.aspect4x3),
               videoUrl,
               videoId,
-              autoplay,
+              autoplay = '',
               playerHeight = 0,
-              useIframe = false;
+              vidFrame = false;
 
           if ( type === 'youtube' || type === 'youtu' )
           {
@@ -65,7 +65,7 @@
             autoplay = data.autostart ? '&autoplay=1' : '';
             videoUrl = docLocPC + '//www.youtube.com/embed/' + videoId + '?rel=0' + autoplay;
             playerHeight = 30;
-            useIframe = true;
+            vidFrame = 'iframe';
           }
           else if ( type === 'vimeo' )
           {
@@ -80,7 +80,7 @@
             videoId = videoId && videoId[1];
             autoplay = data.autostart ? '&autoplay=1' : '';
             videoUrl = docLocPC + '//player.vimeo.com/video/'+ videoId +'?title=1&amp;byline=0&amp;portrait=0' + autoplay;
-            useIframe = true;
+            vidFrame = 'iframe';
           }
           else if ( type === 'facebook' )
           {
@@ -95,19 +95,32 @@
             */
             videoId = videoHref.match(/(?:\/v\/|[?&]v=)(\d{10,20})/); // matches v/nnnnn or v=nnnnn
             videoId = videoId && videoId[1];
-            videoUrl = docLocPC + '//www.facebook.com/v/'+ videoId;
+            videoUrl = docLocPC + '//www.facebook.com/video/embed?video_id='+ videoId;
+            vidFrame = 'iframe';
           }
           else if ( type === 'file' )
           {
-            autoplay = data.autostart ? '&autostart=true' : '';
-            videoUrl = '/bitar/common/media/mediaplayer.swf?file=' + videoHref + autoplay;
-            playerHeight = 20;
+            var mp4v = document.createElement('video'),
+                mp4support = !!mp4v.canPlayType && mp4v.canPlayType('video/mp4').replace(/no/, '');
+            if ( mp4support && !/\.flv(\?|$)/i.test( videoHref ) )
+            {
+              videoUrl = videoHref;
+              vidFrame = 'video';
+              autoplay = data.autostart ? 'autoplay' : '';
+            }
+            else
+            {
+              autoplay = data.autostart ? '&autostart=true' : '';
+              videoUrl = '/bitar/common/media/mediaplayer.swf?file=' + videoHref + autoplay;
+              playerHeight = 20;
+            }
+
 
           }
 
           vidHeight = vidHeight + playerHeight; //add player height to video height
 
-          if (useIframe)
+          if (vidFrame == 'iframe')
           {
             item.html($.inject(iframeTempl, {
                           vidurl : videoUrl,
@@ -115,7 +128,16 @@
                           vidhe  : vidHeight
                         }));
           }
-          else
+          else if (vidFrame == 'video')
+          {
+            item.html($.inject(videoTempl, {
+                          vidurl : videoUrl,
+                          vidwi  : vidWidth,
+                          vidhe  : vidHeight,
+                          auto   : autoplay
+                        }));
+          }
+          else if (vidFrame == 'flash')
           {
             item.html($.inject(objectTempl, {
                           vidurl : videoUrl,
@@ -126,7 +148,7 @@
 
           item.append('<span class="videocaption">'+  data.vidCapt +'</span>');
 
-          if (useIframe && data.vidWidth === 'auto')
+          if (vidFrame != 'flash' && data.vidWidth === 'auto')
           {
             $(window).on('resize', function (/*e*/) {
                 newWidth = data.contElm.width();
@@ -135,7 +157,7 @@
                   vidWidth = newWidth;
                   vidWidth = data.contElm.width();
                   vidHeight = calcHeight(vidWidth, data.aspect4x3) + playerHeight;
-                  item.find('iframe').attr('height',vidHeight).attr('width',vidWidth);
+                  item.find('iframe,video').attr('height',vidHeight).attr('width',vidWidth);
                 }
               });
           }
