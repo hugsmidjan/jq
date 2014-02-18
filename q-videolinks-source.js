@@ -162,7 +162,7 @@
               var link = $(this),
                   videoHref = link.attr('href'),
                   type =  (/\.youtube\.com/i.test( videoHref ) && 'youtube') ||
-                          (/\.(flv|mp4|m4v)(\?|$)/i.test( videoHref ) && 'file') ||
+                          (/\.(flv|mp4|m4v|mov)(\?|$)/i.test( videoHref ) && 'file') ||
                           (/vimeo\.com/i.test( videoHref ) && 'vimeo') ||
                           (/youtu\.be/i.test( videoHref ) && 'youtu') ||
                           (/facebook\.com/i.test( videoHref ) && 'facebook') ||
