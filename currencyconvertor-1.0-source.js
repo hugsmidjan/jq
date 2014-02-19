@@ -1,4 +1,3 @@
-// encoding: utf-8
 // ----------------------------------------------------------------------------------
 // jQuery.fn.currencyConvertor v 1.0
 // ----------------------------------------------------------------------------------
@@ -13,7 +12,7 @@
 (function($, defaultCfg, currencyConvertor, emptyCellSuffix){
   currencyConvertor = 'currencyConvertor';
   emptyCellSuffix =  ' class="empty" />';
-  
+
   $[currencyConvertor] = {};
 
   defaultCfg = $[currencyConvertor].config = {
@@ -34,29 +33,30 @@
 
       var table    = this,
           lang      = cfg.lang  ||  this.closest('[lang]').attr('lang'),
-          inputSel  = cfg.inputSel,
-          numConfig = {
-              lang:     lang,
-              decimals: cfg.decimals
-            };
+          inputSel  = cfg.inputSel;
+
       table
-          .delegate( inputSel, 'focusin', function (e) {
+          .delegate( inputSel, 'focusin', function (/*e*/) {
               $(this).select();
             })
-          .delegate( inputSel, 'keyup', function (e) {
+          .delegate( inputSel, 'keyup', function (/*e*/) {
               var activeInput = this,
                   inputData = $(activeInput).data(currencyConvertor);
-              if (this.value != inputData.V )
+              // (input)Data.V <-- raw
+              if (this.value !== inputData.V )
               {
                 inputData.V = this.value;
                 var num = $.prettyNum.read( activeInput, lang );
-                if ( num != inputData.v )
+                if ( num !== inputData.v )
                 {
-                  inputData.v = num;
-                  var activeNum = num * inputData.F; 
+                  var selStart = activeInput.selectionStart;
+                  var selEnd = activeInput.selectionEnd;
                   activeInput.value = $.prettyNum.make( activeInput, { trail: true,  lang: lang,  milleSep: cfg.milleSep } );
+                  activeInput.setSelectionRange  &&  activeInput.setSelectionRange(selStart, selEnd);
+                  inputData.v = num;
+                  var activeNum = num * inputData.F;
                   table.find('input').each(function () {
-                      if ( this != activeInput )
+                      if ( this !== activeInput )
                       {
                         var data = $(this).data(currencyConvertor),
                             val = data.v = activeNum / data.F;
@@ -66,7 +66,7 @@
                 }
               }
             })
-          .delegate( inputSel, 'focusout', function (e) {
+          .delegate( inputSel, 'focusout', function (/*e*/) {
               var data = $(this).data(currencyConvertor);
               this.value = data.V = $.prettyNum.make( data.v, data.PN );
             })
@@ -113,9 +113,9 @@
                     }
                   }
                 });
-              
+
 
       return table;
-    }
+    };
 
 })(jQuery);

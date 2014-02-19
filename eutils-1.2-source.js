@@ -144,6 +144,18 @@
     };
 
 
+  // update input/textarea values while maintaining cursor-position
+  $.fn.liveVal = function (value) {
+      return this.each(function (i, input) {
+                var selStart = input.selectionStart;
+                var selEnd = input.selectionEnd;
+                input.value = value;
+                input.setSelectionRange  &&  input.setSelectionRange(selStart, selEnd);
+              });
+    }
+
+
+
   $.fn.if_ = function (cond) {
       if ($.isFunction(cond)) { cond = cond.call(this); }
       this.if_CondMet = !!cond;
