@@ -20,14 +20,15 @@
 
         if (!e.isDefaultPrevented())
         {
-          var theForm = $(this);
-          theForm.trigger('beforeSubmit');
+          var theForm = $(this).trigger('beforeSubmit'),
+              method = theForm.attr('method') || 'post';
 
           $('body').addClass('ajax-wait');
-          $.get(
-              theForm.attr('action'),
-              theForm.serialize(),
-              function(response){
+          $[method.toLowerCase()](
+                theForm.attr('action'),
+                theForm.serialize() + '&justPicPos=pgmain'
+              )
+            .done(function(response) {
                 var responseText = $(response).find('.pgmain .boxbody:first');
                 if (theForm.find('.boxbody').length)
                 {
@@ -40,15 +41,10 @@
                 theForm
                     .addClass('submitted')
                     .trigger('afterSubmit');
-
+              })
+            .always(function() {
                 $('body').removeClass('ajax-wait');
-              }
-            );
-
-          setTimeout(function(){
-            $('body').removeClass('ajax-wait');
-          }, 1500);
-
+              });
           return false;
         }
       });
