@@ -16,8 +16,8 @@
 
       opts = $.extend({
                 stickyHeader: true,
-                mediaGroup: 'Small',
-                menuButton: '.skiplink a',
+                mediaGroup:  'Small',
+                menuButton:  '.skiplink a',
               }, opts);
 
       var formatChangeEv = 'formatchange.mobileMenu';
@@ -71,9 +71,10 @@
           .addClass('is-menu-active');
 
       // opts.stickyHeader  &&  $.initStickyHeader({
-      //     headerHeight: opts.headerHeight,
-      //     mediaGroup:   opts.mediaGroupp,
       //     media:        media
+      //     upDelay:      upDelay,
+      //     mediaGroup:   opts.mediaGroupp,
+      //     headerHeight: opts.headerHeight,
       //   })
       opts.stickyHeader  &&  $.initStickyHeader( opts );
 
@@ -85,7 +86,8 @@
   $.initStickyHeader = function (opts) {
 
       opts = $.extend({
-                mediaGroup: 'Small',
+                upDelay:      50,
+                mediaGroup:   'Small',
                 headerHeight: function () { return parseInt($html.css('padding-top'), 10); },
               }, opts);
 
@@ -139,7 +141,7 @@
                               }
                               lastOffs = yOffs;
                             }
-                            else if ( delta < -100 )
+                            else if ( delta < -opts.upDelay )
                             {
                               if ( !isShown )
                               {
