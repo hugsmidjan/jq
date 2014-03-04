@@ -213,6 +213,8 @@
 
     };
 
+  formatChange.media = media;
+
   formatChange.config = {
       // $tagName: 'del',
       // $elmId:   'mediaformat',
