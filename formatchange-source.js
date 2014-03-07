@@ -152,7 +152,7 @@
         {
           cfg = $.extend(formatChange.config, cfg);
 
-          media = $.extend({
+          media = formatChange.media = $.extend({
                   groups: formatChange.groups,
                   // DEPRICATED methods: (Instead use static media.isLarge, media.becameSmall, etc. flags)
                   is:     function (fmt) {  return  _checkFormat(fmt,this[format]);  },
@@ -212,8 +212,6 @@
       return media;
 
     };
-
-  formatChange.media = media;
 
   formatChange.config = {
       // $tagName: 'del',

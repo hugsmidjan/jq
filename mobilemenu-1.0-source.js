@@ -54,7 +54,7 @@
                       });
                 !media && $win.off(formatChangeEv);
               }
-              else if ( opts.media['left'+opts.mediaGroup] )
+              else if ( media['left'+opts.mediaGroup] )
               {
                 // Close the menu when switching to Large formats
                 if ( isMenuOpen )
@@ -156,7 +156,7 @@
                     .trigger(scrollEv);
                 !media  &&  $win.off(formatChangeEv);
               }
-              else if ( opts.media['left'+opts.mediaGroup] )
+              else if ( media['left'+opts.mediaGroup] )
               {
 
                 $win.off(scrollEv);
