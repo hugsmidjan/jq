@@ -10,65 +10,81 @@
   var $win =  $(window);
   var $doc =  $(document);
   var $html = $('html');
-  var isMenuOpen;
+  var openMenu;
 
   $.initMobileMenu = function (opts) {
 
       opts = $.extend({
                 stickyHeader: true,
                 mediaGroup:  'Small',
+                name:        'menu',
+                evPrefix:    'mobile',
                 menuButton:  '.skiplink a',
               }, opts);
 
-      var formatChangeEv = 'formatchange.mobileMenu';
+      var formatChangeEv = 'formatchange.' + opts.evPrefix + opts.name;
       var media = 'media' in opts ?  opts.media : ($.formatChange && $.formatChange.media);
+      var isThisMenuOpen;
+
+      var classPrefix = 'is-' + opts.name;
+      var classClosed = classPrefix + '-closed';
+      var classOpen =   classPrefix + '-open';
+      var classActive = classPrefix + '-active';
+      var eventOpened = opts.evPrefix + opts.name;
+      var eventClosed = eventOpened + 'closed';
+      eventOpened += 'opened';
 
       $win
           .on(formatChangeEv, function (/*e*/) {
               if ( !media  ||  media['became'+opts.mediaGroup] )
               {
                 var scrollTopBeforeMenu;
-                $html.addClass('is-menu-closed');
+                $html.addClass(classClosed);
                 $(opts.menuButton)
                     .on('click.toggleMenu', function (e) {
+                        var link = this;
                         e.preventDefault();
-                        if ( !isMenuOpen )
+                        if ( !isThisMenuOpen )
                         {
+                          openMenu  &&  $(openMenu).trigger('click.toggleMenu');
+                          openMenu = link;
                           scrollTopBeforeMenu = $win.scrollTop() || 1;
-                          $html.addClass('is-menu-open');
-                          $html.removeClass('is-menu-closed');
-                          var target = $( $(this).attr('href') );
+                          $html.addClass(classOpen);
+                          $html.removeClass(classClosed);
+                          var target = $( $(link).attr('href') );
                           target.focusHere();
                           $win.scrollTop( 1 );
-                          $doc.trigger('mobilemenuopened');
+                          $doc.trigger(eventOpened);
                         }
                         else
                         {
-                          $html.removeClass('is-menu-open');
-                          $html.addClass('is-menu-closed');
+                          openMenu = null;
+                          $html.removeClass(classOpen);
+                          $html.addClass(classClosed);
                           $win.scrollTop( scrollTopBeforeMenu );
-                          this.blur();
-                          $doc.trigger('mobilemenuclosed');
+                          link.blur();
+                          $doc.trigger(eventClosed);
                         }
-                        isMenuOpen = !isMenuOpen;
+                        isThisMenuOpen = !isThisMenuOpen;
                       });
                 !media && $win.off(formatChangeEv);
               }
               else if ( media['left'+opts.mediaGroup] )
               {
                 // Close the menu when switching to Large formats
-                if ( isMenuOpen )
+                if ( isThisMenuOpen )
                 {
-                  isMenuOpen = false;
-                  $html.removeClass('is-menu-open');
-                  $doc.trigger('mobilemenuclosed');
+                  openMenu = null;
+                  isThisMenuOpen = false;
+                  $html.removeClass(classOpen);
+                  $doc.trigger(eventClosed);
                 }
                 $(opts.menuButton).off('click.toggleMenu');
               }
             })
           .trigger(formatChangeEv);
       $html
-          .addClass('is-menu-active');
+          .addClass(classActive);
 
       // opts.stickyHeader  &&  $.initStickyHeader({
       //     media:        media
@@ -78,6 +94,7 @@
       //   })
       opts.stickyHeader  &&  $.initStickyHeader( opts );
 
+      return $;
     };
 
 
@@ -112,7 +129,7 @@
 
                 $win
                     .on(scrollEv, $.throttleFn(function (/*e*/) {
-                        if ( !isMenuOpen )
+                        if ( !openMenu )
                         {
                           var yOffs = hasPageYOffset ?
                                           window.pageYOffset:
@@ -165,6 +182,8 @@
               }
             })
           .trigger(formatChangeEv);
+
+      return $;
     };
 
 
