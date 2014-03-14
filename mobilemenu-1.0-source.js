@@ -30,9 +30,7 @@
       var classClosed = classPrefix + '-closed';
       var classOpen =   classPrefix + '-open';
       var classActive = classPrefix + '-active';
-      var eventOpened = opts.evPrefix + opts.name;
-      var eventClosed = eventOpened + 'closed';
-      eventOpened += 'opened';
+      var eventPrefix = opts.evPrefix + opts.name;
 
       $win
           .on(formatChangeEv, function (/*e*/) {
@@ -48,22 +46,24 @@
                         {
                           openMenu  &&  $(openMenu).trigger('click.toggleMenu');
                           openMenu = link;
+                          $doc.trigger( eventPrefix+'open' );
                           scrollTopBeforeMenu = $win.scrollTop() || 1;
                           $html.addClass(classOpen);
                           $html.removeClass(classClosed);
                           var target = $( $(link).attr('href') );
                           target.focusHere();
                           $win.scrollTop( 1 );
-                          $doc.trigger(eventOpened);
+                          $doc.trigger( eventPrefix+'opened' );
                         }
                         else
                         {
                           openMenu = null;
+                          $doc.trigger( eventPrefix+'close' );
                           $html.removeClass(classOpen);
                           $html.addClass(classClosed);
                           $win.scrollTop( scrollTopBeforeMenu );
                           link.blur();
-                          $doc.trigger(eventClosed);
+                          $doc.trigger( eventPrefix+'closed' );
                         }
                         isThisMenuOpen = !isThisMenuOpen;
                       });
@@ -75,9 +75,10 @@
                 if ( isThisMenuOpen )
                 {
                   openMenu = null;
+                  $doc.trigger( eventPrefix+'close' );
                   isThisMenuOpen = false;
                   $html.removeClass(classOpen);
-                  $doc.trigger(eventClosed);
+                  $doc.trigger( eventPrefix+'closed' );
                 }
                 $(opts.menuButton).off('click.toggleMenu');
               }
