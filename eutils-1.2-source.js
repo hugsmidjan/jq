@@ -152,7 +152,7 @@
                 input.value = value;
                 input.setSelectionRange  &&  input.setSelectionRange(selStart, selEnd);
               });
-    }
+    };
 
 
 
@@ -225,6 +225,10 @@
       }
       return this;
     },
+
+
+    // Virkja reverse á jquery collection
+    reverse: [].reverse,
 
 
 
