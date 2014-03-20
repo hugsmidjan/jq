@@ -388,20 +388,35 @@
           _elm.prop('tabindex', -1);
         }
         // Make note of current scroll position
-        var doc = $(document),
-            _before = doc.scrollTop();
+        var doc = $(document);
+        var _before = doc.scrollTop();
 
         // Focus the element!
         _elm[0].focus(); // NOTE: Can't use _elm.trigger('focus'); because it won't focus Zero width/height elements.
 
-        // Check for new scroll position
-        if ( doc.scrollTop() !== _before )  // if the browser jumped to the anchor...  (the browser only scrolls the page if the _focusElm was outside the viewport)
+        // Measure the distance scrolled
+        var _scrolld = doc.scrollTop() - _before;
+
+        // Check if the browser jumped to the anchor...
+        //(the browser only scrolls the page if the _focusElm was outside the viewport)
+        if ( _scrolld )
         {
-          // ...then scroll the window to place the anchor at the top of the viewport.
-          // (NOTE: We do this because most browsers place the artificially .focus()ed link at the *bottom* of the viewport.)
-          var offset = opts && opts.offset || $.focusOffset();
-          offset = $.isFunction(offset) ? offset(_elm) : offset || 0;
-          doc.scrollTop( $(_elm).offset().top - offset );
+          // But actually, Chrome (as of v.33 at least) will always scroll
+          // unless the focused element is wholly within the viewport.
+          var elmTop = /*_before + */_scrolld + _elm[0].getBoundingClientRect().top;
+          var orgWinBottom = /*_before + */(_win.innerHeight||document.documentElement.clientHeight);
+          if ( _scrolld>0  &&  elmTop < orgWinBottom - 50 )
+          {
+            doc.scrollTop(_before);
+          }
+          else
+          {
+            // ...then scroll the window to place the anchor at the top of the viewport.
+            // (NOTE: We do this because most browsers place the artificially .focus()ed link at the *bottom* of the viewport.)
+            var offset = opts && opts.offset || $.focusOffset();
+            offset = $.isFunction(offset) ? offset(_elm) : offset || 0;
+            doc.scrollTop( $(_elm).offset().top - offset );
+          }
         }
       }
     };
