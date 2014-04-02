@@ -10,7 +10,7 @@
 //  - jQuery 1.4
 //  - eutils  (uses: $.lang() )
 
-// splits the articlelist date into spans with month names, requires d.m.yy / 0d.0m.yyyy format
+// splits the articlelist date into spans with month names, requires d.m.yy / 0d.0m.yyyy format. Handles ranges like: d.m.y - d.m.y
 // Usage:
 //  - $('.articlelist').alistDateSplit();
 
@@ -37,7 +37,10 @@
               monthAfterDate: 1, // 1/true inserts month after date, 0/false before
               dateSel:        '.item .date',
               showWeekday:    0, // 1/true inserts weekday, 'short' uses first 3 letters
-              showTime:       0
+              showTime:       0,
+              allowRange:     0,
+              rangeSplitter:  /-/,
+              dateSplitter:   /\.|\s+/
             }, cfg );
 
     return this.each(function(){
@@ -47,21 +50,43 @@
 
         alist.find( cfg.dateSel ).each(function(){
               var dateElm = $(this),
-                  date = $.trim(dateElm.text().split('-')[0]).split(/\.|\s+/),
-                  dateObj = new Date(date[2],date[1]-1,date[0]),
-                  Amonth = text.months[ dateObj.getMonth() ] || '',
-                  weekday = text.weekdays[ dateObj.getDay() ] || '',
-                  month = cfg.shortMonths && Amonth.length > 4 ? Amonth.substr(0,3) : Amonth,
-                  monthDot = cfg.shortMonths && Amonth.length > 4 ? '<i>.</i> ' : ' ',
-                  timeStamp = cfg.showTime && date[3] ? '<span class="t">'+ date[3] +'</span>' : '',
-                  jsDate = $('<span class="js-date" />'),
-                  pendFunc = cfg.monthAfterDate ? 'append' : 'prepend';
+                  dates = dateElm.text().split(cfg.rangeSplitter),
+                  jsDate = $('<span class="js-date" />');
 
-              weekday = cfg.showWeekday == 'short' ?  '<span class="wd">' + weekday.substr(0,3) + '<i>.</i></span> ' :
-                        cfg.showWeekday ? '<span class="wd">' + weekday + '</span> ' :
-                        '';
+              for (var i=0; i<dates.length; i++)
+              {
+                var date = $.trim(dates[i]).split(cfg.dateSplitter),
+                    dateObj = new Date(date[2],date[1]-1,date[0]),
+                    dayElm = cfg.allowRange ? $('<span class="day'+ (i+1) +'" />') : jsDate,
+                    Amonth = text.months[ dateObj.getMonth() ] || '',
+                    weekday = text.weekdays[ dateObj.getDay() ] || '',
+                    month = cfg.shortMonths && Amonth.length > 4 ? Amonth.substr(0,3) : Amonth,
+                    monthDot = cfg.shortMonths && Amonth.length > 4 ? '<i>.</i> ' : ' ',
+                    timeStamp = cfg.showTime && date[3] ? '<span class="t">'+ date[3] +'</span>' : '',
 
-              jsDate.append('<span class="d">'+ date[0] +'<i>.</i></span> ')[pendFunc]('<span class="m">'+ month + monthDot +'</span>').append('<span class="y">'+ date[2] +'</span> ').append(timeStamp).prepend(weekday);
+                    pendFunc = cfg.monthAfterDate ? 'append' : 'prepend';
+
+                weekday = cfg.showWeekday == 'short' ?  '<span class="wd">' + weekday.substr(0,3) + '<i>.</i></span> ' :
+                          cfg.showWeekday ? '<span class="wd">' + weekday + '</span> ' :
+                          '';
+
+                dayElm.append('<span class="d">'+ date[0] +'<i>.</i></span> ')[pendFunc]('<span class="m">'+ month + monthDot +'</span>').append('<span class="y">'+ date[2] +'</span> ').append(timeStamp).prepend(weekday);
+
+                if (cfg.allowRange)
+                {
+                  if (i > 0)
+                  {
+                    jsDate.append('<span class="sep"> - </span>');
+                  }
+
+                  jsDate.append(dayElm);
+                }
+                else
+                {
+                  break;
+                }
+              }
+
 
               dateElm.before(jsDate).remove();
           });
