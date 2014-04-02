@@ -1,4 +1,3 @@
-// encoding: utf-8
 // ----------------------------------------------------------------------------------
 // jQuery.fn.alistDateSplit v 1.0
 // ----------------------------------------------------------------------------------
@@ -37,7 +36,8 @@
               shortMonths:    1, // 1/true uses fyrst 3/4 letters, 0/false uses full month name
               monthAfterDate: 1, // 1/true inserts month after date, 0/false before
               dateSel:        '.item .date',
-              showWeekday:    0 // 1/true inserts weekday, 'short' uses first 3 letters
+              showWeekday:    0, // 1/true inserts weekday, 'short' uses first 3 letters
+              showTime:       0
             }, cfg );
 
     return this.each(function(){
@@ -47,12 +47,13 @@
 
         alist.find( cfg.dateSel ).each(function(){
               var dateElm = $(this),
-                  date = $.trim(dateElm.text().split('-')[0]).split('.'),
+                  date = $.trim(dateElm.text().split('-')[0]).split(/\.|\s+/),
                   dateObj = new Date(date[2],date[1]-1,date[0]),
                   Amonth = text.months[ dateObj.getMonth() ] || '',
                   weekday = text.weekdays[ dateObj.getDay() ] || '',
                   month = cfg.shortMonths && Amonth.length > 4 ? Amonth.substr(0,3) : Amonth,
                   monthDot = cfg.shortMonths && Amonth.length > 4 ? '<i>.</i> ' : ' ',
+                  timeStamp = cfg.showTime && date[3] ? '<span class="t">'+ date[3] +'</span>' : '',
                   jsDate = $('<span class="js-date" />'),
                   pendFunc = cfg.monthAfterDate ? 'append' : 'prepend';
 
@@ -60,7 +61,7 @@
                         cfg.showWeekday ? '<span class="wd">' + weekday + '</span> ' :
                         '';
 
-              jsDate.append('<span class="d">'+ date[0] +'<i>.</i></span> ')[pendFunc]('<span class="m">'+ month + monthDot +'</span>').append('<span class="y">'+ date[2] +'</span> ').prepend(weekday);
+              jsDate.append('<span class="d">'+ date[0] +'<i>.</i></span> ')[pendFunc]('<span class="m">'+ month + monthDot +'</span>').append('<span class="y">'+ date[2] +'</span> ').append(timeStamp).prepend(weekday);
 
               dateElm.before(jsDate).remove();
           });
