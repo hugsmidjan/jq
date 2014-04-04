@@ -9,6 +9,10 @@
 
   Example usage:
 
+      var arr = ['1','Á','ö','bá','be','$ff','af','að','ad','ý','y'];
+      arr.sortISL();
+      alert( arr.join('\n') );
+
       // use jQuery to select <tr> elements to sort
       // and convert them to an Array
       var tRows = jQuery('tbody tr').toArray();
