@@ -1,0 +1,2 @@
+// $.fn.txtFill -- (c) 2012 Hugsmiðjan ehf.
+(function(d){var j={maxSize:150,minSize:10},k=function(a,c){a.css('font-size','');var f=a.parent().width(),e,b,g,h=parseInt(c.minSize,10),i=parseInt(c.maxSize,10);while(true){b=Math.floor((h+i)/2);if(g==b){return false}a.css('font-size',b);e=a.width();if(e>f){i=b}else if(e<f){h=b}g=b}};d.fn.txtFill=function(a){var c=d.extend(j,a);return this.each(function(){k(d(this),c)})}})(jQuery);
