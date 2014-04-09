@@ -383,9 +383,9 @@
       if (_elm)
       {
         _elm = $(_elm);
-        if ( _elm.prop('tabindex') == null )
+        if ( _elm.attr('tabindex') == null )
         {
-          _elm.prop('tabindex', -1);
+          _elm.attr('tabindex', -1);
         }
         // Make note of current scroll position
         var doc = $(document);
@@ -455,9 +455,9 @@
                 if ( elm[0]  &&  href[0]===doc.location.href.split('#')[0] )
                 {
                   e.preventDefault();
-                  if ( elm.prop('tabindex') == null )
+                  if ( elm.attr('tabindex') == null )
                   {
-                    elm.prop('tabindex', -1);
+                    elm.attr('tabindex', -1);
                   }
                   doc.location.href = '#'+id;
                   var offset = opts && opts.offset || $.scrollOffset();
