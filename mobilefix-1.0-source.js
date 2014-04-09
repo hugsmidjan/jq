@@ -4,12 +4,12 @@
 
   // fix orientation change zoom bug in Safari Mobile on iOS devices
   // based on: https://gist.github.com/901295
-  if (  /iPhone|iPad/.test(ua) && !/Opera Mini/.test(ua) /* && doc[querySelectorAll] */ ) {
+  if ( /iPhone|iPad/.test(ua) && !/Opera Mini/.test(ua) /* && doc[querySelectorAll] */ ) {
     var meta = doc.querySelectorAll('meta[name=viewport]');
     if ( meta[0] ) {
-      var type = 'gesturestart',
-          s = [1, 1],
-          fix = function () {
+      var type = 'gesturestart';
+      var s = [1, 1];
+      var fix = function () {
               meta[meta.length - 1].content = 'width=device-width,minimum-scale='+ s[0] +',maximum-scale='+ s[1];
               doc.removeEventListener(type, fix, true);
             };
@@ -27,44 +27,45 @@
           s.display = 'none';
           setTimeout(function(){ s.display = 'block'; }, 0);
         */
-          setTimeout(function(d){
-              (d=document.documentElement).className = d.className;
+          setTimeout(function(docElm){
+              (docElm=document.documentElement).className = docElm.className;
             }, 0);
         }, true);
     }
   }
 
 
+/** /
   // attempt to hide location bar in iPhone and Android devices by scrolling ever so slightly.
   // Based on: https://gist.github.com/1183357
   // If there's a hash, or addEventListener is undefined, stop here
   if( !location.hash && win[addEv] ) {
-    var scrTo = 'scrollTo',
-        getScrTop = function(pageYOffset){
+    var scrollTo = 'scrollTo';
+    var getScrollTop = function(pageYOffset){
             return  (pageYOffset = win.pageYOffset)!=null ?
                         pageYOffset:
                         (doc.body&&doc.body.scrollTop)||0;
-          },
-        scrollVal = 1,
-        //reset to 0 on bodyready, if needed
-        bodycheck = setInterval(function(){
+          };
+    var scrollVal = 1;
+    //reset to 0 on bodyready, if needed
+    var bodycheck = setInterval(function(){
             if( doc.body ){
               clearInterval( bodycheck );
-              win[scrTo]( 0, (scrollVal=getScrTop())===1 ? 0 : 1 );
+              win[scrollTo]( 0, (scrollVal=getScrollTop())===1 ? 0 : 1 );
             }
           }, 15 );
     //scroll to 1 if user hasn't already scrolled
-    getScrTop()===0 && win[scrTo]( 0, 1 );
+    getScrollTop()===0 && win[scrollTo]( 0, 1 );
     win[addEv]( 'load', function(){
       setTimeout(function(){
-        if( getScrTop() < 5 ){
+        if( getScrollTop() < 5 ){
           //reset to hide addr bar at onload
-          win[scrTo]( 0, scrollVal === 1 ? 0 : 1 );
+          win[scrollTo]( 0, scrollVal === 1 ? 0 : 1 );
         }
       }, 0);
     }, false );
   }
-
+/**/
 
 })(
   /* win =   */ window,
