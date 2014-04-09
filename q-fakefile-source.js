@@ -8,7 +8,7 @@
         var fileInp = fileElm.find('input').data('data-fileNo', fileNo),
             fileWrap = fileInp.wrap('<div class="filewrap" />').parent(),
             fileId, fileNo,
-            fakeFile = $('<a href="#" />')
+            fakeFile = $('<a class="fakefile" href="#" />')
                             .on('click', function (e) {
                                 e.preventDefault();
                               })
@@ -33,7 +33,7 @@
                 var filename = $(this).val().replace("C:\\fakepath\\", "");
                 if (filename)
                 {
-                  var fileEnding = filename.toLowerCase().match(/[a-z0-9]+$/)[0];
+                  var fileEnding = filename.toLowerCase().match(/[a-z0-9]+$/);
                   fileEnding = fileEnding ? fileEnding[0] : 'default';
                   $(this)
                       .next('.fakefile')
