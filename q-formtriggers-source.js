@@ -4,10 +4,10 @@
 /*
   Usage:
   Add trigger class to the container on the triggers
-  add data-trigger attribute to the inputs/options that indicate what ID they should trigger, followed by -open or -close action for select options and radio buttons
-  Use closed class to hide block in the begining
+  add data-trigger attribute to the inputs/options that indicate what ID they should trigger followed by -open or -close action
+  Use closed
 
-  f.ex.: <input type="radio" data-trigger="opt1-open opt2-close" />
+  f.ex.: <input type="checkbox" data-trigger="opt1-open opt2-close" />
 */
 
 (function($){
@@ -15,7 +15,9 @@
           triggerSel: '.trigger',
           subreqClass: 'subreq',
           showFunc:    'fadeIn',
+          showSpeed:   'fast',
           hideFunc:    'hide',
+          hideSpeed:    0,
           closedClass: 'closed'
         },
         triggerFunc = function (triggerData, cfg) {
@@ -27,11 +29,11 @@
 
               if ( tOpCl == 'open' )
               {
-                $('#'+tData)[cfg.showFunc]('fast').find('.'+cfg.subreqClass).removeClass(cfg.subreqClass).addClass('req');
+                $('#'+tData)[cfg.showFunc](cfg.showSpeed).find('.'+cfg.subreqClass).removeClass(cfg.subreqClass).addClass('req');
               }
               else
               {
-                $('#'+tData)[cfg.hideFunc]('fast').find('.req').removeClass('req').addClass(cfg.subreqClass);
+                $('#'+tData)[cfg.hideFunc](cfg.hideSpeed).find('.req').removeClass('req').addClass(cfg.subreqClass);
               }
             });
         };
