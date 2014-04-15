@@ -49,7 +49,7 @@
               mimetype,
               autoplay = '',
               playerHeight = 0,
-              vidFrame = false;
+              vidFrame = 'iframe';
 
           if ( type === 'youtube' || type === 'youtu' )
           {
@@ -66,7 +66,6 @@
             autoplay = data.autostart ? '&autoplay=1' : '';
             videoUrl = docLocPC + '//www.youtube.com/embed/' + videoId + '?rel=0' + autoplay;
             playerHeight = 30;
-            vidFrame = 'iframe';
           }
           else if ( type === 'vimeo' )
           {
@@ -81,7 +80,6 @@
             videoId = videoId && videoId[1];
             autoplay = data.autostart ? '&autoplay=1' : '';
             videoUrl = docLocPC + '//player.vimeo.com/video/'+ videoId +'?title=1&amp;byline=0&amp;portrait=0' + autoplay;
-            vidFrame = 'iframe';
           }
           else if ( type === 'facebook' )
           {
@@ -97,7 +95,6 @@
             videoId = videoHref.match(/(?:\/v\/|[?&]v=)(\d{10,20})/); // matches v/nnnnn or v=nnnnn
             videoId = videoId && videoId[1];
             videoUrl = docLocPC + '//www.facebook.com/video/embed?video_id='+ videoId;
-            vidFrame = 'iframe';
           }
           else if ( type === 'file' )
           {
@@ -125,8 +122,11 @@
               playerHeight = 20;
               vidFrame = 'flash';
             }
-
-
+          }
+          else
+          {
+            // Everything else
+            videoUrl = videoHref;
           }
 
           vidHeight = vidHeight + playerHeight; //add player height to video height
