@@ -157,7 +157,10 @@
                         }));
           }
 
-          item.append('<span class="videocaption">'+  data.vidCapt +'</span>');
+          if (data.useCaption)
+          {
+            item.append('<span class="videocaption">'+  data.vidCapt +'</span>');
+          }
 
           if (vidFrame != 'flash' && data.vidWidth === 'auto')
           {
@@ -183,10 +186,11 @@
     if (videoLinks.length)
     {
       cfg = $.extend({
-              //autostart: false, // Q: Should we change this default to true?
+              //autostart: false, // Q: Should we change this default to true? A: No
               vidWidth:  'auto', //integer or 'auto' ()
               vidHeight: 'auto',
-              aspect4x3:  false
+              aspect4x3:  false,
+              useCaption:    true // append video caption
             }, cfg );
 
 
@@ -207,7 +211,8 @@
                       vidWidth:    cfg.vidWidth,
                       vidHeight:   cfg.vidHeight,
                       autostart:   !!cfg.autostart,
-                      aspect4x3:   cfg.aspect4x3
+                      aspect4x3:   cfg.aspect4x3,
+                      useCaption:  cfg.useCaption
                     };
 
               if (type)
