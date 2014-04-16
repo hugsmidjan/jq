@@ -144,11 +144,12 @@
     };
 
 
-  // update input/textarea values while maintaining cursor-position
+  // update input/textarea values while maintaining cursor-position *from end*
   $.fn.liveVal = function (value) {
       return this.each(function (i, input) {
-                var selStart = input.selectionStart;
-                var selEnd = input.selectionEnd;
+                var delta = value.length - input.value.length;
+                var selStart = input.selectionStart + delta;
+                var selEnd = input.selectionEnd + delta;
                 input.value = value;
                 input.setSelectionRange  &&  input.setSelectionRange(selStart, selEnd);
               });
