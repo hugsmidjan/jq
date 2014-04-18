@@ -785,8 +785,9 @@
     {
       _fragment = (_fragment||'').replace(/^#/, '');
       // check if there exists an element with .id same as _fragment
-      var _elm = _fragment  &&  _doc.getElementById(_fragment),
-          _prePos = !_fragment  &&  $.scrollPos();
+      var _elm = _fragment  &&  _doc.getElementById( _isEncoded ? decodeURIComponent(_fragment) : _fragment );
+      // var _prePos = !_fragment  &&  $.scrollPos();
+      var _prePos = $.scrollPos();
 
       // temporaily defuse the element's id
       _elm  &&  (_elm.id = '');
@@ -794,10 +795,16 @@
       // set the damn hash... (Note: Safari 3 & Chrome barf if frag === '#'.)
       _location.href = '#'+ (_isEncoded ? _fragment : $.encodeFrag(_fragment) );
 
-      // scrollpos will have changed if fragment was set to an empty "#"
-      !_fragment  &&  $.scrollPos(_prePos);
+      // // scrollpos will have changed if fragment was set to an empty "#"
+      // !_fragment  &&  $.scrollPos(_prePos);
 
-      // put the old tab-id back in it's place
+      // Always reset scrollpos
+      // (because Chrome ~v34 seems to scroll to the element which had -
+      // that ID on page load regardless of wheter its id has changed
+      // or if another element has now received that id. weird.)
+      $.scrollPos(_prePos);
+
+      // put the old DOM id back in it's place
       _elm  &&  (_elm.id = _fragment);
     },
 
