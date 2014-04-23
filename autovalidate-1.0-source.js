@@ -309,6 +309,16 @@
 
 
   // jQuery.fn.constrainNumberInput 1.2  -- (c) 2013 Hugsmiðjan ehf.
+  /*
+    Usage/options:
+
+      $('input.number')
+          .constrainNumberInput({
+              arrows: true,  // activate UP/DOWN arrows *crementing the value (respecting min="", max="" and step="" attributes)
+              floats: true   // allows typing of "-", "." and "," symbols into the field (no validation performed).
+            })
+
+  */
   (function($){
 
     $.fn.constrainNumberInput = function (opts) {
@@ -322,8 +332,8 @@
               inputs.on('keydown',  arrowCrement).on('focusin', triggerChange);
         }
         selector ?
-            inputs.on('keypress', selector,  rejectInvalidKeystrokes):
-            inputs.on('keypress',  rejectInvalidKeystrokes);
+            inputs.on('keypress', selector,  rejectInvalidKeystrokes(opts.floats) ):
+            inputs.on('keypress',  rejectInvalidKeystrokes(opts.floats) );
         return inputs;
       };
 
@@ -352,7 +362,7 @@
                         Math.min(val, max):
                         val;
 
-              if ( $inp.val() != val ) // skip unnessesary updates and change events
+              if ( $inp.val() !== val ) // skip unnessesary updates and change events
               {
                 $inp.val( val );
                 // trigger "change" immediately - unless the field is focused - then wait for blur like normal
@@ -393,19 +403,28 @@
                   });
           },
 
+        extraChars = {
+            44: 1, // ,
+            45: 1, // -
+            46: 1  // .
+          },
+
         // reject non-digit character input
-        rejectInvalidKeystrokes =  function (e) {
-            // Cancel the keypress when
-            if (!e.ctrlKey && !e.metaKey &&  // allow copy/paste/
-                e.which  &&                  // key has some keycode (Arrow keys don't on 'keypress') but is
-                e.which!==8  &&              // not Backspace
-                e.which!==13  &&             // not Enter
-                (e.which<48  ||  e.which>57) // not a Digit (0-9)
-                // FIXME: use pattern="" attribute to check for valid input...
-              )
-            {
-              e.preventDefault();
-            }
+        rejectInvalidKeystrokes =  function ( allowFloats ) {
+            return function (e) {
+                // Cancel the keypress when
+                if (!e.ctrlKey && !e.metaKey &&  // allow copy/paste/
+                    e.which  &&                  // key has some keycode (Arrow keys don't on 'keypress') but is
+                    e.which!==8  &&              // not Backspace
+                    e.which!==13  &&             // not Enter
+                    (e.which<48  ||  e.which>57) && // not a Digit (0-9)
+                    !(allowFloats && extraChars[e.which]) // allow extra characters when floats are allowed
+                    // FIXME: use pattern="" attribute to check for valid input...
+                  )
+                {
+                  e.preventDefault();
+                }
+              };
           };
 
   })(jQuery);
@@ -737,6 +756,10 @@
   });
 
 })(jQuery);
+
+
+
+
 
 
 
