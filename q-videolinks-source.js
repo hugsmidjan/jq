@@ -131,7 +131,7 @@
 
           vidHeight = vidHeight + playerHeight; //add player height to video height
 
-          if (vidFrame == 'iframe')
+          if (vidFrame === 'iframe')
           {
             item.html($.inject(iframeTempl, {
                           vidurl : videoUrl,
@@ -139,7 +139,7 @@
                           vidhe  : vidHeight
                         }));
           }
-          else if (vidFrame == 'video')
+          else if (vidFrame === 'video')
           {
             item.html($.inject(videoTempl, {
                           vidurl : videoUrl,
@@ -148,7 +148,7 @@
                           auto   : autoplay
                         }));
           }
-          else if (vidFrame == 'flash')
+          else if (vidFrame === 'flash')
           {
             item.html($.inject(objectTempl, {
                           vidurl : videoUrl,
@@ -162,7 +162,7 @@
             item.append('<span class="videocaption">'+  data.vidCapt +'</span>');
           }
 
-          if (vidFrame != 'flash' && data.vidWidth === 'auto')
+          if (vidFrame !== 'flash' && data.vidWidth === 'auto')
           {
             $(window).on('resize', function (/*e*/) {
                 newWidth = data.contElm.width();
@@ -192,47 +192,43 @@
               aspect4x3:  false,
               useCaption:    true // append video caption
             }, cfg );
-
-
-      videoLinks
-          .each(function () {
-              var link = $(this),
-                  videoHref = link.attr('href'),
-                  type =  (/\.youtube\.com/i.test( videoHref ) && 'youtube') ||
-                          (/\.(flv|mp4|m4v|mov)(\?|$)/i.test( videoHref ) && 'file') ||
-                          (/vimeo\.com/i.test( videoHref ) && 'vimeo') ||
-                          (/youtu\.be/i.test( videoHref ) && 'youtu') ||
-                          (/facebook\.com/i.test( videoHref ) && 'facebook') ||
-                          undefined,
-                  data = {
-                      videoHref:   videoHref,
-                      type:        type,
-                      vidCapt:     link.text(),
-                      vidWidth:    cfg.vidWidth,
-                      vidHeight:   cfg.vidHeight,
-                      autostart:   !!cfg.autostart,
-                      aspect4x3:   cfg.aspect4x3,
-                      useCaption:  cfg.useCaption
-                    };
-
-              if (type)
-              {
-                var wrapper = link.wrap('<span class="videoblock" />').parent();
-                data.contElm = $(wrapper);
-                while ( data.contElm[0]  &&  data.contElm.css('display')==='inline' )
-                {
-                  data.contElm = $(data.contElm.parent());
-                }
-                wrapper
-                    .data( 'playvideo_data', data )
-                    .run(playVideo);
-                link.remove();
-              }
-
-            });
     }
+    return videoLinks.map(function () {
+        var link = $(this),
+            videoHref = link.attr('href'),
+            type =  (/\.youtube\.com/i.test( videoHref ) && 'youtube') ||
+                    (/\.(flv|mp4|m4v|mov)(\?|$)/i.test( videoHref ) && 'file') ||
+                    (/vimeo\.com/i.test( videoHref ) && 'vimeo') ||
+                    (/youtu\.be/i.test( videoHref ) && 'youtu') ||
+                    (/facebook\.com/i.test( videoHref ) && 'facebook') ||
+                    undefined,
+            data = {
+                videoHref:   videoHref,
+                type:        type,
+                vidCapt:     link.text(),
+                vidWidth:    cfg.vidWidth,
+                vidHeight:   cfg.vidHeight,
+                autostart:   !!cfg.autostart,
+                aspect4x3:   cfg.aspect4x3,
+                useCaption:  cfg.useCaption
+              };
 
-    return videoLinks;
+        if (type)
+        {
+          var wrapper = link.wrap('<span class="videoblock" />').parent();
+          data.contElm = $(wrapper);
+          while ( data.contElm[0]  &&  data.contElm.css('display')==='inline' )
+          {
+            data.contElm = $(data.contElm.parent());
+          }
+          wrapper
+              .data( 'playvideo_data', data )
+              .run(playVideo);
+          link.remove();
+          return wrapper;
+        }
+
+      });
   };
 
 })(jQuery);
