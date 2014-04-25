@@ -211,22 +211,22 @@
                 autostart:   !!cfg.autostart,
                 aspect4x3:   cfg.aspect4x3,
                 useCaption:  cfg.useCaption
-              };
+              },
+            wrapper = link.wrap('<span class="videoblock" />').parent();
 
-        if (type)
+        data.contElm = $(wrapper);
+        while ( data.contElm[0]  &&  data.contElm.css('display')==='inline' )
         {
-          var wrapper = link.wrap('<span class="videoblock" />').parent();
-          data.contElm = $(wrapper);
-          while ( data.contElm[0]  &&  data.contElm.css('display')==='inline' )
-          {
-            data.contElm = $(data.contElm.parent());
-          }
-          wrapper
-              .data( 'playvideo_data', data )
-              .run(playVideo);
-          link.remove();
-          return wrapper;
+          data.contElm = $(data.contElm.parent());
         }
+
+        wrapper
+            .data( 'playvideo_data', data )
+            .run(playVideo);
+
+        link.remove();
+
+        return wrapper;
 
       });
   };
