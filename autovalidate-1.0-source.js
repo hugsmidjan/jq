@@ -25,21 +25,21 @@
 
   var defaultConfig = {
 
-    lang                : 'en',             // Two digit language-code used for displaying error messgages, etc.
-    maxLabelLength      : 35,               // Cutoff-character-limit for <label> values listed in the error alert() window.
-    errorAction         : 'focus',          // available values: (anchor|focus) (Note: anchor is bound to be more irritating.)
-    focusElmClass       : 'stream',         // className for the placeholder <a href=""> element used to move the
-                                            // keyboard/screen-reader focus between inline error messages.
+    lang                : 'en',              // Two digit language-code used for displaying error messgages, etc.
+    maxLabelLength      : 35,                // Cutoff-character-limit for <label> values listed in the error alert() window.
+    errorAction         : 'focus',           // available values: (anchor|focus) (Note: anchor is bound to be more irritating.)
+    focusElmClass       : 'stream',          // className for the placeholder <a href=""> element used to move the
+                                             // keyboard/screen-reader focus between inline error messages.
     formInvalidClass    : 'is-invalid',     // className toggled on the <form> element whenever $.fn.isValid() runs
-    submittedClass      : 'issubmitted',    // className that gets added to the <form> element when it has been
-                                            // submitted and is waiting for the server to respond
-    validateEachField   : '',               // possible values:  "change"==onChange; ""==onSubmit (normal)
-    errorMsgType        : 'alertonly',      // How should error texts be displayed?
-                                            // Possible values: "alertonly", "inlineonly", "both". Defaults to alertonly.
-    inlineErrorClass    : 'errmsg',         // className for the inline "Error" message element
-    nextErrorLinkClass  : 'nexterror',      // className for the inline "Next Error" link element
+    submittedClass      : 'issubmitted',     // className that gets added to the <form> element when it has been
+                                             // submitted and is waiting for the server to respond
+    validateEachField   : '',                // possible values:  "change"==onChange; (only when errorMsgType: 'inlineonly') ""==onSubmit (normal) ...
+    errorMsgType        : 'alertonly',       // How should error texts be displayed?
+                                             // Possible values: "alertonly", "inlineonly", "both". Defaults to alertonly.
+    inlineErrorClass    : 'errmsg',          // className for the inline "Error" message element
+    nextErrorLinkClass  : 'nexterror',       // className for the inline "Next Error" link element
 
-    customReqCheck      : {},               // Container for dynamic "required" checks for based on field @name attribute values.
+    customReqCheck      : {},                // Container for dynamic "required" checks for based on field @name attribute values.
                                             // Example use:
                                             //     var validationConfig = $.av.config( myform );
                                             //     validateionConfig.customReqCheck = {
@@ -48,20 +48,20 @@
                                             //         'fieldName3': function(){ /* do stuff */ return booleanValue; }
                                             //       });
 
-    reqClassPattern     : 'req',            // The `className` that designates a field to be "required".
-    reqErrorClass       : 'reqerror',       // The `className` put on field "container" elements when they trigger a "required" error.
-    typeErrorClass      : 'typeerror',      // The className put on field "container" elements that have a "invalid input" error.
+    reqClassPattern     : 'req',             // The `className` that designates a field to be "required".
+    reqErrorClass       : 'reqerror',        // The `className` put on field "container" elements when they trigger a "required" error.
+    typeErrorClass      : 'typeerror',       // The className put on field "container" elements that have a "invalid input" error.
 
     //emulateTab:         false,
-    //includeDisabled:    false,            // true - means that [disabled] fields are not filtered out.
+    //includeDisabled:    false,             // true - means that [disabled] fields are not filtered out.
     //maxLengthTab:       false
 
-    defangReset         : true,             // assign a confirmation dialog to reset buttons to prevent accidental resets
-    defangEnter         : 'auto'            // disable form submitions on enter key.
-                                            // Values are (true|false|auto) where:
-                                            //  true  - disables all enter submits,
-                                            //  false - doesn't alter bowser defaults,
-                                            //  auto  - disables enter submitions if form has more than one submit button
+    defangReset         : true,              // assign a confirmation dialog to reset buttons to prevent accidental resets
+    defangEnter         : 'auto'             // disable form submitions on enter key.
+                                             // Values are (true|false|auto) where:
+                                             //  true  - disables all enter submits,
+                                             //  false - doesn't alter bowser defaults,
+                                             //  auto  - disables enter submitions if form has more than one submit button
   };
 
 
@@ -463,8 +463,6 @@
 
     autoValidate : function ( config ) {
 
-      // TODO : validateEachField is missing
-
       return this.each(function(){
 
         var context = $( this ),
@@ -513,12 +511,12 @@
           // TODO: consider adding the reverse for backspace
         }
 
-/* delete?
-        if (/blur|change/.test(conf.validateEachField)) {
-          // $( this ).isValid();
-          // what context should the validation be called on?
+        if ( conf.validateEachField == 'change' && conf.errorMsgType == 'inlineonly' )
+        {
+          form.bind('change', function (e) {
+              $(e.target).isValid();
+            });
         }
-*/
 
         form.bind('submit', function(e){
             var f = $( this );
@@ -602,8 +600,8 @@
 
           // purge wrapper of old error notifications
           if ( report ) {
-            wrap.removeClass( conf.reqErrorClass );
-            wrap.removeClass( conf.typeErrorClass );
+          wrap.removeClass( conf.reqErrorClass );
+          wrap.removeClass( conf.typeErrorClass );
           }
 
           if (wrap.length !== 0)
@@ -676,18 +674,18 @@
                 contextInvalids.push( wrap.get(0) );
 
                 if ( report ) {
-                  var shortErr;
-                  // handle Object
-                  if (!resIsString) {
-                    shortErr = res.alert;
-                    res = res.inline;
-                  }
-                  wrap.data( 'av-error', res );
-                  wrap.data( 'av-error-short', (typeof shortErr === 'string' ? shortErr : res) );
+                var shortErr;
+                // handle Object
+                if (!resIsString) {
+                  shortErr = res.alert;
+                  res = res.inline;
+                }
+                wrap.data( 'av-error', res );
+                wrap.data( 'av-error-short', (typeof shortErr === 'string' ? shortErr : res) );
 
                 // mark wrapper (or control) with error class
-                  wrap.removeClass( conf.reqErrorClass );
-                  wrap.addClass( conf.typeErrorClass );
+                wrap.removeClass( conf.reqErrorClass );
+                wrap.addClass( conf.typeErrorClass );
                 }
 
               }
@@ -698,7 +696,7 @@
 
                 // mark wrapper (or control) with error class
                 if ( report ) {
-                  wrap.addClass( conf.reqErrorClass );
+                wrap.addClass( conf.reqErrorClass );
                 }
 
               }
@@ -722,19 +720,19 @@
 
       if ( report )
       {
-        // we've passed through every control - time to sort out the results
+      // we've passed through every control - time to sort out the results
         if ( !isValid )
-        {
+      {
           var field = $(invalids[0]).find('*').addBack().filter('input, select, textarea');
-          field.focusHere ?
-              field.focusHere():
-          field.setFocus ?
-              field.focusHere():
-              field[0].focus();
+        field.focusHere ?
+            field.focusHere():
+        field.setFocus ?
+            field.focusHere():
+            field[0].focus();
 
           if (displayAlert) {
             $.av.alertErrors( $.unique( invalids ), this );
-          }
+      }
 
         }
 
@@ -756,6 +754,7 @@
   });
 
 })(jQuery);
+
 
 
 
