@@ -573,9 +573,11 @@
         displayAlert = displayAlert || /both|alertonly/.test( conf.errorMsgType );
 
         // purge wrapper of old error notifications
-        errMsgSel = errMsgSel || 'strong.' + conf.inlineErrorClass + ', a.' + conf.nextErrorLinkClass;
+
         if ( report ) {
-          context.find( errMsgSel ).remove();
+          var errMsgWrap = context.is(':input') ? context.parent() : context;
+          errMsgSel = errMsgSel || 'strong.' + conf.inlineErrorClass + ', a.' + conf.nextErrorLinkClass;
+          errMsgWrap.find( errMsgSel ).remove();
         }
 
         // find controls that need validation
@@ -600,8 +602,8 @@
 
           // purge wrapper of old error notifications
           if ( report ) {
-          wrap.removeClass( conf.reqErrorClass );
-          wrap.removeClass( conf.typeErrorClass );
+            wrap.removeClass( conf.reqErrorClass );
+            wrap.removeClass( conf.typeErrorClass );
           }
 
           if (wrap.length !== 0)
@@ -754,6 +756,7 @@
   });
 
 })(jQuery);
+
 
 
 
