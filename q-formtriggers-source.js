@@ -21,21 +21,24 @@
           closedClass: 'closed'
         },
         triggerFunc = function (triggerData, cfg) {
-          triggerData = triggerData.split(/\s+/);
-          $.each(triggerData, function (i) {
-              var tData = triggerData[i].split('-'),
-                  tOpCl = tData.pop();
-              tData = tData.join('-');
+          if (triggerData)
+          {
+            triggerData = triggerData.split(/\s+/);
+            $.each(triggerData, function (i) {
+                var tData = triggerData[i].split('-'),
+                    tOpCl = tData.pop();
+                tData = tData.join('-');
 
-              if ( tOpCl == 'open' )
-              {
-                $('#'+tData)[cfg.showFunc](cfg.showSpeed).find('.'+cfg.subreqClass).removeClass(cfg.subreqClass).addClass('req');
-              }
-              else
-              {
-                $('#'+tData)[cfg.hideFunc](cfg.hideSpeed).find('.req').removeClass('req').addClass(cfg.subreqClass);
-              }
-            });
+                if ( tOpCl == 'open' )
+                {
+                  $('#'+tData)[cfg.showFunc](cfg.showSpeed).find('.'+cfg.subreqClass).removeClass(cfg.subreqClass).addClass('req');
+                }
+                else
+                {
+                  $('#'+tData)[cfg.hideFunc](cfg.hideSpeed).find('.req').removeClass('req').addClass(cfg.subreqClass);
+                }
+              });
+          }
         };
 
 
