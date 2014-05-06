@@ -226,7 +226,7 @@
 
         link.remove();
 
-        return wrapper;
+        return wrapper[0];
 
       });
   };
