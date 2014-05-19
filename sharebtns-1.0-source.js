@@ -227,7 +227,7 @@
 
           fbshare: {
               width:  10,             // suggested width for the iframe
-              count:  'button_count', // 'button', 'box_count'
+              count:  'button_count', // 'button', 'box_count', 'icon', 'icon_link', 'link',
               //custom: false,          // Defaults to using the standard <iframe> embed code
               //txt:    null,           // Link text for customized links
 
@@ -253,7 +253,6 @@
               $pos:  11
             },
 
-
           facebook: {
               width:    10,             // suggested width for the iframe
               count:    'button_count', // 'standard', 'box_count'
@@ -274,9 +273,10 @@
                     $('body').prepend('<div id="fb-root"/>');
                   }
                   injectScriptIfNeeded(
-                      '//connect.facebook.net/'+ _getLocale(this.lang, 'en') +'/all.js#xfbml=1',
+                      '//connect.facebook.net/'+ _getLocale(this.lang, 'en') +'/sdk.js#xfbml=1&version=v2.0&appId=113869198637480',
                       function(){  win.FB  &&  win.FB.XFBML.parse();  }
-                    );
+                    )
+                      .attr('id', 'facebook-jssdk');
                 },
               $pos:  10 // defaults to last position because when 'count' is set to '' - loads of text appear to the right of the button
             },
@@ -390,13 +390,13 @@
           var scriptState = loadedScripts[scriptURL];
           if ( _multiple || !scriptState )
           {
-            loadedScripts[scriptURL] = scriptState = scriptState || {};
+            loadedScripts[scriptURL] = scriptState = scriptState || { elm: $('<script/>') };
 
             clearTimeout( scriptState.s );
             scriptState.s = setTimeout(function(){
                 // we do this instead of $.getScript() to avoid an annoying
                 // cross-frame access violation error in Google Chrome. Ack!
-                $('<script/>')
+                scriptState.elm
                     .attr('src', scriptURL)
                     .html( body||'' )
                     .each(function () {
@@ -424,6 +424,7 @@
             clearTimeout( scriptState.t );
             scriptState.t = setTimeout(callback, delay);
           }
+          return scriptState.elm;
         };
 
 
