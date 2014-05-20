@@ -44,28 +44,32 @@
     var abcIdx = {};
     var abc = '| -0123456789aáàâäåbcdðeéèêëfghiíîïjklmnoóôpqrstuúùüvwxyýÿzþæö'; // prepend list with '|' to guarantee that abc.indexOf(chr) never returns 0 (falsy)
     var getAbcText = function(text){
-            var idxStr = '';
-            text = (text.trim ? text.trim() : text.replace(/^\s+|\s+$/g,''))
-                      .replace(/[\/.,()]/g, '') // remove punctutation
-                      .replace(/\s*-\s*/g,'-')  // normalize spacing around dashes
-                      .replace(/(_|\s)+/g,' ')  // normalize/collapse space-characters
-                      .toLowerCase();           // lowercase
-            var len = text.length;
-            var i = 0;
-            while ( i < len )
+            if ( typeof text === 'string' )
             {
-              var chr = text.charAt(i);
-              var chrCode = abcIdx[chr];
-              if ( !chrCode )
+              var idxStr = '';
+              text = (text.trim ? text.trim() : text.replace(/^\s+|\s+$/g,''))
+                        .replace(/[\/.,()]/g, '') // remove punctutation
+                        .replace(/\s*-\s*/g,'-')  // normalize spacing around dashes
+                        .replace(/(_|\s)+/g,' ')  // normalize/collapse space-characters
+                        .toLowerCase();           // lowercase
+              var len = text.length;
+              var i = 0;
+              while ( i < len )
               {
-                var idx = abc.indexOf(chr);
-                idx = idx>-1 ? 32+idx : 99+chr.charCodeAt(0);
-                chrCode = abcIdx[chr] = String.fromCharCode( idx );
+                var chr = text.charAt(i);
+                var chrCode = abcIdx[chr];
+                if ( !chrCode )
+                {
+                  var idx = abc.indexOf(chr);
+                  idx = idx>-1 ? 32+idx : 99+chr.charCodeAt(0);
+                  chrCode = abcIdx[chr] = String.fromCharCode( idx );
+                }
+                idxStr += chrCode;
+                i++;
               }
-              idxStr += chrCode;
-              i++;
+              return idxStr;
             }
-            return idxStr;
+            return text;
           };
 
    Array.prototype.sortISL = function( opts ){
