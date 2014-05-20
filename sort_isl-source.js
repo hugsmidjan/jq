@@ -17,10 +17,22 @@
       // and convert them to an Array
       var tRows = jQuery('tbody tr').toArray();
 
+      var getSortProp = function(cellElm){
+              return $(cellElm).find('td:eq(1)').text()
+            };
+
       // sort the array in Icelandic alphabetical order
       // by the text-value of each row's second <td> cell.
-      tRows.sortISL(function(item){
-          return $(item).find('td:eq(1)').text()
+      tRows.sortISL( getSortProp );
+      // or for reverse sorting
+      tRows.sortISL({
+          getProp: getSortProp,
+          reverse: true
+        });
+      // or for custom sorting
+      tRows.sortISL({
+          getProp: getSortProp,
+          sortFn:  function (a,b) { a===b ? 0 : a>b ? 1 : -1; }
         });
 
       // re-inject the sorted rows into table.
@@ -56,8 +68,12 @@
             return idxStr;
           };
 
-   Array.prototype.sortISL = function( getProp ){
-      getProp = getProp || function (item) { return ''+item; };
+   Array.prototype.sortISL = function( opts ){
+      opts =  !opts ? {} : (opts.apply && opts.call) ? { getProp:opts } : opts;
+
+      var getProp = opts.getProp  ||  function (item) { return ''+item; };
+      var sortFn = opts.sortFn  ||  function (a,b) { return a[0]===b[0] ? 0 : a[0]>b[0] ? 1 : -1; };
+
       var arr = this;
       var tempArr = [];
       var len = arr.length;
@@ -67,9 +83,11 @@
         tempArr[i] = [ getAbcText(getProp( arr[i] )), arr[i] ];
         i++;
       }
-      tempArr.sort(function (a,b) {
-          return a[0]===b[0] ? 0 : a[0]>b[0] ? 1 : -1;
-        });
+      tempArr.sort(
+          opts.reverse ?
+              function (a,b) { return -1 * sortFn(a,b); }:
+              sortFn
+        );
       i = 0;
       while ( i<len )
       {
