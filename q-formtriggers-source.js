@@ -31,11 +31,19 @@
 
                 if ( tOpCl == 'open' )
                 {
-                  $('#'+tData)[cfg.showFunc](cfg.showSpeed).find('.'+cfg.subreqClass).removeClass(cfg.subreqClass).addClass('req');
+                  $('#'+tData)[cfg.showFunc](cfg.showSpeed)
+                      .find('.'+cfg.subreqClass)
+                      .andSelf()
+                      .filter('.'+cfg.subreqClass)
+                          .addClass('req');
                 }
                 else
                 {
-                  $('#'+tData)[cfg.hideFunc](cfg.hideSpeed).find('.req').removeClass('req').addClass(cfg.subreqClass);
+                  $('#'+tData)[cfg.hideFunc](cfg.hideSpeed)
+                      .find('.'+cfg.subreqClass)
+                      .andSelf()
+                      .filter('.'+cfg.subreqClass)
+                          .removeClass('req');
                 }
               });
           }
@@ -46,7 +54,14 @@
     var cfg = $.extend(defaultCfg, o);
     return this.each(function() {
 
-      $(this).find('.'+cfg.closedClass).hide().find('.req').removeClass('req').addClass(cfg.subreqClass);
+      $(this)
+          .find('.'+cfg.closedClass)
+              .hide()
+              .find('.req')
+                  .andSelf()
+                  .filter('.req')
+                      .removeClass('req')
+                      .addClass(cfg.subreqClass);
 
       $(this).find(cfg.triggerSel)
           .each(function () {
