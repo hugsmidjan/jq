@@ -5,6 +5,7 @@
 //  written by:
 //   * Már Örlygsson        -- http://mar.anomy.net
 //   * Borgar Þorsteinsson  -- http://borgar.undraland.com
+//   * Valur Sverrisson
 // ----------------------------------------------------------------------------------
 
 (function($){
@@ -34,13 +35,14 @@
           _resetLock = 1;
           for (var id in _sets)
           {
-            _equalizeHeights(_sets[id], _cfgs[id].margins);
+            _equalizeHeights(_sets[id], _cfgs[id].margins, _cfgs[id].hMethod);
           }
           setTimeout(function(){ _resetLock = 0; }, 0);
         },
 
-      _equalizeHeights = function (_collection, _margins) {
+      _equalizeHeights = function (_collection, _margins, _hMethod) {
           var visibleElms = $(_collection).filter(':visible');
+          _hMethod = _hMethod ? _hMethod : 'min-height';
           if (visibleElms.length) // only equalize if at least one of the elements is :visible
           {
             var _maxHeight = 0,
@@ -50,7 +52,10 @@
                 // find highest 'natural' element-height
                 .each(function ( i ) {
                     var _this = $( this );
-                    _this.css( 'min-height', '' );
+                    _this.css({
+                            'min-height': '',
+                            'height': ''
+                          });
                     var _totalHeight = _this.outerHeight(),
                         _marginHeight = 0,
                         _boxSizing,
@@ -85,7 +90,7 @@
                   })
                 // assign new min-heights to visible elements of _collection
                 .each(function( i ){
-                    $(this).css( 'min-height',  _maxHeight - _paddings[i] + 0.5 ); // Adding 1px seems to fix some sub-pixel float-clearing calculation bugs in Firefox 3+
+                    $(this).css( _hMethod,  _maxHeight - _paddings[i] + 0.5 ); // Adding 1px seems to fix some sub-pixel float-clearing calculation bugs in Firefox 3+
                   })
                 .triggerHandler('equalizeheights', _maxHeight); // does not bubble!
 
@@ -110,7 +115,10 @@
               {
                 elm
                     .removeData(idDataKey)
-                    .css( 'min-height', '');
+                    .css({
+                        'min-height': '',
+                        'height': ''
+                      });
                 elmSet.splice( elmIdx, 1 );
                 if ( elmSet.length === 1  &&  $.inArray( elmSet[0], set.slice(i) )<0 )
                 {
@@ -170,7 +178,7 @@
                 nextSetId++;
               }
             }
-            _equalizeHeights(set, cfg.margins);
+            _equalizeHeights(set, cfg.margins, cfg.hMethod);
           }
         }
       }
