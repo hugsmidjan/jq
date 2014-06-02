@@ -33,7 +33,7 @@
                 {
                   $('#'+tData)[cfg.showFunc](cfg.showSpeed)
                       .find('.'+cfg.subreqClass)
-                      .andSelf()
+                      .addBack()
                       .filter('.'+cfg.subreqClass)
                           .addClass('req');
                 }
@@ -41,7 +41,7 @@
                 {
                   $('#'+tData)[cfg.hideFunc](cfg.hideSpeed)
                       .find('.'+cfg.subreqClass)
-                      .andSelf()
+                      .addBack()
                       .filter('.'+cfg.subreqClass)
                           .removeClass('req');
                 }
