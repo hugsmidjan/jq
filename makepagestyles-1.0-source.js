@@ -88,7 +88,7 @@
             .bind('click', toggleMode);
         makeItem('pref', 5, menuUS)
             .find('a')
-                .attr('href', location.protocol +'//minar.stillingar.is/lesa/form/?redirect=yes&l='+ lang );
+                .attr('href', '//minar.stillingar.is/lesa/form/?redirect=yes&l='+ lang );
 
         toggleMode();
       }
