@@ -58,7 +58,7 @@
           .find('.'+cfg.closedClass)
               .hide()
               .find('.req')
-                  .andSelf()
+                  .addBack()
                   .filter('.req')
                       .removeClass('req')
                       .addClass(cfg.subreqClass);
