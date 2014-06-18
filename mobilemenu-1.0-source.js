@@ -16,6 +16,7 @@
 
       opts = $.extend({
                 stickyHeader: true,
+                startOpen:    false,
                 mediaGroup:  'Small',
                 name:        'menu',
                 evPrefix:    'mobile',
@@ -24,7 +25,7 @@
 
       var formatChangeEv = 'formatchange.' + opts.evPrefix + opts.name;
       var media = 'media' in opts ?  opts.media : ($.formatChange && $.formatChange.media);
-      var isThisMenuOpen;
+      var isThisMenuOpen = opts.startOpen;
 
       var classPrefix = 'is-' + opts.name;
       var classClosed = classPrefix + '-closed';
@@ -37,7 +38,9 @@
               if ( !media  ||  media['became'+opts.mediaGroup] )
               {
                 var scrollTopBeforeMenu;
-                $html.addClass(classClosed);
+                $html[ opts.startOpen ? 'addClass' : 'removeClass' ](classOpen);
+                $html[ opts.startOpen ? 'removeClass' : 'addClass' ](classClosed);
+
                 $(opts.menuButton)
                     .on('click.toggleMenu', function (e) {
                         var link = this;
