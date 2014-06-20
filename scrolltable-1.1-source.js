@@ -1,7 +1,7 @@
 // ----------------------------------------------------------------------------------
 // jQuery.fn.scrollTable v 1.1
 // ----------------------------------------------------------------------------------
-// (c) 2010-2013 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+// (c) 2010-2014 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
 //  written by:
 //   * Már Örlygsson        -- http://mar.anomy.net
 // ----------------------------------------------------------------------------------
@@ -21,13 +21,18 @@
 
       setColWidths = function ( elmData ) {
           var table = elmData.table;
-          if ( table.is(':visible') )
+          // select the children every time to allow for dynamic changes to the table
+          var tbRows = table.find('>tbody>tr:visible').eq(0);
+
+          // Don't do anything if all <tr>s are hidden/invisible
+          if ( tbRows[0] )
           {
-            var tbCells = table.find('>tbody>tr:first>*') // select the children every time to allow for dynamic changes to the table
-                              .css('width', ''),
-                headandfoot = table.find('>thead,>tfoot').show(),
-                iWidths = [],
-                oWidths = [];
+            var tbCells = tbRows.children();
+            var headandfoot = table.find('>thead,>tfoot');
+            var iWidths = [];
+            var oWidths = [];
+            tbCells.css('width', '');
+            headandfoot.show();
             if (elmData._init)
             {
               elmData._scrlBW = elmData.tbWrap ?
@@ -74,15 +79,16 @@
                                 newOuterWidth = 0;
                             //if ( padWidth === undefined )
                             //{
-                              padWidth = cell.outerWidth() - cell.width();
+                            var padWidth = cell.outerWidth() - cell.width();
                               //cell.data( 'padWidth', padWidth );
                             //}
                             while ( span-- )
                             {
                               newOuterWidth += oWidths[ col++ ];
                             }
-                            cell.width( newOuterWidth - padWidth
-                                        + (cellIdx===lastIdx ? elmData._scrlBW : 0) );
+                            cell.width(
+                                newOuterWidth - padWidth + (cellIdx===lastIdx ? elmData._scrlBW : 0)
+                              );
                           });
 
                  });
@@ -216,7 +222,7 @@
       if ( cfg === 'refresh' )
       {
         this.each(function (elmData) {
-            if (elmData = $(this).data(scrollTable)  &&  methodOpts  &&  methodOpts.reclone )
+            if ( (elmData = $(this).data(scrollTable))  &&  methodOpts  &&  methodOpts.reclone )
             {
               makeClones( elmData );
               elmData._init = 1;
