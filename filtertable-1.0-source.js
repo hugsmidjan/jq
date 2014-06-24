@@ -29,10 +29,10 @@
         this.filter('table').each(function(){
             var table = $(this);
 */
-  var _normalizeTable = function (table) {
+  var _normalizeTable = function (table, cfg) {
             var table = $(table).filter('table').eq(0);
 /* -- */
-            if ( !table.find('thead').length )
+            if ( !cfg.thead  &&  !table.find('thead').length )
             {
               var tbody = table.find('tbody'),
                   thead = $('<thead />').insertBefore( tbody[0] ),
@@ -322,10 +322,10 @@
 
           tables
               .each(function(){
-                  _normalizeTable(this);
+                  _normalizeTable( this, cfg );
                   var table = $(this),
                       bodyRows = table.find('tbody tr'),
-                      thead = table.find('thead'),
+                      thead = cfg.thead ? $(cfg.thead) : table.find('thead'),
                       headRows = thead.find('tr'),
                       filterRow = protoFilterRow.clone(TRUE),
                       filterInputs,
@@ -419,6 +419,7 @@
     };
 
   $.fn.filterTable.defaults = {
+      //thead:            null, // or Element
       fixColWidths:     true,
       filterRow:        '<tr class="filters" />',
       filterCell:       '<td>&nbsp;</td>',
