@@ -1,7 +1,7 @@
 // ----------------------------------------------------------------------------------
 // jQuery.fn.filterTable v 1.0
 // ----------------------------------------------------------------------------------
-// (c) 2009 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+// (c) 2009-2014 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
 //  written by:
 //   * Már Örlygsson        -- http://mar.anomy.net
 // ----------------------------------------------------------------------------------
@@ -163,7 +163,7 @@
                       if (inp.value)
                       {
                         this.value = inpData.lastValue = '';
-                        _toggleColClass(table, inpData.idx, activeColClass, 0);
+                        _toggleColClass(data, inpData.idx, activeColClass, 0);
                       }
                     });
             }
@@ -176,7 +176,7 @@
 
           if (doToggleClass)
           {
-            _toggleColClass(table, data.idx, activeColClass, !!val);
+            _toggleColClass(data, data.idx, activeColClass, !!val);
           }
 
           if (val != lastValue)
@@ -184,12 +184,12 @@
             _performRowSearch(data)
           }
 
-          table.useCellMapCache = 0; // invalidate the CellMapCache.
+          data.table_head.useCellMapCache = 0; // invalidate the CellMapCache.
         },
 
 
       _performRowSearch = function (data) {
-          _computeCellMap( data.table );
+          _computeCellMap( data );
           var cfg = data.cfg,
               tbody = data.table.find('tbody'),
               candiateRows = tbody.find('tr'),
@@ -237,17 +237,19 @@
           {
             _showRows( tbody.find('tr'), cfg );
           }
-          data.table
+          data.table_head.closest('table')
               .toggleClass(cfg.activeTableClass, someFilterActive)
+          data.table
               .trigger('filter.filterTable');
         },
 
 
-      _computeCellMap = function (table) {
-          if (!table.useCellMapCache)
+      _computeCellMap = function ( data ) {
+          var table_head = data.table_head;
+          if (!table_head.useCellMapCache)
           {
             var colHeadRowSpans = [];
-            $(table).find('tr').each(function(){
+            table_head.find('tr').each(function(){
                 var row = $(this),
                     currCol = 0,
                     foundCell,
@@ -273,26 +275,20 @@
                           });
                 cellMap.length = currCol;
               });
-            table.useCellMapCache = 1;
+            table_head.useCellMapCache = 1;
           }
         },
 
 
-      _toggleColClass = function (table, idx, className, addClass) {
-          _computeCellMap( table );
-          var rows = $(table).find('tr'),
-            cells = rows.map(function(){
-              return $(this).data(_cellMap_keyName)[idx] || null; // null removes the item from the resulting array
-            });
+      _toggleColClass = function (data, idx, className, addClass) {
+          _computeCellMap( data );
+          var rows = data.table_head.find('tr');
+          var cells = rows.map(function(){
+                  return $(this).data(_cellMap_keyName)[idx] || null; // null removes the item from the resulting array
+                });
           cells.toggleClass(className, addClass);
         },
 
-
-      protoFilterRow,
-      protoCell,
-      protoInput,
-      protoClearBtn,
-      protoFilterCell,
 
       _data_keyName = 'filterTable',
       _cellMap_keyName = _data_keyName+'-cellMap',
@@ -302,7 +298,6 @@
 
 
   $.fn.filterTable = function (cfg) {
-      ;;;var debugMode = !!arguments.callee.debugMode;
       if (this.length)
       {
         var tables = this.filter('table').add( this.find('table') );
@@ -311,14 +306,14 @@
           cfg = _beget(arguments.callee.defaults, cfg);
 
           // create clonable prototype elements
-          var protoFilterRow  =  protoFilterRow   ||  $(cfg.filterRow),
-              protoInput      =  protoInput       ||  $(cfg.inputField)
-                                                          .bind('focus', _selectAll)
-                                                          .bind('focus blur', _setFocusClass)
-                                                          .bind('change keyup', _monitorFilterInput),
-              protoClearBtn   =  protoClearBtn    ||  $(cfg.clearBtn).bind('click', _clearFilterInput),
-              protoCell       =  protoCell        ||  $(cfg.filterCell),
-              protoFilterCell =  protoFilterCell  ||  protoCell.clone(TRUE).empty().append(protoInput);
+          var protoFilterRow  =  $(cfg.filterRow);
+          var protoInput      =  $(cfg.inputField)
+                                     .bind('focus', _selectAll)
+                                     .bind('focus blur', _setFocusClass)
+                                     .bind('change keyup', _monitorFilterInput);
+          var protoClearBtn   =  $(cfg.clearBtn).bind('click', _clearFilterInput);
+          var protoCell       =  $(cfg.filterCell);
+          var protoFilterCell =  protoCell.clone(TRUE).empty().append(protoInput);
 
           tables
               .each(function(){
@@ -334,7 +329,8 @@
                       protoData = {
                           cfg:    cfg,
                           //allInputs: filterInputs, // <-- assigned below
-                          table:  table
+                          table:  table,
+                          table_head: $(table.add(cfg.thead))
                         },
 
                       colHeaders = [],
@@ -405,12 +401,6 @@
                             $(this).width( (100*colW[i]/W)+'%' );
                           });
                   }
-
-                  ;;; if (debugMode) {
-                  ;;;   table.addClass('tablefilters-debug');
-                  ;;;   colHeaders.addClass('debug-activeHeader').each(function(i){ $(this).append(' ('+(i+1)+')') })
-                  ;;;   window.console&&console.log( [table[0]],'colHeaders: ', colHeaders );
-                  ;;; }
 
                 });
           }
