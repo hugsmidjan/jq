@@ -135,7 +135,7 @@
 
           // if this element is a group (has named 1+ siblings contained in fieldset wrapper)
           // the groups heading will override the current label text
-          var isGroup = control.is('fieldset') && control.find('input[name=' + input.attr('name') + ']')[1];
+          var isGroup = control.is('fieldset') && control.find('input[name="' + input.attr('name') + '"]')[1];
           if (isGroup) {
             var thd = control.find(':header,legend,p').eq(0).text() || control.attr('title');  // move selector to config?
             labelData = (thd) ? $.av.cleanLabelString( thd, conf.maxLabelLength ) : labelData;
@@ -287,7 +287,7 @@
   var _defaultCheck      = function ( v/*, w, lang */) { return !!v; },
       _defaultToggleCheck = function (/* v, w, lang */) {
           var inp = $(this),
-              checked = inp.closest('form').find('input[name=' + inp.attr('name') + ']:checked');
+              checked = inp.closest('form').find('input[name="' + inp.attr('name') + '"]:checked');
           return !!checked[0]  &&  // at least one must be :checked
                   // and if these are :radios, then the :checked must have a non-empty value
                   (!checked.is(':radio') || !!checked.filter(function () { return !!$(this).val(); })[0]);
@@ -631,7 +631,7 @@
           else if (reqchk && typeof(reqchk) === 'string')
           {
             var m = /^(!)?(.*)$/.exec(reqchk);
-            var t = $(':input[name=' + m[2] + ']', this.form);  // use context rather than form?
+            var t = $(':input[name="' + m[2] + '"]', this.form);  // use context rather than form?
             if (t.length)
             {
               required = t.is(':checkbox, :radio') ?
@@ -666,7 +666,7 @@
 
               validContext = false;
 
-              // context.is('fieldset:has(input[name=' + input.attr('name') + ']:gt(1))');
+              // context.is('fieldset:has(input[name="' + input.attr('name') + '"]:gt(1))');
               //var id = $.av.id( this );
 
               // returned value was: a string (error message / exception) or Object { inline:'...', alert:'...' }
