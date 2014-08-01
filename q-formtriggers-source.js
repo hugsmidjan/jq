@@ -72,7 +72,7 @@
                     })
                   .on('change.formtriggers', 'input:checkbox', function (e) {
                       var tInp = $(this);
-                      triggerFunc( tInp.attr('data-trigger') + '-' + ( tInp.is(':checked') ? 'open' : 'close'), cfg  );
+                      triggerFunc( tInp.attr('data-trigger') + '-' + ( tInp[ tInp.is('.inverse') ? 'not' : 'is' ](':checked') ? 'open' : 'close'), cfg  );
                     })
                   .on('change.formtriggers', 'select', function (e) {
                       triggerFunc( trigger.find('option:selected').attr('data-trigger'), cfg );
