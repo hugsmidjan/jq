@@ -29,6 +29,8 @@
                     tOpCl = tData.pop();
                 tData = tData.join('-');
 
+                ;;;window.console&&console.log( triggerData );
+
                 if ( tOpCl == 'open' )
                 {
                   $('#'+tData)[cfg.showFunc](cfg.showSpeed)
@@ -72,12 +74,19 @@
                     })
                   .on('change.formtriggers', 'input:checkbox', function (e) {
                       var tInp = $(this);
-                      triggerFunc( tInp.attr('data-trigger') + '-' + ( tInp[ tInp.is('.inverse') ? 'not' : 'is' ](':checked') ? 'open' : 'close'), cfg  );
+                      if ( tInp.is('.inverse') )
+                      {
+                        triggerFunc( tInp.attr('data-trigger') + '-' + ( tInp.is(':checked') ?  'close' : 'open'), cfg  );
+                      }
+                      else
+                      {
+                        triggerFunc( tInp.attr('data-trigger') + '-' + ( tInp.is(':checked') ? 'open' : 'close'), cfg  );
+                      }
                     })
                   .on('change.formtriggers', 'select', function (e) {
                       triggerFunc( trigger.find('option:selected').attr('data-trigger'), cfg );
                     })
-                  .find('select, input:checked')
+                  .find('select, input:checked, .inverse:checkbox')
                       .trigger('change.formtriggers');
             });
     });
