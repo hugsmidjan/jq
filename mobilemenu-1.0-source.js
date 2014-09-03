@@ -1,3 +1,5 @@
+/* jQuery MobileMenu and StickyHeader 1.0  -- (c) 2014 Hugsmiðjan ehf.  @preserve */
+
 // ----------------------------------------------------------------------------------
 // Simple mobile menu and stickyHeader behaviour  v 1.0
 // ----------------------------------------------------------------------------------
@@ -10,22 +12,24 @@
   var $win =  $(window);
   var $doc =  $(document);
   var $html = $('html');
+  var oldFormatChange = !window.FormatChange;
   var openMenu;
 
   $.initMobileMenu = function (opts) {
 
       opts = $.extend({
                 stickyHeader: true,
-                startOpen:    false,
-                mediaGroup:  'Small',
+                mediaGroup:  'Small', // String or `function (media, prefix) { return matches(media,prefix); }`
                 name:        'menu',
                 evPrefix:    'mobile',
                 menuButton:  '.skiplink a',
               }, opts);
 
+      var mediaGroup = (typeof opts.mediaGroup === 'function') ?
+                          opts.mediaGroup:
+                          function (media, prefix) { return !opts.mediaGroup || media[prefix+opts.mediaGroup]; };
       var formatChangeEv = 'formatchange.' + opts.evPrefix + opts.name;
-      var media = 'media' in opts ?  opts.media : ($.formatChange && $.formatChange.media);
-      var isThisMenuOpen = opts.startOpen;
+      var isThisMenuOpen;
 
       var classPrefix = 'is-' + opts.name;
       var classClosed = classPrefix + '-closed';
@@ -34,13 +38,12 @@
       var eventPrefix = opts.evPrefix + opts.name;
 
       $win
-          .on(formatChangeEv, function (/*e*/) {
-              if ( !media  ||  media['became'+opts.mediaGroup] )
+          .on(formatChangeEv, function (e, media) {
+
+              if ( mediaGroup(media,'became') )
               {
                 var scrollTopBeforeMenu;
-                $html[ opts.startOpen ? 'addClass' : 'removeClass' ](classOpen);
-                $html[ opts.startOpen ? 'removeClass' : 'addClass' ](classClosed);
-
+                $html.addClass(classClosed);
                 $(opts.menuButton)
                     .on('click.toggleMenu', function (e) {
                         var link = this;
@@ -72,7 +75,7 @@
                       });
                 !media && $win.off(formatChangeEv);
               }
-              else if ( media['left'+opts.mediaGroup] )
+              else if ( mediaGroup(media,'left') )
               {
                 // Close the menu when switching to Large formats
                 if ( isThisMenuOpen )
@@ -85,8 +88,8 @@
                 }
                 $(opts.menuButton).off('click.toggleMenu');
               }
-            })
-          .trigger(formatChangeEv);
+            });
+      oldFormatChange  &&  $win.trigger(formatChangeEv, [$.formatChange.media]);
       $html
           .addClass(classActive);
 
@@ -96,7 +99,10 @@
       //     mediaGroup:   opts.mediaGroupp,
       //     headerHeight: opts.headerHeight,
       //   })
-      opts.stickyHeader  &&  $.initStickyHeader( opts );
+      if ( opts.stickyHeader )
+      {
+        $.initStickyHeader( $.extend({}, opts, { name:'header' }) );
+      }
 
       return $;
     };
@@ -107,14 +113,21 @@
   $.initStickyHeader = function (opts) {
 
       opts = $.extend({
+                name:         'header',
                 upDelay:      50,
-                mediaGroup:   'Small',
+                mediaGroup:  'Small', // String or `function (media) { return matches(media); }`
                 headerHeight: function () { return parseInt($html.css('padding-top'), 10); },
               }, opts);
 
+      var mediaGroup = (typeof opts.mediaGroup === 'function') ?
+                          opts.mediaGroup:
+                          function (media, prefix) { return !opts.mediaGroup || media[prefix+opts.mediaGroup]; };
       var formatChangeEv = 'formatchange.stickyheader';
       var scrollEv = 'scroll.stickyheader';
-      var media = 'media' in opts ?  opts.media : ($.formatChange && $.formatChange.media);
+
+      var classPrefix = 'is-' + opts.name;
+      var classFixed =  classPrefix + '-fixed';
+      var classShown =  classPrefix + '-shown';
 
       // if ( typeof opts.headerHeight === 'number' )
       // {
@@ -122,8 +135,8 @@
       //   opts.headerHeight = function () { return height; };
       // }
       $win
-          .on(formatChangeEv, function (/*e*/) {
-              if ( !media  ||  media['became'+opts.mediaGroup] )
+          .on(formatChangeEv, function (e, media) {
+              if ( mediaGroup(media,'became') )
               {
                 var lastOffs = 0;
                 var headerHeight = opts.headerHeight();
@@ -141,10 +154,10 @@
                           var doFix = yOffs > headerHeight;
                           if ( doFix !== isFixed )
                           {
-                            $html.toggleClass('is-header-fixed', doFix);
+                            $html.toggleClass( classFixed, doFix);
                             if ( isFixed )
                             {
-                              $html.removeClass('is-header-shown');
+                              $html.removeClass( classShown );
                               isShown = false;
                             }
                             lastOffs = yOffs;
@@ -157,7 +170,7 @@
                             {
                               if ( isShown )
                               {
-                                $html.removeClass('is-header-shown');
+                                $html.removeClass( classShown );
                                 isShown = false;
                               }
                               lastOffs = yOffs;
@@ -166,7 +179,7 @@
                             {
                               if ( !isShown )
                               {
-                                $html.addClass('is-header-shown');
+                                $html.addClass( classShown );
                                 isShown = true;
                               }
                               lastOffs = yOffs;
@@ -177,15 +190,15 @@
                     .trigger(scrollEv);
                 !media  &&  $win.off(formatChangeEv);
               }
-              else if ( media['left'+opts.mediaGroup] )
+              else if ( mediaGroup(media,'left') )
               {
 
                 $win.off(scrollEv);
-                $html.removeClass('is-header-fixed is-header-shown');
+                $html.removeClass( classFixed +' '+ classShown);
 
               }
-            })
-          .trigger(formatChangeEv);
+            });
+      oldFormatChange  &&  $win.trigger(formatChangeEv, [$.formatChange.media]);
 
       return $;
     };
