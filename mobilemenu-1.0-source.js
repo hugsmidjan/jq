@@ -19,6 +19,7 @@
 
       opts = $.extend({
                 stickyHeader: true,
+                startOpen:    false,
                 mediaGroup:  'Small', // String or `function (media, prefix) { return matches(media,prefix); }`
                 name:        'menu',
                 evPrefix:    'mobile',
@@ -29,7 +30,7 @@
                           opts.mediaGroup:
                           function (media, prefix) { return !opts.mediaGroup || media[prefix+opts.mediaGroup]; };
       var formatChangeEv = 'formatchange.' + opts.evPrefix + opts.name;
-      var isThisMenuOpen;
+      var isThisMenuOpen = opts.startOpen;
 
       var classPrefix = 'is-' + opts.name;
       var classClosed = classPrefix + '-closed';
@@ -43,7 +44,7 @@
               if ( mediaGroup(media,'became') )
               {
                 var scrollTopBeforeMenu;
-                $html.addClass(classClosed);
+                $html.addClass( opts.startOpen ? classOpen : classClosed );
                 $(opts.menuButton)
                     .on('click.toggleMenu', function (e) {
                         var link = this;
@@ -83,7 +84,7 @@
                   openMenu = null;
                   $doc.trigger( eventPrefix+'close' );
                   isThisMenuOpen = false;
-                  $html.removeClass(classOpen);
+                  $html.removeClass(classOpen +' '+ classClosed);
                   $doc.trigger( eventPrefix+'closed' );
                 }
                 $(opts.menuButton).off('click.toggleMenu');
