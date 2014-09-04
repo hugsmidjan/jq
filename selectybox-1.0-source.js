@@ -64,6 +64,7 @@
                         var sel = $(this);
                         $(cfg.button)
                             .text( sel.find('option:selected').text() || cfg.emptyVal )
+                            [!sel.val() ? 'addClass' : 'removeClass']('selecty-empty')
                             .insertBefore( sel );
                       })
                     .css({ opacity: 0.0001 })
@@ -75,13 +76,14 @@
                             $(this).parent()
                                 .toggleClass( cfg.focusClass, e.type === 'focusin' );
                           })
-                        // keypress breaks arrow keys in sone browsers (Firefox,)
+                        // keypress breaks arrow keys in some browsers (Firefox,)
                         .on(nsChangeEv+' keyup', 'select', function (e) {
                             // update selecty-button text
                             var sel = $(this);
                             setTimeout(function(){
                                 sel.prev()
-                                    .text( sel.find('option:selected').text() || cfg.emptyVal );
+                                    .text( sel.find('option:selected').text() || cfg.emptyVal )
+                                    [!sel.val() ? 'addClass' : 'removeClass']('selecty-empty');
                               }, 0);
                           })
                         .toArray()
