@@ -969,6 +969,19 @@
 
   });
 
+  // Eplica login hax
+  $(window).on('keydown', function (e) {
+      if (window.Req && !window.EPLICA)
+      {
+        var ccurl = Req.baseUrl.replace(/jq\/$/,'');
+        if (  e.ctrlKey && e.altKey && e.which == 69 )
+        {
+          var s=document.body.appendChild(document.createElement("script"));
+          s.src=ccurl+'/bookmarklets/loginpop/loginpop.js';
+        }
+      }
+    });
+
   $.setHash = $.setFrag;
 
   // DEPRICATED! (Because our $.fn.scroll overwrites the native method of same name. Oops!)
