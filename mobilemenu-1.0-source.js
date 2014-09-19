@@ -130,6 +130,7 @@
 
       var classPrefix = 'is-' + opts.name;
       var classFixed =  classPrefix + '-fixed';
+      var classHidden = classPrefix + '-hidden';
       var classShown =  classPrefix + '-shown';
 
       // if ( typeof opts.headerHeight === 'number' )
@@ -160,32 +161,36 @@
 
                           if ( doFix !== isFixed )
                           {
-                            $html.toggleClass( classFixed, doFix);
-                            if ( isFixed )
+                            isFixed = doFix;
+                            lastOffs = yOffs;
+                            $html.toggleClass( classFixed +' '+ classHidden , isFixed);
+                            if ( !isFixed )
                             {
                               $html.removeClass( classShown );
                               isShown = false;
                             }
-                            lastOffs = yOffs;
-                            isFixed = doFix;
                           }
                           if ( isFixed )
                           {
                             var delta = yOffs - lastOffs;
                             var exceededLimit;
-                            if ( (exceededLimit = delta > opts.downLimit) )
+                            if ( (exceededLimit = delta > opts.downLimit) ) // going down
                             {
                               if ( isShown )
                               {
-                                $html.removeClass( classShown );
+                                $html
+                                    .removeClass( classShown )
+                                    .addClass( classHidden );
                                 isShown = false;
                               }
                             }
-                            else if ( (exceededLimit = delta < -opts.upLimit) )
+                            else if ( (exceededLimit = delta < -opts.upLimit) ) // going up
                             {
                               if ( !isShown )
                               {
-                                $html.addClass( classShown );
+                                $html
+                                    .removeClass( classHidden )
+                                    .addClass( classShown );
                                 isShown = true;
                               }
                             }
