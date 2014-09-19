@@ -96,7 +96,8 @@
 
       // opts.stickyHeader  &&  $.initStickyHeader({
       //     media:        media
-      //     upDelay:      upDelay,
+      //     upLimit:      upLimit,
+      //     downLimit:    downLimit,
       //     mediaGroup:   opts.mediaGroupp,
       //     headerHeight: opts.headerHeight,
       //   })
@@ -115,7 +116,8 @@
 
       opts = $.extend({
                 name:         'header',
-                upDelay:      50,
+                upLimit:      70,
+                downLimit:    50,
                 mediaGroup:  'Small', // String or `function (media) { return matches(media); }`
                 headerHeight: function () { return parseInt($html.css('padding-top'), 10); },
               }, opts);
@@ -140,6 +142,7 @@
               if ( mediaGroup(media,'became') )
               {
                 var lastOffs = 0;
+                var updateLastOffset;
                 var headerHeight = opts.headerHeight();
                 var hasPageYOffset = ('pageXOffset' in window);
                 var isFixed = false;
@@ -153,6 +156,8 @@
                                           window.pageYOffset:
                                           window.document.documentElement.scrollTop;
                           var doFix = yOffs > headerHeight;
+                          updateLastOffset  &&  clearTimeout( updateLastOffset );
+
                           if ( doFix !== isFixed )
                           {
                             $html.toggleClass( classFixed, doFix);
@@ -167,23 +172,32 @@
                           if ( isFixed )
                           {
                             var delta = yOffs - lastOffs;
-                            if ( delta > 0 )
+                            var exceededLimit;
+                            if ( (exceededLimit = delta > opts.downLimit) )
                             {
                               if ( isShown )
                               {
                                 $html.removeClass( classShown );
                                 isShown = false;
                               }
-                              lastOffs = yOffs;
                             }
-                            else if ( delta < -opts.upDelay )
+                            else if ( (exceededLimit = delta < -opts.upLimit) )
                             {
                               if ( !isShown )
                               {
                                 $html.addClass( classShown );
                                 isShown = true;
                               }
+                            }
+                            if ( exceededLimit )
+                            {
                               lastOffs = yOffs;
+                            }
+                            else
+                            {
+                              updateLastOffset = setTimeout(function(){
+                                  lastOffs = yOffs;
+                                }, 1000);
                             }
                           }
                         }
