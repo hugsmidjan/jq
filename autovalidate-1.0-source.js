@@ -1,3 +1,4 @@
+/*! $.fn.autoValidate/.defangEnter/.defangReset  1.0  -- (c) 2009-2014 Hugsmiðjan ehf.  @preserve */
 // ----------------------------------------------------------------------------------
 // jQuery.fn.autoValidate/.defangEnter/.defangReset  v. 1.0
 // ----------------------------------------------------------------------------------
@@ -308,14 +309,18 @@
 
 
 
+
+
+
+
   // jQuery.fn.constrainNumberInput 1.2  -- (c) 2013 Hugsmiðjan ehf.
   /*
     Usage/options:
 
       $('input.number')
           .constrainNumberInput({
-              arrows: true,  // activate UP/DOWN arrows *crementing the value (respecting min="", max="" and step="" attributes)
-              floats: true   // allows typing of "-", "." and "," symbols into the field (no validation performed).
+              arrows: false,  // activate UP/DOWN arrows *crementing the value (respecting min="", max="" and step="" attributes)
+              floats: false   // allows typing of "-", "." and "," symbols into the field (no validation performed).
             })
 
   */
@@ -332,8 +337,8 @@
               inputs.on('keydown',  arrowCrement).on('focusin', triggerChange);
         }
         selector ?
-            inputs.on('keypress', selector,  rejectInvalidKeystrokes(opts.floats) ):
-            inputs.on('keypress',  rejectInvalidKeystrokes(opts.floats) );
+            inputs.on('keypress', selector,  rejectInvalidKeystrokes(opts.floats) ).on('keyup', selector, enforceMinMax):
+            inputs.on('keypress',  rejectInvalidKeystrokes(opts.floats) ).on('keyup', enforceMinMax);
         return inputs;
       };
 
@@ -353,18 +358,12 @@
             if ( delta )
             {
               delta = delta * (input.step || 1) * (e.shiftKey ? 10 : 1);
-              var min,max,
-                  $inp = $(input),
-                  val = (parseInt( $.trim(input.value), 10 )|| 0) + delta;
-              val = (delta<0 && input.min && !isNaN(min=parseInt(input.min,10)) ) ?
-                        Math.max(val, min):
-                    (delta>0 && input.max && !isNaN(max=parseInt(input.max,10)) ) ?
-                        Math.min(val, max):
-                        val;
-
-              if ( $inp.val() !== val ) // skip unnessesary updates and change events
+              var val = parseFloat( input.value );
+              var val2 = boundryCheck( input, (val||0) + delta );
+              if ( val !== val2 ) // skip unnessesary updates and change events
               {
-                $inp.val( val );
+                input.value = val2;
+                var $inp = $(input);
                 // trigger "change" immediately - unless the field is focused - then wait for blur like normal
                 $inp.data(fieldIsFocused) ?
                     $inp.data(fieldIsChanged, true):
@@ -401,16 +400,40 @@
                             .removeData(fieldIsChanged);
                       }, 100);
                   });
-          },
+          };
 
-        extraChars = {
+    var extraChars = {
             44: 1, // ,
             45: 1, // -
             46: 1  // .
-          },
+          };
 
-        // reject non-digit character input
-        rejectInvalidKeystrokes =  function ( allowFloats ) {
+    var boundryCheck = function (input, num) {
+            var min, max;
+            var ret = ( input.min  &&  !isNaN(min=parseFloat(input.min))  &&  num < min ) ?
+                          min:
+                      ( input.max  &&  !isNaN(max=parseFloat(input.max))  &&  num > max ) ?
+                          max:
+                          num;
+            return ret;
+          };
+
+    var enforceMinMax = function (/*e*/) {
+            var input = this;
+            var val = input.value;
+            if ( val )
+            {
+              val = parseFloat( val );
+              var val2 = boundryCheck( input, val||0 );
+              if ( val !== val2 )
+              {
+                input.value = val2;
+              }
+            }
+          };
+
+    // reject non-digit character input
+    var rejectInvalidKeystrokes =  function ( allowFloats ) {
             return function (e) {
                 // Cancel the keypress when
                 if (!e.ctrlKey && !e.metaKey &&  // allow copy/paste/
@@ -428,6 +451,10 @@
           };
 
   })(jQuery);
+
+
+
+
 
 
 
@@ -511,7 +538,7 @@
           // TODO: consider adding the reverse for backspace
         }
 
-        if ( conf.validateEachField == 'change' && conf.errorMsgType == 'inlineonly' )
+        if ( conf.validateEachField === 'change' && conf.errorMsgType === 'inlineonly' )
         {
           form.bind('change', function (e) {
               $(e.target).isValid();
