@@ -87,6 +87,7 @@
 
 
 (function($, win, docLoc, encURI, readystateevents){
+  'use strict';
 
   var
       pageLang,
@@ -118,12 +119,13 @@
                   var newBtn = ((bCfg.custom&&bCfg.$tmpl2)||bCfg.$tmpl)
                                   .replace(/(%=?)?\{(.+?)\}/g, function(m,p1,p2){
                                       var val = bCfg[p2];
+                                      val = val==null ? '' : val;
                                       return  !p1 ? // we have a plain {key} marker (i.e. NOT preceeded by % or %=)
                                                   val:
                                               p1==='%' ? // %{key} marker means we should URI encode
                                                   encURI(val):
                                               // We must have a %={key} marker. (Prints a full (encoded) URL parameter -- i.e. "key=keyValue&amp;" )
-                                              val!=null ? // but only if it has some value.
+                                              val ? // but only if it has some value.
                                                   p2+'='+encURI(val)+'&amp;':
                                                   ''; // default to not printing anything...
                                       });
@@ -195,11 +197,11 @@
           twitter: {
               size:     'm',   // or 'l'
               count:    '',    // '' == 'horizontal'. Other options: 'none', 'vertical'
-              via:      '',    // Optional twitter username to mention/link to. Example: "foobar"
-              related:  '',    // Optional list of recommended usernames. Example: "anywhere:The Javascript API,sitestreams,twitter:The official account"
+              //via:      '',    // Optional twitter username to mention/link to. Example: "foobar"
+              //related:  '',    // Optional list of recommended usernames. Example: "anywhere:The Javascript API,sitestreams,twitter:The official account"
               //lang:     '',    // Optional language setting ??? defaults to 'en'
-              hashtags: '',    // Optional comma-delmited list of hashtags. (e.g. 'cooloption,hipster,socool')
-              text:     '',    // Optional default tweet body text.
+              //hashtags: '',    // Optional comma-delmited list of hashtags. (e.g. 'cooloption,hipster,socool')
+              // text:     '',    // Optional default tweet body text.
               //custom:   false, // Defaults to using the standard <iframe> embed code
               //txt:      null,  // Link text for customized links
 
@@ -261,8 +263,8 @@
               //sendBtn:  false, <-- Seems to be depricated
               shareBtn: false,
               faces:    false,
-              color:   '', // 'dark' or 'light' (default),
-              verb:     '',    // 'recommend' or 'like' (default)
+              //color:   '', // 'dark' or 'light' (default),
+              //verb:     '',    // 'recommend' or 'like' (default)
               custom:   false, // NOTE: facebook like button CAN NOT be customized!
 
             // private
@@ -320,14 +322,41 @@
 
           linkedin: {
               count:   'right', // (facebook-style) or 'top' or 'none' (defaults to "bubble" (== '') )
-              custom:   false, // NOTE: facebook like button CAN NOT be customized!
+              // custom:   false,  // Defaults to using the standard button
+              // text:     '',     // Optional default summary text.
+              // source:   '',     // site name
+              // title:    '',     // page/resource title/headline
+              // textSel:  '',
+              // sourceSel:'',
 
             // private
               $prep: function ( /*pluginCfg*/ ) {
                   var b = this;
-                  b.count = b.count ? ' data-counter="'+b.count+'"' : '';
+                  if ( b.custom )
+                  {
+                    var txt = { en:'Share on LinkedIn', is:'Deila á LinkedIn' };
+                    b.txt = b.txt || txt[b.lang] || txt.en;
+                    b.source =  b.source ||
+                                $('.brand > a').text() ||
+                                $('.brand img.logo').attr('alt');
+                    b.title =   b.title ||
+                                (b.titleSel && $(b.titleSel).text()) ||
+                                $('meta[property="og:title"]').attr('content')  || // fallback to using the open-graph image
+                                $('h1:first').text() ||
+                                document.title;
+                    b.text =    b.text ||
+                                (b.textSel && $(b.textSel).text()) ||
+                                $('meta[property="og:description"]').attr('content')  || // fallback to using the open-graph image
+                                $('meta[name="description"]').attr('content');//|| // fallback to using the open-graph image
+                                // $('.pgmain .summary:first').text();
+                  }
+                  else
+                  {
+                    b.count = b.count ? ' data-counter="'+b.count+'"' : '';
+                  }
                 },
               $tmpl: '<script type="IN/Share" data-url="{url}"{count} data-showzero="true"/>',
+              $tmpl2: '<a href="https://www.linkedin.com/shareArticle?mini=true&amp;url=%{url}&amp;title=%{title}&amp;summary=%{text}&amp;source=%{source}" class="linkedinbtn"'+ dodgyPopupAttrs +'"linkedinwin">{txt}</a>',
               $init: function (b/* , cfg */) {
                   // http://developer.linkedin.com/plugins/share-plugin-generator
                   // NOTE: LinkedIn's plugin is crap and can only be injected once,
