@@ -1,3 +1,5 @@
+/* $.fn.sharebtns 1.0  -- (c) 2012-2014 Hugsmiðjan ehf.  @preserve */
+
 // ----------------------------------------------------------------------------------
 // jQuery.fn.sharebtns v 1.0
 // ----------------------------------------------------------------------------------
@@ -345,7 +347,7 @@
               count:       'beside',       // '' (horizontal). Other options: 'none', 'above'
               //imgSrcAttr:  '',  // defaults to 'src'
               imgSelector: '.pgmain img',  // The `imgSrcAttr` value of the first image matching this selector will be used
-              custom:      false,        // Defaults to using the standard image-based button
+              //custom:      false,        // Defaults to using the standard image-based button
               txt:         'Pin it',     // Link text for customized links
 
             // private
