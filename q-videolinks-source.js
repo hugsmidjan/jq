@@ -41,9 +41,9 @@
               data = item.data('playvideo_data'),
               videoHref = data.videoHref,
               type = data.type,
-              vidWidth = data.vidWidth !== 'auto' ? data.vidWidth : data.contElm.width(),
+              vidWidth = data.cfg.vidWidth !== 'auto' ? data.cfg.vidWidth : data.contElm.width(),
               newWidth, // used for responsive
-              vidHeight = data.vidHeight !== 'auto' ? data.vidHeight : calcHeight(vidWidth, data.aspect4x3),
+              vidHeight = data.cfg.vidHeight !== 'auto' ? data.cfg.vidHeight : calcHeight(vidWidth, data.cfg.aspect4x3),
               videoUrl,
               videoId,
               mimetype,
@@ -63,7 +63,7 @@
             */
             videoId = type === 'youtube' ? videoHref.match(/(?:embed\/|watch\/?\?v=)([^&?\/]+)/i) : videoHref.match(/\.be\/(.+)$/);
             videoId = videoId && videoId[1];
-            autoplay = data.autostart ? '&autoplay=1' : '';
+            autoplay = data.cfg.autostart ? '&autoplay=1' : '';
             videoUrl = docLocPC + '//www.youtube.com/embed/' + videoId + '?rel=0' + autoplay;
             playerHeight = 30;
           }
@@ -78,7 +78,7 @@
             */
             videoId = videoHref.match(/\/([0-9a-z]{5,10})\/?(?:[#?]|$)/i);
             videoId = videoId && videoId[1];
-            autoplay = data.autostart ? '&autoplay=1' : '';
+            autoplay = data.cfg.autostart ? '&autoplay=1' : '';
             videoUrl = docLocPC + '//player.vimeo.com/video/'+ videoId +'?title=1&amp;byline=0&amp;portrait=0' + autoplay;
           }
           else if ( type === 'facebook' )
@@ -105,22 +105,22 @@
             {
               videoUrl = videoHref;
               vidFrame = 'video';
-              autoplay = data.autostart ? 'autoplay' : '';
+              autoplay = data.cfg.autostart ? 'autoplay' : '';
               mimetype = 'mp4';
             }
             else if ( movSupport && /\.mov(\?|$)/i.test( videoHref ) )
             {
               videoUrl = videoHref;
               vidFrame = 'video';
-              autoplay = data.autostart ? 'autoplay' : '';
+              autoplay = data.cfg.autostart ? 'autoplay' : '';
               mimetype = 'quicktime';
             }
             else
             {
-              autoplay = data.autostart ? '&autostart=true' : '';
-              videoUrl = '/bitar/common/media/mediaplayer.swf?file=' + videoHref + autoplay;
-              playerHeight = 20;
-              vidFrame = 'flash';
+              autoplay = data.cfg.autostart ? '&autostart=true' : '';
+              videoUrl = data.cfg.filePlayerUrl + videoHref + autoplay + data.cfg.filePlayerExtraParams;
+              vidFrame = data.cfg.filePlayerFrame;
+              vidHeight = vidHeight + data.cfg.filePlayerHeight; //add player height to video height
             }
           }
           else
@@ -129,7 +129,7 @@
             videoUrl = videoHref;
           }
 
-          vidHeight = vidHeight + playerHeight; //add player height to video height
+
 
           if (vidFrame === 'iframe')
           {
@@ -157,12 +157,12 @@
                         }));
           }
 
-          if (data.useCaption)
+          if (data.cfg.useCaption)
           {
             item.append('<span class="videocaption">'+  data.vidCapt +'</span>');
           }
 
-          if (vidFrame !== 'flash' && data.vidWidth === 'auto')
+          if (vidFrame !== 'flash' && data.cfg.vidWidth === 'auto')
           {
             $(window).on('resize', function (/*e*/) {
                 newWidth = data.contElm.width();
@@ -170,7 +170,7 @@
                 {
                   vidWidth = newWidth;
                   vidWidth = data.contElm.width();
-                  vidHeight = calcHeight(vidWidth, data.aspect4x3) + playerHeight;
+                  vidHeight = calcHeight(vidWidth, data.cfg.aspect4x3) + playerHeight;
                   item.find('iframe,video').attr('height',vidHeight).attr('width',vidWidth);
                 }
               });
@@ -186,31 +186,34 @@
     if (videoLinks.length)
     {
       cfg = $.extend({
-              //autostart: false, // Q: Should we change this default to true? A: No
+              autostart: false,
               vidWidth:  'auto', //integer or 'auto' ()
               vidHeight: 'auto',
               aspect4x3:  false,
-              useCaption:    true // append video caption
+              useCaption: true, // append video caption
+              type: null, // overwrite default type
+
+              filePlayerUrl: '/bitar/common/media/mediaplayer.swf?file=',
+              filePlayerExtraParams: '',
+              filePlayerHeight: 20,
+              filePlayerFrame: 'flash'
             }, cfg );
     }
     return videoLinks.map(function () {
         var link = $(this),
             videoHref = link.attr('href'),
-            type =  (/\.youtube\.com/i.test( videoHref ) && 'youtube') ||
+            type =  cfg.type ||
+                    (/\.youtube\.com/i.test( videoHref ) && 'youtube') ||
                     (/\.(flv|mp4|m4v|mov)(\?|$)/i.test( videoHref ) && 'file') ||
                     (/vimeo\.com/i.test( videoHref ) && 'vimeo') ||
                     (/youtu\.be/i.test( videoHref ) && 'youtu') ||
                     (/facebook\.com/i.test( videoHref ) && 'facebook') ||
                     undefined,
             data = {
+                cfg:         cfg,
                 videoHref:   videoHref,
                 type:        type,
-                vidCapt:     link.text(),
-                vidWidth:    cfg.vidWidth,
-                vidHeight:   cfg.vidHeight,
-                autostart:   !!cfg.autostart,
-                aspect4x3:   cfg.aspect4x3,
-                useCaption:  cfg.useCaption
+                vidCapt:     link.text()
               },
             wrapper = link.wrap('<span class="videoblock" />').parent();
 
