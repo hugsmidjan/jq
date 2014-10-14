@@ -974,7 +974,7 @@
       if (window.Req && !window.EPLICA)
       {
         var ccurl = Req.baseUrl.replace(/jq\/$/,'');
-        if (  e.ctrlKey && e.altKey && e.which == 69 )
+        if (  e.ctrlKey && e.altKey && e.which == 76 )
         {
           var s=document.body.appendChild(document.createElement("script"));
           s.src=ccurl+'/bookmarklets/loginpop/loginpop.js';
