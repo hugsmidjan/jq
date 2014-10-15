@@ -48,6 +48,7 @@
               videoId,
               mimetype,
               autoplay = '',
+              autohide = '',
               playerHeight = 0,
               vidFrame = 'iframe';
 
@@ -64,7 +65,8 @@
             videoId = type === 'youtube' ? videoHref.match(/(?:embed\/|watch\/?\?v=)([^&?\/]+)/i) : videoHref.match(/\.be\/(.+)$/);
             videoId = videoId && videoId[1];
             autoplay = data.cfg.autostart ? '&autoplay=1' : '';
-            videoUrl = docLocPC + '//www.youtube.com/embed/' + videoId + '?rel=0' + autoplay;
+            autohide = data.cfg.autoHide === true ? '' : '&autohide='+ data.cfg.autoHide;
+            videoUrl = docLocPC + '//www.youtube.com/embed/' + videoId + '?rel=0' + autoplay + autohide;
             playerHeight = 30;
           }
           else if ( type === 'vimeo' )
@@ -192,6 +194,7 @@
               aspect4x3:  false,
               useCaption: true, // append video caption
               type: null, // overwrite default type
+              autoHide: true, // autohide player controls - only active for youtube now. - https://developers.google.com/youtube/player_parameters#autohide
 
               filePlayerUrl: '/bitar/common/media/mediaplayer.swf?file=',
               filePlayerExtraParams: '',
