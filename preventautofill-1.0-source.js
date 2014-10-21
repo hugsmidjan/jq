@@ -49,11 +49,11 @@
               }
             });
 
-      // Toggle readonly state of password fields on focus/blur to prevent
+      // Toggle readOnly state of password fields on focus/blur to prevent
       // browsers auto-filling the password during typing into the username field.
       forms.find('input:password')
           .prop('readOnly', true)
-          .on('focus blur', function(e){ this.readOnly = e.type === 'blur'; });
+          .on('focusin focusout', function(e){ this.readOnly = e.type === 'focusout';  console.log(this.readOnly) });
 
       // Empty autofilled inputs with previously saved passwords.
 //      setTimeout(function(){
