@@ -1,3 +1,5 @@
+/* $.fn.selectybox 1.0  -- (c) 2012 Hugsmiðjan ehf. - MIT/GPL   @preserve */
+
 // ----------------------------------------------------------------------------------
 // jQuery.fn.selectybox v 1.0
 // ----------------------------------------------------------------------------------
@@ -17,6 +19,7 @@
 //
 // Usage:
 //  $('select').selectybox({ /* options */ });
+//  $('select').selectybox('refresh');   // silently refresh the widget
 //  $('select').selectybox('val', '10'); // silently updates <select>'s value
 //  $('select').selectybox({'destroy'});
 //
@@ -30,7 +33,11 @@
 
       selectybox = $.fn.selectybox = function ( cfg, value ) {
           var selects = this;
-          if ( cfg === 'val' )
+          if ( cfg === 'refresh' )
+          {
+            selects.trigger(nsChangeEv);
+          }
+          else if ( cfg === 'val' )
           {
             selects
                 .val(value)
@@ -64,7 +71,6 @@
                         var sel = $(this);
                         $(cfg.button)
                             .text( sel.find('option:selected').text() || cfg.emptyVal )
-                            [!sel.val() ? 'addClass' : 'removeClass']('selecty-empty')
                             .insertBefore( sel );
                       })
                     .css({ opacity: 0.0001 })
@@ -76,14 +82,13 @@
                             $(this).parent()
                                 .toggleClass( cfg.focusClass, e.type === 'focusin' );
                           })
-                        // keypress breaks arrow keys in some browsers (Firefox,)
+                        // keypress breaks arrow keys in sone browsers (Firefox,)
                         .on(nsChangeEv+' keyup', 'select', function (e) {
                             // update selecty-button text
                             var sel = $(this);
                             setTimeout(function(){
                                 sel.prev()
-                                    .text( sel.find('option:selected').text() || cfg.emptyVal )
-                                    [!sel.val() ? 'addClass' : 'removeClass']('selecty-empty');
+                                    .text( sel.find('option:selected').text() || cfg.emptyVal );
                               }, 0);
                           })
                         .toArray()
