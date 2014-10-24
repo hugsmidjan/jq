@@ -49,23 +49,31 @@
               }
             });
 
-      // Toggle readOnly state of password fields on focus/blur to prevent
-      // browsers auto-filling the password during typing into the username field.
-      forms.find('input:password')
-          .prop('readOnly', true)
-          .on('focusin focusout', function(e){ this.readOnly = e.type === 'focusout';  console.log(this.readOnly) });
+      // Temporarily make password fields readonly to prevent browsers
+      // from auto-filling the field on-load
+      var pwFields = forms.find('input:password')
+                        .prop('readOnly', true);
+      var noFieldHasReceivedFocus = true;
+      // When non-password (text) fields have focus
+      // make password-fields readOnly meanwhile - to prevent browsers from autofilling on input.
+      forms.find('input:not(:password)')
+          .on('focusin focusout', function(e){
+              noFieldHasReceivedFocus = false; // flag that some non-password field has received Focus (makes the readOnly state sticky)
+              pwFields.prop('readOnly', e.type==='focusin');
+            });
 
-      // Empty autofilled inputs with previously saved passwords.
-//      setTimeout(function(){
-          // (setTimeout to allow browser chance to autofill
-          // find all password/text fields
-          forms.find('input:not(:button,:submit,:reset,:checkbox,:radio)')
-              // that don't have a value set on the server-side
-              .not(function () {  return !!$(this).attr('value');  })
-                  // and empty them.
-                  .val('');
-//        }, 50);
+      // Empty autofilled inputs with previously saved passwords
+      // in case the browser has already filled them in (IE is very quick, for example)
+      forms.find('input:not(:button,:submit,:reset,:checkbox,:radio)')
+          // that don't have a value set on the server-side
+          .not(function () {  return !!$(this).attr('value');  })
+              // and empty them.
+              .val('');
 
+      // reset password-fields' readOnly state if noFieldHasReceivedFocus
+      setTimeout(function() {
+          noFieldHasReceivedFocus  &&  pwFields.prop('readOnly', false);
+        }, 100);
 
       return this;
     };
