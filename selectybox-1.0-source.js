@@ -67,15 +67,20 @@
                 selects.filter('select')
                     .data(dataKey, cfg)
                     .wrap(cfg.wrapper)
-                    .each(function () {
-                        var sel = $(this);
-                        $(cfg.button)
-                            .text( sel.find('option:selected').text() || cfg.emptyVal )
-                            [!sel.val() ? 'addClass' : 'removeClass']('selecty-empty')
-                            .insertBefore( sel );
-                      })
+                    .before(cfg.button)
                     .css({ opacity: 0.0001 })
                     .css( cfg.selectCSS )
+                    .on(nsChangeEv+' keyup', function (/*e*/) {
+                        // update selecty-button text
+                        var sel = $(this);
+                        var text = sel.find('option:selected').text();
+                        setTimeout(function(){
+                            sel.prev()
+                                .text( !text ? cfg.emptyVal : cfg.text ? cfg.text(text) : text )
+                                [!sel.val() ? 'addClass' : 'removeClass']('selecty-empty');
+                          }, 0);
+                      })
+                    .trigger(nsChangeEv)
                     .parent()
                         .css( cfg.wrapperCSS )
                         .on('focusin focusout', 'select', function (e) {
@@ -84,15 +89,6 @@
                                 .toggleClass( cfg.focusClass, e.type === 'focusin' );
                           })
                         // keypress breaks arrow keys in sone browsers (Firefox,)
-                        .on(nsChangeEv+' keyup', 'select', function (/*e*/) {
-                            // update selecty-button text
-                            var sel = $(this);
-                            setTimeout(function(){
-                                sel.prev()
-                                    .text( sel.find('option:selected').text() || cfg.emptyVal )
-                                    [!sel.val() ? 'addClass' : 'removeClass']('selecty-empty');
-                              }, 0);
-                          })
                         .toArray()
               );
           }
@@ -100,12 +96,13 @@
         },
 
       defaultCfg = selectybox.defaults = {
-          wrapper:        '<span class="selecty"/>',
-          button:         '<span class="selecty-button"/>',
-          focusClass:     'focused',
-          emptyVal:       '\u00a0 \u00a0 \u00a0',
-          wrapperCSS:     { position: 'relative' },
-          selectCSS:      { position: 'absolute', bottom:0, left:0 }
+          wrapper:     '<span class="selecty"/>',
+          button:      '<span class="selecty-button"/>',
+          focusClass:  'focused',
+          emptyVal:    '\u00a0 \u00a0 \u00a0',
+          // text:        function (txt) { return txt.toUpperCase(); }, // optional transformation
+          wrapperCSS:  { position: 'relative' },
+          selectCSS:   { position: 'absolute', bottom:0, left:0 }
         };
 
 
