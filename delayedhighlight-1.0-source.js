@@ -1,3 +1,5 @@
+/* jQuery.fn.delayedHighlight 1.0  -- (c) 2010-2014 Hugsmiðjan ehf.   @preserve */
+
 // ----------------------------------------------------------------------------------
 // jQuery.fn.delayedHighlight v 1.0
 // ----------------------------------------------------------------------------------
@@ -23,6 +25,8 @@
           className:    'focused',        // for highlighted elements
           delay:        500,              // ms, until highlighton
           delayOut:     300,              // ms, until highlightoff (applies when sticky !== true)
+          focusDelay:    null,            // focusin delay. (Falls back to `delay` option.)
+          focusDelayOut: null,            // focusout delay. (Falls back to `delayOut` option.)
           sticky:       false,            // when sticky, highlight stays on until a new element is highlighted (unless clickToggles is set)
           noBubble:     false,            // set to `true` to prevent the custom events from bubbling upwards from the list container
           click:        false,            // allow clicks to set highlight on without delay
@@ -85,12 +89,15 @@
               className:    'focused',
               delay:        500,
               delayOut:     300,
-              //sticky:       false,
-              //noBubble:     false,
-              //click:        false,
-              //clickToggles: false,
+              // focusDelay:    null, // defaults to delay
+              // focusDelayOut: null, // defaults to delayOut
+              onFocus:      true,
+              // sticky:       false,
+              // noBubble:     false,
+              // click:        false,
+              // clickToggles: false,
               clickGrace:   300,
-              //clickCancels: false,
+              // clickCancels: false,
               cancelOff:    'a, area, :input'
             },
             cfg
@@ -108,8 +115,10 @@
 
             wasClicked = evPrefix+'-wasclicked',
 
-            _mouseover_focusin = 'mouseover focusin',
-            _mosueout_focusout = 'mouseout focusout',
+            onFocus = cfg.onFocus,
+
+            _mouseover_focusin = 'mouseover' + (onFocus ? ' focusin':''),
+            _mosueout_focusout =  'mouseout' + (onFocus ? ' focusout':''),
             _isDefaultPrevented = 'isDefaultPrevented',
             clrTimeout = clearTimeout,
             inTimeout,
@@ -172,7 +181,7 @@
                           }
                         }
                       }
-                    }, e.delay || cfg.delay );
+                    }, e.delay || (e.type==='focusin' && cfg.focusDelay) || cfg.delay );
                 }
               },
 
@@ -196,7 +205,7 @@
                           activeItem = undefined;
                         }
                       }
-                    }, e.delay || cfg.delayOut);
+                    }, e.delay || (e.type==='focusout' && cfg.focusDelayOut) || cfg.delayOut );
                 }
               },
 
@@ -256,4 +265,4 @@
 
     };
 
-})(jQuery);
+})(window.jQuery);
