@@ -255,7 +255,7 @@
             options = options || {};
             // set icky default .text() method to crudely match default behaviour the old the jQuery plugin
             options.text = options.text || function (text) {
-                $(this.container).toggleClass( 'selecty-empty', !text );
+                $(this.container).toggleClass( 'selecty-empty', !$(this.select).val() );
                 return text;
               };
             return selects.pushStack(
