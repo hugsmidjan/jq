@@ -1,8 +1,8 @@
 /*!
- * jQuery UI Datepicker 1.10.3
+ * jQuery UI Datepicker 1.10.4
  * http://jqueryui.com
  *
- * Copyright 2013 jQuery Foundation and other contributors
+ * Copyright 2014 jQuery Foundation and other contributors
  * Released under the MIT license.
  * http://jquery.org/license
  *
@@ -13,7 +13,7 @@
  */
 (function( $, undefined ) {
 
-$.extend($.ui, { datepicker: { version: "1.10.3" } });
+$.extend($.ui, { datepicker: { version: "1.10.4" } });
 
 var PROP_NAME = "datepicker",
 	instActive;
@@ -2033,7 +2033,7 @@ $.fn.datepicker = function(options){
 $.datepicker = new Datepicker(); // singleton instance
 $.datepicker.initialized = false;
 $.datepicker.uuid = new Date().getTime();
-$.datepicker.version = "1.10.3";
+$.datepicker.version = "1.10.4";
 
 })(jQuery);
 
@@ -2041,10 +2041,9 @@ $.datepicker.version = "1.10.3";
 
 
 
-
 /* Icelandic initialisation for the jQuery UI date picker plugin. */
 /* Written by Haukur H. Thorsson (haukur@eskill.is). */
-(function($){
+jQuery(function($){
 	$.datepicker.regional['is'] = {
 		closeText: 'Loka',
 		prevText: '&#x3C; Fyrri',
@@ -2058,10 +2057,10 @@ $.datepicker.version = "1.10.3";
 		dayNamesShort: ['Sun','Mán','Þri','Mið','Fim','Fös','Lau'],
 		dayNamesMin: ['Su','Má','Þr','Mi','Fi','Fö','La'],
 		weekHeader: 'Vika',
-		dateFormat: 'dd/mm/yy',
+		dateFormat: 'dd.mm.yy',
 		firstDay: 0,
 		isRTL: false,
 		showMonthAfterYear: false,
 		yearSuffix: ''};
   $.datepicker.setDefaults( $.datepicker.regional[ $('html').attr('lang')||'' ] );
-})(jQuery);
+});
