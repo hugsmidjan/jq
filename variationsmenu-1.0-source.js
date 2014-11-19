@@ -252,7 +252,9 @@
                                             });
                                     }
                                     thisItem.trigger( 'variationchanged', [selectedVariation, t.name, selectedTags[i]] );
-                                    hiddenInput.val( selectedVariation ? selectedVariation.id : '' );
+                                    hiddenInput
+                                        .val( selectedVariation ? selectedVariation.id : '' )
+                                        .trigger('change');
                                     imgCont  &&  imgCont.trigger('variationchanged', [selectedVariation && selectedVariation.id]);
                                   }
                                 });
