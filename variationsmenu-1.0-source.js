@@ -1,3 +1,5 @@
+/* $.fn.variationsMenu 1.0 -- (c) 2012-2013 Hugsmiðjan ehf.  @preserve */
+
 // ----------------------------------------------------------------------------------
 // jQuery.fn.variationsMenu v 1.0
 // ----------------------------------------------------------------------------------
@@ -15,17 +17,17 @@
 
 (function($){
 
-  // returns the first variation that matches all the selectedTags
+  // returns the first variation that matches all of the selectedTags
   var deriveSelectedVariation = function ( allVariations, selectedTags ) {
-          var selectedVariation,
-              l = allVariations.length,
-              i = -1;
-          varsLoop:while (++i<l)
+          var selectedVariation;
+          var l = allVariations.length;
+          var i = -1;
+          varsLoop:while ( ++i < l )
           {
-            var variation = allVariations[i],
-                n = variation.length,
-                k = -1;
-            while (++k<n)
+            var variation = allVariations[i];
+             var n = variation.length;
+             var k = -1;
+            while ( ++k < n )
             {
               if ( variation[k] !== selectedTags[k] )
               {
@@ -37,30 +39,33 @@
             break;
           }
           return selectedVariation;
-        },
+        };
 
-      // returns an object with all tagValues (of index tagIdx), that are available alternatives based on all the other selectedTags values.
-      deriveAvailableValues = function ( tagIdx,  allVariations, selectedTags ) {
-          var availableVals = {},
-              l = allVariations.length,
-              i = -1;
-          varsLoop:while (++i<l)
+  // returns the values available for tag tagIdx, for a given activeTagdIdex
+  var deriveAvailableValues = function (tagIdx, activeTagIdx, allVariations, selectedTags) {
+          var availableVals = {};
+          var l = allVariations.length;
+          var i = 0;
+          while ( i < l )
           {
-            var variation = allVariations[i],
-                n = variation.length,
-                k = -1;
-            while (++k<n)
+            // for each variation (i.e. `['blue','xl','banana']`)
+            var variation = allVariations[i++];
+            if ( variation[activeTagIdx] === selectedTags[activeTagIdx] )
             {
-              if ( selectedTags[k]!== undefined  &&  k!==tagIdx  &&  variation[k] !== selectedTags[k] )
-              {
-                continue varsLoop;
-              }
+              availableVals[ variation[tagIdx] ] = true;
             }
-            availableVals[ variation[tagIdx] ] = true;
           }
           return availableVals;
         };
 
+  var highlightSelectedItem = function (menuElm, cfg) {
+          var selectedItem = $( menuElm.data( 'varSelectedItem' ) );
+          selectedItem
+              .addClass( cfg.currentClass )
+              .find('input')
+                  .prop('checked', true)
+                  .attr('title', selectedItem.orgTitle);
+        };
 
 
   $.fn.variationsMenu = function ( cfg ) {
@@ -77,60 +82,84 @@
                 //itemBuilder:    function($itemElm, tagname, tagData, value, label) { /* play with the $itemElm, or (optionally) return a new one (as jQuery collection) */ },
                 emptyLabel:     '- - -',
                 currentClass:   'current',
+                lastMenuClass:  'activemenu',
                 i18n:           {
-                    is:{ unavail:' (Samsetning ekki til)' },
-                    en:{ unavail:' (Combination unavailable)' }
+                    is:{ unavail:'(Samsetning ekki til)' },
+                    en:{ unavail:'(Combination unavailable)' }
                   },
-                disabledClass:  'disabled'
+                priceElm: function (cont) { // function or element or selector
+                              return cont.closest('form').parent().find('.price b');
+                            },
+                defaultPrice:   '--',
+                disabledClass:  'disabled',
+                autoSelect:     true
               }, cfg);
 
       var wrappers = [];
 
       this.each(function () {
-          var cont = $(this),
-              select = cont.find('select'),
-              headline = cont.find('label').contents(),
-              rnd = (new Date()).getTime(),
+          var cont = $(this);
+          var select = cont.find('select');
+          var headline = cont.find('label').contents();
+          var rnd = (new Date()).getTime();
 
-              txt = cfg.i18n[cont.closest('[lang]').attr('lang')] || cfg.i18n.en,
+          var txt = cfg.i18n[cont.closest('[lang]').attr('lang')] || cfg.i18n.en;
 
-              // hidden input that carries the value of the selectbox
-              hiddenInput = $('<input type="hidden" />').attr({ name:select[0].name }),
+          // hidden input that carries the value of the selectbox
+          var hiddenInput = $('<input type="hidden" />').attr({ name:select[0].name });
 
-              imgCont = ( cfg.imgCont  &&  $.fn.variationsImages ) ?
+          var imgCont = ( cfg.imgCont  &&  $.fn.variationsImages ) ?
                             $( cfg.imgCont ).variationsImages( cfg.variationsImages ):
-                            null,
+                            null;
 
-              tagnames = (select.attr('data-tagnames')||'').split('|'),
-              taglabels = (select.attr('data-taglabels')||'').split('|') ,
-              numTags = tagnames.length,
-              tagTextSplitter = new RegExp('\\s*'+(select.attr('data-tagjoint')||cfg.tagJoint) +'\\s*' ),
+          var tagnames = (select.attr('data-tagnames')||'').split('|');
+          var taglabels = (select.attr('data-taglabels')||'').split('|');
+          var numTags = tagnames.length;
+          var tagTextSplitter = new RegExp('\\s*'+(select.attr('data-tagjoint')||cfg.tagJoint) +'\\s*' );
 
-              // list of available variationObjects
-              variations = [/*  [ 'id':variationId, 0:tag1value, 1:tag2value, ... ],  [... */],
-              // the currently selected variationObject
-              selectedVariation, // the actual variations object (tag value list) that is currently selected. May be null.
-              selectedTags = [/* tag1value, tag2value, ... */],  // list of currently selected tags - may be empty or incomplete.
-              // map of tag types, their legend text and a list of unique values. (used to build the menus)
-              tags =  $.map(tagnames, function (name, i) {
+          // list of available variationObjects
+          var variations = [/*  [ 'id':variationId, 0:tag1value, 1:tag2value, ... ],  [... */];
+
+          // the currently selected variationObject
+          var selectedVariation; // the actual variations object (tag value list) that is currently selected. May be null.
+
+          var selectedTags = [/* tag1value, tag2value, ... */];  // list of currently selected tags - may be empty or incomplete.
+
+           // map of tag types, their legend text and a list of unique values. (used to build the menus)
+          var tags =  $.map(tagnames, function (name, i) {
                           return { name:tagnames[i],  legend:taglabels[i],  vals:{/*  value1Name:value1Label, ... */}, tagData:{/*  value1Name:value1tagData, ... */} };
                         });
 
+          var priceElm = select.is('[data-hasprice]') ?
+                            $(cfg.priceElm.apply ? cfg.priceElm( cont ) : cfg.priceElm ):
+                            null;
+          var defaultPrice = cfg.defaultPrice!=null ? cfg.defaultPrice : priceElm  &&  priceElm[0].firstChild;
 
-          // Hvarvest data from inside the select box and store it in `variations` and `tags`
-          // (BUT before we harvest - remove empty options so single-option elements get autoselected)
-          select.children().filter(function(){ return !$(this).attr('value'); }).remove();
+
+          // (Before we harvest - remove empty options so single-option elements get autoselected)
+          cfg.autoSelect  &&  select.children().filter(function(){ return !$(this).attr('value'); }).remove();
+          // Harvest data from inside the select box and store it in `variations` and `tags`
           select.children(/*'option'*/).each(function(){
               var optElm = $(this),
                   variationId = optElm.attr('value');
               if ( variationId )
               {
-                var text = optElm.text().split(tagTextSplitter),
-                    vals = optElm.attr('data-tags').split('|'),
-                    tagData = optElm.attr('data-tagdata'),
-                    selected = optElm.is(':selected'),
-                    varObj = [];
+                var vals = optElm.attr('data-tags').split('|');
+                var tagData = optElm.attr('data-tagdata');
+                var selected = optElm.is(':selected');
+                var varObj = [];
+                var text = optElm.text();
+                if ( priceElm ) {
+                  var priceRe = /\s+\(([^\(\)]+?)\)\s*$/;
+                  var priceMatch = text.match(priceRe);
+                  if ( priceMatch ) {
+                    varObj.price = document.createTextNode( priceMatch[1] );
+                    text = text.replace(priceRe, '');
+                  }
+                }
+                text = text.split(tagTextSplitter);
                 tagData = tagData ? tagData.split('|') : [];
+
                 varObj.id = variationId;
                 for (var n=0; n<numTags; n++)
                 {
@@ -148,13 +177,23 @@
               }
             });
 
+
+          // Handle sloppy/weird product registration:
+          // if product only a single variation and no tags/attributes (i.e. if its data-tags="" is empty)
+          if ( variations.length === 1   &&  !(variations[0]||[]).join('') )
+          {
+            hiddenInput
+                .val( variations[0].id )
+                .replaceAll( cont );
+            return;
+          }
+
           // build the menus from the information stored in `tags`
           var menus = $.map(tags, function (t, i) {
                   var menuElm = $( cfg.menuTmpl.replace(/\{legend\}/g, t.legend) )
-                                    .addClass( t.name ),
-                      count = 0,
-                      selectedItem,
-                      items = $.map(t.vals, function (label, value) {
+                                    .addClass( t.name );
+                  var count = 0;
+                  var menuItems = $.map(t.vals, function (label, value) {
                                   var itemHTML =  cfg.menuItem
                                                       .replace(/\{id\}/g,     t.name+rnd+'-'+ (count++) )
                                                       .replace(/\{tagname\}/g, t.name+rnd)
@@ -165,7 +204,7 @@
                                       selected = (value === selectedTags[i]);
                                   if ( selected )
                                   {
-                                    selectedItem = item[0];
+                                    menuElm.data( 'varSelectedItem', item[0] );
                                   }
                                   if ( cfg.itemBuilder )
                                   {
@@ -175,83 +214,95 @@
                                   return item[0];
                                 });
 
-                  if ( selectedItem  ||  items.length === 1 )
-                  {
-                    $(selectedItem || items[0])
-                        .addClass( cfg.currentClass )
-                        .find('input')
-                            .prop('checked', true);
-                  }
+                  highlightSelectedItem(menuElm, cfg);
 
-                  items = $(items)
-                              .on('click.variationmenu', function (e, firstRun) {
-                                  var thisElm = this,
-                                      thisItem = $(thisElm),
-                                      thisRadio = thisItem.find('input');
-                                  // do nothing unless this is either firstRun
-                                  // or if the clicked item is neither disabled nor already current
-                                  if ( firstRun  ||  selectedItem !== thisElm)
+                  menuItems = $(menuItems)
+                              .on('click.variationmenu', function (e, isFirstRun) {
+                                  var clickedLiElm = this;
+                                  var clickedLi = $(clickedLiElm);
+                                  var selectedItem = menuElm.data('varSelectedItem');
+                                  var isChanged = selectedItem !== clickedLiElm;
+
+                                  // only mark the item as .current and update the enabled/disabled states
+                                  // on real clicks (!isFirstRun) or if the targetItem is preselected on page load (current)
+                                  if ( !isFirstRun )
                                   {
-                                    if ( !firstRun || thisItem.is('.'+cfg.currentClass) )
+                                    // only preventDefault on link clicks. radio-input clicks shouldn't be touched
+                                    if ( $(e.target).closest('[href]', clickedLiElm)[0] )
                                     {
-                                      // only mark the item as .current and update the enabled/disabled states
-                                      // on real clicks (!firstRun) or if the targetItem is preselected on page load (current)
-                                      if ( $(e.target).closest('[href]', thisElm)[0] )
-                                      {
-                                        // only preventDefault on link clicks. radio-input clicks shouldn't be touched
-                                        e.preventDefault();
-                                      }
-                                      // unmark current state of selectedItem
+                                      e.preventDefault();
+                                    }
+
+                                    if ( isChanged )
+                                    {
+                                      // unmark current state of the previously selectedItem
                                       $(selectedItem)
                                           .removeClass( cfg.currentClass );
                                       // update selectedItem
-                                      selectedItem = thisElm;
-                                      if ( thisItem.data('varDisabled') )
+                                      selectedItem = clickedLiElm;
+                                      menuElm
+                                          .data( 'varSelectedItem', selectedItem );
+
+                                      // if the user clicked a disabled option - then we reset the whole selection.
+                                      if ( clickedLi.data('varDisabled') )
                                       {
-                                        // if the user clicked a disabled option - then we reset the whole selection.
                                         selectedTags = [];
                                       }
                                       // update selectedTags info
-                                      selectedTags[i] = thisItem.data('varValue');
+                                      selectedTags[i] = clickedLi.data('varValue');
                                       // derive the new selectedVariation
                                       selectedVariation = deriveSelectedVariation( variations, selectedTags );
-                                      // update the status (and enabled/disabled state) of thisItem
-                                      thisItem
-                                          .removeClass( cfg.disabledClass )
-                                          .data('varDisabled', false)
-                                          .addClass( cfg.currentClass );
-                                      thisRadio
-                                          .prop('checked', true)
-                                          .attr('title', thisElm.orgTitle);
 
-                                      // refresh the enabled/disabled state on all menu items across all menus
-                                      $(menus)
-                                          .each(function (j) {
-                                              if ( j !== i )
-                                              {
-                                                var available = deriveAvailableValues( j,  variations, selectedTags );
-                                                $(this).data('varMenuItems')
-                                                    .each(function () {
-                                                        var item = $(this),
-                                                            radio = item.find('input'),
-                                                            isUnavailable = !available[ item.data('varValue') ];
-                                                        item
-                                                            .toggleClass( cfg.disabledClass, isUnavailable )
-                                                            .data( 'varDisabled', isUnavailable );
-                                                        radio
-                                                            .attr('title', this.orgTitle+(isUnavailable?txt.unavail:'') );
-                                                        if ( isUnavailable  &&  radio.prop('checked') )
-                                                        {
-                                                          radio
-                                                              .prop('checked', false);
-                                                          item
-                                                              .removeClass( cfg.currentClass );
-                                                        }
-                                                      });
-                                              }
-                                            });
+                                      // enable all menuItems in this menu
+                                      menuItems
+                                          .removeClass( cfg.disabledClass )
+                                          .data('varDisabled', false);
+                                      // and mark the clickedLi as current/selected
+                                      highlightSelectedItem( menuElm, cfg );
+
                                     }
-                                    thisItem.trigger( 'variationchanged', [selectedVariation, t.name, selectedTags[i]] );
+
+                                    menuElm
+                                        .addClass( cfg.lastMenuClass );
+                                    // refresh the enabled/disabled state on all
+                                    // menuItems in the other menus
+                                    $(menus)
+                                        .each(function (j) {
+                                            if ( j !== i )
+                                            {
+                                              var otherMenu = $(this);
+                                              var available = deriveAvailableValues( j, i, variations, selectedTags, selectedVariation );
+                                              otherMenu.removeClass( cfg.lastMenuClass );
+                                              otherMenu.data('varMenuItems')
+                                                  .each(function () {
+                                                      var otherMenuItem = $(this);
+                                                      var radioElm = otherMenuItem.find('input')[0];
+                                                      var isUnavailable = !available[ otherMenuItem.data('varValue') ];
+                                                      otherMenuItem
+                                                          .data( 'varDisabled', isUnavailable )
+                                                          .toggleClass( cfg.disabledClass, isUnavailable );
+                                                      radioElm.title = this.orgTitle + (isUnavailable?' '+txt.unavail:'');
+                                                      if ( isUnavailable   &&   otherMenuItem[0] === otherMenu.data('varSelectedItem') )
+                                                      {
+                                                        otherMenu.data('varSelectedItem', null);
+                                                        otherMenuItem.removeClass( cfg.currentClass );
+                                                        radioElm.checked = false;
+                                                      }
+                                                    });
+                                            }
+                                          });
+                                  }
+                                  if ( priceElm )
+                                  {
+                                    var newPrice = selectedVariation && selectedVariation.price || defaultPrice;
+                                    var currentPrice = priceElm[0].firstChild;
+                                    if ( newPrice !== currentPrice ) {
+                                      $( currentPrice ).replaceWith( newPrice );
+                                    }
+                                  }
+                                  if ( isChanged || isFirstRun )
+                                  {
+                                    clickedLi.trigger( 'variationchanged', [selectedVariation, t.name, selectedTags[i]] );
                                     hiddenInput
                                         .val( selectedVariation ? selectedVariation.id : '' )
                                         .trigger('change');
@@ -259,11 +310,12 @@
                                   }
                                 });
                   menuElm
-                      .data( 'varMenuItems', items )
+                      .data( 'varMenuItems', menuItems )
                       .find('[items]')
-                          .replaceWith( items );
+                          .replaceWith( menuItems );
                   return menuElm.toArray();
                 });
+
 
           var wrapper = $(cfg.wrapper);
           wrappers.push(wrapper[0]);
@@ -274,16 +326,26 @@
               .find('[menus]')
                   .replaceWith( menus )
               .end()
-              .replaceAll( cont )
-              .after( hiddenInput );
+              .replaceAll( cont );
+          hiddenInput
+              .insertAfter( wrapper );
 
-          $( menus[0] ).data('varMenuItems')
-              .filter( ':first, .'+cfg.currentClass )
-                  .last() // ensure we click the .current item if available
-                      .triggerHandler('click.variationmenu', [true]);
+          $(menus[0]).data('varMenuItems')
+              .filter( '.'+cfg.currentClass )
+                  .triggerHandler('click.variationmenu', [true]);
 
           // Release memory (GC)
-          tagnames = taglabels = numTags = tagTextSplitter = tags = cont = select = headline = rnd = wrapper = undefined;
+          tagnames =
+          taglabels =
+          numTags =
+          tagTextSplitter =
+          tags =
+          cont =
+          select =
+          headline =
+          rnd =
+          wrapper =
+              undefined;
         });
 
       return this.pushStack( wrappers );
