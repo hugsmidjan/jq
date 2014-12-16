@@ -962,6 +962,27 @@
         }
       }
       return _theString;
+    },
+
+
+
+    // Helper functions to ping google universal analytics
+    gaEvtPing: function (category, action, label, value, interaction) {
+      window.ga && window.ga('send', {
+          hitType: 'event',
+          eventCategory:  category,
+          eventAction:    action,
+          eventLabel:     label,
+          eventValue:     value,
+          nonInteraction: !interaction
+        });
+    },
+
+    gaViewPing: function (url, title) {
+      window.ga && ga('send', 'pageview', {
+          'page': url,
+          'title': title
+        });
     }
 
 
