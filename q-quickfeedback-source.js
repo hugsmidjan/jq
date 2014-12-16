@@ -31,6 +31,7 @@
   $.fn.quickFeedback = function ( cfg ) {
 
     cfg = $.extend({
+              gaPing:         true,
               yayBtnSel:      'a.yay',
               nayBtnSel:      'a.nay',
               ajaxParams:     { justPicPos:'pgmain' },
@@ -39,7 +40,7 @@
 
     return this.each(function(){
               var promptElm = $(this),
-                  i18n = $.quickFeedback.i18n[promptElm.lang()] || $.alistDateSplit.i18n.is;
+                  i18n = $.quickFeedback.i18n[promptElm.lang()] || $.quickFeedback.i18n.is;
 
               promptElm
                   .on('click', cfg.yayBtnSel, function (e) {
@@ -52,7 +53,7 @@
                             })
                           .pause(4000)
                           .fadeOut(1000, function () { promptElm.remove(); });
-                      $.gaEvtPing('quickfeedback', 'clicked-yes');
+                      gaPing && $.gaEvtPing('quickfeedback', 'clicked-yes');
                     })
                   .on('click', cfg.nayBtnSel, function (e) {
                       e.preventDefault();
@@ -97,7 +98,7 @@
                                   .on('VBloaded', function (/*e, req*/) {
                                       if ( nonEmptyFeedback )
                                       {
-                                        $.gaEvtPing('quickfeedback', 'clicked-no', 'form-submitted');
+                                        gaPing && $.gaEvtPing('quickfeedback', 'clicked-no', 'form-submitted');
                                         feedbackSubmitted = true;
                                       }
                                       feedbackform
@@ -111,7 +112,7 @@
 
                         $win
                             .on('unload beforeunload', function (/*e*/) {
-                                !feedbackSubmitted  &&  $.gaEvtPing('quickfeedback', 'clicked-no', 'button-only');
+                                !feedbackSubmitted  &&  gaPing &&  $.gaEvtPing('quickfeedback', 'clicked-no', 'button-only');
                                 feedbackSubmitted = true;
                               });
                     });
