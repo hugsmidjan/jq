@@ -15,4 +15,24 @@
       refNode.parentNode.insertBefore( script, refNode );
       ga.loadScript = function(){};
     });
+
+
+  ga.gaEvtPing = function (category, action, label, value, interaction) {
+      window.ga && window.ga('send', {
+          hitType: 'event',
+          eventCategory:  category,
+          eventAction:    action,
+          eventLabel:     label,
+          eventValue:     value,
+          nonInteraction: !interaction
+        });
+  };
+
+  ga.gaViewPing = function (url, title) {
+      window.ga && ga('send', 'pageview', {
+          'page': url,
+          'title': title
+        });
+  };
+
 })(window);
