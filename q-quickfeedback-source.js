@@ -89,7 +89,7 @@
                                     });
                               promptElm
                                   .detach();
-                              $doc.trigger('domupdated', [feedbackform]);
+                              $(document).trigger('domupdated', [feedbackform]);
                               feedbackform.find('.boxbody')
                                   .on('VBload', function (e, req) {
                                       req.resultDOM.find('h1, h2').detach();
@@ -110,7 +110,7 @@
                                   .virtualBrowser(); // do this after domupdated to allow autovalidate to assign first
                             });
 
-                        $win
+                        $(window)
                             .on('unload beforeunload', function (/*e*/) {
                                 !feedbackSubmitted  &&  gaPing &&  $.gaEvtPing('quickfeedback', 'clicked-no', 'button-only');
                                 feedbackSubmitted = true;
