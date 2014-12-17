@@ -53,7 +53,7 @@
                             })
                           .pause(4000)
                           .fadeOut(1000, function () { promptElm.remove(); });
-                      cfg.gaPing && window.ga && window.ga.gaEvtPing('quickfeedback', 'clicked-yes');
+                      cfg.gaPing && window.ga.eventPing('quickfeedback', 'clicked-yes');
                     })
                   .on('click', cfg.nayBtnSel, function (e) {
                       e.preventDefault();
@@ -98,7 +98,7 @@
                                   .on('VBloaded', function (/*e, req*/) {
                                       if ( nonEmptyFeedback )
                                       {
-                                        cfg.gaPing && window.ga && window.ga.gaEvtPing('quickfeedback', 'clicked-no', 'form-submitted');
+                                        cfg.gaPing && window.ga.eventPing('quickfeedback', 'clicked-no', 'form-submitted');
                                         feedbackSubmitted = true;
                                       }
                                       feedbackform
@@ -112,7 +112,7 @@
 
                         $(window)
                             .on('unload beforeunload', function (/*e*/) {
-                                !feedbackSubmitted  &&  cfg.gaPing &&  window.ga && window.ga.gaEvtPing('quickfeedback', 'clicked-no', 'button-only');
+                                !feedbackSubmitted  &&  cfg.gaPing &&  window.ga.eventPing('quickfeedback', 'clicked-no', 'button-only');
                                 feedbackSubmitted = true;
                               });
                     });
