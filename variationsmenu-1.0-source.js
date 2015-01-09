@@ -1,4 +1,4 @@
-/* $.fn.variationsMenu 1.0 -- (c) 2012-2013 Hugsmiðjan ehf.  @preserve */
+/* jQuery.fn.variationsMenu 1.0 -- (c) 2012-2015 Hugsmiðjan ehf.  @preserve */
 
 // ----------------------------------------------------------------------------------
 // jQuery.fn.variationsMenu v 1.0
@@ -162,7 +162,7 @@
           var selectedTags = new Array(numTags); // list of currently selected tags - may be empty or incomplete.
 
           var priceElm = select.is('[data-hasprice]') ?
-                            $(cfg.priceElm.apply ? cfg.priceElm( cont ) : cfg.priceElm ):
+                            $(cfg.priceElm.apply ? cfg.priceElm( cont ) : cfg.priceElm ).last():
                             null;
           var defaultPrice = cfg.defaultPrice!=null ? cfg.defaultPrice : priceElm  &&  priceElm[0].firstChild;
 
