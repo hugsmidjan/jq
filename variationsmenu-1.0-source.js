@@ -82,17 +82,16 @@
                     .each(function () {
                         var menuItemElm = this;
                         var menuItem = $(menuItemElm);
-                        var radioElm = menuItem.find('input')[0];
                         var itemValue = menuItem.data('varValue');
                         var isUnavailable = !enabledVals[ itemValue ];
                         var isCurrent = itemValue === selectedTags[i];
 
                         menuItem
                             .data( 'varDisabled', isUnavailable )
-                            .toggleClass( cfg.disabledClass, isUnavailable );
-                        radioElm.title = menuItemElm.orgTitle + (isUnavailable?' '+txt.unavail:'');
-                        radioElm.checked = isCurrent;
-                        menuItem.toggleClass( cfg.currentClass, isCurrent );
+                            .toggleClass( cfg.disabledClass, isUnavailable )
+                            .toggleClass( cfg.currentClass, isCurrent )
+                            .attr('title', menuItemElm.orgTitle + (isUnavailable?' '+txt.unavail:'') );
+                        menuItem.find('input')[0].checked = isCurrent;
                       });
               });
           };
@@ -118,13 +117,57 @@
                     is:{ unavail:'(Samsetning ekki til)' },
                     en:{ unavail:'(Combination unavailable)' }
                   },
-                priceElm: function (cont) { // function or element or selector
-                    return cont.closest('form').parent().find('.price b');
-                  },
-                defaultPrice:   '--',
                 disabledClass:  'disabled',
-                autoSelect:     'aggressive' // 'soft', falsy
+                autoSelect:     'aggressive', // 'soft', falsy
+
+                priceElm: function (cont) { // priceElm is function or element or selector
+                    return cont.closest('form').parent().find('.price');
+                  },
+                defaultPrice: function ( priceElm ) {
+                    return priceElm.find('b')[0].firstChild.nodeValue;
+                  },
+                updatePrice: function ( priceElm, priceNormal, priceOffer ) {
+                    // TODO: make all this more generic, configurable
+                    //       and/or less of a mess.
+                    var protoPrice = priceElm.data('prototype');
+                    if ( !protoPrice )
+                    {
+                      protoPrice = priceElm.children('del').addBack().last().contents().detach();
+                      protoPrice.filter('b').contents().eq(0).replaceWith('<span class="price__value"/>');
+                      priceElm.data( 'prototype', protoPrice );
+                    }
+
+                    priceElm.empty();
+                    if ( priceOffer )
+                    {
+                      protoPrice.clone()
+                          .appendTo( priceElm )
+                          .wrap('<del/>');
+                      priceElm.find('del .price__value')
+                          .replaceWith( priceNormal );
+                      protoPrice.clone()
+                          .appendTo( priceElm )
+                          .wrap('<ins/>');
+                      priceElm.find('ins .price__value')
+                          .replaceWith( priceOffer );
+                      var discountLabel = priceElm.attr('data-offerlabel');
+                      if ( discountLabel )
+                      {
+                        priceElm.find('ins strong').text( discountLabel );
+                      }
+                    }
+                    else
+                    {
+                      protoPrice.clone()
+                          .appendTo( priceElm );
+                      priceElm.find('.price__value')
+                          .replaceWith( priceNormal );
+                    }
+                  },
+                unknownPrice: '--'
+
               }, cfg);
+
 
       var wrappers = [];
 
@@ -161,10 +204,13 @@
 
           var selectedTags = new Array(numTags); // list of currently selected tags - may be empty or incomplete.
 
-          var priceElm = select.is('[data-hasprice]') ?
-                            $(cfg.priceElm.apply ? cfg.priceElm( cont ) : cfg.priceElm ).last():
-                            null;
-          var defaultPrice = cfg.defaultPrice!=null ? cfg.defaultPrice : priceElm  &&  priceElm[0].firstChild;
+          var priceElm;
+          var defaultPrice;
+          if ( select.is('[data-hasprice]') )
+          {
+            priceElm = $( cfg.priceElm.apply ? cfg.priceElm( cont ) : cfg.priceElm );
+            defaultPrice = cfg.defaultPrice( priceElm );
+          }
 
 
           // (Before we harvest - remove empty options so single-option elements get autoselected)
@@ -180,12 +226,17 @@
                 var selected = optElm.is(':selected');
                 var varObj = [];
                 var text = optElm.text();
-                if ( priceElm ) {
+                if ( priceElm )
+                {
                   var priceRe = /\s+\(([^\(\)]+?)\)\s*$/;
                   var priceMatch = text.match(priceRe);
-                  if ( priceMatch ) {
-                    varObj.price = document.createTextNode( priceMatch[1] );
+                  if ( priceMatch )
+                  {
                     text = text.replace(priceRe, '');
+                    var price = document.createTextNode( priceMatch[1] );
+                    var beforePrice = optElm.attr('data-beforeprice');
+                    varObj.price = beforePrice || price;
+                    varObj.priceOffer = beforePrice ? price : '';
                   }
                 }
                 text = text.split(tagTextSplitter);
@@ -278,11 +329,11 @@
 
                           if ( priceElm )
                           {
-                            var newPrice = selectedVariation && selectedVariation.price || defaultPrice;
-                            var currentPrice = priceElm[0].firstChild;
-                            if ( newPrice !== currentPrice ) {
-                              $( currentPrice ).replaceWith( newPrice );
-                            }
+                            var price = selectedVariation ?
+                                            (selectedVariation.price || defaultPrice):
+                                            cfg.unknownPrice;
+                            var priceOffer = selectedVariation  && selectedVariation.priceOffer;
+                            cfg.updatePrice( priceElm, price, priceOffer );
                           }
 
                           if ( isChanged || isFirstRun )
