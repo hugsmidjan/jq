@@ -147,6 +147,7 @@
                           .replaceWith( priceNormal );
                       protoPrice.clone()
                           .appendTo( priceElm )
+                          .eq(0).before(' ').end() // add space
                           .wrap('<ins/>');
                       priceElm.find('ins .price__value')
                           .replaceWith( priceOffer );
