@@ -142,13 +142,13 @@
                     {
                       protoPrice.clone()
                           .appendTo( priceElm )
-                          .wrap('<del/>');
+                          .wrapAll('<del/>');
                       priceElm.find('del .price__value')
                           .replaceWith( priceNormal );
                       protoPrice.clone()
                           .appendTo( priceElm )
                           .eq(0).before(' ').end() // add space
-                          .wrap('<ins/>');
+                          .wrapAll('<ins/>');
                       priceElm.find('ins .price__value')
                           .replaceWith( priceOffer );
                       var discountLabel = priceElm.attr('data-offerlabel');
