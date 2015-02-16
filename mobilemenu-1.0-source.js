@@ -129,6 +129,7 @@
                 name:         'header',
                 upLimit:      70,
                 downLimit:    50,
+                //onresize:  false,
                 mediaGroup:  'Small', // String or `function (media, prefix) { return matches(media, prefix); }`
                 headerHeight: function () { return parseInt($html.css('padding-top'), 10); },
               }, opts);
@@ -136,8 +137,10 @@
       var mediaGroup = (typeof mediaGroupOptValue === 'function') ?
                           mediaGroupOptValue:
                           function (media, prefix) { return !mediaGroupOptValue || media[prefix+mediaGroupOptValue]; };
-      var formatChangeEv = 'formatchange.stickyheader';
-      var scrollEv = 'scroll.stickyheader';
+      var ns = '.stickyheader';
+      var formatChangeEv = 'formatchange'+ns;
+      var scrollEv = 'scroll'+ns;
+      var scrollAndResizeEv = scrollEv + (opts.onresize ? ' resize'+ns : '');
 
       var classPrefix = 'is-' + opts.name;
       var classFixed =  classPrefix + '-fixed';
@@ -164,7 +167,7 @@
                 var isShown = false;
 
                 $win
-                    .on(scrollEv, $.throttleFn(function (/*e*/) {
+                    .on(scrollAndResizeEv, $.throttleFn(function (/*e*/) {
                         if ( !openMenu )
                         {
                           var yOffs = hasPageYOffset ?
@@ -228,7 +231,7 @@
               else if ( isActive && mediaGroup(media,'left') )
               {
                 isActive = !isActive;
-                $win.off(scrollEv);
+                $win.off(scrollAndResizeEv);
                 $html.removeClass( classFixed +' '+ classShown);
 
               }
