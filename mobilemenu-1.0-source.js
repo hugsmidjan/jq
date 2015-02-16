@@ -161,7 +161,6 @@
                 isActive = !isActive;
                 var lastOffs = 0;
                 var updateLastOffset;
-                var headerHeight = opts.headerHeight();
                 var hasPageYOffset = ('pageXOffset' in win);
                 var isFixed = false;
                 var isShown = false;
@@ -173,7 +172,7 @@
                           var yOffs = hasPageYOffset ?
                                           win.pageYOffset:
                                           document.documentElement.scrollTop;
-                          var doFix = yOffs > headerHeight;
+                          var doFix = yOffs > opts.headerHeight();
                           updateLastOffset  &&  clearTimeout( updateLastOffset );
 
                           if ( doFix !== isFixed )
