@@ -213,6 +213,16 @@
             defaultPrice = cfg.defaultPrice( priceElm );
           }
 
+          var _updatePrice = function () {
+                  if ( priceElm )
+                  {
+                    var price = selectedVariation ?
+                                    (selectedVariation.price || defaultPrice):
+                                    cfg.unknownPrice;
+                    var priceOffer = selectedVariation  && selectedVariation.priceOffer;
+                    cfg.updatePrice( priceElm, price, priceOffer );
+                  }
+                };
 
           // (Before we harvest - remove empty options so single-option elements get autoselected)
           cfg.autoSelect  &&  select.children().filter(function(){ return !$(this).attr('value'); }).remove();
@@ -266,6 +276,7 @@
           // if product only a single variation and no tags/attributes (i.e. if its data-tags="" is empty)
           if ( variations.length === 1   &&  !(variations[0]||[]).join('') )
           {
+            _updatePrice();
             hiddenInput
                 .val( variations[0].id )
                 .replaceAll( cont );
@@ -328,14 +339,7 @@
                             }
                           }
 
-                          if ( priceElm )
-                          {
-                            var price = selectedVariation ?
-                                            (selectedVariation.price || defaultPrice):
-                                            cfg.unknownPrice;
-                            var priceOffer = selectedVariation  && selectedVariation.priceOffer;
-                            cfg.updatePrice( priceElm, price, priceOffer );
-                          }
+                          _updatePrice();
 
                           if ( isChanged || isFirstRun )
                           {
