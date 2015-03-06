@@ -3,7 +3,6 @@
 
 /*
   Usage:
-  Add trigger class to the container on the triggers
   $('.paging .jump span').pagingHack();
 */
 
@@ -26,7 +25,7 @@
       var max = pages.length -1;
       var curIdx = pages.filter(cfg.currentSel).index();
 
-      var pagesBack = Math.floor( (cfg.pages/2)-1 );
+      var pagesBack = Math.max(Math.floor((cfg.pages/2)-1), 0);
       var pagesExtra = cfg.pages - 1;
 
       var start = (curIdx < pagesBack) ? 0 : curIdx - pagesBack;
