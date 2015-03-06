@@ -1,0 +1,2 @@
+// $.fn.paginghack -- (c) 2015 Hugsmiðjan ehf.
+!function(e){var n={pagingSel:"a,b",currentSel:"b.current",pagingSep:"<i>,</i>",pages:10};e.fn.pagingHack=function(i){var a=e.extend(n,i);return this.each(function(){e(this).find("*:not("+a.pagingSel+")").remove();var n=e(this).find(a.pagingSel),i=n.length-1,t=n.filter(a.currentSel).index(),r=Math.floor(a.pages/2-1),g=a.pages-1,p=r>t?0:t-r,c=g+p;c=c>i?i:c;var f=p-c+g;p-=p-f>0?f:0,n=n.clone(),e(this).empty();for(var h=p;c>=h;h++)e(this).append(n.get(h)),h!==c&&e(this).append(a.pagingSep)})}}(jQuery);
