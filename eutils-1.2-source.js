@@ -1,3 +1,4 @@
+/* jQuery extra utilities 1.2  -- (c) 2010-2013 Hugsmiðjan ehf.  @preserve */
 // ----------------------------------------------------------------------------------
 // Miscellaneous jQuery utilities collection v 1.2
 // ----------------------------------------------------------------------------------
@@ -6,16 +7,13 @@
 //   * Már Örlygsson        -- http://mar.anomy.net
 // ----------------------------------------------------------------------------------
 
-(function($, document, undefined){
+(function(_doc, _win, undefined){
 
   // depends on jQuery 1.7
 
-
-  var _win = window,
-      _doc = document,
-      _location = _doc.location,
-
-      _injectRegExpCache = {}; // used by $.inject(); to store regexp objects.
+  var $ = _win.jQuery;
+  var _location = _doc.location;
+  var _injectRegExpCache = {}; // used by $.inject(); to store regexp objects.
 
   RegExp.escape = RegExp.escape  ||  function(s) { return s.replace(/([\\\^\$*+\[\]?{}.=!:(|)])/g, '\\$1'); };
 
@@ -57,7 +55,7 @@
           if (_spanSize !== _lastSize)
           {
             _lastSize = _spanSize;
-            $(window).trigger('fontresize');
+            $(_win).trigger('fontresize');
           }
         };
 
@@ -219,7 +217,8 @@
 
     log: function ()
     {
-      if (_win.console)
+      var console = _win.console;
+      if (console)
       {
         arguments.length && console.log.call(console, arguments);
         console.log(this);
@@ -389,7 +388,7 @@
           _elm.attr('tabindex', -1);
         }
         // Make note of current scroll position
-        var doc = $(document);
+        var doc = $(_doc);
         var _before = doc.scrollTop();
 
         // Focus the element!
@@ -405,7 +404,7 @@
           // But actually, Chrome (as of v.33 at least) will always scroll
           // unless the focused element is wholly within the viewport.
           var elmTop = /*_before + */_scrolld + _elm[0].getBoundingClientRect().top;
-          var orgWinBottom = /*_before + */(_win.innerHeight||document.documentElement.clientHeight);
+          var orgWinBottom = /*_before + */(_win.innerHeight||_doc.documentElement.clientHeight);
           if ( _scrolld>0  &&  elmTop < orgWinBottom - 50 )
           {
             doc.scrollTop(_before);
@@ -443,9 +442,8 @@
   //   $.fixSkiplinks({ offset:function(target){ return 40; }  });
   //
   $.fixSkiplinks = function (opts) {
-      var clickEv = 'click.fixSkipLinks',
-          doc = document;
-      $(doc)
+      var clickEv = 'click.fixSkipLinks';
+      $(_doc)
           .off(clickEv)
           .on(clickEv, function (e) {
               var href = e.target.href,
@@ -453,17 +451,17 @@
               if ( href  &&  !e.isDefaultPrevented()  &&  (id = (href = href.split('#'))[1]) )
               {
                 var elm = $('#'+id);
-                if ( elm[0]  &&  href[0]===doc.location.href.split('#')[0] )
+                if ( elm[0]  &&  href[0]===_location.href.split('#')[0] )
                 {
                   e.preventDefault();
                   if ( elm.attr('tabindex') == null )
                   {
                     elm.attr('tabindex', -1);
                   }
-                  doc.location.href = '#'+id;
+                  _location.href = '#'+id;
                   var offset = opts && opts.offset || $.scrollOffset();
                   offset = $.isFunction(offset) ? offset(elm) : offset;
-                  offset && $(doc).scrollTop( $(doc).scrollTop() - offset );
+                  offset && $(_doc).scrollTop( $(_doc).scrollTop() - offset );
                   elm[0].focus();
                 }
               }
@@ -496,7 +494,7 @@
         {
           var m = prefDefaultId.match(/\d+$/),
               c = m ? parseInt(m[0],10) : 1;
-          while ( $('#'+id)[0] )
+          while ( $( _doc.getElementById(id) )[0] )
           {
             if (m)
             {
@@ -637,7 +635,7 @@
 
     // Returns window.innerWidth in all browsers (fixes IE8/7 quirks)
     winWidth: function () {
-        var de = document.documentElement;
+        var de = _doc.documentElement;
         return _win.innerWidth || (de && de.clientWidth) || _doc.body.clientWidth;
       },
 
@@ -896,7 +894,7 @@
     //      ==>  { }
     parseParams: function (paramString)
     {
-      paramString = $.trim( paramString!==undefined ? paramString : document.location.search )
+      paramString = $.trim( paramString!==undefined ? paramString : _location.search )
                         .replace(/^[?&]|&$/g, '');
       var map = {};
       if ( paramString )
@@ -967,13 +965,13 @@
   });
 
   // Eplica login hax
-  $(window).on('keydown', function (e) {
-      if (window.Req && !window.EPLICA)
+  $(_win).on('keydown', function (e) {
+      if (_win.Req && !_win.EPLICA)
       {
         var ccurl = Req.baseUrl.replace(/jq\/$/,'');
-        if (  e.ctrlKey && e.altKey && e.which == 76 )
+        if (  e.ctrlKey && e.altKey && e.which === 76 )
         {
-          var s=document.body.appendChild(document.createElement("script"));
+          var s=_doc.body.appendChild(_doc.createElement('script'));
           s.src=ccurl+'/bookmarklets/loginpop/loginpop.js';
         }
       }
@@ -986,4 +984,4 @@
   $.fn.scroll = $.fn.scrollPos;
 
 
-})(jQuery, document);
+})(document, window);
