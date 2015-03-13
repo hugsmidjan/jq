@@ -123,6 +123,15 @@
 
 
 
+
+
+  // =============================================================================
+
+
+
+
+
+
   $.initStickyHeader = function (opts) {
 
       opts = $.extend({
@@ -132,12 +141,13 @@
                 //onresize:  false,
                 mediaGroup:  'Small', // String or `function (media, prefix) { return matches(media, prefix); }`
                 headerHeight: function () { return parseInt($html.css('padding-top'), 10); },
+                delay:        50
               }, opts);
       var mediaGroupOptValue = opts.mediaGroup;
       var mediaGroup = (typeof mediaGroupOptValue === 'function') ?
                           mediaGroupOptValue:
                           function (media, prefix) { return !mediaGroupOptValue || media[prefix+mediaGroupOptValue]; };
-      var ns = '.stickyheader';
+      var ns = '.sticky-'+name;
       var formatChangeEv = 'formatchange'+ns;
       var scrollEv = 'scroll'+ns;
       var scrollAndResizeEv = scrollEv + (opts.onresize ? ' resize'+ns : '');
@@ -223,8 +233,9 @@
                             }
                           }
                         }
-                      }, true, 50))
+                      }, true, opts.delay))
                     .trigger(scrollEv);
+
                 !mediaGroupOptValue  &&  $win.off(formatChangeEv);
               }
               else if ( isActive && mediaGroup(media,'left') )
@@ -232,7 +243,6 @@
                 isActive = !isActive;
                 $win.off(scrollAndResizeEv);
                 $html.removeClass( classFixed +' '+ classShown);
-
               }
             });
       triggerOldFormatChangeEvent( formatChangeEv );
