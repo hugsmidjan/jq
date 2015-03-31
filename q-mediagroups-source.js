@@ -18,14 +18,14 @@
             }, cfg );
 
     return this.each(function(){
-
         var groups = $(this).find('.group');
 
         groups.each(function (i) {
-            var linkHref = $(this).find('a:first').attr('href'),
+            var firstDiv =  $(this).find('> div:first'),
+                linkHref = $(this).find('a:first').attr('href'),
                 iframeSrc = $(this).find('iframe:first').attr('src'),
-                airTimes = $(this).find('div:first').is('.airtimes'),
-                type =  (/(?:\/\/|\.)(?:youtube\.com|youtu\.be)/i.test( linkHref ) && 'youtube')
+                type =  (firstDiv.is('.twitter-wrap') && 'twitter')
+                        || (/(?:\/\/|\.)(?:youtube\.com|youtu\.be)/i.test( linkHref ) && 'youtube')
                         || (/(?:\/\/|\.)vimeo\.com/i.test( linkHref ) && 'video vimeo')
                         || (/(?:\/\/|\.)twitter\.com/i.test( linkHref ) && 'twitter')
                         || (/\.(flv|mp4|m4v)(\?|$)/i.test( linkHref ) && 'video file')
@@ -33,8 +33,6 @@
                         || (/(?:\/\/|\.)flickr\.com/i.test( linkHref ) && 'images flickr')
                         || (/(?:\/\/|\.)spotify\.com/i.test( iframeSrc ) && 'spotify')
                         || (/\.(jpe?g|png|gif)(\?|$)/i.test( linkHref ) && 'images file')
-                        || (airTimes  && 'airtime')
-                        || (/(?:\/\/|\.)midi\.is/i.test( linkHref ) && 'midi_is')
                         || 'links';
 
             if (type == 'youtube')
@@ -136,8 +134,6 @@
                 });
             }
           });
-
-        groups.filter('.airtime, .midi_is').remove();
 
         // þurfum að finna .group aftur eftir að búið er að remove'a ^
         $(this).addClass('gpc-'+ $(this).find('.group').length);
