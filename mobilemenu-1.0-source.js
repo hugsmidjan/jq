@@ -8,116 +8,198 @@
 //   * Már Örlygsson        -- http://mar.anomy.net
 // ----------------------------------------------------------------------------------
 
+// FIXME: Need to write documentation
+
 (function(win){
   var $ = win.jQuery;
-  var $win =  $(win);
-  var $doc =  $(document);
-  var $html = $('html');
 
+
+  // non-minimal mode legacy stuff
+  var $win =  $(win);
+  var currentlyOpenMenuWidget;
   var triggerOldFormatChangeEvent = function (formatChangeEv) {
           !win.FormatChange  &&  $win.trigger(formatChangeEv, [$.formatChange.media]);
         };
-  var openMenu;
-
-  $.initMobileMenu = function (opts) {
-
-      opts = $.extend({
-                stickyHeader: true,
-                startOpen:    false,
-                mediaGroup:  'Small', // String or `function (media, prefix) { return matches(media,prefix); }`
-                name:        'menu',
-                evPrefix:    'mobile',
-                menuButton:  '.skiplink a',
-              }, opts);
-      var mediaGroupOptValue = opts.mediaGroup;
-      var mediaGroup = (typeof mediaGroupOptValue === 'function') ?
-                          mediaGroupOptValue:
-                          function (media, prefix) { return !mediaGroupOptValue || media[prefix+mediaGroupOptValue]; };
-      var formatChangeEv = 'formatchange.' + opts.evPrefix + opts.name;
-      var isThisMenuOpen = opts.startOpen;
-
-      var classPrefix = 'is-' + opts.name;
-      var classClosed = classPrefix + '-closed';
-      var classOpen =   classPrefix + '-open';
-      var classActive = classPrefix + '-active';
-      var eventPrefix = opts.evPrefix + opts.name;
-
-      var isActive = false;
-
-      $win
-          .on(formatChangeEv, function (e, media) {
+  // ------------------------------
 
 
-              if ( !isActive && mediaGroup(media,'became') )
-              {
-                isActive = !isActive;
-                var scrollTopBeforeMenu;
-                $html.addClass( opts.startOpen ? classOpen : classClosed );
-                $(opts.menuButton)
-                    .on('click.toggleMenu', function (e) {
-                        var link = this;
-                        e.preventDefault();
-                        if ( !isThisMenuOpen )
-                        {
-                          openMenu  &&  $(openMenu).trigger('click.toggleMenu');
-                          openMenu = link;
-                          $doc.trigger( eventPrefix+'open' );
-                          scrollTopBeforeMenu = $win.scrollTop() || 1;
-                          $html
-                              .addClass(classOpen)
-                              .removeClass(classClosed);
-                          $( $(link).attr('href') )
-                              .focusHere();
-                          $win.scrollTop( 1 );
-                          $doc.trigger( eventPrefix+'opened' );
-                        }
-                        else
-                        {
-                          openMenu = null;
-                          $doc.trigger( eventPrefix+'close' );
-                          $html
-                              .removeClass(classOpen)
-                              .addClass(classClosed);
-                          $win.scrollTop( scrollTopBeforeMenu );
-                          link.blur();
-                          $doc.trigger( eventPrefix+'closed' );
-                        }
-                        isThisMenuOpen = !isThisMenuOpen;
-                      });
-                !mediaGroupOptValue && $win.off(formatChangeEv);
-                $html
-                    .addClass(classActive);
-              }
-              else if ( isActive && mediaGroup(media,'left') )
-              {
-                isActive = !isActive;
-                // Close the menu when switching to Large formats
-                if ( isThisMenuOpen )
-                {
-                  openMenu = null;
-                  $doc.trigger( eventPrefix+'close' );
-                  isThisMenuOpen = false;
-                  $doc.trigger( eventPrefix+'closed' );
-                }
-                $(opts.menuButton).off('click.toggleMenu');
-                $html.removeClass(classActive +' '+ classOpen +' '+ classClosed);
-              }
-            });
-      triggerOldFormatChangeEvent( formatChangeEv );
-
-      // opts.stickyHeader  &&  $.initStickyHeader({
-      //     media:        media
-      //     upLimit:      upLimit,
-      //     downLimit:    downLimit,
-      //     mediaGroup:   opts.mediaGroupp,
-      //     headerHeight: opts.headerHeight,
-      //   })
-      if ( opts.stickyHeader )
+  $.initMobileMenu = function (minimal, opts) {
+      if ( minimal !== false  &&  minimal !== true )
       {
-        $.initStickyHeader( $.extend({}, opts, { name:'header' }) );
+        opts = minimal;
+        minimal = false;
       }
 
-      return $;
+      opts = $.extend({
+                // name:         'menu',
+                // evPrefix:     'mobile',
+                menuButton:   '.skiplink a',
+                // startOpen:    false,
+                // autoStart:    false,
+
+                // container:    'html',
+                // evTarget:     document,
+                // scrollElm:    window,
+                resetScroll:  true, // Boolean or Function
+
+                minimal:      minimal // default: false
+              }, opts);
+
+      var name = opts.name || 'menu';
+      var eventPrefix = (opts.evPrefix||'mobile')+name;
+      var ns = '.toggle-'+eventPrefix;
+
+      var classPrefix = 'is-'+name;
+      var classClosed = classPrefix+'-closed';
+      var classOpen =   classPrefix+'-open';
+      var classActive = classPrefix+'-active';
+
+      var isActive;// = false;
+      var isOpen;// = false;
+
+
+      var $evTarget; // lazy bound
+      var $container; // lazy bound
+      var $scrollElm; // lazy bound
+      var $link; // lazy bound
+      var $linkTarget; // lazy bound
+
+      var resetScroll = opts.resetScroll.apply ? opts.resetScroll : function(){ return opts.resetScroll; };
+      var scrollPosBeforeMenuOpened;
+
+      var widget = {
+
+              start: function () {
+                  if ( !isActive )
+                  {
+                    // find the elements
+                    if ( !$container )
+                    {
+                      $container = $( opts.container || 'html' );
+                      $scrollElm = resetScroll()  &&  $( opts.scrollElm || win );
+                      $evTarget = $( opts.evTarget || document );
+
+                      if ( opts.menuButton )
+                      {
+                        $link = $(opts.menuButton);
+                        $linkTarget = $.focusHere  &&  $link  &&  $link.attr('href');
+                        $linkTarget = $linkTarget  &&  $( $linkTarget );
+                      }
+                    }
+
+                    isActive = true;
+                    isOpen = opts.startOpen;
+                    $container
+                        .addClass( isOpen ? classOpen : classClosed )
+                        .addClass(classActive);
+                    if ( $link )
+                    {
+                      $link
+                          .on('click'+ns, function (e) {
+                              e.preventDefault();
+                              isOpen ?
+                                  widget.close():
+                                  widget.open();
+                            });
+                    }
+                  }
+                },
+
+              open: function () {
+                  if ( isActive && !isOpen )
+                  {
+                    $evTarget.trigger( eventPrefix+'open' );
+                    scrollPosBeforeMenuOpened = resetScroll()  &&  $scrollElm.scrollTop();
+                    $container
+                        .addClass(classOpen)
+                        .removeClass(classClosed);
+                    $linkTarget  &&  $linkTarget.focusHere();
+                    resetScroll()  &&  $scrollElm.scrollTop( 0 );
+                    isOpen = true;
+                    $evTarget.trigger( eventPrefix+'opened' );
+                  }
+                },
+
+              close: function ( _isStopping ) {
+                  if ( isActive && isOpen )
+                  {
+                    currentlyOpenMenuWidget = null;
+                    $evTarget.trigger( eventPrefix+'close' );
+                    $container
+                        .removeClass(classOpen);
+                    if ( !_isStopping )
+                    {
+                      $container
+                          .addClass(classClosed);
+                      resetScroll()  &&  $scrollElm.scrollTop( scrollPosBeforeMenuOpened );
+                      $link  &&  $link[0].blur();
+                    }
+                    isOpen = false;
+                    $evTarget.trigger( eventPrefix+'closed' );
+                  }
+                },
+
+              stop: function () {
+                  if ( isActive )
+                  {
+                    isActive = false;
+                    widget.close(true);
+                    $link.off('click'+ns);
+                    $container.removeClass(classActive +' '+ classClosed);
+                  }
+                }
+            };
+
+      if ( opts.minimal )
+      {
+        opts.autoStart && widget.start();
+      }
+      else
+      {
+        // old fat behavior - handle formatChange and impose auto-toggling in-case of multiple widgets.
+
+        // disallow customization to avoid this fat magic causing obscure side-effects
+        opts.container = 'html';
+        opts.scrollElm = win;
+        opts.evTarget = document;
+
+        var formatChangeEv = 'formatchange' + ns;
+        var mediaGroupOptValue = ('mediaGroup' in opts) ? opts.mediaGroup : 'Small';
+        var mediaGroup = (typeof mediaGroupOptValue === 'function') ?
+                            mediaGroupOptValue:
+                            function (media, prefix) { return !mediaGroupOptValue || media[prefix+mediaGroupOptValue]; };
+        $win
+            .on(formatChangeEv, function (e, media) {
+                if ( !isActive && mediaGroup(media,'became') )
+                {
+                  widget.start();
+                  $evTarget
+                      .on( eventPrefix+'open'+ns, function () {
+                          currentlyOpenMenuWidget  &&  currentlyOpenMenuWidget.close();
+                          currentlyOpenMenuWidget = widget;
+                        })
+                      .on( eventPrefix+'closed'+ns, function () {
+                          currentlyOpenMenuWidget = null;
+                        });
+                  !mediaGroupOptValue && $win.off(formatChangeEv);
+                }
+                else if ( isActive && mediaGroup(media,'left') )
+                {
+                  widget.stop();
+                  $evTarget.off( ns );
+                }
+              });
+        triggerOldFormatChangeEvent( formatChangeEv );
+
+        if ( opts.stickyHeader !== false )
+        {
+          widget.stickyHeaderWidget = $.initStickyHeader( $.extend({}, opts, { name:'header' }) );
+        }
+        return $;
+      }
+
+
+      return widget;
     };
 
 
@@ -132,122 +214,184 @@
 
 
 
-  $.initStickyHeader = function (opts) {
+  $.initStickyHeader = function (minimal, opts) {
+      if ( minimal !== false  &&  minimal !== true )
+      {
+        opts = minimal;
+        minimal = false;
+      }
 
       opts = $.extend({
-                name:         'header',
+                // headerHeight: function () { return parseInt($container.css('padding-top'), 10); },
+                delay:        50,
+                recede:     true, // Boolean or Function
+                                  // monitor up/down movement to hide/show if up/down limits are exceeded
                 upLimit:      70,
                 downLimit:    50,
-                //onresize:  false,
-                mediaGroup:  'Small', // String or `function (media, prefix) { return matches(media, prefix); }`
-                headerHeight: function () { return parseInt($html.css('padding-top'), 10); },
-                delay:        50
+                // name: 'header',
+                // onresize:  false,
+                // autoStart: false,
+
+                // container:    'html',
+                // scrollElm:    window,
+
+                minimal:      minimal // default: false
               }, opts);
-      var mediaGroupOptValue = opts.mediaGroup;
-      var mediaGroup = (typeof mediaGroupOptValue === 'function') ?
-                          mediaGroupOptValue:
-                          function (media, prefix) { return !mediaGroupOptValue || media[prefix+mediaGroupOptValue]; };
+
+      var name = opts.name || 'header';
       var ns = '.sticky-'+name;
-      var formatChangeEv = 'formatchange'+ns;
       var scrollEv = 'scroll'+ns;
       var scrollAndResizeEv = scrollEv + (opts.onresize ? ' resize'+ns : '');
 
-      var classPrefix = 'is-' + opts.name;
-      var classFixed =  classPrefix + '-fixed';
-      var classHidden = classPrefix + '-hidden';
-      var classShown =  classPrefix + '-shown';
+      var classPrefix = 'is-'+name;
+      var classFixed =  classPrefix+'-fixed';
+      var classHidden = classPrefix+'-hidden';
+      var classShown =  classPrefix+'-shown';
 
       var isActive = false;
 
-      // if ( typeof opts.headerHeight === 'number' )
-      // {
-      //   var height = opts.headerHeight;
-      //   opts.headerHeight = function () { return height; };
-      // }
-      $win
-          .on(formatChangeEv, function (e, media) {
-              if ( !isActive && mediaGroup(media,'became') )
-              {
-                isActive = !isActive;
-                var lastOffs = 0;
-                var updateLastOffset;
-                var hasPageYOffset = ('pageXOffset' in win);
-                var isFixed = false;
-                var isShown = false;
+      var $container; // lazy bound
+      var $scrollElm; // lazy bound
 
-                $win
-                    .on(scrollAndResizeEv, $.throttleFn(function (/*e*/) {
-                        if ( !openMenu )
-                        {
-                          var yOffs = hasPageYOffset ?
-                                          win.pageYOffset:
-                                          document.documentElement.scrollTop;
-                          var doFix = yOffs > opts.headerHeight();
-                          updateLastOffset  &&  clearTimeout( updateLastOffset );
+      var widget = {
 
-                          if ( doFix !== isFixed )
-                          {
-                            isFixed = doFix;
-                            lastOffs = yOffs;
-                            $html.toggleClass( classFixed +' '+ classHidden , isFixed);
-                            if ( !isFixed )
+              upLimit: opts.upLimit,
+              downLimit: opts.downLimit,
+              recede: opts.recede.apply ? opts.recede : function(){ return opts.recede; },
+
+              // distY: 0
+              // isFixed: (distY > 0),
+              // isShown: false,
+
+              headerHeight: opts.headerHeight || function () { return parseInt($container.css('padding-top'), 10); },
+
+              start: function () {
+                  if ( !isActive )
+                  {
+                    isActive = true;
+                    var lastOffs = 0;
+                    var updateLastOffset;
+                    var hasPageYOffset = ('pageXOffset' in win);
+                    var isFixed = false;
+                    var isShown = false;
+                    var delay = opts.delay;
+
+                    var monitorScroll = function (/*e*/) {
+                            if ( !currentlyOpenMenuWidget )
                             {
-                              $html
-                                  .removeClass( classShown );
-                              isShown = false;
-                            }
-                          }
-                          if ( isFixed )
-                          {
-                            var delta = yOffs - lastOffs;
-                            var exceededLimit;
-                            if ( (exceededLimit = delta > opts.downLimit) ) // going down
-                            {
-                              if ( isShown )
+                              var yOffs = hasPageYOffset ?
+                                              win.pageYOffset:
+                                              document.documentElement.scrollTop;
+                              var distY = widget.distY = yOffs - widget.headerHeight();
+                              var doFix = distY > 0;
+                              updateLastOffset  &&  clearTimeout( updateLastOffset );
+
+                              if ( doFix !== isFixed )
                               {
-                                $html
-                                    .removeClass( classShown )
-                                    .addClass( classHidden );
-                                isShown = false;
+                                isFixed = doFix;
+                                lastOffs = yOffs;
+                                $container.toggleClass( classFixed +' '+ classHidden , isFixed);
+                                if ( !isFixed )
+                                {
+                                  $container
+                                      .removeClass( classShown );
+                                  isShown = false;
+                                }
                               }
-                            }
-                            else if ( (exceededLimit = delta < -opts.upLimit) ) // going up
-                            {
-                              if ( !isShown )
+                              if ( widget.recede() && isFixed )
                               {
-                                $html
-                                    .removeClass( classHidden )
-                                    .addClass( classShown );
-                                isShown = true;
-                              }
-                            }
-                            if ( exceededLimit )
-                            {
-                              lastOffs = yOffs;
-                            }
-                            else
-                            {
-                              updateLastOffset = setTimeout(function(){
+                                var delta = yOffs - lastOffs;
+                                var exceededLimit;
+                                if ( (exceededLimit = delta > widget.downLimit) ) // going down
+                                {
+                                  if ( isShown )
+                                  {
+                                    $container
+                                        .removeClass( classShown )
+                                        .addClass( classHidden );
+                                    isShown = false;
+                                  }
+                                }
+                                else if ( (exceededLimit = delta < -widget.upLimit) ) // going up
+                                {
+                                  if ( !isShown )
+                                  {
+                                    $container
+                                        .removeClass( classHidden )
+                                        .addClass( classShown );
+                                    isShown = true;
+                                  }
+                                }
+                                if ( exceededLimit )
+                                {
                                   lastOffs = yOffs;
-                                }, 1000);
+                                }
+                                else
+                                {
+                                  updateLastOffset = setTimeout(function(){
+                                      lastOffs = yOffs;
+                                    }, 1000);
+                                }
+                              }
+                              widget.isFixed = doFix;
+                              widget.isShown = isShown;
                             }
-                          }
-                        }
-                      }, true, opts.delay))
-                    .trigger(scrollEv);
+                          };
 
-                !mediaGroupOptValue  &&  $win.off(formatChangeEv);
-              }
-              else if ( isActive && mediaGroup(media,'left') )
-              {
-                isActive = !isActive;
-                $win.off(scrollAndResizeEv);
-                $html.removeClass( classFixed +' '+ classShown);
-              }
-            });
-      triggerOldFormatChangeEvent( formatChangeEv );
+                    $container = $container || $(opts.container || 'html' );
+                    $scrollElm = $scrollElm || $( opts.scrollElm || win );
 
-      return $;
+                    $scrollElm
+                        .on(scrollAndResizeEv, (delay && $.throttleFn) ?
+                                $.throttleFn(monitorScroll, true, delay):
+                                monitorScroll)
+                        .trigger(scrollEv);
+                  }
+                },
+              stop: function () {
+                  if ( isActive )
+                  {
+                    isActive = false;
+                    $scrollElm.off( scrollAndResizeEv );
+                    $container.removeClass( classFixed+' '+classShown+' '+classHidden );
+                  }
+                }
+
+            };
+
+
+      if ( opts.minimal )
+      {
+        opts.autoStart  &&  widget.start();
+      }
+      else
+      {
+        opts.container = 'html';
+        opts.scrollElm = win;
+
+        // old fat behavior - handle formatChange.
+        var formatChangeEv = 'formatchange'+ns;
+        var mediaGroupOptValue = ('mediaGroup' in opts) ? opts.mediaGroup : 'Small';
+        var mediaGroup = (typeof mediaGroupOptValue === 'function') ?
+                            mediaGroupOptValue:
+                            function (media, prefix) { return !mediaGroupOptValue || media[prefix+mediaGroupOptValue]; };
+        $win
+            .on(formatChangeEv, function (e, media) {
+                if ( !isActive && mediaGroup(media,'became') )
+                {
+                  widget.start();
+                  !mediaGroupOptValue  &&  $win.off(formatChangeEv);
+                }
+                else if ( isActive && mediaGroup(media,'left') )
+                {
+                  widget.stop();
+                }
+              });
+        triggerOldFormatChangeEvent( formatChangeEv );
+        return $;
+      }
+
+      return widget;
     };
 
 
