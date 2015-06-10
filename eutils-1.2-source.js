@@ -367,7 +367,7 @@
       }
       var lang = $(elm||'html').closest('[lang]').attr('lang') || '';
       return lang ?
-                  (returnFull ? lang.substr(0,2) : lang).toLowerCase():
+                  (!returnFull ? lang.substr(0,2) : lang).toLowerCase():
                   null;
     };
   // returns the lang="" value of the first item in the collection
