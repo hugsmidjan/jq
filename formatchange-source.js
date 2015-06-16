@@ -1,3 +1,5 @@
+/* $.formatChange  -- (c) 2012 Hugsmiðjan ehf.   @license MIT/GPL */
+
 // ----------------------------------------------------------------------------------
 // jQuery.formatChange
 // ----------------------------------------------------------------------------------
@@ -180,10 +182,12 @@
 
           $(window).on(resize_formatchange, function (e, evOpts) {
               evOpts = evOpts || {};
-              var newFormat = (
-                                (getComputedStyle && getComputedStyle( elm[0], cfg.$before?':before':':after' ).getPropertyValue('content'))  ||
-                                elm.css('font-family')
-                              ).replace(/['"]/g,''); // some browsers return a quoted strings.
+              var newFormat = (getComputedStyle && getComputedStyle( elm[0], cfg.$before?':before':':after' ).getPropertyValue('content'));
+              if ( !newFormat || newFormat ==='none' )
+              {
+                newFormat = elm.css('font-family');
+              }
+              newFormat = newFormat.replace(/['"]/g,''); // some browsers return a quoted strings.
 
               if ( newFormat !== oldFormat )
               {
