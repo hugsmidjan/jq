@@ -1,3 +1,5 @@
+/* jQuery.fn.whenOnScreen 1.0  (https://github.com/maranomynet/whenonscreen/)   @license MIT/GPL */
+
 // ----------------------------------------------------------------------------------
 // jQuery.fn.whenOnScreen v 1.0
 // ----------------------------------------------------------------------------------
@@ -399,7 +401,7 @@
                         delete range['_'+sideLC];
                       });
                   });
-                checkElements([ data ]);
+                setTimeout(checkElements, 0, [ data ]);
               }
             });
 
