@@ -40,39 +40,53 @@
                               .on('click', function (e) {
                                   e.preventDefault();
                                   var fsElm = $(this).data('$fsclnr');
+                                  cfg.cloneCount--;
                                   fsElm
                                       .slideUp(cfg.showSpeed, function(){ fsElm.remove(); });
+
+                                  if ( cfg.cloneMax && cfg.cloneCount < cfg.cloneMax )
+                                  {
+                                    $cloneBtn.show();
+                                  }
+
                                   if ( cfg.$place==='appendTo' )
                                   {
                                     // check if this fieldset has cloneButton inside it (i.e. is the last fieldset)
                                     fsElm.find('.'+cfg.addBtnClass)
                                         [cfg.$place]( fsElm.prev() );
                                   }
-                                }),
+                                });
           cfg.$place = ({after:'insertAfter', bottom:'appendTo'})[ cfg.buttonPlacement ] || 'insertAfter';
           cfg.$num = 1; // Counter for field-name suffixes
+          cfg.cloneCount = 1; // internal number for clonefields
+          cfg.cloneMax = parseInt(fieldset.attr(cfg.cloneMaxSel||''), 10) || null;
 
           // Create Clone Button
-          $(cfg.addBtnTemplate
+          var $cloneBtn = $(cfg.addBtnTemplate
               .replace(/%\{className\}/g, cfg.addBtnClass)
               .replace(/%\{label\}/g,     cfg.addBtnLabel + cfg.rowName)
               .replace(/%\{tooltip\}/g,   cfg.addBtnTitle + cfg.rowName)
             )
-              [cfg.$place](fieldset)
+              [cfg.$place](fieldset);
+          $cloneBtn
               .on('click', function (e) {
                   e.preventDefault();
-                  var cloneBtn = $(this),
-                      btnInside = cfg.$place==='appendTo',
-                      lastFS = btnInside ? cloneBtn.parent() : cloneBtn.prev(),
+                  var btnInside = cfg.$place==='appendTo',
+                      lastFS = btnInside ? $cloneBtn.parent() : $cloneBtn.prev(),
                       _newFieldset;
 
+                  cfg.cloneCount++;
+                  if ( cfg.cloneMax && cfg.cloneCount === cfg.cloneMax )
+                  {
+                    $cloneBtn.hide();
+                  }
 
-                  btnInside  && cloneBtn.detach();
+                  btnInside  && $cloneBtn.detach();
                   _newFieldset = _cloneFieldset(cfg)
                                     .hide()
                                     .insertAfter( lastFS )
                                     .slideDown(cfg.showSpeed);
-                  btnInside  &&  cloneBtn[cfg.$place]( _newFieldset );
+                  btnInside  &&  $cloneBtn[cfg.$place]( _newFieldset );
                   cfg.afterClone  &&  cfg.afterClone(_newFieldset);
                 });
         });
@@ -86,6 +100,7 @@
       cloneClass:        'clone',
       //cloneEvents:       false,
       //rowNameSel:        '' , //hægt að nota selector string, eða attribute-name
+      //cloneMaxSel:       'data-clonemax', // data-clonemax (max number of cloner fields including original)
       showSpeed:         'fast',          // 'fast', 'slow', integer -- 0 for instant -- >0 for milliseconds
       //addDelBtn:         false,
       //delBtnAppendTo:    sub-selector for cloneBlock - if falsy then appendTo the cloneBlock itself.
