@@ -1,10 +1,12 @@
+/* $.fn.videoLinks 1.0  -- (c) 2011-2015 Hugsmiðjan ehf. @preserve */
 // ----------------------------------------------------------------------------------
 // jQuery.fn.videoLinks v 1.0
 // ----------------------------------------------------------------------------------
-// (c) 2011 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+// (c) 2011-2015 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
 //  written by:
 //   * Valur Sverrisson
 //   * Már Örlygsson             -- http://mar.anomy.net
+//   * Þórarinn Stefánsson       -- http://thorarinn.com
 // ----------------------------------------------------------------------------------
 
 // Requires:
@@ -66,7 +68,7 @@
             videoId = videoId && videoId[1];
             autoplay = data.cfg.autostart ? '&autoplay=1' : '';
             autohide = data.cfg.autoHide === true ? '' : '&autohide='+ data.cfg.autoHide;
-            videoUrl = docLocPC + '//www.youtube.com/embed/' + videoId + '?rel=0' + autoplay + autohide;
+            videoUrl = docLocPC + '//www.youtube.com/embed/' + videoId + '?rel=0&wmode=transparent' + autoplay + autohide + data.cfg.filePlayerExtraParams;
             playerHeight = 30;
           }
           else if ( type === 'vimeo' )
@@ -81,7 +83,7 @@
             videoId = videoHref.match(/\/([0-9a-z]{5,10})\/?(?:[#?]|$)/i);
             videoId = videoId && videoId[1];
             autoplay = data.cfg.autostart ? '&autoplay=1' : '';
-            videoUrl = docLocPC + '//player.vimeo.com/video/'+ videoId +'?title=1&amp;byline=0&amp;portrait=0' + autoplay;
+            videoUrl = docLocPC + '//player.vimeo.com/video/'+ videoId +'?title=1&amp;byline=0&amp;portrait=0' + autoplay + data.cfg.filePlayerExtraParams;
           }
           else if ( type === 'facebook' )
           {
