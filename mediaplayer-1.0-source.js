@@ -5,26 +5,26 @@
 // (c) 2009 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
 //  written by:
 //   * Már Örlygsson        -- http://mar.anomy.net
-//   * Andri Sigurðsson     
+//   * Andri Sigurðsson
 // ----------------------------------------------------------------------------------
 
 // Attach click event to mp3 files to open in flash media player
 (function ($) {
-  
+
   var _currentPlayer,
       _currentLink;
 
   $.fn.mediaPlayer = function (cfg) {
-    
+
     cfg = jQuery.extend({
             //container: null,  // selector or element or jQuery collection or HTML code
             width:       150,
-            height:       20, 
-            playerUrl:   (document.location.protocol=='https:' ? 'https://secure.eplica.is/codecentre' : 'http://codecentre.eplica.is') + '/play/audio.swf'
+            height:       20,
+            playerUrl:   'https://eplica-cdn.is/play/audio.swf'
           }, cfg );
 
     function _getPlayerHTML(fileUrl) {
-      return flashembed.getHTML({src: cfg.playerUrl, w3c: true, width: cfg.width, height: cfg.height}, { 
+      return flashembed.getHTML({src: cfg.playerUrl, w3c: true, width: cfg.width, height: cfg.height}, {
         file: fileUrl,
         playlist: 'none',
         allowfullscreen: false,

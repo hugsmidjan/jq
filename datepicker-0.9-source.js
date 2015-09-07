@@ -79,7 +79,7 @@
           this.defaultCssFile !== ""  // if this.defaultCssFile === "" then assume the user doesn't want any remote CSS file
          )
       {
-        this.defaultCssFile = this.defaultCssFile || 'https://secure.eplica.is/codecentre/jquery/datepicker/0.9/dp.css';
+        this.defaultCssFile = this.defaultCssFile || 'https://eplica-cdn.is/jquery/datepicker/0.9/dp.css';
         $('head').append('<link href="'+ this.defaultCssFile +'" media="screen" rel="stylesheet" type="text/css" />');
       }
 

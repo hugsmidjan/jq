@@ -3,7 +3,7 @@
  * (previously known as pngfix)
  * Version 3.1.2  (2008/09/01)
  * @requires jQuery v1.2.6 or above, or a lower version with the dimensions plugin
- * 
+ *
  * Based on the plugin by Kush M., http://jquery.khurshid.com
  *
  * Background position Fixed
@@ -11,7 +11,7 @@
  * (c) Copyright Yereth Jansen (yereth@yereth.nl)
  * personal website: http://www.yereth.nl
  * Company website: http://www.wharf.nl
- * 
+ *
  * Dual licensed under the MIT and GPL licenses:
  * http://www.opensource.org/licenses/mit-license.php
  * http://www.gnu.org/licenses/gpl.html
@@ -49,16 +49,16 @@
 	$.ifixpng = function(customPixel) {
 		$.ifixpng.pixel = customPixel;
 	};
-	
+
 	$.ifixpng.regexp = {
 		bg: /^url\(["']?(.*\.png([?].*)?)["']?\)$/i,
 		img: /.*\.png([?].*)?$/i
 	},
-	
+
 	$.ifixpng.getPixel = function() {
-		return $.ifixpng.pixel || "https://secure.eplica.is/codecentre/f/trans.png";
+		return $.ifixpng.pixel || "https://eplica-cdn.is/f/trans.png";
 	};
-	
+
 	var hack = {
 		base	: $('base').attr('href'),
 		ltie7	: $.browser.msie && $.browser.version < 7,
@@ -66,7 +66,7 @@
 			return "progid:DXImageTransform.Microsoft.AlphaImageLoader(enabled=true,sizingMethod=crop,src='"+src+"')";
 		}
 	};
-	
+
 	/**
 	 * Applies ie png hack to selected dom elements
 	 *
@@ -78,7 +78,7 @@
 	 *
 	 * @name ifixpng
 	 */
-	 
+
 	$.fn.ifixpng = hack.ltie7 ? function() {
 		function fixImage(image, source, width, height, hidden) {
 			image.css({filter:hack.filter(source), width: width, height: height})
@@ -88,13 +88,13 @@
             if ($$.css('position') != 'absolute') $$.css({position:'relative'});
           });
 		}
-		
+
     	return this.each(function() {
 			var $$ = $(this);
 			if ($$.is('img') || $$.is('input')) { // hack image tags present in dom
 				var source, img;
 				if (this.src && this.src.match($.ifixpng.regexp.img)) { // make sure it is png image
-					// use source tag value if set 
+					// use source tag value if set
 					source = (hack.base && this.src.substring(0,1)!='/' && this.src.indexOf(hack.base) === -1) ? hack.base + this.src : this.src;
 					// If the width is not set, we have a problem; the image is not probably visible or not loaded
 					// and we need a work around.
@@ -116,14 +116,14 @@
 					if (x || y) {
 						var css = {}, img;
 						if (typeof x != 'undefined') {
-							if (x == 'left') css.left = 0; 
+							if (x == 'left') css.left = 0;
 							// if right is 0, we have to check if the parent has an odd width, because of an IE bug
 							else if (x == 'right') css.right = $$.width() % 2 === 1 ? -1 : 0;
 							else css.left = x;
 						}
 						if (typeof y != 'undefined') {
 							// if bottom is 0, we have to check if the parent has an odd height, because of an IE bug
-							if (y == 'bottom') css.bottom = $$.height() % 2 === 1 ? -1 : 0; 
+							if (y == 'bottom') css.bottom = $$.height() % 2 === 1 ? -1 : 0;
 							else if (y == 'top') css.top = 0;
 							else css.top = y;
 						}
@@ -163,7 +163,7 @@
 			}
 		});
 	} : function() { return this; };
-	
+
 	/**
 	 * positions selected item relatively
 	 */
