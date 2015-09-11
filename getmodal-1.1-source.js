@@ -1,3 +1,4 @@
+/* $.getModal 1.1  -- (c) 2012 Hugsmiðjan ehf.  @preserve */
 // ----------------------------------------------------------------------------------
 // jQuery.getModal v 1.1
 // ----------------------------------------------------------------------------------
@@ -19,6 +20,7 @@
 //            });
 //      modal.fickle('open');
 //      modal.data('popbody').append('<p>Over!</p>');  // access modal "body" element
+//      modal.data('popwin').addClass('foobar');       // access modal "window" element
 //      modal.data('popclosebtn').addClass('closer');  // access modal "close" link
 //
 //
@@ -49,6 +51,7 @@
         popup
             .data('popclosebtn', closeBtn)
             .data('popbody', popup.find( cfg.bodySel ))
+            .data('popwin', popup.find( cfg.winSel ))
             .addClass( cfg.className )
             .on('click', function (e) {
                 var targ = e.target;
@@ -140,7 +143,7 @@
 
     getModal.i18n = {
         dk: {
-            closeT: 'Close popup',
+            closeT: 'Luk popup',
             close: 'Luk'
           },
         en: {
