@@ -4,10 +4,12 @@
 // (c) 2010 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
 //  written by:
 //   * Már Örlygsson        -- http://mar.anomy.net
+//   * Valur Sverrisson
 // ----------------------------------------------------------------------------------
 
 /*
   requires:  jQuery.prettyNum 1.1
+  requires:  eutils 1.2
 */
 (function($, defaultCfg, currencyConvertor, emptyCellSuffix){
   currencyConvertor = 'currencyConvertor';
@@ -36,23 +38,24 @@
           inputSel  = cfg.inputSel;
 
       table
-          .delegate( inputSel, 'focusin', function (/*e*/) {
+          .on( 'focusin', inputSel, function (/*e*/) {
               $(this).select();
             })
-          .delegate( inputSel, 'keyup', function (/*e*/) {
+          .on( 'keyup',  inputSel, function (/*e*/) {
               var activeInput = this,
                   inputData = $(activeInput).data(currencyConvertor);
-              // (input)Data.V <-- raw
+              // (input)Data.V <-- <input/>'s raw String value (dots and points and all)
+              // (input)Data.v <-- <input/>'s integer value
               if (this.value !== inputData.V )
               {
                 inputData.V = this.value;
                 var num = $.prettyNum.read( activeInput, lang );
                 if ( num !== inputData.v )
                 {
-                  var selStart = activeInput.selectionStart;
-                  var selEnd = activeInput.selectionEnd;
-                  activeInput.value = $.prettyNum.make( activeInput, { trail: true,  lang: lang,  milleSep: cfg.milleSep } );
-                  activeInput.setSelectionRange  &&  activeInput.setSelectionRange(selStart, selEnd);
+                  $(activeInput)
+                      .liveVal(
+                          $.prettyNum.make( activeInput, { trail: true,  lang: lang,  milleSep: cfg.milleSep } )
+                        );
                   inputData.v = num;
                   var activeNum = num * inputData.F;
                   table.find('input').each(function () {
@@ -66,7 +69,7 @@
                 }
               }
             })
-          .delegate( inputSel, 'focusout', function (/*e*/) {
+          .on( 'focusout', inputSel, function (/*e*/) {
               var data = $(this).data(currencyConvertor);
               this.value = data.V = $.prettyNum.make( data.v, data.PN );
             })
