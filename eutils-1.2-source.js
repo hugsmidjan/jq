@@ -128,7 +128,6 @@
     };
 
 
-
   $.fn.splitN = function (n, func) {
       var i = 0,
           len = this.length,
@@ -139,6 +138,18 @@
         i += n;
       }
       return this;
+    };
+
+
+  // coderjoe zero padding for numbers - http://jsperf.com/left-zero-pad/18
+  $.fn.zeroPad = function (number, width) {
+      var num = Math.abs(number);
+      var zeros = Math.max(0, width - Math.floor(num).toString().length );
+      var zeroString = Math.pow(10,zeros).toString().substr(1);
+      if( number < 0 ) {
+          zeroString = '-' + zeroString;
+      }
+      return zeroString+num;
     };
 
 
