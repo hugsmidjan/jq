@@ -27,6 +27,7 @@
           delayOut:     300,              // ms, until highlightoff (applies when sticky !== true)
           focusDelay:    null,            // focusin delay. (Falls back to `delay` option.)
           focusDelayOut: null,            // focusout delay. (Falls back to `delayOut` option.)
+          onFocus:      true,             // set to `false` to disable focusin/focusout events altogether
           sticky:       false,            // when sticky, highlight stays on until a new element is highlighted (unless clickToggles is set)
           noBubble:     false,            // set to `true` to prevent the custom events from bubbling upwards from the list container
           click:        false,            // allow clicks to set highlight on without delay
@@ -53,22 +54,22 @@
 
       jQuery('ul')
           .delayedHighlight()
-          .bind('beforehighlighton', function (e) {
+          .on('beforehighlighton', function (e) {
               // When applicable `e.fromTarget` points to the element that just turned off
               if ( $(e.target).is('.disabled') ) {
                 e.preventDefault();
               }
             })
-          .bind('beforehighlightoff', function (e) {
+          .on('beforehighlightoff', function (e) {
               if ( $(e.target).is('.pinnedopen') ) {
                 e.preventDefault();
               }
             })
-          .bind('highlighton', function (e) {
+          .on('highlighton', function (e) {
               // When applicable `e.fromTarget` points to the element that just turned off
               $(e.target).prepend('<img class="icon" src="star.gif" alt=""/>');
             })
-          .bind('highlightoff', function (e) {
+          .on('highlightoff', function (e) {
               $(e.target).find('img.icon').remove();
             });
 
@@ -134,7 +135,7 @@
         {
           // don't have the custom events bubble upwards from the list
           list
-              .bind(
+              .on(
                   befOnEvent+' '+befOffEvent+' '+onEvent+' '+offEvent,
                   function (e) {  e.stopPropagation();  }
                 );
@@ -209,11 +210,12 @@
                 }
               },
 
-            handleClick = function (e) {
-                var method = ( !activeItem  ||  this !== activeItem[0] ) ?
-                                  highlightOn:
-                              ( cfg.clickToggles  &&  this!==justHighlighted  &&  !$(e.target).closest( cfg.cancelOff||'' )[0]  ) ?
-                                  highlightOff:
+            handleClick = function (e, forcedMethod) {
+                // "forcedMethod" enables externally triggered events, like forced closing on body click when sticky is enabled: mnav.find('.focused').trigger('click.forced', ['highlightOff']);
+                var method =  ( forcedMethod === 'highlightOn' || !activeItem  ||  this !== activeItem[0] ) ?
+                                  highlightOn :
+                              ( forcedMethod === 'highlightOff' ||  cfg.clickToggles  &&  this!==justHighlighted  &&  !$(e.target).closest( cfg.cancelOff||'' )[0]  ) ?
+                                  highlightOff :
                                   undefined;
                 method  &&  method.call( this, { type:'click', delay: 1 } );
               },
@@ -233,24 +235,26 @@
 
         delegate ?
             list
-                .delegate(delegate, _mouseover_focusin, highlightOn)
-                .delegate(delegate, _mosueout_focusout, highlightOff):
+                .on(_mouseover_focusin, delegate, highlightOn)
+                .on(_mosueout_focusout, delegate, highlightOff)
+                .on('click.forced', delegate, handleClick):
             list
-                .bind(_mouseover_focusin, highlightOn)
-                .bind(_mosueout_focusout, highlightOff);
+                .on(_mouseover_focusin, highlightOn)
+                .on(_mosueout_focusout, highlightOff)
+                .on('click.forced', handleClick);
         if ( cfg.click )
         {
           delegate ?
-              list.delegate(delegate, 'click', handleClick):
-              list.bind('click', handleClick);
+              list.on('click', delegate, handleClick):
+              list.on('click', handleClick);
         }
         else if ( cfg.clickCancels )
         {
           delegate ?
-              list.delegate(delegate, 'click', cancelOnClick):
-              list.bind('click', cancelOnClick);
+              list.on('click', delegate, cancelOnClick):
+              list.on('click', cancelOnClick);
           list
-              .bind(befOnEvent, function (e) {
+              .on(befOnEvent, function (e) {
                   var item = $(e.target);
                   if ( item.data(wasClicked) )
                   {
