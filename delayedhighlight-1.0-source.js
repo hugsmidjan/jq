@@ -236,12 +236,10 @@
         delegate ?
             list
                 .on(_mouseover_focusin, delegate, highlightOn)
-                .on(_mosueout_focusout, delegate, highlightOff)
-                .on('click.forced', delegate, handleClick):
+                .on(_mosueout_focusout, delegate, highlightOff):
             list
                 .on(_mouseover_focusin, highlightOn)
-                .on(_mosueout_focusout, highlightOff)
-                .on('click.forced', handleClick);
+                .on(_mosueout_focusout, highlightOff);
         if ( cfg.click )
         {
           delegate ?
