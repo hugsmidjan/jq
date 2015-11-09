@@ -1,3 +1,4 @@
+/* $.fn.anchorTags 1.0  -- (c) 2009-2013 Hugsmiðjan ehf. @preserve*/
 // ----------------------------------------------------------------------------------
 // jQuery.fn.anchorTags v 1.0
 // ----------------------------------------------------------------------------------
@@ -34,135 +35,151 @@
 
   var anchorTags = $.fn.anchorTags = function (config) {
       config = config || {};
-      var links = this.filter('[href]'),
-          i = links.length,
-          tagged = [];
-      if (i)
-      {
-        var cfg = $.extend({ patterns:{} }, anchorTags.config),
-            localDomains = config.localDomains||[],
-            _locreg,
-            patterns = config.patterns,
-            defaultPatterns = anchorTags.patterns;
+      var globalCfg = window.anchorTags_config;
+      var links = this.filter('[href]');
+      var tagged = [];
 
-        delete config.patterns;
+      if (links[0])
+      {
+        var cfg = $.extend(true,
+                      { patterns:{} },
+                      { patterns:anchorTags.patterns },
+                      anchorTags.config,
+                      globalCfg
+                    );
+        var localDomains = config.localDomains;
+        delete config.localDomains;
+        var patterns = config.patterns;
+        delete config.patterns; // move `config.patterns` out of the way before extending `cfg`
+
         $.extend(cfg, config);
+
         if (cfg.usePatterns)
         {
+          var filteredPatterns = {};
           // pull in the user-specified patterns only
           $.each(cfg.usePatterns, function(i, name){
-              defaultPatterns[name] && (cfg.patterns[name] = defaultPatterns[name]);
+              cfg.patterns[name] && (filteredPatterns[name] = cfg.patterns[name]);
             });
+          cfg.patterns = filteredPatterns;
         }
-        else
+
+        if ( patterns )
         {
-          // use all default patterns.
-          $.extend(cfg.patterns, defaultPatterns);
+          $.extend(cfg.patterns, patterns);
+          config.patterns = patterns; // tidy up
         }
-        $.extend(cfg.patterns, patterns);
-        config.patterns = patterns;
-        localDomains = localDomains.concat(cfg.baseDomains)
-                          .join('|')
-                          .replace( /\./g, '\\.' )
-                          .replace( /\\\\\./g, '.' );
-
-        _locreg = new RegExp( '^(?:[a-z]{3,12})://(?:'+localDomains+')(?:/|$)', 'i');
-        while (i--)
+        if ( localDomains )
         {
-          var linkElm = links[i],
-              link = $(linkElm),
-              _href = linkElm.href,
-              _protocol = linkElm.protocol,
-              isTagged=0,
-              is = { a:{} };
+          config.localDomains = localDomains;
+        }
 
-          // There's this weirdo bug in MSIE 8-10 where some (otherwise normal) link elements
-          // don't report a protocol... sometimes... ack!
-          // This happens only once in a blue moon - but in those cases it's very consitent
-          if (_protocol === ':')
-          {
-            linkElm.href += '';
-            _protocol = linkElm.protocol;
-          }
+        links = cfg.skipFilter ? links.not(cfg.skipFilter) : links;
 
-          if (_protocol === 'mailto:') // mailto links
-          {
-            link.addClass(cfg.emailClass);
-            is.mailto = !0;
-            ++isTagged;
-          }
-          else if (_protocol === 'tel:' || _protocol === 'callto:') {  // tel links
-            link.addClass(cfg.telClass);
-            is.tel = !0;
-            ++isTagged;
-          }
-          else
-          {
-            // javascript: and data: urls are not tagged as either internal or external.
-            // They're really in a category of their own...
-            if (!/^(javascript|data):/.test(_protocol))
+        localDomains = (cfg.baseDomains||[])
+                          .concat( cfg.localDomains||[], localDomains||[] )
+                              .join('|')
+                              .replace( /\./g, '\\.' )
+                              .replace( /\\\\\./g, '.' );
+
+        var _locreg = new RegExp( '^(?:[a-z]{3,12})://(?:'+localDomains+')(?:/|$)', 'i');
+
+        links.each(function () {
+            var linkElm = this,
+                link = $(linkElm),
+                _href = linkElm.href,
+                _protocol = linkElm.protocol,
+                isTagged=0,
+                is = { a:{} };
+
+            is.type = is.a; // alias is.a.vido as is.type.video
+
+            // There's this weirdo bug in MSIE 8-10 where some (otherwise normal) link elements
+            // don't report a protocol... sometimes... ack!
+            // This happens only once in a blue moon - but in those cases it's very consitent
+            if (_protocol === ':')
             {
-              if (_protocol) // has protocol?
-              {
-                var _isHttps = _protocol === 'https:',
-                    _isHttp  = _protocol === 'http:';
-
-                // secure http protocol
-                if (_isHttps)
-                {
-                  link.addClass(cfg.secureClass);
-                  is.secure = !0;
-                  ++isTagged;
-                }
-                if (cfg.externalClass  &&  (
-                    // is http(s) and doesn't match the defined localDomains
-                    ((_isHttp || _isHttps) && !_locreg.test(_href))  ||
-                    // non http(s) protocol === external link. (Except we assume that when both protocols are equal they're "file:" and page is being developed locally)
-                    (!_isHttp && !_isHttps  &&  location.protocol !== _protocol )
-                   ))
-                {
-                  link.addClass(cfg.externalClass);
-                  is.external = !0;
-                  ++isTagged;
-                }
-              }
-              // internal/same-page fragment links
-              if (!is.external && cfg.internalClass)
-              {
-                _fragmReg = _fragmReg || new RegExp( '^(?:'+location.toString().replace(/^https?:/, 'https?:').split('#')[0].replace(/([\\\^\$*+\[\]?{}.=!:(|)])/g, '\\$1')+')?#.', 'i' );
-                if ( _fragmReg.test(_href) )
-                {
-                  link.addClass(cfg.internalClass);
-                  is.internal = !0;
-                  ++isTagged;
-                }
-              }
+              linkElm.href += '';
+              _protocol = linkElm.protocol;
             }
 
-            for (var key in cfg.patterns)
+            if (_protocol === 'mailto:') // mailto links
             {
-              var _patternObj = cfg.patterns[key] || {},
-                  _check = _patternObj.check || _patternObj,
-                  _className = $.isFunction(_check) ? _check(linkElm, key) : null;
-
-              if (_className || _check.test(_href) )
+              link.addClass(cfg.emailClass);
+              is.mailto = !0;
+              ++isTagged;
+            }
+            else if (_protocol === 'tel:' || _protocol === 'callto:') {  // tel links
+              link.addClass(cfg.telClass);
+              is.tel = !0;
+              ++isTagged;
+            }
+            else
+            {
+              // javascript: and data: urls are not tagged as either internal or external.
+              // They're really in a category of their own...
+              if (!/^(javascript|data):/.test(_protocol))
               {
-                link.addClass( _className  ||  _patternObj.tag  ||  (cfg.patternClassPrefix + key) );
-                (is.pattern || (is.pattern=[])).push( key );
-                is.a[key] = !0;
-                ++isTagged;
+                if (_protocol) // has protocol?
+                {
+                  var _isHttps = _protocol === 'https:',
+                      _isHttp  = _protocol === 'http:';
+
+                  // secure http protocol
+                  if (_isHttps)
+                  {
+                    link.addClass(cfg.secureClass);
+                    is.secure = !0;
+                    ++isTagged;
+                  }
+                  if (cfg.externalClass  &&  (
+                      // is http(s) and doesn't match the defined localDomains
+                      ((_isHttp || _isHttps) && !_locreg.test(_href))  ||
+                      // non http(s) protocol === external link. (Except we assume that when both protocols are equal they're "file:" and page is being developed locally)
+                      (!_isHttp && !_isHttps  &&  location.protocol !== _protocol )
+                     ))
+                  {
+                    link.addClass(cfg.externalClass);
+                    is.external = !0;
+                    ++isTagged;
+                  }
+                }
+                // internal/same-page fragment links
+                if (!is.external && cfg.internalClass)
+                {
+                  _fragmReg = _fragmReg || new RegExp( '^(?:'+location.toString().replace(/^https\\?:/, 'https?:').split('#')[0].replace(/([\\\^\$*+\[\]?{}.=!:(|)])/g, '\\$1')+')?#.', 'i' );
+                  if ( _fragmReg.test(_href) )
+                  {
+                    link.addClass(cfg.internalClass);
+                    is.internal = !0;
+                    ++isTagged;
+                  }
+                }
               }
+
+              for (var key in cfg.patterns)
+              {
+                var _patternObj = cfg.patterns[key] || {},
+                    _check = _patternObj.check || _patternObj,
+                    _className = $.isFunction(_check) ? _check(linkElm, key) : null;
+
+                if (_className || _check.test(_href) )
+                {
+                  link.addClass( _className  ||  _patternObj.tag  ||  (cfg.patternClassPrefix + key) );
+                  (is.pattern || (is.pattern=[])).push( key );
+                  is.a[key] = !0;
+                  ++isTagged;
+                }
+              }
+
             }
 
-          }
-
-          if ( isTagged )
-          {
-            tagged.push( link[0] );
-            cfg.onTag  &&  cfg.onTag.call( cfg, link, is );
-          }
-
-        } // end while
+            if ( isTagged )
+            {
+              tagged.push( link[0] );
+              cfg.onTag  &&  cfg.onTag.call( cfg, link, is );
+            }
+          }); // END .each()
 
       }
       this.taggedAnchors = $(tagged);
@@ -198,6 +215,8 @@
       //       $link.addClass('foobar');
       //     }
       //   },
+      skipFilter:    '.no-anchortags', // function(i, link){ return $(link).is('.no-anchortags'); },
+
       emailClass:    'mailto',
       telClass:      'tel',
       externalClass: 'external',
@@ -218,4 +237,4 @@
     };
 
 
-})(jQuery);
+})(window.jQuery);
