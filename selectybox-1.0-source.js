@@ -1,4 +1,4 @@
-/* Selectybox 1.0  -- (c) 2012-2014 Hugsmiðjan ehf. - MIT/GPL   @preserve */
+/* Selectybox 1.0  -- (c) 2012-2015 Hugsmiðjan ehf. - MIT/GPL   @preserve */
 
 // (c) 2012-2014 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
 //  written by:
@@ -266,11 +266,9 @@
   else
   {
     win.Selectybox = Selectybox;
-    if ( win.jQuery )
-    {
-      Selectybox.jQueryPlugin( win.jQuery );
-    }
   }
+  var jQuery = win.jQuery;
+  jQuery  &&  !jQuery.fn.selectybox  &&  Selectybox.jQueryPlugin( jQuery );
 
 
 })();
