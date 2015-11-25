@@ -12,7 +12,11 @@
   },
   "author": "Hugsmiðjan ehf. (www.hugsmidjan.is)",
   "contributors": [
-    "Már Örlygsson <mar@hugsmidjan.is>"
+    "Már Örlygsson <mar@hugsmidjan.is>",
+    "Valur Sverrisson <valur@hugsmidjan.is>"
   ],
+  "dependencies": {
+    "qj": "git+ssh://git@github.com/hugsmidjan/qj.git#v1"
+  },
   "license": "ISC"
 }
