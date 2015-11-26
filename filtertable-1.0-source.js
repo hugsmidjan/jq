@@ -6,13 +6,19 @@
 //   * Már Örlygsson        -- http://mar.anomy.net
 // ----------------------------------------------------------------------------------
 
+
+// Depends on eutils 1.2+:
+//     $.uniqueArray()
+
+//   Supports sort_isl for icelandic sorting
+
+
 // TODO:
 //  * trigger a cancellable beforefilter event
 //  * expose "before" value array on filter events
 //  * support a public "filter" method that accepts value array or (input index + single value)
 //  * expose element.data() object with arrays of inputs and clear buttons.
 //  * noFound message + <tr> template
-//  * minChars support
 
 (function($, undefined){
 
@@ -153,7 +159,6 @@
 
           if (val && !lastValue) // only toggle things if the hasValue state has changed
           {
-            doToggleClass = 1;
             if (!cfg.multiFilter) // if multiFilter is off, then clear all other inputs.
             {
               data.allInputs.not(input)
@@ -168,16 +173,9 @@
                     });
             }
           }
-          else if (!val && lastValue) // only toggle things if the hasValue state has changed
-          {
-            doToggleClass = 1;
-          }
           data.lastValue = val;
 
-          if (doToggleClass)
-          {
-            _toggleColClass(data, data.idx, activeColClass, !!val);
-          }
+          _toggleColClass(data, data.idx, activeColClass,  (val.length >= cfg.minChars) );
 
           if (val != lastValue)
           {
@@ -222,12 +220,14 @@
                     var val = $.trim( this.value );
                     val = cfg.matchCase ? val : val.toLowerCase();
 
+                    val = val.length >= cfg.minChars ? val : ''; // enforce minChars
+
                     candiateRows
                         .each(function(){
                             var row = $(this),
                                 cellMap = row.data(_cellMap_keyName),
                                 cell = cellMap[i];
-                            _toggleRows(row, cfg, (cell && cfg.cellMatches(cell, val, data)) );
+                            _toggleRows(row, cfg, (cell && cfg.cellMatches(cell, val, data, input.is('select'))) );
                           });
                     candiateRows = candiateRows.filter(':visible')
                   }
@@ -289,6 +289,22 @@
           cells.toggleClass(className, addClass);
         },
 
+      _injectSelectOptions = function (select) {
+          var data = select.data().filterTable;
+          var strings = [];
+          var sortFunc = ($.lang === 'is' &&  typeof strings.sortISL === 'function') ? 'sortISL' : 'sort';
+
+          $(data.table).find('tbody tr').each(function () {
+              strings.push( $.trim($(this).find('td:eq('+data.idx+')').text()) );
+            });
+          strings = $.uniqueArray( strings[sortFunc](), true );
+
+          for (var i=0; i<strings.length; i++)
+          {
+            select.append('<option>'+ strings[i] +'</option>');
+          }
+        },
+
 
       _data_keyName = 'filterTable',
       _cellMap_keyName = _data_keyName+'-cellMap',
@@ -311,9 +327,13 @@
                                      .bind('focus', _selectAll)
                                      .bind('focus blur', _setFocusClass)
                                      .bind('change keyup', _monitorFilterInput);
+          var protoSelect      =  $(cfg.selectField)
+                                     .bind('focus blur', _setFocusClass)
+                                     .bind('change keyup', _monitorFilterInput);
           var protoClearBtn   =  $(cfg.clearBtn).bind('click', _clearFilterInput);
           var protoCell       =  $(cfg.filterCell);
-          var protoFilterCell =  protoCell.clone(TRUE).empty().append(protoInput);
+          var protoInputFilterCell =  protoCell.clone(TRUE).empty().append(protoInput);
+          var protoSelectFilterCell =  protoCell.clone(TRUE).empty().append(protoSelect);
 
           tables
               .each(function(){
@@ -364,6 +384,8 @@
                       // trim the rowspan values of the column-headers, to allow filter-cells to align up properly
                       .each(function(i){
                           var refTH = $(this);
+                          var selectFilter = refTH.is('.'+cfg.selectFilterClass);
+
                           if (colHeadRowSpans[i])
                           {
                             refTH.attr('rowspan', headRows.length);
@@ -374,16 +396,27 @@
                                   idx:  i,
                                   btn:  newClearBtn
                                 }),
-                              newCell = ( ( refTH.filter(cfg.includeCols/*||''*/).length  || isTHeadEmpty ) ?  protoFilterCell : protoCell ).clone(TRUE),
+                              newCell = (
+                                      ( (refTH.filter(cfg.includeCols).length  || isTHeadEmpty) && !selectFilter ) ?
+                                          protoInputFilterCell :
+                                      ( (refTH.filter(cfg.includeCols).length  || isTHeadEmpty) && selectFilter ) ?
+                                          protoSelectFilterCell :
+                                          protoCell
+                                    )
+                                  .clone(TRUE),
                               newInput = newCell
                                             .appendTo(filterRow)
-                                            .find('input')
+                                            .find('input, select')
                                                 .data(_data_keyName, inputData)
                                                 .after(newClearBtn);
+                          if (selectFilter)
+                          {
+                            _injectSelectOptions(newInput);
+                          }
                           newClearBtn.data(_data_keyName, { input: newInput });
                         });
 
-                  protoData.allInputs = filterRow.find('input');
+                  protoData.allInputs = filterRow.find('input, select');
 
                   filterRow.appendTo(thead);
 
@@ -398,7 +431,7 @@
                             W += w;
                           })
                         .each(function(i){
-                            $(this).width( (100*colW[i]/W)+'%' );
+                            $(this).css({'width': (100*colW[i]/W)+'%' });
                           });
                   }
 
@@ -414,26 +447,35 @@
       filterRow:        '<tr class="filters" />',
       filterCell:       '<td>&nbsp;</td>',
       inputField:       '<input />',
+      selectField:      '<select><option value=""></option></select>',
       clearBtn:         '<span class="clearfilter"/>',
       activeTableClass: 'filters-active',
       fieldFocusClass:  'filter-focus',
       activeColClass:   'filter-col',
+      selectFilterClass:'select-filter',
       //hideRowClass:     '',     // if falsy - .hide() and .css(display,'') are used.
       includeCols:      function () {  return $(this).is('th') || _cellsHaveOnlyBoldText(this);  }, // selector or filter function
       //isHideRow:        null,   //  '.notaresult' ...or...  function() { return $(this).is('.notaresult'); },  // hide these rows whenever a filter is active - regardless of their content.
       //isStickyRow:      null,   //  '.staticRow' ...or...  function() { return $(this).is('.staticRow'); },    // always display these rows - regardless of filter status/content.
       //multiFilter:      false,
-      cellMatches: function (cell, val, data) {
+      cellMatches: function (cell, val, data, exactMatch) {
           var text = $(cell).text() || '',
               cfg = data.cfg,
               pos;
           text = cfg.matchCase ? text : text.toLowerCase();
-          pos = text.indexOf(val);
+          if (exactMatch)
+          {
+            pos = ($.trim(text) === $.trim(val)) ? 1 : -1;
+          }
+          else
+          {
+            pos = text.indexOf(val)
+          }
           return cfg.substrSearch ? pos > -1 : !pos;
         },
       //matchCase:        false,
       substrSearch:     true,
-      //minChars:         2, //NOT IMPLEMENTED YET
+      minChars:         2,
       delay:            300
     };
 

@@ -893,6 +893,20 @@
     },
 
 
+    uniqueArray: function(array, isSorted) {
+      var result = [];
+      for (var i = 0; i < array.length; i++)
+      {
+        var value = array[i];
+        if ($.inArray(value, result) <= 0)
+        {
+          result.push(value);
+        }
+      }
+      return result;
+    },
+
+
 
     // Convert queryString type Strings into a neat object
     // where each named value is an Array of URL-decoded Strings.
