@@ -58,11 +58,13 @@
     //maxLengthTab:       false
 
     defangReset         : true,              // assign a confirmation dialog to reset buttons to prevent accidental resets
-    defangEnter         : 'auto'             // disable form submitions on enter key.
+    defangEnter         : 'auto',            // disable form submitions on enter key.
                                              // Values are (true|false|auto) where:
                                              //  true  - disables all enter submits,
                                              //  false - doesn't alter bowser defaults,
                                              //  auto  - disables enter submitions if form has more than one submit button
+    consumeRequired     : true,              // overtake default browser behaviour of html5 required attibute
+    consumeMinlength    : true               // overtake default browser behaviour of html5 minlength attibute
   };
 
 
@@ -538,6 +540,30 @@
           // TODO: consider adding the reverse for backspace
         }
 
+        // consume html5 required
+        if (conf.consumeRequired) {
+          context.find('[required]').each(function () {
+              var wrap = $(this).closest('[class^="fi_"], [class*=" fi_"]');
+              if (wrap.length)
+              {
+                wrap.addClass(conf.reqClassPattern);
+                $(this).removeAttr('required');
+              }
+            });
+        }
+
+        // consume html5 minlength
+        if (conf.consumeMinlength) {
+          context.find('[minlength]').each(function () {
+              var wrap = $(this).closest('[class^="fi_"], [class*=" fi_"]');
+              if (wrap.length)
+              {
+                $(this).attr('data-minlength', $(this).attr('minlength'));
+                $(this).removeAttr('minlength');
+              }
+            });
+        }
+
         if ( conf.validateEachField === 'change' && conf.errorMsgType === 'inlineonly' )
         {
           form.bind('change', function (e) {
@@ -642,6 +668,11 @@
                 tests[c] = $.av.type[c];
               }
             }
+          }
+
+          if ( control.is('[data-minlength]') )
+          {
+            tests.minlength = $.av.type.minlength;
           }
 
           // extra requirement check
@@ -783,17 +814,6 @@
   });
 
 })(jQuery);
-
-
-
-
-
-
-
-
-
-
-
 // Icelandic translation
 jQuery.av.lang.is = {
 
@@ -812,7 +832,9 @@ jQuery.av.lang.is = {
   fi_url:           { inline: 'Vinsamlega sláðu inn löggilda vefslóð (dæmi: http://www.example.is)',  alert: 'e.g. http://www.domain.is' },
   fi_year:          { inline: 'Vinsamlega sláðu inn rétt ártal (dæmi: 1998)',  alert: 't.d. 1998' },
   fi_ccnum_noamex:  'American Express kort virka ekki',
-  fi_valuemismatch: 'Staðfesting stemmir ekki'
+  fi_valuemismatch: 'Staðfesting stemmir ekki',
+
+  minlength:        'Lágmarks stafafjöldi: '
 
 };
 
@@ -827,7 +849,9 @@ $.extend($.av.lang.en, {
   fi_url:           { inline: 'Please provide a valid web address (example: http://www.example.is)',  alert: 'e.g. http://www.example.com' },
   fi_year:          { inline: 'Please provide a valid four digit year (example: 1998)',  alert: 'e.g. 1998' },
   fi_ccnum_noamex:  { inline: 'American Express cards not accepted',  alert:'AmEx not accepted' },
-  fi_valuemismatch: 'Confirmation doesn\'t match'
+  fi_valuemismatch: 'Confirmation doesn\'t match',
+
+  minlength:        'Minimum characters: '
 
 });
 
@@ -1173,8 +1197,16 @@ $.extend(avTypes, {
       }
     }
     return !!v;
-  }
+  },
 
+
+  minlength:  function ( v, w, lang ) {
+    var minlength = parseInt($(w).find('[data-minlength]').attr('data-minlength'), 10);
+    if (v && v.length < minlength) {
+      return $.av.getError( 'minlength', lang ) + minlength;
+    }
+    return !!v;
+  }
 
 });
 
