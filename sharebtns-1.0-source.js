@@ -21,7 +21,6 @@
   Plugin Options (defaults):
      twitter:   true,     // Boolean|Number(non-zero position index)|Object(button config)  - non-falsy values insert Twitter "Tweet" button
               size:     'm',    // or 'l'
-              count:    '',     // '' == 'horizontal'. Other options: 'none', 'vertical'
               via:      '',     // Optional twitter username to mention/link to. Example: "foobar"
               related:  '',     // Optional list of recommended usernames. Example: "anywhere:The Javascript API,sitestreams,twitter:The official account"
               lang:     '',     // Optional language setting ??? defaults to 'en'
@@ -167,8 +166,8 @@
       countNone={ count:'none' },
       presets = {
           large:     { twitter:{size:'l'},            gplus:{size:''}      },
-          countNone: { twitter:countNone,             gplus:countNone,               fbshare:{count:'button'},/*  facebook:{count:'standard'}, */pinterest:countNone,          linkedin:{count:''} },
-          countV:    { twitter:{ count:'vertical' },  gplus:{count:'',size:'tall'},  fbshare:{count:'box_count'}, facebook:{count:'box_count'},  pinterest:{ count:'above' },  linkedin:{count:'top'} }
+          countNone: {                                gplus:countNone,               fbshare:{count:'button'},/*  facebook:{count:'standard'}, */pinterest:countNone,          linkedin:{count:''} },
+          countV:    {                                gplus:{count:'',size:'tall'},  fbshare:{count:'box_count'}, facebook:{count:'box_count'},  pinterest:{ count:'above' },  linkedin:{count:'top'} }
         },
 
 
@@ -196,7 +195,6 @@
 
           twitter: {
               size:     'm',   // or 'l'
-              count:    '',    // '' == 'horizontal'. Other options: 'none', 'vertical'
               //via:      '',    // Optional twitter username to mention/link to. Example: "foobar"
               //related:  '',    // Optional list of recommended usernames. Example: "anywhere:The Javascript API,sitestreams,twitter:The official account"
               //lang:     '',    // Optional language setting ??? defaults to 'en'
@@ -215,15 +213,13 @@
                   }
                   else
                   {
-                    var hCount = !b.count || b.count === 'horizontal',
-                        vCount = b.count === 'vertical',
-                        large = b.size === 'l';
+                    var large = b.size === 'l';
                     // we must size the iframe manually because Twitter doesn't provide an API for initing/parsing ajax-injected buttons
-                    b.width =  (hCount && large) ? '138px' : hCount ? '110px' : large ? '76px' : '58px';
-                    b.height = large ?  '28px' : vCount ?  '62px' : '20px'; // vercial && large seems not to be supported by Twitter
+                    b.width =  large ? '78px' : '62px';
+                    b.height = large ?  '28px' : '20px'; // vercial && large seems not to be supported by Twitter
                   }
                 },
-              $tmpl:  '<iframe src="//platform.twitter.com/widgets/tweet_button.html?%={size}%={count}%={via}%={related}%={hashtags}%={text}%={url}%={lang}" style="width:{width}; height:{height};" allowtransparency="true" frameborder="0" scrolling="no" title="Twitter Tweet Button" />',
+              $tmpl:  '<iframe src="//platform.twitter.com/widgets/tweet_button.html?%={size}%={via}%={related}%={hashtags}%={text}%={url}%={lang}" style="width:{width}; height:{height};" allowtransparency="true" frameborder="0" scrolling="no" title="Twitter Tweet Button" />',
               $tmpl2: '<a'+ dodgyPopupAttrs +'"tweetit" href="https://twitter.com/intent/tweet?%={via}%={related}%={hashtags}%={text}%={url}%={lang}">{txt}</a>',
               $pos:  20 // lowest $pos comes first
             },
