@@ -221,33 +221,39 @@
   Selectybox.jQueryPlugin = function ( $ ) {
       $.fn.selectybox = function ( options, value ) {
           var selects = this;
-          if ( /^(?:refresh|val|destroy|widget)$/.test(options) )
+          if ( selects[0] )
           {
-            selects.each(function(){
-                var widget = Selectybox.getWidget(this);
-                if ( widget )
+            if ( typeof options === 'string' )
+            {
+                if ( options === 'widget' )
                 {
-                  if ( options === 'widget' )
-                  {
-                    return widget;
-                  }
-                  widget[options](value); // value is actually meaningless for all but the .val() method
+                  return Selectybox.getWidget( selects[0] );
                 }
-              });
-          }
-          else if ( typeof options !== 'string' )
-          {
-            options = options || {};
-            // set icky default .text() method to crudely match default behaviour the old the jQuery plugin
-            options.text = options.text || function (text) {  // this === widget
-                $(this.container).toggleClass( 'selecty-empty', !$(this.select).val() );
-                return text;
-              };
-            return selects.pushStack(
-                selects.filter('select').map(function (i,select) {
-                    return Selectybox( select, options ).container;
-                  })
-              );
+                else if ( /^(?:refresh|val|destroy)$/.test(options) )
+                {
+                  selects.each(function(){
+                      var widget = Selectybox.getWidget(this);
+                      if ( widget )
+                      {
+                        widget[options](value); // value is actually meaningless for all but the .val() method
+                      }
+                    });
+                }
+            }
+            else
+            {
+              options = options || {};
+              // set icky default .text() method to crudely match default behaviour the old the jQuery plugin
+              options.text = options.text || function (text) {  // this === widget
+                  $(this.container).toggleClass( 'selecty-empty', !$(this.select).val() );
+                  return text;
+                };
+              return selects.pushStack(
+                  selects.filter('select').map(function (i,select) {
+                      return Selectybox( select, options ).container;
+                    })
+                );
+            }
           }
           return selects;
         };
