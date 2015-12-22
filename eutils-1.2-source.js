@@ -898,7 +898,7 @@
       for (var i = 0; i < array.length; i++)
       {
         var value = array[i];
-        if ($.inArray(value, result) <= 0)
+        if ($.inArray(value, result) < 0)
         {
           result.push(value);
         }

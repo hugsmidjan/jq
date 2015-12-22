@@ -179,7 +179,7 @@
 
           if (val != lastValue)
           {
-            _performRowSearch(data)
+            _performRowSearch(data);
           }
 
           data.table_head.useCellMapCache = 0; // invalidate the CellMapCache.
@@ -229,7 +229,7 @@
                                 cell = cellMap[i];
                             _toggleRows(row, cfg, (cell && cfg.cellMatches(cell, val, data, input.is('select'))) );
                           });
-                    candiateRows = candiateRows.filter(':visible')
+                    candiateRows = candiateRows.filter(':visible');
                   }
                 });
 
@@ -238,7 +238,7 @@
             _showRows( tbody.find('tr'), cfg );
           }
           data.table_head.closest('table')
-              .toggleClass(cfg.activeTableClass, someFilterActive)
+              .toggleClass(cfg.activeTableClass, someFilterActive);
           data.table
               .trigger('filter.filterTable');
         },
@@ -295,7 +295,12 @@
           var sortFunc = ($.lang === 'is' &&  typeof strings.sortISL === 'function') ? 'sortISL' : 'sort';
 
           $(data.table).find('tbody tr').each(function () {
-              strings.push( $.trim($(this).find('td:eq('+data.idx+')').text()) );
+              var str = $.trim($(this).find('td:eq('+data.idx+')').text());
+              if (str.length)
+              {
+                strings.push( str );
+              }
+
             });
           strings = $.uniqueArray( strings[sortFunc](), true );
 
@@ -469,7 +474,7 @@
           }
           else
           {
-            pos = text.indexOf(val)
+            pos = text.indexOf(val);
           }
           return cfg.substrSearch ? pos > -1 : !pos;
         },
