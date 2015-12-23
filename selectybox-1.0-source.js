@@ -43,20 +43,22 @@
 
 
   var Selectybox = function ( select, options ) {
+          var widget = this;
+          // Tolerate repeat instantiations with new config.
           var existingWidget = Selectybox.getWidget( select );
-          var widget = existingWidget || this;
+          if ( existingWidget )
+          {
+            existingWidget.destroy();
+            widget = existingWidget;
+          }
 
           if ( !(widget instanceof Selectybox) )
           {
-            // tolerate cases when new is missing.
+            // Tolerate missing new keyword.
             return new Selectybox( select, options );
           }
           else
           {
-            if ( existingWidget )
-            {
-              existingWidget.destroy();
-            }
 
             if ( options )
             {
