@@ -23,13 +23,8 @@
   // ------------------------------
 
 
-  $.initMobileMenu = function (minimal, opts) {
-      if ( minimal !== false  &&  minimal !== true )
-      {
-        opts = minimal;
-        minimal = false;
-      }
-
+  $.initMobileMenu = function (opts) {
+      opts = opts===true ? { minimal:true } : opts;
       opts = $.extend({
                 // name:         'menu',
                 // evPrefix:     'mobile',
@@ -42,7 +37,7 @@
                 // scrollElm:    window,
                 resetScroll:  true, // Boolean or Function
 
-                minimal:      minimal // default: false
+                // minimal: false,
               }, opts);
 
       var name = opts.name || 'menu';
@@ -158,7 +153,7 @@
       {
         // old fat behavior - handle formatChange and impose auto-toggling in-case of multiple widgets.
 
-        // disallow customization to avoid this fat magic causing obscure side-effects
+        // disallow certain customization to avoid this fat magic causing obscure side-effects
         opts.container = 'html';
         opts.scrollElm = win;
         opts.evTarget = document;
@@ -214,13 +209,8 @@
 
 
 
-  $.initStickyHeader = function (minimal, opts) {
-      if ( minimal !== false  &&  minimal !== true )
-      {
-        opts = minimal;
-        minimal = false;
-      }
-
+  $.initStickyHeader = function (opts) {
+      opts = opts===true ? { minimal:true } : opts;
       opts = $.extend({
                 // headerHeight: function () { return parseInt($container.css('padding-top'), 10); },
                 delay:        50,
@@ -235,7 +225,7 @@
                 // container:    'html',
                 // scrollElm:    window,
 
-                minimal:      minimal // default: false
+                // minimal: false,
               }, opts);
 
       var name = opts.name || 'header';
@@ -366,6 +356,8 @@
       }
       else
       {
+        // old fat behavior - handle formatChange
+        // disallow certain customization to avoid this fat magic causing obscure side-effects
         opts.container = 'html';
         opts.scrollElm = win;
 
