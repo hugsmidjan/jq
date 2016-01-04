@@ -121,11 +121,10 @@
                     currentlyOpenMenuWidget = null;
                     $evTarget.trigger( eventPrefix+'close' );
                     $container
-                        .removeClass(classOpen);
+                        .removeClass(classOpen)
+                        .addClass(classClosed);
                     if ( !_isStopping )
                     {
-                      $container
-                          .addClass(classClosed);
                       resetScroll()  &&  $scrollElm.scrollTop( scrollPosBeforeMenuOpened );
                       $link  &&  $link[0].blur();
                     }
@@ -137,10 +136,10 @@
               stop: function () {
                   if ( isActive )
                   {
-                    isActive = false;
                     widget.close(true);
                     $link.off('click'+ns);
                     $container.removeClass(classActive +' '+ classClosed);
+                    isActive = false;
                   }
                 }
             };
