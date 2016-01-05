@@ -1,4 +1,4 @@
-/* jQuery extra utilities 1.2  -- (c) 2010-2013 Hugsmiðjan ehf.  @preserve */
+/* jQuery extra utilities 1.2  -- (c) 2010-2016 Hugsmiðjan ehf.  @preserve */
 // ----------------------------------------------------------------------------------
 // Miscellaneous jQuery utilities collection v 1.2
 // ----------------------------------------------------------------------------------

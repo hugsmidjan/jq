@@ -1,5 +1,4 @@
-// ----------------------------------------------------------------------------------
-// jQuery.fn.quickFeedback v 1.0
+/* jQuery quickFeedback 1.0  -- (c) 2014 Hugsmiðjan ehf.  @preserve */
 // ----------------------------------------------------------------------------------
 // (c) 20014 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
 //  written by:
@@ -35,7 +34,8 @@
               yayBtnSel:      'a.yay',
               nayBtnSel:      'a.nay',
               ajaxParams:     { justPicPos:'pgmain' },
-              feedbackformSel: '.quickfeedback'
+              feedbackformSel: '.quickfeedback',
+              thankyouSel:    '.thankyou'
             }, cfg );
 
     return this.each(function(){
@@ -107,7 +107,12 @@
                                               feedbackform.remove();
                                             });
                                     })
-                                  .virtualBrowser(); // do this after domupdated to allow autovalidate to assign first
+                                  // do this after domupdated to allow autovalidate to assign first
+                                  .virtualBrowser({
+                                      params:       cfg.ajaxParams,
+                                      loadmsgMode:  'replace',
+                                      selector:     cfg.thankyouSel
+                                    });
                             });
 
                         $(window)
