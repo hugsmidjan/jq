@@ -237,7 +237,6 @@
 
       var container; // lazy bound
       var containerClassList; // lazy bound
-      var containerCSS; // lazy bound
       var $scrollElm; // lazy bound
 
       var widget = {
@@ -250,7 +249,7 @@
               // isFixed: (distY > 0),
               // isShown: false,
 
-              headerHeight: opts.headerHeight || function () { return parseInt((containerCSS || (containerCSS = getComputedStyle(container))).paddingTop, 10); },
+              headerHeight: opts.headerHeight || function () { return parseInt(getComputedStyle(container).paddingTop, 10); },
 
               start: function () {
                   if ( !isActive )
