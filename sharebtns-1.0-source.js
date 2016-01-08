@@ -63,9 +63,13 @@
               count:   'right', // (facebook-style) or 'top' or 'none' (defaults to "bubble" (== '') )
               // NOTE: LinkedIn's share button CAN NOT be customized!
 
+     email: false,  // Boolean|Number(non-zero position index)|Object(button config) - non-falsy values insert a mailto: link
+
 
      wrap:      null,     // String(tagName) - if non-empty each button is wrapped in a "tagName" Element with "buttonName" as its className.
                           //                   i.e.  wrap:'li', -->  .wrap(<li class="twitter"/>);
+     wrapClassPrefix: '', // String  - prefix for each wrap element's className
+
      process:   function ( btnHTML, btnName, btnCfg ) { // allows modifying each button before injection
                      // do stuff - like adding a wrapper, or modifying the HTML, or whatever...
                      return updatedHTMLorElm || btnHTML;
@@ -73,6 +77,13 @@
      insertion: 'append', // String  - jQuery method used to insert the buttons.  Accepted values: 'append', 'prepend', 'after', 'before'
 
      url:       '',       // String  - Url to share. Defaults to document.location.href
+
+     source:    '',       // String  - Site name (for such custom buttons that need it)
+     sourceSel: '',       // String(css-selector)  - Custom selector for finding source text
+     title:     '',       // String  - Page/resource title/headline  (for such custom buttons that need it)
+     titleSel: '',       // String(css-selector)  - Custom selector for finding title text
+     description: '',     // String  - Page/resource description (for such custom buttons that need it)
+     descriptionSel: '',       // String(css-selector)  - Custom selector for finding description text
 
      large:     false,    // Boolean  - true prints a large version of the button, where supported (not supported by Facebook)
      countNone: false,    // Boolean  - true suppresses the display of tweet-/like-/share counter balloons. (not supported by Facebook)
@@ -85,9 +96,10 @@
 */
 
 
-(function($, win, docLoc, encURI, readystateevents){
+(function(win, docLoc, encURI, readystateevents){
   'use strict';
 
+  var $ = win.jQuery;
   var
       pageLang,
       link,
@@ -104,7 +116,17 @@
                 var btnSpecificCfg = cfg[btnName];
                 if ( btnSpecificCfg )
                 {
-                  var bCfg = cfg[btnName] = $.extend({ custom:cfg.custom, url:cfg.url, lang:pageLang }, btnDefault);
+                  var bCfg = cfg[btnName] = $.extend({
+                          custom:cfg.custom,
+                          url:cfg.url,
+                          lang:pageLang,
+                          source: cfg.source,
+                          sourceSel: cfg.sourceSel,
+                          title:  cfg.title,
+                          titleSel: cfg.titleSel,
+                          description: cfg.description,
+                          descriptionSel: cfg.descriptionSel,
+                        }, btnDefault);
                   $.each(presets, function(propName, presetVals){
                       presetVals = presetVals[btnName];
                       cfg[propName]  &&   presetVals  &&  $.extend(bCfg, presetVals);
@@ -128,7 +150,7 @@
                                                   p2+'='+encURI(val)+'&amp;':
                                                   ''; // default to not printing anything...
                                       });
-                  if ( cfg.wrap ) { newBtn = '<'+cfg.wrap+' class='+btnName+'>'+newBtn+'</'+cfg.wrap+'>'; }
+                  if ( cfg.wrap ) { newBtn = '<'+cfg.wrap+' class="'+cfg.wrapClassPrefix+btnName+'">'+newBtn+'</'+cfg.wrap+'>'; }
                   newBtn = $( cfg.process ? cfg.process(newBtn, btnName, bCfg) : newBtn );
                   newBtn.$pos = bCfg.$pos;
                   buttonsToInsert.push( newBtn );
@@ -148,20 +170,28 @@
       defaultCfg = sharebtns.defaults = {
           twitter:  true, // or a non-zero Number to indicate $pos
           facebook: true,
-          // fbshare:  false,
-          // fbshare2: false,
-          // gplus:    false,
+          // fbshare: false,
+          // gplus: false,
+          // pinterest: false,
+          // linkedin: false,
+          // email: false,
           // process:  function ( btnHTML, btnName, btnCfg ) {
           //               // do stuff - like adding a wrapper, or modifying the HTML, or whatever...
           //               return updatedHTMLorElm || btnHTML;
           //             }
           insertion: 'append',
-          //countNone: false,
-          //countV:    false,
-          //large:     false,
-          //color:     dark,
-          //custom:    false,
-          url: $('link[rel="canonical"]').prop('href') || docLoc.href.split('#')[0].replace(/[?&]fb_action_ids=.+/,'')
+          // countNone: false,
+          // countV:    false,
+          // large:     false,
+          // color:     dark,
+          // custom:    false,
+          url: $('link[rel="canonical"]').prop('href') || docLoc.href.split('#')[0].replace(/[?&]fb_action_ids=.+/,''),
+          // source: '',
+          // sourceSel: '',
+          // title: '',
+          // titleSel: '',
+          // description: '',
+          // descriptionSel: '',
         },
       countNone={ count:'none' },
       presets = {
@@ -186,10 +216,32 @@
       _getLocale = function (lang, def) {
           return _locs[lang] || _locs[def||'en'];
         },
-
+      _getTxt = function ( bCfg, i18n, prop ) {
+          return bCfg[prop||'txt'] || i18n[bCfg.lang] || i18n.en;
+        },
+      _getSource = function ( bCfg ) {
+          return  bCfg.source ||
+                  $(bCfg.sourceSel).text() ||
+                  $('.brand > a').text() ||
+                  $('.brand img.logo').attr('alt');
+        },
+      _getTitle = function ( bCfg ) {
+          return  bCfg.title ||
+                  $(bCfg.titleSel).text() ||
+                  $('meta[property="og:title"]').attr('content')  || // fallback to using the open-graph image
+                  $('h1:first').text() ||
+                  document.title;
+        },
+      _getDescription = function ( bCfg ) {
+          return  bCfg.description ||
+                  $(bCfg.descriptionSel).text() ||
+                  $('meta[property="og:description"]').attr('content')  || // fallback to using the open-graph image
+                  $('meta[name="description"]').attr('content');//|| // fallback to using the open-graph image
+                  // $('.pgmain .summary:first').text();
+        },
 
       dodgyPopupAttrs = ' onclick="window.open(this.href,null,\'toolbar=0,status=0,width=626,height=436\');return false;" target=',
-      fbshareLnk = '<a'+ dodgyPopupAttrs +'"fbshare" href="//www.facebook.com/sharer.php?u=',
+      fbshareLnk = '<a'+ dodgyPopupAttrs +'"fbshare" aria-type="button" href="//www.facebook.com/sharer.php?u=',
 
       btnDefaults = sharebtns.btnDefaults = {
 
@@ -199,7 +251,7 @@
               //related:  '',    // Optional list of recommended usernames. Example: "anywhere:The Javascript API,sitestreams,twitter:The official account"
               //lang:     '',    // Optional language setting ??? defaults to 'en'
               //hashtags: '',    // Optional comma-delmited list of hashtags. (e.g. 'cooloption,hipster,socool')
-              // text:     '',    // Optional default tweet body text.
+              //text:     '',    // Optional default tweet body text.
               //custom:   false, // Defaults to using the standard <iframe> embed code
               //txt:      null,  // Link text for customized links
 
@@ -208,8 +260,7 @@
                   var b = this;
                   if ( b.custom )
                   {
-                    var txt = { en:'Tweet this!', is:'Senda á Twitter' };
-                    b.txt = b.txt || txt[b.lang] || txt.en;
+                    b.txt = _getTxt(b, { en:'Tweet this!', is:'Senda á Twitter' });
                   }
                   else
                   {
@@ -220,7 +271,7 @@
                   }
                 },
               $tmpl:  '<iframe src="//platform.twitter.com/widgets/tweet_button.html?%={size}%={via}%={related}%={hashtags}%={text}%={url}%={lang}" style="width:{width}; height:{height};" allowtransparency="true" frameborder="0" scrolling="no" title="Twitter Tweet Button" />',
-              $tmpl2: '<a'+ dodgyPopupAttrs +'"tweetit" href="https://twitter.com/intent/tweet?%={via}%={related}%={hashtags}%={text}%={url}%={lang}">{txt}</a>',
+              $tmpl2: '<a'+ dodgyPopupAttrs +'"tweetit" aria-type="button" href="https://twitter.com/intent/tweet?%={via}%={related}%={hashtags}%={text}%={url}%={lang}">{txt}</a>',
               $pos:  20 // lowest $pos comes first
             },
 
@@ -236,13 +287,7 @@
                   var b = this;
                   if ( b.custom  &&  !b.txt )
                   {
-                    var txts = { en: 'Share on Facebook',  is: 'Deila á Facebook' };
-                    b.txt = txts[ b.lang ];
-                    if ( !b.txt )
-                    {
-                      b.lang = 'en';
-                      b.txt = txts.en;
-                    }
+                    b.txt = _getTxt(b, { en: 'Share on Facebook',  is: 'Deila á Facebook' });
                   }
                 },
               $tmpl:  '<div class="fb-share-button" data-href="{url}" data-width="{width}" data-type="{count}"/>',
@@ -294,8 +339,7 @@
                   var b = this;
                   if ( b.custom )
                   {
-                    var txts = { en: 'Share on Google+',  is: 'Deila á Google+' };
-                    b.txt = b.txt || txts[ b.lang ] || txts.en;
+                    b.txt = _getTxt(b, { en: 'Share on Google+',  is: 'Deila á Google+' });
                   }
                   else
                   {
@@ -303,7 +347,7 @@
                   }
                 },
               $tmpl:  '<div class="g-plusone" data-size="{size}"{count} data-href="{url}"/>',
-              $tmpl2: '<a href="https://plus.google.com/share?url=%{url}" class="gplusbtn"'+ dodgyPopupAttrs +'"gpluswin">{txt}</a>',
+              $tmpl2: '<a href="https://plus.google.com/share?url=%{url}" aria-type="button" class="gplusbtn"'+ dodgyPopupAttrs +'"gpluswin">{txt}</a>',
               $init: function (/* btn, cfg */) {
                   // https://developers.google.com/+/web/+1button/
                   //win.___gcfg = win.___gcfg || {lang:b.lang};
@@ -316,35 +360,40 @@
             },
 
 
+          email: {
+              //txt:      null,  // Link text for customized links
+              //subject:  '', // Email Subject line
+              //body:     '', // Optional default email body text, to start off the email (follwed by the title and link)
+
+            // private
+              $prep: function( /*pluginCfg*/ ) {
+                  var b = this;
+                  var title = _getTitle(b);
+                  b.txt = _getTxt(b, { en:'Share by e-mail', is:'Deila í tölvupósti' });
+                  b.subject = _getTxt(b, { en:'Look at this!', is:'Kíktu á þetta!' }, 'subject');
+                  b.body =  (b.body ? b.body+'\n\n' : '') +
+                            (title ? title+'\n' : '') +
+                            b.url +
+                            '\n\n';
+                },
+              $tmpl: '<a href="mailto:?body=%{body}&amp;subject=%{subject}" class="emailbtn" title="{txt}">{txt}</a>',
+            },
+
+
           linkedin: {
               count:   'right', // (facebook-style) or 'top' or 'none' (defaults to "bubble" (== '') )
+              // txt: null, // Link text for Customized links
               // custom:   false,  // Defaults to using the standard button
-              // text:     '',     // Optional default summary text.
-              // source:   '',     // site name
-              // title:    '',     // page/resource title/headline
-              // textSel:  '',
-              // sourceSel:'',
 
             // private
               $prep: function ( /*pluginCfg*/ ) {
                   var b = this;
                   if ( b.custom )
                   {
-                    var txt = { en:'Share on LinkedIn', is:'Deila á LinkedIn' };
-                    b.txt = b.txt || txt[b.lang] || txt.en;
-                    b.source =  b.source ||
-                                $('.brand > a').text() ||
-                                $('.brand img.logo').attr('alt');
-                    b.title =   b.title ||
-                                (b.titleSel && $(b.titleSel).text()) ||
-                                $('meta[property="og:title"]').attr('content')  || // fallback to using the open-graph image
-                                $('h1:first').text() ||
-                                document.title;
-                    b.text =    b.text ||
-                                (b.textSel && $(b.textSel).text()) ||
-                                $('meta[property="og:description"]').attr('content')  || // fallback to using the open-graph image
-                                $('meta[name="description"]').attr('content');//|| // fallback to using the open-graph image
-                                // $('.pgmain .summary:first').text();
+                    b.txt = _getTxt(b, { en:'Share on LinkedIn', is:'Deila á LinkedIn' });
+                    b.source =  _getSource(b);
+                    b.title =  _getTitle(b);
+                    b.description =  _getDescription(b);
                   }
                   else
                   {
@@ -352,7 +401,7 @@
                   }
                 },
               $tmpl: '<script type="IN/Share" data-url="{url}"{count} data-showzero="true"/>',
-              $tmpl2: '<a href="https://www.linkedin.com/shareArticle?mini=true&amp;url=%{url}&amp;title=%{title}&amp;summary=%{text}&amp;source=%{source}" class="linkedinbtn"'+ dodgyPopupAttrs +'"linkedinwin">{txt}</a>',
+              $tmpl2: '<a href="https://www.linkedin.com/shareArticle?mini=true&amp;url=%{url}&amp;title=%{title}&amp;summary=%{description}&amp;source=%{source}" class="linkedinbtn"'+ dodgyPopupAttrs +'"linkedinwin" aria-type="button">{txt}</a>',
               $init: function (b/* , cfg */) {
                   // http://developer.linkedin.com/plugins/share-plugin-generator
                   // NOTE: LinkedIn's plugin is crap and can only be injected once,
@@ -368,12 +417,12 @@
 
 
           pinterest: {
-              imgsrc:      '',  //  defaults to the first image on the page or the opengraph image
               count:       'beside',       // '' (horizontal). Other options: 'none', 'above'
-              //imgSrcAttr:  '',  // defaults to 'src'
-              imgSelector: '.pgmain img',  // The `imgSrcAttr` value of the first image matching this selector will be used
               //custom:      false,        // Defaults to using the standard image-based button
               txt:         'Pin it',     // Link text for customized links
+              imgsrc:      '',  //  defaults to the first image on the page or the opengraph image
+              //imgSrcAttr:  '',  // defaults to 'src'
+              imgSelector: '.pgmain img',  // The `imgSrcAttr` value of the first image matching this selector will be used
 
             // private
               $prep: function( /*pluginCfg*/ ) {
@@ -389,9 +438,9 @@
                     }
                   }
                 },
-              $tmpl: '<a href="http://pinterest.com/pin/create/button/?url=%{url}&amp;media=%{imgsrc}" class="pin-it-button" data-pin-do="buttonPin" data-pin-config="{count}" lang="en">{txt}</a>',
+              $tmpl: '<a href="http://pinterest.com/pin/create/button/?url=%{url}&amp;media=%{imgsrc}" class="pin-it-button" data-pin-do="buttonPin" data-pin-config="{count}" lang="en" aria-type="button">{txt}</a>',
                         //<img border="0" src="//assets.pinterest.com/images/PinExt.png" title="Pin It" />
-              $tmpl2: '<a href="http://pinterest.com/pin/create/button/?url=%{url}&amp;media=%{imgsrc}" class="pinitbtn"'+ dodgyPopupAttrs +'"pinitwin" lang="en">{txt}</a>',
+              $tmpl2: '<a href="http://pinterest.com/pin/create/button/?url=%{url}&amp;media=%{imgsrc}" class="pinitbtn"'+ dodgyPopupAttrs +'"pinitwin" lang="en" aria-type="button">{txt}</a>',
 
               $init: function (/* btn, cfg */) {
                   // http://business.pinterest.com/widget-builder/#do_pin_it_button
@@ -457,4 +506,4 @@
 
 
 
-})(jQuery, window, document.location, encodeURIComponent, 'load readystatechange');
+})(window, document.location, encodeURIComponent, 'load readystatechange');
