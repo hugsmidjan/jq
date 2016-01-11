@@ -150,7 +150,7 @@
                                                   p2+'='+encURI(val)+'&amp;':
                                                   ''; // default to not printing anything...
                                       });
-                  if ( cfg.wrap ) { newBtn = '<'+cfg.wrap+' class="'+cfg.wrapClassPrefix+btnName+'">'+newBtn+'</'+cfg.wrap+'>'; }
+                  if ( cfg.wrap ) { newBtn = '<'+cfg.wrap+' class="'+(cfg.wrapClassPrefix||'')+btnName+'">'+newBtn+'</'+cfg.wrap+'>'; }
                   newBtn = $( cfg.process ? cfg.process(newBtn, btnName, bCfg) : newBtn );
                   newBtn.$pos = bCfg.$pos;
                   buttonsToInsert.push( newBtn );
