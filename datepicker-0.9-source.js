@@ -1,7 +1,7 @@
+/* datepicker 0.9 -- (c) 2011 Hugsmiðjan ehf.  @preserve */
 !window.datePicker && (function($){
 
-  var oldIe = 8>parseInt((/MSIE ([\w.]+)/.exec(navigator.userAgent)||[])[1],10),
-      _capitalize = function(s) { return s  &&  (s.charAt(0).toUpperCase() + s.substr(1)); },
+  var _capitalize = function(s) { return s  &&  (s.charAt(0).toUpperCase() + s.substr(1)); },
       _zeroClock = function(d)
       {
         d.setHours(0);
@@ -14,7 +14,7 @@
 
   datePicker = {
 
-    VERSION : 1.0,
+    VERSION : 0.9,
 
     defaultCssFile : null,  // URL to a custom CSS file  null == auto-find default CSS file -- "" == use no CSS file.
     cssTriggers : ['fi_date', 'fi_dmy'],
@@ -89,7 +89,7 @@
       _containerElm = _containerElm || $('body'); // _containerElm ?
       var _allInputs = $(_containerElm).find("input");  // if _containerElm is null or undefined, then DOM.get() defaults to document
       var _classNameTriggers = new RegExp(" "+ this.cssTriggers.join(" | ") +" ");
-      ;
+
       for (var i = 0, _inpt; _inpt = _allInputs[i]; i++)
       {
         if (_inpt.id  &&  this.fields[_inpt.id]  &&  (this.fields[_inpt.id]._input == _inpt))  // the last check is to ensure the dom hasn't been rewritten since last init...
@@ -265,34 +265,29 @@
           _lang = _dateUI.lang,
           _txt = this[_lang];
 
-      var _cont = $(''
-        + '<div id="'+myId+'-cal" class="pickdate'+(_dateUI.flipYears?' pickdate-yearnav':'')+'">'
-        +   (oldIe ? '<iframe class="layerfix" frameborder="0"></iframe>' : '') // add an `<iframe>` to allow calendars to overlap Flash plugins and `<select>` elements in old MSIEs
-        +   '<div class="pickdatewrap">'
-        +     '<h4>'+this.getMY(dt,_lang)+'</h4>'
-        +   '</div>'
-        + '</div>'
-      );
+      var _cont = $('<div id="'+myId+'-cal" class="pickdate'+(_dateUI.flipYears?' pickdate-yearnav':'')+'">'+
+                      '<div class="pickdatewrap">'+
+                        '<h4>'+this.getMY(dt,_lang)+'</h4>'+
+                      '</div>'+
+                    '</div>');
       _cont[0].fieldId = myId;
 
-      _cont.bind('click', function (e) {
+      _cont.on('click', function (e) {
           e.preventDefault();
           e.stopPropagation();
         });
 
       var _cal = $(_cont).find('div');
 
-      var _monthNav = $(''
-        + '<ul class="month">'
-        +   '<li class="prev"><a href="#" title="'+(_txt.prevMLong||_txt.prevM)+'">'+_txt.prevM+'</a></li>'
-        +   '<li class="next"><a href="#" title="'+(_txt.nextMLong||_txt.nextM)+'">'+_txt.nextM+'</a></li>'
-        + '</ul>'
-      );
-      _monthNav.find('.prev a').bind('click', function (e) {
+      var _monthNav = $('<ul class="month">'+
+                          '<li class="prev"><a href="#" title="'+(_txt.prevMLong||_txt.prevM)+'">'+_txt.prevM+'</a></li>'+
+                          '<li class="next"><a href="#" title="'+(_txt.nextMLong||_txt.nextM)+'">'+_txt.nextM+'</a></li>'+
+                        '</ul>');
+      _monthNav.find('.prev a').on('click', function (e) {
           datePicker.flipCal(myId,-1,"m");
           e.preventDefault();
         });
-      _monthNav.find('.next a').bind('click', function (e) {
+      _monthNav.find('.next a').on('click', function (e) {
           datePicker.flipCal(myId,1,"m");
           e.preventDefault();
         });
@@ -301,17 +296,16 @@
 
       if (_dateUI.flipYears)
       {
-        var _yearNav = $(''
-          + '<ul class="year">'
-          +   '<li class="prev"><a href="#" title="'+(_txt.prevYLong||_txt.prevY)+'">'+_txt.prevY+'</a></li>'
-          +   '<li class="next"><a href="#" title="'+(_txt.nextYLong||_txt.nextY)+'">'+_txt.nextY+'</a></li>'
-          + '</ul>'
-        );
-        _yearNav.find('.prev a').bind('click', function (e) {
+        var _yearNav = $(''+
+          '<ul class="year">'+
+            '<li class="prev"><a href="#" title="'+(_txt.prevYLong||_txt.prevY)+'">'+_txt.prevY+'</a></li>'+
+            '<li class="next"><a href="#" title="'+(_txt.nextYLong||_txt.nextY)+'">'+_txt.nextY+'</a></li>'+
+          '</ul>');
+        _yearNav.find('.prev a').on('click', function (e) {
             datePicker.flipCal(myId,-1,"y");
             e.preventDefault();
           });
-        _yearNav.find('.next a').bind('click', function (e) {
+        _yearNav.find('.next a').on('click', function (e) {
             datePicker.flipCal(myId,1,"y");
             e.preventDefault();
           });
@@ -323,7 +317,7 @@
       for (var i = 0; i < 7; i++)
       {
         var _wDay = _capitalize(_txt.wdays[i]);
-        _tableHTML += '<th><acronym title="'+_wDay+'">'+_wDay.substr(0,this.wDLength)+'</acronym></th>'
+        _tableHTML += '<th><acronym title="'+_wDay+'">'+_wDay.substr(0,this.wDLength)+'</acronym></th>';
       }
       _tableHTML += '</tr></thead><tbody><tr><td colspan="7"></td></tr></tbody></table>';
 
@@ -331,7 +325,7 @@
 
       var _clslink = $('<a href="#" class="close" title="'+(_txt.closeLong||_txt.close)+'">'+_txt.close+'</a>');
       _cal.append(_clslink);
-      _clslink.bind('click', function (e) {
+      _clslink.on('click', function (e) {
           datePicker.closeCalendar(myId);
           e.preventDefault();
         });
@@ -382,7 +376,7 @@
               tda[0].href = "#";
               tda[0].fieldId = myId;
               tda[0].newDay = _lDate.getDate();
-              tda.bind('click', function (e) {
+              tda.on('click', function (e) {
                   _tdaOnClickFunc(this);
                   e.preventDefault();
                 });
@@ -432,6 +426,9 @@
     openCalendar : function(myId)
     {
       var _myField = this.fields[myId];
+
+      if (_myField._input.disabled){ return false; }
+
       _myField.dateMin = _myField.getDateBoundry("min");
       _myField.dateMax = _myField.getDateBoundry("max");
       this.updateCalendar(myId);
@@ -440,7 +437,7 @@
 
       _myField.isOpen = true;
       $(_myField._button).after(_myField._calendar);
-      $('body').bind('click', this.delayedCloseAll);
+      $('body').on('click', this.delayedCloseAll);
     },
 
 
@@ -450,7 +447,7 @@
       if (!_myField.isOpen) { return false; }
       _myField.isOpen = false;
       $(_myField._calendar).detach();
-      $('body').unbind('click', this.delayedCloseAll);
+      $('body').off('click', this.delayedCloseAll);
       return false;
     },
 
@@ -524,7 +521,7 @@
       var _theCal = _myField._calendar;
 
       $(_theCal).find("h4").text( this.getMY(_myField.dateActive, _myField.lang) );
-      $(_theCal).find("tbody").replaceWith( this.buildCalendarDays(myId) )
+      $(_theCal).find("tbody").replaceWith( this.buildCalendarDays(myId) );
     },
 
 
@@ -578,14 +575,14 @@
     this._input = $('#'+ myId)[0];
     if (dp.openOnFieldClick)
     {
-      $(this._input).bind('mouseup', function (e) {
+      $(this._input).on('mouseup', function (e) {
           if (!dp.fields[this.id].isOpen)
           {
             setTimeout("datePicker.openCalendar('"+this.id+"')", 20);
             e.stopPropagation();
           }
         });
-      $(this._input).bind('blur', function (e) {
+      $(this._input).on('blur', function (e) {
           var funcStr = "if (!datePicker.fields['"+this.id+"'].isHovered) { datePicker.closeCalendar('"+this.id+"'); }";
           setTimeout(funcStr, 20);
         });
@@ -660,7 +657,7 @@
       var btn = $('<a href="#" class="pickdatelink">'+ dp[this.lang].popBtn +'</a>');
       btn[0].title = (dp[this.lang].popBtnLong) || dp[this.lang].popBtn;
       btn[0].fieldId = myId;
-      btn.bind('click', function (e) {
+      btn.on('click', function (e) {
           dp.toggleCalendar(this.fieldId);
           e.stopPropagation();
           return false;
@@ -673,16 +670,16 @@
       this._calendar = dp.buildCalendar(myId);
       this.isHovered = false;
 
-      btn.bind('focus', function (e) {
+      btn.on('focus', function (e) {
           datePicker.fields[this.fieldId].isHovered = true;
         });
-      btn.bind('mouseout', function (e) {
+      btn.on('mouseout', function (e) {
           datePicker.fields[this.fieldId].isHovered = false;
         });
-      $(this._calendar).bind('mouseover', function (e) {
+      $(this._calendar).on('mouseover', function (e) {
           datePicker.fields[this.fieldId].isHovered = true;
         });
-      $(this._calendar).bind('mouseout', function (e) {
+      $(this._calendar).on('mouseout', function (e) {
           datePicker.fields[this.fieldId].isHovered = false;
         });
     };
