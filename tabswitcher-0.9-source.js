@@ -1,4 +1,3 @@
-// encoding: utf-8
 // ----------------------------------------------------------------------------------
 /*
   jQuery tabSwitcher Plugin
@@ -34,7 +33,7 @@
   $.fn.tabSwitcher = function ( idx ) {
     this.each(function () {
 
-      var tab = $( this ), 
+      var tab = $( this ),
           cf = $.fn.tabSwitcher.config,
           ls = tab.find( cf.linkselector ),
           re = !tab.hasClass( cf.active ),
@@ -55,7 +54,7 @@
       }
 
       // calling tabSwitcher with an integer selects a tab,
-      // a negative number selects nothing, 
+      // a negative number selects nothing,
       // null or undefined selects "current" or first
       if ( idx == null ) {
         idx = ls.index( tab.find('.'+ cf.current +' a') );
@@ -69,7 +68,7 @@
       if (re && pn.length) {
         // click event
         tab
-          .find( 'a[href$='+ pn.join('],a[href$=') +']' )
+          .find( 'a[href$="'+ pn.join('"],a[href$="') +'"]' )
             .bind('click', function( e ){
               var l = $( this );
               if ( l.is('a') ) {
@@ -84,12 +83,12 @@
     });
     return this;
   };
-  
+
   $.fn.tabSwitcher.config = {
-    linkselector : 'li a[href^=#]',
+    linkselector : 'li a[href^="#"]',
     focuslink    : '<a href="#" class="stream"></a>',
     active       : 'tabs-active',
     current      : 'current'
   };
-  
+
 })(jQuery);
