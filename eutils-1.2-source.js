@@ -785,6 +785,7 @@
       var _elm = _fragment  &&  _doc.getElementById( _isEncoded ? decodeURIComponent(_fragment) : _fragment );
       // var _prePos = !_fragment  &&  $.scrollPos();
       var _prePos = $.scrollPos();
+      var _tmpId = _elm && _elm.id;
 
       // temporaily defuse the element's id
       _elm  &&  (_elm.id = '');
@@ -802,7 +803,7 @@
       $.scrollPos(_prePos);
 
       // put the old DOM id back in it's place
-      _elm  &&  (_elm.id = _fragment);
+      _elm  &&  (_elm.id = _tmpId);
     },
 
 
