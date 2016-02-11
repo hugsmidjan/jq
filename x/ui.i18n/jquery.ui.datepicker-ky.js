@@ -1,6 +1,6 @@
 /* Kyrgyz (UTF-8) initialisation for the jQuery UI date picker plugin. */
 /* Written by Sergey Kartashov (ebishkek@yandex.ru). */
-jQuery(function($){
+(function($){
 	$.datepicker.regional['ky'] = {
 		closeText: 'Жабуу',
 		prevText: '&#x3c;Мур',
@@ -21,4 +21,4 @@ jQuery(function($){
 		yearSuffix: ''
 	};
 	$.datepicker.setDefaults($.datepicker.regional['ky']);
-});
+})(jQuery);

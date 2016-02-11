@@ -1,6 +1,6 @@
 /* Macedonian i18n for the jQuery UI date picker plugin. */
 /* Written by Stojce Slavkovski. */
-jQuery(function($){
+(function($){
 	$.datepicker.regional['mk'] = {
 		closeText: 'Затвори',
 		prevText: '&#x3C;',
@@ -20,4 +20,4 @@ jQuery(function($){
 		showMonthAfterYear: false,
 		yearSuffix: ''};
 	$.datepicker.setDefaults($.datepicker.regional['mk']);
-});
+})(jQuery);

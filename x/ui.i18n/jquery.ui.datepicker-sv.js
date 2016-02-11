@@ -1,6 +1,6 @@
 /* Swedish initialisation for the jQuery UI date picker plugin. */
 /* Written by Anders Ekdahl ( anders@nomadiz.se). */
-jQuery(function($){
+(function($){
 	$.datepicker.regional['sv'] = {
 		closeText: 'Stäng',
 		prevText: '&#xAB;Förra',
@@ -20,4 +20,4 @@ jQuery(function($){
 		showMonthAfterYear: false,
 		yearSuffix: ''};
 	$.datepicker.setDefaults($.datepicker.regional['sv']);
-});
+})(jQuery);

@@ -1,6 +1,6 @@
 /* Kazakh (UTF-8) initialisation for the jQuery UI date picker plugin. */
 /* Written by Dmitriy Karasyov (dmitriy.karasyov@gmail.com). */
-jQuery(function($){
+(function($){
 	$.datepicker.regional['kk'] = {
 		closeText: 'Жабу',
 		prevText: '&#x3C;Алдыңғы',
@@ -20,4 +20,4 @@ jQuery(function($){
 		showMonthAfterYear: false,
 		yearSuffix: ''};
 	$.datepicker.setDefaults($.datepicker.regional['kk']);
-});
+})(jQuery);

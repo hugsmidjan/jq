@@ -1,6 +1,6 @@
 /* Hindi initialisation for the jQuery UI date picker plugin. */
 /* Written by Michael Dawart. */
-jQuery(function($){
+(function($){
 	$.datepicker.regional['hi'] = {
 		closeText: 'बंद',
 		prevText: 'पिछला',
@@ -20,4 +20,4 @@ jQuery(function($){
 		showMonthAfterYear: false,
 		yearSuffix: ''};
 	$.datepicker.setDefaults($.datepicker.regional['hi']);
-});
+})(jQuery);

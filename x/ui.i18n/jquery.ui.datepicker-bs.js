@@ -1,6 +1,6 @@
 /* Bosnian i18n for the jQuery UI date picker plugin. */
 /* Written by Kenan Konjo. */
-jQuery(function($){
+(function($){
 	$.datepicker.regional['bs'] = {
 		closeText: 'Zatvori',
 		prevText: '&#x3C;',
@@ -20,4 +20,4 @@ jQuery(function($){
 		showMonthAfterYear: false,
 		yearSuffix: ''};
 	$.datepicker.setDefaults($.datepicker.regional['bs']);
-});
+})(jQuery);

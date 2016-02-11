@@ -1,6 +1,6 @@
 /* German initialisation for the jQuery UI date picker plugin. */
 /* Written by Milian Wolff (mail@milianw.de). */
-jQuery(function($){
+(function($){
 	$.datepicker.regional['de'] = {
 		closeText: 'Schließen',
 		prevText: '&#x3C;Zurück',
@@ -20,4 +20,4 @@ jQuery(function($){
 		showMonthAfterYear: false,
 		yearSuffix: ''};
 	$.datepicker.setDefaults($.datepicker.regional['de']);
-});
+})(jQuery);

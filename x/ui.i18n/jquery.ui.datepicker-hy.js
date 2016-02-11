@@ -1,6 +1,6 @@
 /* Armenian(UTF-8) initialisation for the jQuery UI date picker plugin. */
 /* Written by Levon Zakaryan (levon.zakaryan@gmail.com)*/
-jQuery(function($){
+(function($){
 	$.datepicker.regional['hy'] = {
 		closeText: 'Փակել',
 		prevText: '&#x3C;Նախ.',
@@ -20,4 +20,4 @@ jQuery(function($){
 		showMonthAfterYear: false,
 		yearSuffix: ''};
 	$.datepicker.setDefaults($.datepicker.regional['hy']);
-});
+})(jQuery);

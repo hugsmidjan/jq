@@ -1,6 +1,6 @@
 /* English/UK initialisation for the jQuery UI date picker plugin. */
 /* Written by Stuart. */
-jQuery(function($){
+(function($){
 	$.datepicker.regional['en-GB'] = {
 		closeText: 'Done',
 		prevText: 'Prev',
@@ -20,4 +20,4 @@ jQuery(function($){
 		showMonthAfterYear: false,
 		yearSuffix: ''};
 	$.datepicker.setDefaults($.datepicker.regional['en-GB']);
-});
+})(jQuery);

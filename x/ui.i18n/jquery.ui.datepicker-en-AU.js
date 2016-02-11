@@ -1,6 +1,6 @@
 /* English/Australia initialisation for the jQuery UI date picker plugin. */
 /* Based on the en-GB initialisation. */
-jQuery(function($){
+(function($){
 	$.datepicker.regional['en-AU'] = {
 		closeText: 'Done',
 		prevText: 'Prev',
@@ -20,4 +20,4 @@ jQuery(function($){
 		showMonthAfterYear: false,
 		yearSuffix: ''};
 	$.datepicker.setDefaults($.datepicker.regional['en-AU']);
-});
+})(jQuery);

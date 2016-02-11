@@ -1,6 +1,6 @@
 /* Faroese initialisation for the jQuery UI date picker plugin */
 /* Written by Sverri Mohr Olsen, sverrimo@gmail.com */
-jQuery(function($){
+(function($){
 	$.datepicker.regional['fo'] = {
 		closeText: 'Lat aftur',
 		prevText: '&#x3C;Fyrra',
@@ -20,4 +20,4 @@ jQuery(function($){
 		showMonthAfterYear: false,
 		yearSuffix: ''};
 	$.datepicker.setDefaults($.datepicker.regional['fo']);
-});
+})(jQuery);

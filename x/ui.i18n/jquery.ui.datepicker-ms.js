@@ -1,6 +1,6 @@
 /* Malaysian initialisation for the jQuery UI date picker plugin. */
 /* Written by Mohd Nawawi Mohamad Jamili (nawawi@ronggeng.net). */
-jQuery(function($){
+(function($){
 	$.datepicker.regional['ms'] = {
 		closeText: 'Tutup',
 		prevText: '&#x3C;Sebelum',
@@ -20,4 +20,4 @@ jQuery(function($){
 		showMonthAfterYear: false,
 		yearSuffix: ''};
 	$.datepicker.setDefaults($.datepicker.regional['ms']);
-});
+})(jQuery);

@@ -1,6 +1,6 @@
 /* Thai initialisation for the jQuery UI date picker plugin. */
 /* Written by pipo (pipo@sixhead.com). */
-jQuery(function($){
+(function($){
 	$.datepicker.regional['th'] = {
 		closeText: 'ปิด',
 		prevText: '&#xAB;&#xA0;ย้อน',
@@ -20,4 +20,4 @@ jQuery(function($){
 		showMonthAfterYear: false,
 		yearSuffix: ''};
 	$.datepicker.setDefaults($.datepicker.regional['th']);
-});
+})(jQuery);

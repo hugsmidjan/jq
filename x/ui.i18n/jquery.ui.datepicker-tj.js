@@ -1,6 +1,6 @@
 /* Tajiki (UTF-8) initialisation for the jQuery UI date picker plugin. */
 /* Written by Abdurahmon Saidov (saidovab@gmail.com). */
-jQuery(function($){
+(function($){
 	$.datepicker.regional['tj'] = {
 		closeText: 'Идома',
 		prevText: '&#x3c;Қафо',
@@ -20,4 +20,4 @@ jQuery(function($){
 		showMonthAfterYear: false,
 		yearSuffix: ''};
 	$.datepicker.setDefaults($.datepicker.regional['tj']);
-});
+})(jQuery);

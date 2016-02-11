@@ -1,6 +1,6 @@
 /* Luxembourgish initialisation for the jQuery UI date picker plugin. */
 /* Written by Michel Weimerskirch <michel@weimerskirch.net> */
-jQuery(function($){
+(function($){
 	$.datepicker.regional['lb'] = {
 		closeText: 'Fäerdeg',
 		prevText: 'Zréck',
@@ -20,4 +20,4 @@ jQuery(function($){
 		showMonthAfterYear: false,
 		yearSuffix: ''};
 	$.datepicker.setDefaults($.datepicker.regional['lb']);
-});
+})(jQuery);

@@ -1,6 +1,6 @@
 /* Hungarian initialisation for the jQuery UI date picker plugin. */
 /* Written by Istvan Karaszi (jquery@spam.raszi.hu). */
-jQuery(function($){
+(function($){
 	$.datepicker.regional['hu'] = {
 		closeText: 'bezár',
 		prevText: 'vissza',
@@ -20,4 +20,4 @@ jQuery(function($){
 		showMonthAfterYear: true,
 		yearSuffix: ''};
 	$.datepicker.setDefaults($.datepicker.regional['hu']);
-});
+})(jQuery);

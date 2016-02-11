@@ -3,7 +3,7 @@
  * Written by Edmond L. (ll_edmond@walla.com)
  * and Ionut G. Stan (ionut.g.stan@gmail.com)
  */
-jQuery(function($){
+(function($){
 	$.datepicker.regional['ro'] = {
 		closeText: 'Închide',
 		prevText: '&#xAB; Luna precedentă',
@@ -23,4 +23,4 @@ jQuery(function($){
 		showMonthAfterYear: false,
 		yearSuffix: ''};
 	$.datepicker.setDefaults($.datepicker.regional['ro']);
-});
+})(jQuery);

@@ -1,6 +1,6 @@
 /* Greek (el) initialisation for the jQuery UI date picker plugin. */
 /* Written by Alex Cicovic (http://www.alexcicovic.com) */
-jQuery(function($){
+(function($){
 	$.datepicker.regional['el'] = {
 		closeText: 'Κλείσιμο',
 		prevText: 'Προηγούμενος',
@@ -20,4 +20,4 @@ jQuery(function($){
 		showMonthAfterYear: false,
 		yearSuffix: ''};
 	$.datepicker.setDefaults($.datepicker.regional['el']);
-});
+})(jQuery);
