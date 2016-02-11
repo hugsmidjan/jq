@@ -1,6 +1,4 @@
-// encoding: utf-8
-// ----------------------------------------------------------------------------------
-// jQuery.fn.videoList v 1.0
+/* $.fn.videoList 1.0  -- (c) 2010 Hugsmiðjan ehf.  @preserve */
 // ----------------------------------------------------------------------------------
 // (c) 2010 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
 //  written by:
@@ -125,7 +123,7 @@
                 https://www.facebook.com/video/video.php?v=10150469623167067
                 http://www.facebook.com/video/video.php?v=2246424718688
                 http://www.facebook.com/photo/photo.php?v=2246424718688
-                http://www.facebook.com/photo.php?v=2246424718688                
+                http://www.facebook.com/photo.php?v=2246424718688
                 https://www.facebook.com/photo.php?v=2427791652748&set=vb.144567668911104&type=2&theater
               */
               var videoId = videoHref.match(/(?:\/v\/|[?&]v=)(\d{10,20})/); // matches v/nnnnn or v=nnnnn
@@ -145,8 +143,8 @@
                           vidwi  : cfg.vidWidth,
                           vidhe  : vidFinHeight
                         }))
-            } 
-            else 
+            }
+            else
             {
               videoTempl.find('.videocontainer')
                       .html($.inject(objectTempl, {
@@ -159,7 +157,7 @@
             videoTempl.find('h2')
                 .text( item.find('h3 a').text() );
             videoTempl.find('.summary')
-                .text( item.find('.summary').text() );
+                .html( item.find('.summary').html() );
 
             e.preventDefault();
           }
