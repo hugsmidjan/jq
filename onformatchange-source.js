@@ -1,9 +1,9 @@
-/* FormatChange  -- (c) 2012-2015 Hugsmiðjan ehf.   @license MIT/GPL */
+/* FormatChange  -- (c) 2012-2016 Hugsmiðjan ehf.   @license MIT/GPL */
 
 // ----------------------------------------------------------------------------------
 // FormatChange   --  https://github.com/maranomynet/formatchange
 // ----------------------------------------------------------------------------------
-// (c) 2012-2015 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+// (c) 2012-2016 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
 //  written by:
 //   * Már Örlygsson        -- http://mar.anomy.net
 //
@@ -14,7 +14,6 @@
 (function(){'use strict';
 
   var win = window;
-  var doc = document;
   var w3cEvents = !!win.addEventListener;
 
   // var _extend = function (target, source) {
@@ -41,11 +40,14 @@
           else
           {
             config = config || {};
-            config.elmTagName  &&  (self.elmTagName = config.elmTagName);
-            config.elmId  &&  (self.elmId = config.elmId);
+            self.win = config.win || self.win;
+            self.elm = config.elm;
+            if ( config.elmTagName ) { self.elmTagName = config.elmTagName; }
+            if ( config.elmId ) { self.elmId = config.elmId; }
+            if ( 'manual' in config ) { self.manual = config.manual; }
             if ( 'defer' in config ) { self.defer = config.defer; }
 
-            self.formatGroups = groups ? groups : _beget(self.formatGroups);
+            self.formatGroups = groups || _beget(self.formatGroups);
 
             self.media = {};
             self._callbacks = [];
@@ -68,10 +70,12 @@
       // Default options and format groups.
       elmTagName: 'del',
       elmId: 'mediaformat',
+      manual: false,
       defer: false,
+      win: win,
       formatGroups: {},
 
-      isRunning: function () { return this._on },
+      isRunning: function () { return this._on; },
 
       start: function (afresh) {
           var self = this;
@@ -79,20 +83,41 @@
           // Define the Format Info object if needed
           if ( !self._on )
           {
-            // build and inject the hidden monitoring element
-            var elm = self._elm = doc.createElement(self.elmTagName||'del');
-            var elm_style = elm.style;
-            elm_style.position = 'absolute';
-            elm_style.visibility = elm_style.overflow = 'hidden';
-            elm_style.width = elm_style.height = 0;
-            elm.id = self.elmId || 'mediaformat';
-            doc.body.appendChild( elm );
+            var win = self.win;
+            // Ensure elm is defined
+            if ( !self.elm )
+            {
+              var doc = win.document;
+              var id = self.elmId || 'mediaformat';
+              var elm = self.elm = doc.getElementById(id);
+
+              if ( !elm )
+              {
+                // build and inject the hidden monitoring element
+                elm = self.elm = doc.createElement(self.elmTagName||'del');
+                var elm_style = elm.style;
+                elm_style.position = 'absolute';
+                elm_style.visibility =
+                elm_style.overflow = 'hidden';
+                elm_style.border =
+                elm_style.padding =
+                elm_style.margin =
+                elm_style.width =
+                elm_style.height = 0;
+                elm.id = id;
+                elm._isMine = true;
+                doc.body.appendChild( elm );
+              }
+            }
 
             self._on = true;
 
-            w3cEvents ?
-                win.addEventListener('resize', self._$hdl):
-                win.attachEvent('onresize',    self._$hdl);
+            if ( !self.manual )
+            {
+              w3cEvents ?
+                  win.addEventListener('resize', self._$hdl):
+                  win.attachEvent('onresize',    self._$hdl);
+            }
 
             self.refresh(afresh);
           }
@@ -101,27 +126,37 @@
 
       stop: function () {
           var self = this;
-          var elm = self._elm;
+          var elm = self.elm;
 
           if ( self._on )
           {
-            w3cEvents ?
-                win.removeEventListener('resize', self._$hdl):
-                win.detachEvent('onresize',       self._$hdl);
-            elm.parentNode.removeChild(elm);
-            delete self._elm;
+            if ( !self.manual )
+            {
+              w3cEvents ?
+                  self.win.removeEventListener('resize', self._$hdl):
+                  self.win.detachEvent('onresize',       self._$hdl);
+            }
+            if ( elm._isMine )
+            {
+              elm.parentNode.removeChild(elm);
+              delete self.elm;
+            }
             self._on = false;
           }
         },
 
 
       refresh: function (hardRefresh) {
+          var self = this;
           if (hardRefresh)
           {
-            this.oldFormat = null;
+            self.oldFormat = null;
           }
-          this._getFormat();
-          this._updateFlags(); // in case Group data has changed or something
+          if ( self._on ) {
+            self._getFormat();
+            self._updateFlags(); // in case Group data has changed or something
+          }
+          return self._on;
         },
 
 
@@ -178,9 +213,9 @@
           var self = this;
           var media = self.media;
           var oldFormat = self.oldFormat;
-          var elm = self._elm;
+          var elm = self.elm;
 
-          var getComputedStyle = win.getComputedStyle;
+          var getComputedStyle = self.win.getComputedStyle;
 
           // Here's the thing...
           // Old Opera browsers (mainly surviving on older Android devices and possibly STB/embededs)
@@ -221,16 +256,22 @@
 
 
   FormatChange.jQueryPlugin = function ($, defaultEventName) {
-      var instances = {};
       $.formatChange = function (groups, config) {
           config = config || {};
+          var instanceWin = config.win || FormatChange.prototype.win || win;
+          var instancesKey = '$formatchange_jquery_instances';
+          var instances = instanceWin[instancesKey];
+          if ( !instances ) {
+            instances = instanceWin[instancesKey] = {};
+          }
           var evName = config.eventName || defaultEventName || 'formatchange';
-          if ( !instances[evName] )
+          var fcInstance = instances[evName];
+          if ( !fcInstance )
           {
-            var fcInstance = instances[evName] = new FormatChange(groups, config);
+            fcInstance = instances[evName] = new FormatChange(groups, config);
             var triggered = '_$triggered';
             fcInstance.subscribe(function (media) {
-                $(win).trigger(evName, [media]);
+                $(instanceWin).trigger(evName, [media]);
               });
             $.event.special[evName] = {
                 add: function (handlObj) {
@@ -239,7 +280,7 @@
                         var handler = handlObj.handler;
                         if ( fcInstance._on  &&  !handler[triggered] )
                         {
-                          handler.call(win, $.Event(evName), fcInstance.media);
+                          handler.call(instanceWin, $.Event(evName), fcInstance.media);
                         }
                       }, 0);
                   },
@@ -258,9 +299,7 @@
 
   if ( typeof module === 'object'  &&  typeof module.exports === 'object' )
   {
-
     module.exports = FormatChange;
-
   }
   else
   {
