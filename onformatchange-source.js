@@ -58,7 +58,7 @@
             // }
 
             // a self-bound handler-function for window.onresize events.
-            self._$hdl = function () { self._getFormat(); };
+            self.check = function () { self.check(); };
 
             !self.defer  &&  self.start();
           }
@@ -115,8 +115,8 @@
             if ( !self.manual )
             {
               w3cEvents ?
-                  win.addEventListener('resize', self._$hdl):
-                  win.attachEvent('onresize',    self._$hdl);
+                  win.addEventListener('resize', self.check):
+                  win.attachEvent('onresize',    self.check);
             }
 
             self.refresh(afresh);
@@ -133,8 +133,8 @@
             if ( !self.manual )
             {
               w3cEvents ?
-                  self.win.removeEventListener('resize', self._$hdl):
-                  self.win.detachEvent('onresize',       self._$hdl);
+                  self.win.removeEventListener('resize', self.check):
+                  self.win.detachEvent('onresize',       self.check);
             }
             if ( elm._isMine )
             {
@@ -153,8 +153,12 @@
             self.oldFormat = null;
           }
           if ( self._on ) {
-            self._getFormat();
-            self._updateFlags(); // in case Group data has changed or something
+            if ( !self.check() )
+            {
+              // in case Group data has changed or something
+              // even though check() returned false - indicating no format change.
+              self._updateFlags();
+            } 
           }
           return self._on;
         },
@@ -209,7 +213,7 @@
         },
 
 
-      _getFormat: function () {
+      check: function () {
           var self = this;
           var media = self.media;
           var oldFormat = self.oldFormat;
@@ -235,7 +239,8 @@
           }
           newFormat = newFormat.replace(/['"]/g,''); // some browsers return a quoted strings.
 
-          if ( newFormat !== oldFormat )
+          var changeOccurred = newFormat !== oldFormat;
+          if ( changeOccurred )
           {
             media.is = media.format = newFormat;
             media.was = media.lastFormat = oldFormat;
@@ -249,6 +254,7 @@
             }
             self._triggering = false;
           }
+          return changeOccurred;
         }
 
     };
