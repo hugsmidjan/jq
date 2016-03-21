@@ -848,7 +848,6 @@ $.extend($.av.lang.en, {
   fi_email:         { inline: 'Please provide a valid e-mail address (example: user@example.com)',  alert: 'e.g. user@example.com' },
   fi_url:           { inline: 'Please provide a valid web address (example: http://www.example.is)',  alert: 'e.g. http://www.example.com' },
   fi_year:          { inline: 'Please provide a valid four digit year (example: 1998)',  alert: 'e.g. 1998' },
-  fi_ccnum_noamex:  { inline: 'American Express cards not accepted',  alert:'AmEx not accepted' },
   fi_valuemismatch: 'Confirmation doesn\'t match',
 
   minlength:        'Minimum characters: '
@@ -1131,40 +1130,41 @@ $.extend(avTypes, {
   // ====[ credit cards ]====
 
 
-  // Returns true if valid credid card number
+  // Returns true if it looks vaguely like a valid credid card number
   // Fake Credit Card number for testing: 1234-1234-1234-1238
   fi_ccnum:  function ( v, w, lang ) {
     var error = $.av.getError( 'fi_ccnum', lang );
     if (v) {
       // Strip out the optional space|dash delimiters
       var ccNum = v.replace(/[ \-]/g, '');
-      // make sure there are 16 digits (or 15 for AmEx cards (starting with 34 or 37))
-      if ( !/^(\d{16}|3[47]\d{13})$/.test( ccNum ) ) {
+      // Card numbers can range from 13 to 19 digits - according to Valitor, anno 2016
+      if ( !/^\d{13,19}$/.test( ccNum ) ) {
         return error;
       }
 
       // insert the cleaned up creditcard number back into the field
       $( this ).val( ccNum );
-      var checkSum = 0,
-          item,
-           i = ccNum.length;
-      while (i-->0) // warning for 15 digit numbers i may sink below zero
+
+      // Apply Luhn checksum algorithm
+      // (https://en.wikipedia.org/wiki/Luhn_algorithm)
+      var checkSum = 0;
+      var doDouble = false;
+      var i = ccNum.length;
+      while (i--)
       {
-        checkSum += ccNum.charAt(i--) * 1;
-        item = ccNum.charAt(i) * 2;
-        checkSum += Math.floor(item/10) + (item%10); // Þversumma!
+        var num = 1 * ccNum.charAt(i);
+        if ( doDouble ) {
+          // every-other digit (starting from the last) should
+          // be doubled (added twice) and if the doubling results
+          // in a two-digit number, then subtract 9 to get the sum of its digits.
+          // (i.e. 2 * 6 === 12  ...  1 + 2 === 3 === 12 - 9)
+          num += num - (num > 4 ? 9 : 0); // Þversumma!
+        }
+        doDouble = !doDouble;
+        checkSum += num;
       }
       var isValid = (checkSum % 10) === 0;  // checkSum % 10 must be 0
       return isValid || error;
-    }
-    return !!v;
-  },
-
-
-  // Fake AmEx number for testing: 341-2341-2341-2341
-  fi_ccnum_noamex: function ( v, w, lang ) {
-    if (v && v.replace(/[ \-]/g, '').length === 15 ) {
-      return $.av.getError( 'fi_ccnum_noamex', lang );
     }
     return !!v;
   },
@@ -1214,4 +1214,4 @@ $.extend(avTypes, {
 avTypes.fi_pnr = avTypes.fi_postal_is;
 
 
-})(jQuery);
+})(window.jQuery);
