@@ -1094,7 +1094,7 @@ $.extend(avTypes, {
       }
 
       // we can get to here if: we have no datepicker, we have datepicker but no config for this field
-      v = v.replace(/[ .-\/]+/g, '.').replace(/\.(\d\d)$/, '.20$1');
+      v = v.replace(/[ .\-\/]+/g, '.').replace(/\.(\d\d)$/, '.20$1');
       // $(this).val( v );
       return (/^(3[01]|[12]?[0-9]|(0)?[1-9])\.(1[012]|(0)?[1-9])\.(19|20)?\d\d$/).test(v) || error;
 
