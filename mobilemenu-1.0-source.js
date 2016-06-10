@@ -184,7 +184,6 @@
         {
           widget.stickyHeaderWidget = $.initStickyHeader( $.extend({}, opts, { name:'header' }) );
         }
-        return $;
       }
 
 
@@ -383,7 +382,6 @@
                 }
               });
         triggerOldFormatChangeEvent( formatChangeEv );
-        return $;
       }
 
       return widget;
