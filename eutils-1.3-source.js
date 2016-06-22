@@ -134,37 +134,88 @@ $.aquireId = module.exports;
 
 
 
-var div;
-var vendors;
+/*
+  Fast CSS support checker and vendor-prefix resolver
+  Returns `false` for unsupported css properties.
+  For supported css properties it returns an object with
+  the properly vendor-prefixed property-name as both
+  JavaScript propertyName and in CSS format.
+
+  Examples of use:
+  -------------------------------------
+
+      cssSupport('not-supported-property');
+  ==>
+      false
+
+      cssSupport('transform-origin');
+  ==>
+      {
+        prop: 'WebkitTransformOrigin',
+        css: '-webkit-transform-origin'
+      }
+
+      cssSupport('transform-origin');
+  ==>
+      {
+        prop: 'WebkitTransformOrigin',
+        css: '-webkit-transform-origin'
+      }
+
+*/
 var cache = {};
+var elmStyles;
+var vendorsJs;
+var vendorsCss;
 
 // cssSupport
-module.exports = function(prop) {
-    if ( !div )
-    {
-      div = document.createElement('div');
-      vendors = 'Khtml Ms O Moz Webkit'.split(' ');
-    }
-    var ret = prop in cache ?
-                  cache[prop]:
-                  prop in div.style || undefined;
-    if ( ret===undefined )
-    {
-      var Prop = prop.replace(/^[a-z]/, function(val) {
-          return val.toUpperCase();
-        });
-      var i = vendors.length;
-      while (i--)
-      {
-        if ( vendors[i]+Prop in div.style )
-        {
-          ret = true;
-          break;
+module.exports = function( propname ) {
+    // lazy initalize elmStyle
+    elmStyles = elmStyles || document.createElement('div').style;
+
+    var prop = cache[propname];
+    // If this is the first time we're asked about propname
+    if ( prop === undefined ) {
+      var cssProp;
+      var jsProp;
+      // Convert propname from CSS style `transform-origin`
+      // into JavaScript-style `transformOrigin`
+      var PropName = propname.replace(/-([a-z])/g, function ( val, chr ) {
+              return chr.toUpperCase();
+            });
+      if ( PropName in elmStyles ) {
+        // Un-prefixed property is supported!
+        jsProp = PropName;
+        cssProp = propname;
+      }
+      else {
+        if ( !vendorsJs ) {
+          // lazy initialize vendor-prefixes.
+          vendorsJs = ['Khtml','O','Ms','Moz','Webkit'];
+          vendorsCss = ['-khtml-','-o-','-ms-','-moz-','-webkit-'];
+        }
+        // Capitalize PropName in preparation for vendor-prefixing
+        // (i.e. from `transformOrigin` to `TransformOrigin`
+        PropName = PropName.replace(/^[a-z]/, function ( chr ) {
+            return chr.toUpperCase();
+          });
+        var i = vendorsJs.length;
+        while (i--) {
+          var PrefixedProp = vendorsJs[i] + PropName;
+          if ( PrefixedProp in elmStyles ) {
+            // Vendor-prefixed property is supported
+            jsProp = PrefixedProp;
+            cssProp = vendorsCss[i] + propname;
+            break;
+          }
         }
       }
+      // Build the property-name object.
+      prop = jsProp ? { prop: jsProp,  css: cssProp } : false;
+      // Cache the results
+      cache[propname] = prop;
     }
-    ret = cache[prop] = ret||false;
-    return ret;
+    return prop;
   };
 $.cssSupport = module.exports;
 
@@ -495,6 +546,30 @@ $.escResultHtml = module.exports;
 
 
 
+// uniqueArray
+module.exports = function(array) {
+    var result = [];
+    var i = 0;
+    var length = array.length;
+    for (; i < length; i++)
+    {
+      var value = array[i];
+      if ( result.indexOf(value) < 0 )
+      {
+        result.push(value);
+      }
+    }
+    return result;
+  };
+$.uniqueArray = module.exports;
+
+
+
+// ==========================================================================================================
+
+
+
+
 })({},window.jQuery);
 
 
@@ -655,17 +730,18 @@ window.jQuery.fn.splitN = function (n, func) {
 
   $.fixSkiplinks = function (opts) {
       var clickEv = 'click.fixSkipLinks';
-      var $doc = $(document);
-      var _docLoc = document.locaiton;
-      $doc
+      var doc = document;
+      var _docLoc = doc.locaiton;
+      $(doc)
           .off(clickEv)
           .on(clickEv, function (e) {
-              var href = e.target.href,
-                  id;
-              if ( href  &&  !e.isDefaultPrevented()  &&  (id = (href = href.split('#'))[1]) )
+              var href = e.target.href;
+              var hrefBits = href && href.split('#');
+              var id = hrefBits[1];
+              if ( id  &&  !e.isDefaultPrevented() )
               {
-                var elm = $('#'+id);
-                if ( elm[0]  &&  href[0]===_docLoc.href.split('#')[0] )
+                var elm = $(doc.getElementById( id ));
+                if ( elm[0]  &&  hrefBits[0] === _docLoc.href.split('#')[0] )
                 {
                   e.preventDefault();
                   if ( elm.attr('tabindex') == null )
@@ -675,7 +751,9 @@ window.jQuery.fn.splitN = function (n, func) {
                   _docLoc.href = '#'+id;
                   var offset = opts && opts.offset || $.scrollOffset();
                   offset = offset.apply ? offset(elm) : offset;
-                  offset && $doc.scrollTop( $doc.scrollTop() - offset );
+                  if ( offset ) {
+                    doc.scrollTop += offset;
+                  }
                   elm[0].focus();
                 }
               }
@@ -885,6 +963,7 @@ window.jQuery.fn.zap = function () {
     var _elm = _fragment  &&  _doc.getElementById( _isEncoded ? decodeURIComponent(_fragment) : _fragment );
     // var _prePos = !_fragment  &&  $.scrollTop();
     var _prePos = $.scrollTop();
+    var _tmpId = _elm && _elm.id;
 
     // temporaily defuse the element's id
     _elm  &&  (_elm.id = '');
@@ -902,7 +981,7 @@ window.jQuery.fn.zap = function () {
     $.scrollTop(_prePos);
 
     // put the old DOM id back in it's place
-    _elm  &&  (_elm.id = _fragment);
+    _elm  &&  (_elm.id = _tmpId);
   };
 
 

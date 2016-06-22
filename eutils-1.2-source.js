@@ -442,25 +442,30 @@
   //
   $.fixSkiplinks = function (opts) {
       var clickEv = 'click.fixSkipLinks';
-      $(_doc)
+      var doc = document;
+      var _docLoc = doc.locaiton;
+      $(doc)
           .off(clickEv)
           .on(clickEv, function (e) {
-              var href = e.target.href,
-                  id;
-              if ( href  &&  !e.isDefaultPrevented()  &&  (id = (href = href.split('#'))[1]) )
+              var href = e.target.href;
+              var hrefBits = href && href.split('#');
+              var id = hrefBits[1];
+              if ( id  &&  !e.isDefaultPrevented() )
               {
-                var elm = $('#'+id);
-                if ( elm[0]  &&  href[0]===_location.href.split('#')[0] )
+                var elm = $(doc.getElementById( id ));
+                if ( elm[0]  &&  hrefBits[0] === _docLoc.href.split('#')[0] )
                 {
                   e.preventDefault();
                   if ( elm.attr('tabindex') == null )
                   {
                     elm.attr('tabindex', -1);
                   }
-                  _location.href = '#'+id;
+                  _docLoc.href = '#'+id;
                   var offset = opts && opts.offset || $.scrollOffset();
-                  offset = $.isFunction(offset) ? offset(elm) : offset;
-                  offset && $(_doc).scrollTop( $(_doc).scrollTop() - offset );
+                  offset = offset.apply ? offset(elm) : offset;
+                  if ( offset ) {
+                    doc.scrollTop += offset;
+                  }
                   elm[0].focus();
                 }
               }
