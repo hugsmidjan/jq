@@ -447,26 +447,27 @@
       $(doc)
           .off(clickEv)
           .on(clickEv, function (e) {
-              var href = e.target.href;
-              var hrefBits = href && href.split('#');
-              var id = hrefBits[1];
-              if ( id  &&  !e.isDefaultPrevented() )
-              {
-                var elm = $(doc.getElementById( id ));
-                if ( elm[0]  &&  hrefBits[0] === _docLoc.href.split('#')[0] )
+              if ( e.target.href ) {
+                var hrefBits = e.target.href.split('#');
+                var id = hrefBits[1];
+                if ( id  &&  !e.isDefaultPrevented() )
                 {
-                  e.preventDefault();
-                  if ( elm.attr('tabindex') == null )
+                  var elm = $(doc.getElementById( id ));
+                  if ( elm[0]  &&  hrefBits[0] === _docLoc.href.split('#')[0] )
                   {
-                    elm.attr('tabindex', -1);
+                    e.preventDefault();
+                    if ( elm.attr('tabindex') == null )
+                    {
+                      elm.attr('tabindex', -1);
+                    }
+                    _docLoc.href = '#'+id;
+                    var offset = opts && opts.offset || $.scrollOffset();
+                    offset = offset.apply ? offset(elm) : offset;
+                    if ( offset ) {
+                      doc.scrollTop += offset;
+                    }
+                    elm[0].focus();
                   }
-                  _docLoc.href = '#'+id;
-                  var offset = opts && opts.offset || $.scrollOffset();
-                  offset = offset.apply ? offset(elm) : offset;
-                  if ( offset ) {
-                    doc.scrollTop += offset;
-                  }
-                  elm[0].focus();
                 }
               }
             });
