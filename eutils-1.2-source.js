@@ -379,42 +379,45 @@
   // place keyboard focus on _elm - setting tabindex="" when needed
   // and make sure any window scrolling is both sane and useful
   $.focusHere = function (_elm, opts) {
+      if ( _elm.length ) {
+        _elm = _elm;
+      }
       if (_elm)
       {
-        _elm = $(_elm);
-        if ( _elm.prop('tabindex') == null )
+        if ( _elm.tabIndex < 0 )
         {
-          _elm.attr('tabindex', -1);
+          _elm.setAttribute('tabindex', -1);
         }
+
         // Make note of current scroll position
-        var doc = $(_doc);
-        var _before = doc.scrollTop();
+        var _before = window.pageYOffset;
 
         // Focus the element!
-        _elm[0].focus(); // NOTE: Can't use _elm.trigger('focus'); because it won't focus Zero width/height elements.
+        _elm.focus();
 
         // Measure the distance scrolled
-        var _scrolld = doc.scrollTop() - _before;
+        var _scrolld = window.pageYOffset - _before;
 
         // Check if the browser jumped to the anchor...
-        //(the browser only scrolls the page if the _focusElm was outside the viewport)
+        // (the browser only scrolls the page if the _focusElm was outside the viewport)
         if ( _scrolld )
         {
           // But actually, Chrome (as of v.33 at least) will always scroll
           // unless the focused element is wholly within the viewport.
-          var elmTop = /*_before + */_scrolld + _elm[0].getBoundingClientRect().top;
-          var orgWinBottom = /*_before + */(_win.innerHeight||_doc.documentElement.clientHeight);
+          var elmTop = /*_before + */_scrolld + _elm.getBoundingClientRect().top;
+          var orgWinBottom = /*_before + */(window.innerHeight||document.documentElement.clientHeight);
           if ( _scrolld>0  &&  elmTop < orgWinBottom - 50 )
           {
-            doc.scrollTop(_before);
+            window.scrollTo(window.pageXOffset, _before);
           }
           else
           {
             // ...then scroll the window to place the anchor at the top of the viewport.
             // (NOTE: We do this because most browsers place the artificially .focus()ed link at the *bottom* of the viewport.)
-            var offset = opts && opts.offset || $.focusOffset();
-            offset = $.isFunction(offset) ? offset(_elm) : offset || 0;
-            doc.scrollTop( $(_elm).offset().top - offset );
+            var offset = (opts && opts.offset) || $.focusOffset();
+            var offsetPx = offset.apply ? offset(_elm) : offset || 0;
+            var elmTopPos = _elm.getBoundingClientRect().top + document.body.scrollTop;
+            window.scrollTo( window.pageXOffset,  elmTopPos - offsetPx );
           }
         }
       }
@@ -424,6 +427,7 @@
       $.focusHere(this[0], opts);
       return this;
     };
+
   // $.focusOffset provides a default scroll-offset value for $.focusHere()
   $.focusOffset = function (/*elm*/) { return 30; };
 
