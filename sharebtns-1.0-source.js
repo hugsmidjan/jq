@@ -175,6 +175,7 @@
           // pinterest: false,
           // linkedin: false,
           // email: false,
+          // tumblr: false,
           // process:  function ( btnHTML, btnName, btnCfg ) {
           //               // do stuff - like adding a wrapper, or modifying the HTML, or whatever...
           //               return updatedHTMLorElm || btnHTML;
@@ -447,6 +448,23 @@
                   injectScript( 'https://assets.pinterest.com/js/pinit.js' );
                 },
               $pos:  40
+            },
+
+
+          tumblr: {
+              count:       'right',       // Other options: 'none', 'top'
+              color:       'blue',        // Other options: 'white', 'black'
+              txt:         'Post',     // Link text for customized links
+
+            // private
+              // $prep: function ( /*pluginCfg*/) {},
+              $tmpl: '<a class="tumblr-share-button" data-color="{color}" data-notes="{count}" href="https://embed.tumblr.com/share" aria-type="button">{txt}</a>',
+
+              $init: function (/* btn, cfg */) {
+                  // https://www.tumblr.com/buttons
+                  injectScript( 'https://secure.assets.tumblr.com/share-button.js' );
+                },
+              $pos:  50
             }
         };
 
