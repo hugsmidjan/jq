@@ -63,6 +63,10 @@
               count:   'right', // (facebook-style) or 'top' or 'none' (defaults to "bubble" (== '') )
               // NOTE: LinkedIn's share button CAN NOT be customized!
 
+    tumblr:  false,    // Boolean|Number(non-zero position index)|Object(button config)  - non-falsy values insert tumblr "post" button
+              count:       'right',       // Other options: 'none', 'top'
+              color:       'blue',        // Other options: 'white', 'black'
+
      email: false,  // Boolean|Number(non-zero position index)|Object(button config) - non-falsy values insert a mailto: link
 
 
@@ -197,8 +201,8 @@
       countNone={ count:'none' },
       presets = {
           large:     { twitter:{size:'l'},            gplus:{size:''}      },
-          countNone: {                                gplus:countNone,               fbshare:{count:'button'},/*  facebook:{count:'standard'}, */pinterest:countNone,          linkedin:{count:''} },
-          countV:    {                                gplus:{count:'',size:'tall'},  fbshare:{count:'box_count'}, facebook:{count:'box_count'},  pinterest:{ count:'above' },  linkedin:{count:'top'} }
+          countNone: {                                gplus:countNone,               fbshare:{count:'button'},/*  facebook:{count:'standard'}, */pinterest:countNone,          linkedin:{count:''},     tumblr:countNone },
+          countV:    {                                gplus:{count:'',size:'tall'},  fbshare:{count:'box_count'}, facebook:{count:'box_count'},  pinterest:{ count:'above' },  linkedin:{count:'top'},  tumblr:{count:'top'} }
         },
 
 
