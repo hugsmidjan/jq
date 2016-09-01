@@ -801,7 +801,7 @@
       _elm  &&  (_elm.id = '');
 
       // set the damn hash... (Note: Safari 3 & Chrome barf if frag === '#'.)
-      _location.href = '#'+ (_isEncoded ? _fragment : $.encodeFrag(_fragment) );
+      _location.hash = (_isEncoded ? _fragment : $.encodeFrag(_fragment) );
 
       // // scrollpos will have changed if fragment was set to an empty "#"
       // !_fragment  &&  $.scrollPos(_prePos);

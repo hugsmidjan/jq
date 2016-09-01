@@ -782,42 +782,45 @@ window.jQuery.fn.splitN = function (n, func) {
   // place keyboard focus on _elm - setting tabindex="" when needed
   // and make sure any window scrolling is both sane and useful
   $.focusHere = function (_elm, opts) {
+      if ( _elm.length ) {
+        _elm = _elm;
+      }
       if (_elm)
       {
-        _elm = $(_elm);
-        if ( _elm.prop('tabindex') == null )
+        if ( _elm.tabIndex < 0 )
         {
-          _elm.attr('tabindex', -1);
+          _elm.setAttribute('tabindex', -1);
         }
+
         // Make note of current scroll position
-        var doc = $(document);
-        var _before = doc.scrollTop();
+        var _before = window.pageYOffset;
 
         // Focus the element!
-        _elm[0].focus(); // NOTE: Can't use _elm.trigger('focus'); because it won't focus Zero width/height elements.
+        _elm.focus();
 
         // Measure the distance scrolled
-        var _scrolld = doc.scrollTop() - _before;
+        var _scrolld = window.pageYOffset - _before;
 
         // Check if the browser jumped to the anchor...
-        //(the browser only scrolls the page if the _focusElm was outside the viewport)
+        // (the browser only scrolls the page if the _focusElm was outside the viewport)
         if ( _scrolld )
         {
           // But actually, Chrome (as of v.33 at least) will always scroll
           // unless the focused element is wholly within the viewport.
-          var elmTop = /*_before + */_scrolld + _elm[0].getBoundingClientRect().top;
+          var elmTop = /*_before + */_scrolld + _elm.getBoundingClientRect().top;
           var orgWinBottom = /*_before + */(window.innerHeight||document.documentElement.clientHeight);
           if ( _scrolld>0  &&  elmTop < orgWinBottom - 50 )
           {
-            doc.scrollTop(_before);
+            window.scrollTo(window.pageXOffset, _before);
           }
           else
           {
             // ...then scroll the window to place the anchor at the top of the viewport.
             // (NOTE: We do this because most browsers place the artificially .focus()ed link at the *bottom* of the viewport.)
-            var offset = opts && opts.offset || $.focusOffset();
-            offset = $.isFunction(offset) ? offset(_elm) : offset || 0;
-            doc.scrollTop( $(_elm).offset().top - offset );
+            var offset = (opts && opts.offset) || $.focusOffset();
+            var offsetPx = offset.apply ? offset(_elm) : offset || 0;
+            var elmTopPos = _elm.getBoundingClientRect().top + document.body.scrollTop;
+            window.scrollTo( window.pageXOffset,  elmTopPos - offsetPx );
           }
         }
       }
@@ -832,6 +835,7 @@ window.jQuery.fn.splitN = function (n, func) {
   $.focusOffset = function (/*elm*/) { return 30; };
 
 })();
+
 
 
 
@@ -970,7 +974,7 @@ window.jQuery.fn.zap = function () {
     _elm  &&  (_elm.id = '');
 
     // set the damn hash... (Note: Safari 3 & Chrome barf if frag === '#'.)
-    _loc.href = '#'+ (_isEncoded ? _fragment : $.encodeFrag(_fragment) );
+    _loc.hash = (_isEncoded ? _fragment : $.encodeFrag(_fragment) );
 
     // // scrollpos will have changed if fragment was set to an empty "#"
     // !_fragment  &&  $.scrollTop(_prePos);
