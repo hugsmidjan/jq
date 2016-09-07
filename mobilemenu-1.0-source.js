@@ -17,7 +17,7 @@
   // non-minimal mode legacy stuff
   var $win =  $(win);
   var triggerOldFormatChangeEvent = function (formatChangeEv) {
-          !win.FormatChange  &&  $win.trigger(formatChangeEv, [$.formatChange.media]);
+          !win.FormatChange  &&  $win.trigger(formatChangeEv, [($.formatChange||{}).media]);
         };
   // ------------------------------
 
