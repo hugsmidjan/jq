@@ -447,7 +447,7 @@
   $.fixSkiplinks = function (opts) {
       var clickEv = 'click.fixSkipLinks';
       var doc = document;
-      var _docLoc = doc.locaiton;
+      var _docLoc = doc.location;
       $(doc)
           .off(clickEv)
           .on(clickEv, function (e) {
