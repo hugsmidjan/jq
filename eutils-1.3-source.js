@@ -759,7 +759,9 @@ window.jQuery.fn.splitN = function (n, func) {
                     if ( offset ) {
                       setTimeout(function() {
                         doc.body.scrollTop -= offset;
+                        doc.documentElement.scrollTop -= offset;
                         elm[0].focus();
+                        elm[0].blur();
                         if ( hadNoTabindex ) {
                           setTimeout(function() { elm.removeAttr('tabindex'); }, 0);
                         }
@@ -774,9 +776,10 @@ window.jQuery.fn.splitN = function (n, func) {
       var elm = currentHash && document.getElementById(currentHash);
       var elmTop = elm && elm.getBoundingClientRect().top;
       if ( elmTop != null ) {
-        var minOffset = offsetFn();
-        if ( elmTop < minOffset ) {
-          doc.body.scrollTop -= (minOffset - elmTop);
+        var overShot = offsetFn() - elmTop;
+        if ( overShot > 0 ) {
+          doc.body.scrollTop -= overShot;
+          doc.documentElement.scrollTop -= overShot;
         }
       }
     };
