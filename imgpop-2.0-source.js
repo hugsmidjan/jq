@@ -20,7 +20,8 @@
 
     defaultConfig: {
         fadeInSpeed : 250, // set 1 for almost no animation
-        fadeOutSpeed : 200 // set 1 for almost no animation
+        fadeOutSpeed : 200, // set 1 for almost no animation
+        preloadImages : true // set to false to disable preloading images in popup
     },
 
     i18n: {
@@ -143,9 +144,12 @@
                   _imgPop.find('.image').replaceWith( $.imgPopper.getImage( _hrefElms.eq(_idx) ) );
                   _updPager(_paging, _idx, _hrefElms.length);
 
-                  // preload ajacent images
-                  if (_idx !== 0) { (new Image()).src = _hrefElms[_idx-1].href; } // at start
-                  if (_idx !== _hrefElms.length-1)   { (new Image()).src = _hrefElms[_idx+1].href; } // at end
+                  if (cfg.preloadImages)
+                  {
+                    // preload ajacent images
+                    if (_idx !== 0) { (new Image()).src = _hrefElms[_idx-1].href; } // at start
+                    if (_idx !== _hrefElms.length-1)   { (new Image()).src = _hrefElms[_idx+1].href; } // at end
+                  }
                 }
               });
       });
