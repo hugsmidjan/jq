@@ -35,12 +35,14 @@
               nayBtnSel:      'a.nay',
               ajaxParams:     { justPicPos:'pgmain' },
               feedbackformSel: '.quickfeedback',
-              thankyouSel:    '.thankyou'
+              thankyouSel:    '.thankyou',
+              logShortPaths:  false
             }, cfg );
 
     return this.each(function(){
-              var promptElm = $(this),
-                  i18n = $.quickFeedback.i18n[promptElm.lang()] || $.quickFeedback.i18n.is;
+              var promptElm = $(this);
+              var i18n = $.quickFeedback.i18n[promptElm.lang()] || $.quickFeedback.i18n.is;
+              var myPath = cfg.logShortPaths ? document.location.pathname : document.location.href;
 
               promptElm
                   .on('click', cfg.yayBtnSel, function (e) {
@@ -52,8 +54,10 @@
                                   .focusHere();
                             })
                           .pause(4000)
-                          .fadeOut(1000, function () { promptElm.remove(); });
-                      cfg.gaPing && window.ga.eventPing('quickfeedback', 'clicked-yes', document.location.href, 1, false);
+                          .fadeOut(1000, function () {
+                              promptElm.remove();
+                            });
+                      cfg.gaPing && window.ga.eventPing('quickfeedback', 'clicked-yes', myPath, 1, false);
                     })
                   .on('click', cfg.nayBtnSel, function (e) {
                       e.preventDefault();
@@ -77,11 +81,14 @@
 
                               var nonEmptyFeedback;
 
-                              feedbackform
+                              var mySubmitForm = feedbackform.is('form') ? feedbackform : feedbackform.find('form:first');
+                              mySubmitForm
                                   .on('submit', function (/*e*/) {
                                       nonEmptyFeedback = !!feedbackform.find('input:checked')[0] ||
                                                          !!feedbackform.find('textarea').val();
-                                    })
+                                    });
+
+                              feedbackform
                                   .hide()
                                   .insertAfter( promptElm )
                                   .fadeIn(500, function () {
@@ -98,7 +105,7 @@
                                   .on('VBloaded', function (/*e, req*/) {
                                       if ( nonEmptyFeedback )
                                       {
-                                        cfg.gaPing && window.ga.eventPing('quickfeedback', 'clicked-no', document.location.href, 1, false);
+                                        cfg.gaPing && window.ga.eventPing('quickfeedback', 'clicked-no', myPath, 1, false);
                                         feedbackSubmitted = true;
                                       }
                                       feedbackform
@@ -117,7 +124,7 @@
 
                         $(window)
                             .on('unload beforeunload', function (/*e*/) {
-                                !feedbackSubmitted  &&  cfg.gaPing &&  window.ga.eventPing('quickfeedback', 'clicked-no-only', document.location.href, 1, false);
+                                !feedbackSubmitted  &&  cfg.gaPing &&  window.ga.eventPing('quickfeedback', 'clicked-no-only', myPath, 1, false);
                                 feedbackSubmitted = true;
                               });
                     });
