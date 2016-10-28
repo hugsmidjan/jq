@@ -38,7 +38,7 @@
               };
         toggleBold();
         makeItem('b', 2, menuFB)
-            .bind('click', toggleBold);
+            .on('click', toggleBold);
       }
       if ( cfg.fontsizeBtns )
       {
@@ -82,10 +82,10 @@
               };
 
         makeItem('uon',  3, menuFB)
-            .bind('click', toggleMode);
+            .on('click', toggleMode);
 
         makeItem('uoff', 4, menuUS)
-            .bind('click', toggleMode);
+            .on('click', toggleMode);
         makeItem('pref', 5, menuUS)
             .find('a')
                 .attr('href', '//minar.stillingar.is/lesa/form/?redirect=yes&l='+ lang );

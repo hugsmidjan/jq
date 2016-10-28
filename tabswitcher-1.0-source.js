@@ -312,14 +312,14 @@
             if (_conf.focusLinkTemplate) {
               data.focusLink = $( _conf.focusLinkTemplate )
                                       .attr( 'title', backtxt )
-                                      .bind( 'click', returnToTab )
+                                      .on( 'click', returnToTab )
                                       .prependTo( panel );
             }
             // Add a second "return to tab" link to the bottom of the _tabPanelElm.
             if (_conf.returnLinkTemplate) {
               data.returnLink = $( _conf.returnLinkTemplate )
                                       .attr( 'title', backtxt )
-                                      .bind( 'click', returnToTab )
+                                      .on( 'click', returnToTab )
                                       .appendTo( panel );
             }
 
@@ -346,10 +346,10 @@
             }
 
             data.tab
-                .bind('click', function (e) { return false; /* cancel the bubble! */ });
+                .on('click', function (e) { return false; /* cancel the bubble! */ });
             ( data.tab.is('a') ? data.tab : data.tab.find('a:first') )
                 .data(_tabswitcherData+'Link', 1)
-                .bind('click', switchToFragmentPanel);
+                .on('click', switchToFragmentPanel);
 
 
             closePanel( id );
@@ -359,7 +359,7 @@
 
             // Detect bubbling TabSwitch events (from nested tab-panes) and switch to the current tabpane
             panel
-                .bind('Tabswitch', detectNestedTabswitch);
+                .on('Tabswitch', detectNestedTabswitch);
 
           }
 
@@ -389,7 +389,7 @@
       }
     }
 
-    $(document).bind('click', crossReferenceMonitor );
+    $(document).on('click', crossReferenceMonitor );
     return this;
 
   }; // tabswitcher

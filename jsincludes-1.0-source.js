@@ -190,7 +190,7 @@
                       }
 
                       var vBody = $('<div/>')
-                              .bind('VBerror', _errorHandler)
+                              .on('VBerror', _errorHandler)
                               .one('VBloaded', _loadedHandler)
                               [_virtualBrowser]( config ),
 
@@ -210,7 +210,7 @@
                       {
                         // for lazyloaded elements, set `loadLink` as a click handler
                         lazyElms.push( elm[0] );
-                        elm.bind('click', loadLink);
+                        elm.on('click', loadLink);
                       }
                       else if ( !config.delayUnseen  ||  elm.is( config.forceLoad ) )
                       {
@@ -238,7 +238,7 @@
               // NOTE: timeout required since IE will often finish the virtualBrowser ajax request
               // before subsequent event-handling assignments (etc.) have had chance to finish...
               setTimeout(function(){ loadSeenLinks( delayedElms ); }, 0);
-              $(window).bind('resize scroll', refreshUnseen);
+              $(window).on('resize scroll', refreshUnseen);
             }
             return {
                 vbBodies: $(vbBodies),

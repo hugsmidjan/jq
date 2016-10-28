@@ -8,10 +8,6 @@
 
 // Handle collapse functionality of a navigaion tree.
 //
-// Todo:
-//  * animate the open/close actions
-//  * make expand links carry localized text.
-//
 // version: 2.0.0
 //
 //  Requires:
@@ -83,7 +79,7 @@
                   var boxElm = $(this),
                       _selBranch = $(boxElm).find(cfg.leaf+'.'+_selectClass).eq(0);
                   $(boxElm)
-                      .bind('click', function(e) { // delegated event handling
+                      .on('click', function(e) { // delegated event handling
                           var leaf = $(e.target).closest(cfg.leaf);
                           if ( leaf[0]  &&  leaf[0] !== _selBranch[0] )
                           {
@@ -110,7 +106,7 @@
               var boxElm = this,
                   _thisBranch = _branch || '#'+boxElm.id;
               $(boxElm)
-                  .bind('click', function(e) { // delegated event handling
+                  .on('click', function(e) { // delegated event handling
                       if ( $(e.target).closest(_thisBranch+' '+cfg.toggler)[0] )
                       {
                         var _theBranch = $(e.target).closest(_thisBranch),

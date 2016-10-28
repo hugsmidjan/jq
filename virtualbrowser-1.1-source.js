@@ -37,11 +37,11 @@
     * stripCfg:      null,                      // Object: config for the $.getResultsBody() method
     * imgSuppress:   false,                     // Boolean: true renames img[src] to img[data-srcattr] until req.resultDOM has been inserted into the DOM, to stop the browser from preloading every <img> in the result dom
     * imgUnsuppress: true,                      // Boolean: true automatically reenables suppressed img[src] before req.resultDOM is inserted to the page DOM (Applies only when `imgSuppress` is true.)
-    * onBeforeload:  null,                      // Function: Shorthand for .bind('VBbeforeload' handler);
-    * onError:       null,                      // Function: Shorthand for .bind('VBerror', handler);
-    * onLoad:        null,                      // Function: Shorthand for .bind('VBload', handler);
-    * onLoaded:      null,                      // Function: Shorthand for .bind('VBloaded', handler);
-    * onDisengaged:  null,                      // Function: Shorthand for .bind('VBdisengaged', handler);
+    * onBeforeload:  null,                      // Function: Shorthand for .on('VBbeforeload' handler);
+    * onError:       null,                      // Function: Shorthand for .on('VBerror', handler);
+    * onLoad:        null,                      // Function: Shorthand for .on('VBload', handler);
+    * onLoaded:      null,                      // Function: Shorthand for .on('VBloaded', handler);
+    * onDisengaged:  null,                      // Function: Shorthand for .on('VBdisengaged', handler);
     * loadingClass:  null,                      // String: className to apply to the virtualBrowser body element during loading
     * loadmsgElm:    '<div class="loading" />'  // String/Element: Template for a loading message displayed while loading a URL
     * loadmsgMode:   'none',                    // String: Options: (none|overlay|replace)  // none == no load message; overlay == overlays the old content with the loadmsg; replace == removes the old content before displaying the loadmsg
@@ -57,7 +57,7 @@
 
   Events:
     * 'VBbeforeload'  // Triggered before the $.ajax call.
-                      //  .bind('VBbeforeload', function (e, request, vbdata) {
+                      //  .on('VBbeforeload', function (e, request, vbdata) {
                               this  // the virtualBrowser body element
                               vbdata  // Object: {
                                       //   cfg:          // config object
@@ -76,7 +76,7 @@
                             });
 
     * 'VBerror'       // Triggered when the ajax request returns an error.
-                      //  .bind('VBerror', function (e, request vbdata) {
+                      //  .on('VBerror', function (e, request vbdata) {
                               this  // the virtualBrowser body element
                               vbdata  // Object: {
                                       // cfg:          // config object
@@ -91,7 +91,7 @@
                             });
 
     * 'VBload'        // Triggered after the $.ajax request has completed, *before* any DOM injection has taken place
-                      //  .bind('VBload', function (e, request, vbdata) {
+                      //  .on('VBload', function (e, request, vbdata) {
                               this  // the virtualBrowser body element
                               vbdata  // Object: {
                                       // cfg:          // config object
@@ -116,7 +116,7 @@
                             });
 
     * 'VBloaded'      // Triggered *after* the resultDOM has been injected into the virtualBrowser body. Think of it as `window.onload` of sorts.
-                      //  .bind('VBloaded', function (e, request, vbdata) {
+                      //  .on('VBloaded', function (e, request, vbdata) {
                               this  // the virtualBrowser body element
                               vbdata  // Object: {
                                       // cfg:          // config object
@@ -129,7 +129,7 @@
                             });
 
     * 'VBdisengaged'  // Triggered when the 'disengage' method has finished running (only unbinding VBdisengaged events happens after)
-                      //  .bind('VBdisengaged', function (e) {
+                      //  .on('VBdisengaged', function (e) {
                               this  // the virtualBrowser body element
                               // NOTE: config and other data has been removed at this point.
                               // Uncancellable!
@@ -228,7 +228,7 @@
       _triggerCustomEv    = function ( evtype, body, req, vbdata ) {
           var ev = $.Event(evtype);
           body
-              .one(evtype, function(e){ e[_stopPropagation]() }) // needed because of http://bugs.jquery.com/ticket/10699
+              .one(evtype, function(e){ e[_stopPropagation](); }) // needed because of http://bugs.jquery.com/ticket/10699
               .trigger(ev, [req, vbdata]);
           return ev;
         },
@@ -406,7 +406,7 @@
                                         // This makes .isDefaultPrevented() checks fail when plugin-users bind (and .preventDefault())
                                         // submit events on contained forms directly.
                                         .find('form')
-                                            .bind('submit.vb'+body.data('VBid'), $.proxy(_handleHttpRequest, body[0]) );
+                                            .on('submit.vb'+body.data('VBid'), $.proxy(_handleHttpRequest, body[0]) );
                                     // Throw out unneccessary properties that we don't want to store. (Saves memory among other things.)
                                     delete request[_resultDOM];
                                     delete request[_result];
@@ -438,7 +438,7 @@
                           oldAction + (/\?/.test(oldAction)?'&':'?') + config.params
                         );
                     }
-                    iframe.bind('load', function () {
+                    iframe.on('load', function () {
                         var status = 'success'; // this is kind of meaningless... the iframe might very well contain a 404 or whatever...
                         ajaxOptions.complete({
                             fakeXHR:      'iframe',
@@ -570,7 +570,7 @@
                         cfg = $.extend({}, fnVB.defaults, config);
                     $.each(['Beforeload','Error','Load','Loaded','Disengaged'], function (onType, type) {
                         onType = 'on'+type;
-                        cfg[onType]  &&  bodies.bind( 'VB'+type.toLowerCase(), cfg[onType] );
+                        cfg[onType]  &&  bodies.on( 'VB'+type.toLowerCase(), cfg[onType] );
                         delete cfg[onType];
                       });
                     cfg.params = (typeof cfg.params === 'string') ?
@@ -602,7 +602,7 @@
                     body
                         // Depend on 'click' events bubbling up to the virtualBrowser element to allow event-delegation
                         // Thus, we assume that any clicks who's bubbling were cancelled should not be handled by virtualBrowser.
-                        .bind( 'click', _handleHttpRequest);
+                        .on( 'click', _handleHttpRequest);
 
                     body.data('VBid', (new Date()).getTime() );
 
@@ -618,7 +618,7 @@
                       // submit events on contained forms directly.
                       body.find('form')
                           .add( body.filter('form') ) // allow body itself to be a <form>
-                              .bind( 'submit.vb'+body.data('VBid'), $.proxy(_handleHttpRequest, body[0]) );
+                              .on( 'submit.vb'+body.data('VBid'), $.proxy(_handleHttpRequest, body[0]) );
                     }
                   });
 
@@ -635,10 +635,10 @@
       //imgSuppress:  false,                     // Boolean: true renames img[src] to img[data-srcattr] until req.resultDOM has been inserted into the DOM, to stop the browser from preloading every <img> in the result dom
       //imgUnsuppress: true,                     // Boolean: true automatically reenables suppressed img[src] before req.resultDOM is inserted to the page DOM (Applies only when `imgSuppress` is true.)
       //selector:     null,                      // String selector to quickly filter the incoming DOM before injecting it into the virtualBrowser container/body. Defaults to just dumping the whole result body
-      //onBeforeload: null,                      // Function: Shorthand for .bind('VBbeforeload' handler);
-      //onLoad:       null,                      // Function: Shorthand for .bind('VBload' handler);
-      //onLoaded:     null,                      // Function: Shorthand for .bind('VBloaded' handler);
-      //onDisengaged: null,                      // Function: Shorthand for .bind('VBdisengaged' handler);
+      //onBeforeload: null,                      // Function: Shorthand for .on('VBbeforeload' handler);
+      //onLoad:       null,                      // Function: Shorthand for .on('VBload' handler);
+      //onLoaded:     null,                      // Function: Shorthand for .on('VBloaded' handler);
+      //onDisengaged: null,                      // Function: Shorthand for .on('VBdisengaged' handler);
       //loadingClass: null,                      // String: className to apply to the virtualBrowser body element during loading
       //loadmsgElm:   '<div class="loading" />', // String/Element: Template for a loading message displayed while loading a URL
       loadmsgMode:    'none'                   // String: available: "none", "overlay" & "replace"

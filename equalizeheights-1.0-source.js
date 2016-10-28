@@ -1,5 +1,4 @@
-// ----------------------------------------------------------------------------------
-// jQuery.fn.equalizeHeights v 1.0
+/* jQuery equalizeHeights v 1.0  -- (c) 2014 Hugsmiðjan ehf.  @preserve */
 // ----------------------------------------------------------------------------------
 // (c) 2009-2012 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
 //  written by:
@@ -166,8 +165,8 @@
               if ( !_numSets )
               {
                 $( window )
-                    .bind( 'resize.eqh', _reRun )
-                    .bind( 'load.eqh fontresize.eqh', _resetHeights );
+                    .on( 'resize.eqh', _reRun )
+                    .on( 'load.eqh fontresize.eqh', _resetHeights );
               }
               if (!cfg.onceOnly  &&  setId == null )  // only set reize and fontresize events when cfg.onceOnly is false (default)
               {

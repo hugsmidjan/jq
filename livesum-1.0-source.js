@@ -1,4 +1,3 @@
-// encoding: utf-8
 // ----------------------------------------------------------------------------------
 // jQuery.fn.liveSum v 1.0
 // ----------------------------------------------------------------------------------
@@ -16,12 +15,12 @@
                 // sumFormatFunc: function(strVal, fieldElm){ return parseFloat('0'+strVal); },
                 sumElm: this.slice(-1) // default sumElm to last item in collection
               }, cfg);
-      
+
       var fields = this.not( cfg.sumElm ),
           sumElm = $(cfg.sumElm);
 
       fields
-          .bind((cfg.instant?'keyup ':'')+'change.liveSum', function (e) {
+          .on((cfg.instant?'keyup ':'')+'change.liveSum', function (e) {
               var sum = 0;
               fields.each(function(){
                   var field = $(this),
@@ -33,7 +32,7 @@
                   }
                 });
               sum = cfg.sumFormatFunc ? cfg.sumFormatFunc( sum, sumElm ) : sum;
-              sumElm.is(':input') ? 
+              sumElm.is(':input') ?
                   sumElm.val( sum ).trigger('change'):
                   sumElm.text( sum );
             })

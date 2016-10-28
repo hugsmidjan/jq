@@ -467,7 +467,7 @@
     // defangReset can may be run against any collection of elements to defang
     // them OR, in case of non reset buttons, turn them into reset buttons.
     defangReset : function () {
-      return this.bind('click', function(/* e */){
+      return this.on('click', function(/* e */){
           var btn = $( this );
           var lang = btn.closest('[lang]').attr('lang') || 'en';
           btn.attr( 'lang', lang );
@@ -484,7 +484,7 @@
 
 
     defangEnter : function () {
-      return this.bind('keydown', function(e){
+      return this.on('keydown', function(e){
           var target = e.target;
           return ( e.which !== 13  ||  target.tagName !== 'INPUT'  ||  /^(button|reset|submit)$/i.test(target.type) );
         });
@@ -517,7 +517,7 @@
 
         // turn the enter key into tab for all inputs except textareas, and buttons
         if (conf.emulateTab) {
-          form.bind('keydown', function(e){
+          form.on('keydown', function(e){
             if (e.keyCode === 13 &&
                 $(e.target).is(':input:not(:button):not(:reset):not(:submit):not(textarea)')) {
               $.av.focusNext( e.target );
@@ -528,7 +528,7 @@
 
         // functionality to tab to the next field when maxlength is reached
         if (conf.maxLengthTab) {
-          form.bind('keyup', function(e){
+          form.on('keyup', function(e){
             var t = $(e.target);
             var w = e.which;
             // only trigger with keycodes (not scancodes), and where keycode isn't backspace,tab,enter,
@@ -566,12 +566,12 @@
 
         if ( conf.validateEachField === 'change' && conf.errorMsgType === 'inlineonly' )
         {
-          form.bind('change', function (e) {
+          form.on('change', function (e) {
               $(e.target).isValid();
             });
         }
 
-        form.bind('submit', function(e){
+        form.on('submit', function(e){
             var f = $( this );
             if ( !f.data('av.skip') || f.data('av.disabled') )
             {
