@@ -547,7 +547,7 @@
               if (wrap.length)
               {
                 wrap.addClass(conf.reqClassPattern);
-                $(this).removeAttr('required');
+                $(this)[0].required = false;
               }
             });
         }
