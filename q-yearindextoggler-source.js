@@ -38,7 +38,11 @@
             // Add links to ul in 'listContainer'
             var currentLink = links.filter('.current')[0];
             if (currentLink) {
-              listContainer.find('button').text(currentLink.textContent);
+              listContainer.find('button').text(
+                  (typeOfList === 'month' && cfg.shortMonths && currentLink.textContent.length > 4) ?
+                      currentLink.textContent.substring(0, 3) :
+                      currentLink.textContent
+                );
             }
 
             links.detach().addClass(cfg.bemPrefix +'__list__item__link').wrap('<li class="'+ cfg.bemPrefix +'__list__item"/>').parent().appendTo(listContainer.find('ul'));
@@ -49,6 +53,18 @@
           // We have to generate the month list first so the dom exist
           var monthContainer = listContainerGenerator(monthLinks, 'month', cfg.monthText);
           var yearContainer = listContainerGenerator(yearLinks, 'year', cfg.yearText);
+
+          if ( cfg.shortMonths )
+          {
+            monthContainer.find('a').each( function() {
+                var innerText = this.textContent;
+                if ( innerText.length > 4 )
+                {
+                  this.innerHTML = innerText.substring(0, 3) +'<span class="sep">.</span>';
+                }
+              });
+
+          }
 
           $('<div class="'+ cfg.bemPrefix +'"/>').append(yearContainer).append(monthContainer).appendTo(yindexElm.empty());
 
@@ -65,7 +81,7 @@
   $.fn.yearindexToggler = function(o) {
     var defaultCfg = {
           bemPrefix: 'yearindex',
-          splitMonths: true,
+          shortMonths: false,
           monthText: $.lang() === 'is' ? 'Mánuður' : 'Month',
           yearText: $.lang() === 'is' ? 'Ár' : 'Year'
         },
