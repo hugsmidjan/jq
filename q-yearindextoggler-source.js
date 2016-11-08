@@ -32,7 +32,7 @@
           var listContainerGenerator = function listContainerGenerator(links, typeOfList, defaultText) {
 
             // Creating container around filter by 'year' or 'month'
-            var listContainer = $('<div class="'+ cfg.bemName +'__wrapper '+ cfg.bemName +'__wrapper--' + typeOfList + '">' + '<button class="'+ cfg.bemName +'__button">' + defaultText + '</button>' + '<ul class="'+ cfg.bemName +'__list"></ul>' + '</div>');
+            var listContainer = $('<div class="'+ cfg.bemPrefix +'__wrapper '+ cfg.bemPrefix +'__wrapper--' + typeOfList + '">' + '<button class="'+ cfg.bemPrefix +'__button">' + defaultText + '</button>' + '<ul class="'+ cfg.bemPrefix +'__list"></ul>' + '</div>');
             links.filter('.current')[0];
 
             // Add links to ul in 'listContainer'
@@ -41,7 +41,7 @@
               listContainer.find('button').text(currentLink.textContent);
             }
 
-            links.detach().addClass(cfg.bemName +'__list__item__link').wrap('<li class="'+ cfg.bemName +'__list__item"/>').parent().appendTo(listContainer.find('ul'));
+            links.detach().addClass(cfg.bemPrefix +'__list__item__link').wrap('<li class="'+ cfg.bemPrefix +'__list__item"/>').parent().appendTo(listContainer.find('ul'));
 
             return listContainer;
           };
@@ -50,12 +50,12 @@
           var monthContainer = listContainerGenerator(monthLinks, 'month', cfg.monthText);
           var yearContainer = listContainerGenerator(yearLinks, 'year', cfg.yearText);
 
-          $('<div class="'+ cfg.bemName +'"/>').append(yearContainer).append(monthContainer).appendTo(yindexElm.empty());
+          $('<div class="'+ cfg.bemPrefix +'"/>').append(yearContainer).append(monthContainer).appendTo(yindexElm.empty());
 
           // Click, focused, blur events
           yindexElm.delayedHighlight({
-              delegate: '.'+ cfg.bemName +'__wrapper',
-              className: ''+ cfg.bemName +'__wrapper--focused',
+              delegate: '.'+ cfg.bemPrefix +'__wrapper',
+              className: ''+ cfg.bemPrefix +'__wrapper--focused',
               click: true,
               clickToggles: true
             });
@@ -64,7 +64,7 @@
 
   $.fn.yearindexToggler = function(o) {
     var defaultCfg = {
-          bemName: 'yearindex',
+          bemPrefix: 'yearindex',
           splitMonths: true,
           monthText: $.lang() === 'is' ? 'Mánuður' : 'Month',
           yearText: $.lang() === 'is' ? 'Ár' : 'Year'
