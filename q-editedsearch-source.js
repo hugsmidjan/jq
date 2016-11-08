@@ -22,7 +22,6 @@
   var makeSearch = function (searchForm, cfg) {
         var searchInput = searchForm.find('input:text');
         var ajaxRequest;
-        var isStatic = /^\.\//.test(Req.localPath);
         var gaPing = (window.ga && window.ga.eventPing) ? window.ga.eventPing : function(){};
         var pingSearchResults = $.debounceFn(function (value) {
                 gaPing('sitessearch-box', 'ac-result', value);
@@ -37,13 +36,10 @@
                 source: function (request, callback) {
                     var input = this.element;
                     var form = $( input[0].form );
-                    var ajaxSearchUrl = isStatic ?
-                                          'searchresults.html' :
-                                          cfg.ajaxSearchUrl;
                     pingSearchResults.cancel();
                     ajaxRequest  &&  ajaxRequest.abort();
                     ajaxRequest = $.ajax({
-                        url:     ajaxSearchUrl,
+                        url:     cfg.ajaxSearchUrl,
                         data:    form.serialize() +'&'+ $.param(cfg.ajaxParams)
                       })
                       .done(function (html/*, status, xhr*/) {
