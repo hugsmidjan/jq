@@ -32,6 +32,7 @@
           var listContainerGenerator = function listContainerGenerator(links, typeOfList, defaultText) {
 
             // Creating container around filter by 'year' or 'month'
+            defaultText = cfg.shortMonths ? defaultText.substring(0, 3) : defaultText;
             var listContainer = $('<div class="'+ cfg.bemPrefix +'__wrapper '+ cfg.bemPrefix +'__wrapper--' + typeOfList + '">' + '<button class="'+ cfg.bemPrefix +'__button">' + defaultText + '</button>' + '<ul class="'+ cfg.bemPrefix +'__list"></ul>' + '</div>');
             links.filter('.current')[0];
 
