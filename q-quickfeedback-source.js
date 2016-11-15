@@ -48,6 +48,7 @@
                   .on('click', cfg.yayBtnSel, function (e) {
                       e.preventDefault();
                       promptElm
+                          .addClass('submitted')
                           .pause(200, function () {
                               promptElm
                                   .html( '<strong class="thanks">'+i18n.qfeedbackThanks+'</strong>' )
@@ -94,8 +95,18 @@
                                   .fadeIn(500, function () {
                                       feedbackform.focusHere();
                                     });
+
                               promptElm
                                   .detach();
+
+                              var respEmail = feedbackform.find('.resp_email');
+                              if ( respEmail.length )
+                              {
+                                respEmail.find('[name="send_response"]').on('change', function () {
+                                    respEmail[$(this).is(':checked') ? 'addClass' : 'removeClass']('email-active');
+                                  });
+                              }
+
                               $(document).trigger('domupdated', [feedbackform]);
                               feedbackform.find('.boxbody')
                                   .on('VBload', function (e, req) {
