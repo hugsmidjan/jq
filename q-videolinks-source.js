@@ -29,7 +29,7 @@
                       '<embed src="%{vidurl}" type="application/x-shockwave-flash" wmode="transparent" allowscriptaccess="always" allowfullscreen="true" width="%{vidwi}" height="%{vidhe}"></embed>' +
                     '</object>',
 
-      iframeTempl = '<iframe width="%{vidwi}" height="%{vidhe}" src="%{vidurl}" frameborder="0" scrolling="no" allowfullscreen></iframe>',
+      iframeTempl = '<iframe width="%{vidwi}" height="%{vidhe}" src="%{vidurl}" frameborder="0" scrolling="no" title="%{vidTitle}" allowfullscreen></iframe>',
       videoTempl =  '<video width="%{vidwi}" height="%{vidhe}" src="%{vidurl}" controls %{auto}><source src="%{vidurl}" type="video/%{mime}"></source></video>',
 
       calcHeight = function (width, aspect4x3) {
@@ -140,7 +140,8 @@
             item.html($.inject(iframeTempl, {
                           vidurl : videoUrl,
                           vidwi  : vidWidth,
-                          vidhe  : vidHeight
+                          vidhe  : vidHeight,
+                          vidTitle: data.vidCapt
                         }));
           }
           else if (vidFrame === 'video')
