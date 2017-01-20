@@ -111,7 +111,7 @@
               var row = $(this);
               if (cfg.hideRowClass)
               {
-                row.toggleClass(cfg.hideRowClass, !!makeVisible);
+                row.toggleClass(cfg.hideRowClass, !makeVisible);
               }
               else if (makeVisible)
               {
@@ -233,7 +233,6 @@
           data.table
               .trigger('filter.filterTable');
         },
-
 
       _computeCellMap = function ( data ) {
           var table_head = data.table_head;
