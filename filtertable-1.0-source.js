@@ -35,14 +35,13 @@
             var table = $(this);
 */
   var _normalizeTable = function (table, cfg) {
-            var table = $(table).filter('table').eq(0);
+            table = $(table).filter('table').eq(0);
 /* -- */
             if ( !cfg.thead  &&  !table.find('thead').length )
             {
               var tbody = table.find('tbody'),
                   thead = $('<thead />').insertBefore( tbody[0] ),
-                  allRows = tbody.find('tr'),
-                  x/* dummy */;
+                  allRows = tbody.find('tr');
 
               allRows.each(function(i){
                   var tr = $(this),
@@ -71,7 +70,7 @@
   var _F = function(){},
       _beget = $.beget || function (proto, props) {
           _F.prototype = proto;
-          return props ? $.extend(new _F, props) : new _F;
+          return props ? $.extend(new _F(), props) : new _F();
         },
 
 
@@ -98,12 +97,12 @@
           e.stopPropagation();
         },
 
-      _selectAll = function (e) {
+      _selectAll = function (/*e*/) {
           this.select();
         },
       _setFocusClass = function (e) {
           var input = $(this);
-          input.closest('td, th').toggleClass( input.data(_data_keyName).cfg.fieldFocusClass, e.type=='focus' );
+          input.closest('td, th').toggleClass( input.data(_data_keyName).cfg.fieldFocusClass, e.type==='focus' );
         },
 
 
@@ -112,7 +111,7 @@
               var row = $(this);
               if (cfg.hideRowClass)
               {
-                row.toggleClass(cfg.hideRowClass, makeVisible);
+                row.toggleClass(cfg.hideRowClass, !!makeVisible);
               }
               else if (makeVisible)
               {
@@ -124,23 +123,16 @@
               }
             });
         },
-      _showRows = function(rows, cfg){ _toggleRows(rows, cfg, 1); },
-      _hideRows = function(rows, cfg){ _toggleRows(rows, cfg, 0); },
+      _showRows = function(rows, cfg){ _toggleRows(rows, cfg, true); },
+      _hideRows = function(rows, cfg){ _toggleRows(rows, cfg, false); },
 
 
-      _monitorFilterInput = function (e) {
+      _monitorFilterInput = function (/*e*/) {
           var input = $(this),
               data = input.data(_data_keyName);
 
           clearTimeout(data._searchThread);
-          if (e.type == 'change')
-          {
-            _dealWithFilterInput(input);
-          }
-          else
-          {
-            data._searchThread = setTimeout(function(){ _dealWithFilterInput(input); }, data.cfg.delay);
-          }
+          data._searchThread = setTimeout(function(){ _dealWithFilterInput(input); }, data.cfg.delay);
         },
 
 
@@ -148,11 +140,11 @@
           var val = input.val(),
               data = input.data(_data_keyName),
               lastValue = data.lastValue,
-              table = data.table,
+              // table = data.table,
               cfg =  data.cfg,
-              clearBtn = data.btn,
-              activeColClass = cfg.activeColClass,
-              doToggleClass;
+              // clearBtn = data.btn,
+              activeColClass = cfg.activeColClass;
+              // doToggleClass;
 
           delete data._searchThread;
 
@@ -161,13 +153,13 @@
             if (!cfg.multiFilter) // if multiFilter is off, then clear all other inputs.
             {
               data.allInputs.not(input)
-                  .each(function(i){
+                  .each(function(){
                       var inp = this,
                           inpData = $(inp).data(_data_keyName);
                       if (inp.value)
                       {
                         this.value = inpData.lastValue = '';
-                        _toggleColClass(data, inpData.idx, activeColClass, 0);
+                        _toggleColClass(data, inpData.idx, activeColClass, false);
                       }
                     });
             }
@@ -176,7 +168,7 @@
 
           _toggleColClass(data, data.idx, activeColClass,  (val.length >= cfg.minChars) );
 
-          if (val != lastValue)
+          if (val !== lastValue)
           {
             _performRowSearch(data);
           }
@@ -237,7 +229,7 @@
             _showRows( tbody.find('tr'), cfg );
           }
           data.table_head.closest('table')
-              .toggleClass(cfg.activeTableClass, someFilterActive);
+              .toggleClass(cfg.activeTableClass, !!someFilterActive);
           data.table
               .trigger('filter.filterTable');
         },
@@ -251,7 +243,6 @@
             table_head.find('tr').each(function(){
                 var row = $(this),
                     currCol = 0,
-                    foundCell,
                     cellMap = [];
                 row
                     .data(_cellMap_keyName, cellMap)
@@ -311,19 +302,18 @@
 
 
       _data_keyName = 'filterTable',
-      _cellMap_keyName = _data_keyName+'-cellMap',
-      TRUE = !0; // true
+      _cellMap_keyName = _data_keyName+'-cellMap';
 
 
 
 
-  $.fn.filterTable = function (cfg) {
+  var filterTable = function (cfg) {
       if (this.length)
       {
         var tables = this.filter('table').add( this.find('table') );
         if (tables.length)
         {
-          cfg = _beget(arguments.callee.defaults, cfg);
+          cfg = _beget(filterTable.defaults, cfg);
 
           // create clonable prototype elements
           var protoFilterRow  =  $(cfg.filterRow);
@@ -336,8 +326,8 @@
                                      .bind('change keyup', _monitorFilterInput);
           var protoClearBtn   =  $(cfg.clearBtn).bind('click', _clearFilterInput);
           var protoCell       =  $(cfg.filterCell);
-          var protoInputFilterCell =  protoCell.clone(TRUE).empty().append(protoInput);
-          var protoSelectFilterCell =  protoCell.clone(TRUE).empty().append(protoSelect);
+          var protoInputFilterCell =  protoCell.clone(true).empty().append(protoInput);
+          var protoSelectFilterCell =  protoCell.clone(true).empty().append(protoSelect);
 
           tables
               .each(function(){
@@ -346,8 +336,8 @@
                       bodyRows = table.find('tbody tr'),
                       thead = cfg.thead ? $(cfg.thead) : table.find('thead'),
                       headRows = thead.find('tr'),
-                      filterRow = protoFilterRow.clone(TRUE),
-                      filterInputs,
+                      filterRow = protoFilterRow.clone(true),
+                      // filterInputs,
                       isTHeadEmpty = !headRows.length,
 
                       protoData = {
@@ -394,7 +384,7 @@
                           {
                             refTH.attr('rowspan', headRows.length);
                           }
-                          var newClearBtn = protoClearBtn.clone(TRUE),
+                          var newClearBtn = protoClearBtn.clone(true),
                               inputData = _beget(protoData, {
                                   //lastValue: '',
                                   idx:  i,
@@ -407,7 +397,7 @@
                                           protoSelectFilterCell :
                                           protoCell
                                     )
-                                  .clone(TRUE),
+                                  .clone(true),
                               newInput = newCell
                                             .appendTo(filterRow)
                                             .find('input, select')
@@ -445,7 +435,7 @@
       return this;
     };
 
-  $.fn.filterTable.defaults = {
+  filterTable.defaults = {
       //thead:            null, // or Element
       fixColWidths:     true,
       filterRow:        '<tr class="filters" />',
@@ -483,6 +473,8 @@
       delay:            300
     };
 
-})(jQuery);
+  $.fn.filterTable = filterTable;
+
+})(window.jQuery);
 
 
