@@ -64,7 +64,7 @@
               // NOTE: LinkedIn's share button CAN NOT be customized!
 
     tumblr:  false,    // Boolean|Number(non-zero position index)|Object(button config)  - non-falsy values insert tumblr "post" button
-              count:       'right',       // Other options: 'none', 'top'
+              count:       'none',       // Other options: 'right', 'top'
               color:       'blue',        // Other options: 'white', 'black'
 
      email: false,  // Boolean|Number(non-zero position index)|Object(button config) - non-falsy values insert a mailto: link
@@ -263,6 +263,7 @@
             // private
               $prep: function( /*pluginCfg*/ ) {
                   var b = this;
+                  b.text = b.text || _getTitle(b)+'\n';
                   if ( b.custom )
                   {
                     b.txt = _getTxt(b, { en:'Tweet this!', is:'Senda á Twitter' });
@@ -456,7 +457,7 @@
 
 
           tumblr: {
-              count:       'right',       // Other options: 'none', 'top'
+              count:       'none',       // Other options: 'right', 'top'
               color:       'blue',        // Other options: 'white', 'black'
               txt:         'Post',     // Link text for customized links
 
