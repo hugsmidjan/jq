@@ -83,7 +83,8 @@
 
                     isActive = true;
                     isOpen = opts.startOpen;
-                    containerClassList.add( classActive, isOpen ? classOpen : classClosed )
+                    containerClassList.add( classActive )
+                    containerClassList.add( isOpen ? classOpen : classClosed )
                     if ( $link )
                     {
                       $link
@@ -132,7 +133,8 @@
                   {
                     widget.close(true);
                     $link.off('click'+ns);
-                    containerClassList.remove(classActive, classClosed);
+                    containerClassList.remove(classActive);
+                    containerClassList.remove(classClosed);
                     isActive = false;
                   }
                 }
@@ -267,18 +269,19 @@
                               var yOffs = hasPageYOffset ?
                                               win.pageYOffset:
                                               document.documentElement.scrollTop;
-                              var distY = widget.distY = yOffs - widget.headerHeight();
-                              var doFix = distY > 0;
-                              updateLastOffset  &&  clearTimeout( updateLastOffset );
+                              widget.distY = yOffs;
+                              var doFix = yOffs > (isFixed ? 0 : widget.headerHeight());
+                              clearTimeout( updateLastOffset );
 
                               if ( doFix !== isFixed )
                               {
                                 isFixed = doFix;
                                 lastOffs = yOffs;
-                                containerClassList[isFixed?'add':'remove']( classFixed, classHidden);
+                                containerClassList[isFixed?'add':'remove']( classFixed );
                                 if ( !isFixed )
                                 {
                                   containerClassList.remove( classShown );
+                                  containerClassList.remove( classHidden );
                                   isShown = false;
                                 }
                               }
@@ -315,7 +318,7 @@
                                     }, 1000);
                                 }
                               }
-                              widget.isFixed = doFix;
+                              widget.isFixed = isFixed;
                               widget.isShown = isShown;
                             }
                           };
@@ -337,7 +340,9 @@
                   {
                     isActive = false;
                     $scrollElm.off( scrollAndResizeEv );
-                    containerClassList.remove( classFixed, classShown, classHidden );
+                    containerClassList.remove( classFixed );
+                    containerClassList.remove( classShown );
+                    containerClassList.remove( classHidden );
                   }
                 },
 
