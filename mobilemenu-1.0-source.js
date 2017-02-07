@@ -3,7 +3,7 @@
 // ----------------------------------------------------------------------------------
 // Simple mobile menu and stickyHeader behaviour  v 1.0
 // ----------------------------------------------------------------------------------
-// (c) 2014-2016 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+// (c) 2014-2017 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
 //  written by:
 //   * Már Örlygsson        -- http://mar.anomy.net
 // ----------------------------------------------------------------------------------
@@ -22,22 +22,29 @@
   // ------------------------------
 
 
-  $.initMobileMenu = function (opts) {
-      opts = opts===true ? { minimal:true } : opts;
-      opts = $.extend({
-                // name:         'menu',
-                // evPrefix:     'mobile',
-                menuButton:   '.skiplink a',
-                // startOpen:    false,
-                // autoStart:    false,
+  $.initMobileMenu = function (userOpts) {
+      var opts = {
+        // name:         'menu',
+        // evPrefix:     'mobile',
+        menuButton:   '.skiplink a',
+        // startOpen:    false,
+        // autoStart:    false,
 
-                // container:    'html',
-                // evTarget:     document,
-                // scrollElm:    window,
-                resetScroll:  true, // Boolean or Function
+        // container:    'html',
+        // evTarget:     document,
+        // scrollElm:    window,
+        resetScroll:  true, // Boolean or Function
 
-                // minimal: false,
-              }, opts);
+        // minimal: false,
+      };
+
+      userOpts = userOpts===true ? { minimal:true } : userOpts;
+      for (var key in userOpts) {
+        val = userOpts[key];
+        if ( val !== undefined ) {
+          opts[key] = val;
+        }
+      }
 
       var name = opts.name || 'menu';
       var eventPrefix = (opts.evPrefix||'mobile')+name;
@@ -200,33 +207,69 @@
   // =============================================================================
 
 
+  var Q = function (selectorOrElement, root) {
+    return typeof selectorOrElement === 'string' ?
+              (root||document).querySelector(selectorOrElement):
+              selectorOrElement;
+  };
 
 
+  $.initStickyHeader = function (userOpts) {
+      var opts = {
+      /*
+          // The element on which to toggle the state classNames
+          container: 'html', // Element | CSS-selector
 
+          // The element on which to monitor scroll events
+          scrollElm: window, // Element | CSS-selector
 
-  $.initStickyHeader = function (opts) {
-      opts = opts===true ? { minimal:true } : opts;
-      opts = $.extend({
-                // headerHeight: function () { return parseInt(getComputedStyle(container).paddingTop, 10); },
-                delay:        50,
-                recede:     true, // Boolean or Function
-                                  // monitor up/down movement to hide/show if up/down limits are exceeded
-                upLimit:      70,
-                downLimit:    50,
-                // name: 'header',
-                // onresize:  false,
-                // autoStart: false,
+          // Number or a Function to measure the current height of the header element.
+          // Defaults to measuring paddingTop of the `container`/<html/> element.
+          headerHeight: function () { return parseInt(getComputedStyle(container).paddingTop, 10); }, // number | () => number
 
-                // container:    'html',
-                // scrollElm:    window,
+          // Height (number or function) at which to unfix the header
+          // Defaults to being same as `opts.headerHeight`
+          unfixAt: null, // number | () => number,
+      */
 
-                // minimal: false,
-              }, opts);
+          // Throttling amount for the onScroll/onResize handler function.
+          delay: 50, // ms
+
+          // Should a fixed header be additionally hidden/shown
+          // if the page is scrolled beyond a certain up/down pixel limit
+          // within a given timeframe of 1000ms?
+          recede: true, // boolean | () => boolean
+          upLimit: 70, // px
+          downLimit: 50, // px
+
+      /*
+          // className prefix (`.is-{name}-(fixed|hidden|shown)`)
+          name: 'header',
+
+          // true | 1 | window  => Monitor window.onresize events
+          // number(>1)  => Recheck the scroll state every `onresize` ms
+          onresize:  false, boolean || number
+
+          // minimal mode skips
+          //  * jQuery(window).on('formatchange', ...)  event-binding,
+          //  * auto-coupling with `mobilemenu(open|closed)` events,
+          //  * autoStarting by default.
+          minimal: false,
+
+          // Should the widget start automatically when in minimal mode?
+          autoStart: false,
+      */
+      };
+
+      userOpts = userOpts===true ? { minimal:true } : userOpts;
+      for (var key in userOpts) {
+        val = userOpts[key];
+        if ( val !== undefined ) {
+          opts[key] = val;
+        }
+      }
 
       var name = opts.name || 'header';
-      var ns = '.sticky-'+name;
-      var scrollEv = 'scroll'+ns;
-      var scrollAndResizeEv = scrollEv + (opts.onresize ? ' resize'+ns : '');
 
       var classPrefix = 'is-'+name;
       var classFixed =  classPrefix+'-fixed';
@@ -238,7 +281,24 @@
 
       var container; // lazy bound
       var containerClassList; // lazy bound
-      var $scrollElm; // lazy bound
+      var scrollElm; // lazy bound
+      var onresize; // lazy bound
+      var resizeInterval; // optional setInterval id for non-window resize checks
+
+      var headerHeight = opts.headerHeight;
+      headerHeight =  !('headerHeight' in opts) ?
+                          function () { return parseInt(getComputedStyle(container).paddingTop, 10); }:
+                      typeof headerHeight === 'number' ?
+                          function () { return opts.headerHeight; }:
+                          headerHeight;
+
+      var unfixAt = opts.unfixAt;
+      unfixAt = !('unfixAt' in opts) ?
+                    headerHeight:
+                typeof unfixAt === 'number' ?
+                    function () { return opts.unfixAt; }:
+                    unfixAt;
+
 
       var widget = {
 
@@ -250,27 +310,40 @@
               // isFixed: (distY > 0),
               // isShown: false,
 
-              headerHeight: opts.headerHeight || function () { return parseInt(getComputedStyle(container).paddingTop, 10); },
+              headerHeight: headerHeight,
+              unfixAt: unfixAt,
 
               start: function () {
                   if ( !isActive )
                   {
+                    container = Q(opts.container) || document.documentElement;
+                    containerClassList = container.classList;
+                    scrollElm = Q(opts.scrollElm) || win;
+
                     isActive = true;
+
+                    var scrollElmIsWindow = !scrollElm.tagName;
+                    var hasPageYOffset = scrollElmIsWindow && ('pageXOffset' in scrollElm);
+                    var scrollTopElm = scrollElmIsWindow ? scrollElm.document.documentElement : scrollElm;
+                    onresize = opts.onresize;
+                    onresize = onresize === 1 ? true : onresize; // accept lecacy code passing 1 instead of true;
+                    if (onresize === true) {
+                      onresize = scrollElmIsWindow ? scrollElm : win;
+                    }
+
                     var lastOffs = 0;
                     var updateLastOffset;
-                    var hasPageYOffset = ('pageXOffset' in win);
                     var isFixed = false;
                     var isShown = false;
-                    var delay = opts.delay;
 
                     var monitorScroll = function (/*e*/) {
                             if ( !isPaused )
                             {
                               var yOffs = hasPageYOffset ?
-                                              win.pageYOffset:
-                                              document.documentElement.scrollTop;
+                                              scrollElm.pageYOffset:
+                                              scrollTopElm.scrollTop;
                               widget.distY = yOffs;
-                              var doFix = yOffs > (isFixed ? 0 : widget.headerHeight());
+                              var doFix = yOffs > (isFixed ? unfixAt() : headerHeight());
                               clearTimeout( updateLastOffset );
 
                               if ( doFix !== isFixed )
@@ -285,7 +358,7 @@
                                   isShown = false;
                                 }
                               }
-                              if ( widget.recede() && isFixed )
+                              if ( isFixed  &&  widget.recede() )
                               {
                                 var delta = yOffs - lastOffs;
                                 var exceededLimit;
@@ -322,24 +395,32 @@
                               widget.isShown = isShown;
                             }
                           };
+                    if ( opts.delay && $.throttleFn ) {
+                      monitorScroll = $.throttleFn(monitorScroll, true, opts.delay);
+                    }
 
-                    container = container || $(opts.container)[0] || document.documentElement;
-                    containerClassList = container.classList;
+                    $(scrollElm).on('scroll', monitorScroll);
 
-                    $scrollElm = $scrollElm || $( opts.scrollElm || win );
-
-                    $scrollElm
-                        .on(scrollAndResizeEv, (delay && $.throttleFn) ?
-                                $.throttleFn(monitorScroll, true, delay):
-                                monitorScroll)
-                        .trigger(scrollEv);
+                    if ( onresize ) {
+                      if ( typeof onresize === 'number' ) {
+                        resizeInterval = setInterval(monitorScroll, onresize);
+                      }
+                      else {
+                        $(onresize).on('resize', monitorScroll);
+                      }
+                    }
+                    monitorScroll();
                   }
                 },
               stop: function () {
                   if ( isActive )
                   {
                     isActive = false;
-                    $scrollElm.off( scrollAndResizeEv );
+                    $(scrollElm).off('scroll');
+                    if (onresize) {
+                      clearInterval( resizeInterval );
+                      $(onresize).off('resize');
+                    }
                     containerClassList.remove( classFixed );
                     containerClassList.remove( classShown );
                     containerClassList.remove( classHidden );
@@ -364,7 +445,7 @@
         opts.scrollElm = win;
 
         // old fat behavior - handle formatChange.
-        var formatChangeEv = 'formatchange'+ns;
+        var formatChangeEv = 'formatchange.sticky-'+name;
         var mediaGroupOptValue = ('mediaGroup' in opts) ? opts.mediaGroup : 'Small';
         var mediaGroup = (typeof mediaGroupOptValue === 'function') ?
                             mediaGroupOptValue:
