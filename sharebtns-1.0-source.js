@@ -463,7 +463,8 @@
 
             // private
               // $prep: function ( /*pluginCfg*/) {},
-              $tmpl: '<a class="tumblr-share-button" data-color="{color}" data-notes="{count}" href="https://embed.tumblr.com/share" aria-type="button">{txt}</a>',
+              $tmpl:  '<a class="tumblr-share-button" data-color="{color}" data-notes="{count}" href="https://www.tumblr.com/share" aria-type="button">{txt}</a>',
+              $tmpl2: '<a class="tumblrbtn" href="https://www.tumblr.com/share/link?url=%{url}"'+ dodgyPopupAttrs +'"tumblrwin" aria-type="button">{txt}</a>',
 
               $init: function (/* btn, cfg */) {
                   // https://www.tumblr.com/buttons
