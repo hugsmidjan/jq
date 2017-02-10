@@ -17,7 +17,7 @@
     var cfg = $slNav.data('cfg');
     if ( !cfg ) { return false; }
     var $slNavBB = $slNav.find('.boxbody').wrap('<div class="bbclip" />');
-    var $goBack = '<a href="#" class="goback">'+ cfg.backText +'</a>';
+    var $goBack = '<button type="button" class="goback">'+ cfg.backText +'</a>';
     var slNavCurrent = $slNav.find('.current').length ? $slNav.find('.current') : $slNav.find('.parent:last');
     var currentLevel = 0;
     var slNavWidth = 0;
@@ -26,9 +26,9 @@
     if ( destroy )
     {
       $win.off('resize.slNav');
-      $slNavBB.off('click.slNav', cfg.branch+cfg.toggler);
+      $slNavBB.find(cfg.branch).off('click.slNav', cfg.toggler);
 
-      $slNavBB.find(cfg.branch+cfg.toggler).each(function () {
+      $slNavBB.find(cfg.branch).find(cfg.toggler).each(function () {
           $(this).after( $(this).data('branch') );
         });
 
@@ -50,7 +50,7 @@
 
     if (slNavCurrent.length)
     {
-      currentLevel = parseInt( slNavCurrent.closest('ul').attr('class').match(/level(\d+)/)[1], 0) - 1;
+      currentLevel = slNavCurrent.is('.homecurrent') ? 0 : parseInt( slNavCurrent.closest($slNavBB.find(cfg.branch).find('> ul')).attr('class').match(/level(\d+)/)[1], 0) - 1;
       slNavCurrent.parents('ul').addClass('active');
     }
 
@@ -64,7 +64,11 @@
                 .addClass( $(this).is('.current') ? 'current' : '' )
                 .addClass( $(this).is('.parent') ? 'parent' : '' )
                 .append( $goBack )
-                .append( $(this).find('> a')[cfg.linkTitle ? 'clone' : 'text']() )
+                .append(
+                    cfg.linkTitle ?
+                        $(this).find('> a').clone() :
+                        '<span>'+ ($(this).find('> a').text()) +'</span>'
+                  )
           );
 
         if ( !$slNavBB.find('.lvl'+branchLevel).length )
@@ -105,7 +109,8 @@
         .trigger('resize.slNav');
 
     $slNavBB
-        .on('click.slNav', cfg.branch+cfg.toggler, function (e) {
+        .find(cfg.branch)
+        .on('click.slNav', cfg.toggler, function (e) {
             e.preventDefault();
             var branch = $(this).data('branch');
             currentLevel++;
