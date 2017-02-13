@@ -50,7 +50,14 @@
 
     if (slNavCurrent.length)
     {
-      currentLevel = slNavCurrent.is('.homecurrent') ? 0 : parseInt( slNavCurrent.closest($slNavBB.find(cfg.branch).find('> ul')).attr('class').match(/level(\d+)/)[1], 0) - 1;
+      currentLevel = slNavCurrent.is('.homecurrent') ?
+                        0 :
+                        parseInt(
+                            slNavCurrent
+                              .closest( $slNavBB.find(cfg.branch).find('> ul').add($slNavBB.find('.level1'))  )
+                                  .attr('class')
+                                  .match(/level(\d+)/)[1],
+                          10) - 1;
       slNavCurrent.parents('ul').addClass('active');
     }
 
