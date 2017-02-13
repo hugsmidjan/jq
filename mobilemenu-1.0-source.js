@@ -272,6 +272,7 @@
       var name = opts.name || 'header';
 
       var classPrefix = 'is-'+name;
+      var classUnfixed =  classPrefix+'-unfixed';
       var classFixed =  classPrefix+'-fixed';
       var classHidden = classPrefix+'-hidden';
       var classShown =  classPrefix+'-shown';
@@ -351,6 +352,7 @@
                                 isFixed = doFix;
                                 lastOffs = yOffs;
                                 containerClassList[isFixed?'add':'remove']( classFixed );
+                                containerClassList[isFixed?'remove':'add']( classUnfixed );
                                 if ( !isFixed )
                                 {
                                   containerClassList.remove( classShown );
@@ -410,6 +412,7 @@
                       }
                     }
                     monitorScroll();
+                    !widget.isFixed  &&  containerClassList.add( classUnfixed );
                   }
                 },
               stop: function () {
