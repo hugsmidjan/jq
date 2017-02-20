@@ -29,6 +29,8 @@
         menuButton:   '.skiplink a',
         // startOpen:    false,
         // autoStart:    false,
+        // setFocus:     true,
+        // focusDelay:   0, //ms
 
         // container:    'html',
         // evTarget:     document,
@@ -83,7 +85,7 @@
                       if ( opts.menuButton )
                       {
                         $link = $(opts.menuButton);
-                        $linkTarget = $.focusHere  &&  $link  &&  $link.attr('href');
+                        $linkTarget = opts.setFocus  &&  $.focusHere  &&  $link  &&  $link.attr('href');
                         $linkTarget = $linkTarget  &&  $( $linkTarget );
                       }
                     }
@@ -112,7 +114,9 @@
                     scrollPosBeforeMenuOpened = resetScroll()  &&  $scrollElm.scrollTop();
                     containerClassList.add(classOpen);
                     containerClassList.remove(classClosed);
-                    $linkTarget  &&  $linkTarget.focusHere();
+                    $linkTarget  &&  setTimeout(function(){
+                      $linkTarget.focusHere();
+                    }, opts.focusDelay||0);
                     resetScroll()  &&  $scrollElm.scrollTop( 0 );
                     isOpen = true;
                     $evTarget.trigger( eventPrefix+'opened' );
