@@ -246,7 +246,7 @@
         },
 
       dodgyPopupAttrs = ' onclick="window.open(this.href,null,\'toolbar=0,status=0,width=626,height=436\');return false;" target=',
-      fbshareLnk = '<a'+ dodgyPopupAttrs +'"fbshare" aria-type="button" href="//www.facebook.com/sharer.php?u=',
+      fbshareLnk = '<a'+ dodgyPopupAttrs +'"fbshare" role="button" href="//www.facebook.com/sharer.php?u=',
 
       btnDefaults = sharebtns.btnDefaults = {
 
@@ -277,7 +277,7 @@
                   }
                 },
               $tmpl:  '<iframe src="//platform.twitter.com/widgets/tweet_button.html?%={size}%={via}%={related}%={hashtags}%={text}%={url}%={lang}" style="width:{width}; height:{height};" allowtransparency="true" frameborder="0" scrolling="no" title="Twitter Tweet Button" />',
-              $tmpl2: '<a'+ dodgyPopupAttrs +'"tweetit" aria-type="button" href="https://twitter.com/intent/tweet?%={via}%={related}%={hashtags}%={text}%={url}%={lang}">{txt}</a>',
+              $tmpl2: '<a'+ dodgyPopupAttrs +'"tweetit" class="twitterbtn" role="button" href="https://twitter.com/intent/tweet?%={via}%={related}%={hashtags}%={text}%={url}%={lang}">{txt}</a>',
               $pos:  20 // lowest $pos comes first
             },
 
@@ -353,7 +353,7 @@
                   }
                 },
               $tmpl:  '<div class="g-plusone" data-size="{size}"{count} data-href="{url}"/>',
-              $tmpl2: '<a href="https://plus.google.com/share?url=%{url}" aria-type="button" class="gplusbtn"'+ dodgyPopupAttrs +'"gpluswin">{txt}</a>',
+              $tmpl2: '<a href="https://plus.google.com/share?url=%{url}" role="button" class="gplusbtn"'+ dodgyPopupAttrs +'"gpluswin">{txt}</a>',
               $init: function (/* btn, cfg */) {
                   // https://developers.google.com/+/web/+1button/
                   //win.___gcfg = win.___gcfg || {lang:b.lang};
@@ -407,7 +407,7 @@
                   }
                 },
               $tmpl: '<script type="IN/Share" data-url="{url}"{count} data-showzero="true"/>',
-              $tmpl2: '<a href="https://www.linkedin.com/shareArticle?mini=true&amp;url=%{url}&amp;title=%{title}&amp;summary=%{description}&amp;source=%{source}" class="linkedinbtn"'+ dodgyPopupAttrs +'"linkedinwin" aria-type="button">{txt}</a>',
+              $tmpl2: '<a href="https://www.linkedin.com/shareArticle?mini=true&amp;url=%{url}&amp;title=%{title}&amp;summary=%{description}&amp;source=%{source}" class="linkedinbtn"'+ dodgyPopupAttrs +'"linkedinwin" role="button">{txt}</a>',
               $init: function (b/* , cfg */) {
                   // http://developer.linkedin.com/plugins/share-plugin-generator
                   // NOTE: LinkedIn's plugin is crap and can only be injected once,
@@ -444,9 +444,9 @@
                     }
                   }
                 },
-              $tmpl: '<a href="http://pinterest.com/pin/create/button/?url=%{url}&amp;media=%{imgsrc}" class="pin-it-button" data-pin-do="buttonPin" data-pin-config="{count}" lang="en" aria-type="button">{txt}</a>',
+              $tmpl: '<a href="http://pinterest.com/pin/create/button/?url=%{url}&amp;media=%{imgsrc}" class="pin-it-button" data-pin-do="buttonPin" data-pin-config="{count}" lang="en" role="button">{txt}</a>',
                         //<img border="0" src="//assets.pinterest.com/images/PinExt.png" title="Pin It" />
-              $tmpl2: '<a href="http://pinterest.com/pin/create/button/?url=%{url}&amp;media=%{imgsrc}" class="pinitbtn"'+ dodgyPopupAttrs +'"pinitwin" lang="en" aria-type="button">{txt}</a>',
+              $tmpl2: '<a href="http://pinterest.com/pin/create/button/?url=%{url}&amp;media=%{imgsrc}" class="pinitbtn"'+ dodgyPopupAttrs +'"pinitwin" lang="en" role="button">{txt}</a>',
 
               $init: function (/* btn, cfg */) {
                   // http://business.pinterest.com/widget-builder/#do_pin_it_button
@@ -463,8 +463,8 @@
 
             // private
               // $prep: function ( /*pluginCfg*/) {},
-              $tmpl:  '<a class="tumblr-share-button" data-color="{color}" data-notes="{count}" href="https://www.tumblr.com/share" aria-type="button">{txt}</a>',
-              $tmpl2: '<a class="tumblrbtn" href="https://www.tumblr.com/share/link?url=%{url}"'+ dodgyPopupAttrs +'"tumblrwin" aria-type="button">{txt}</a>',
+              $tmpl:  '<a class="tumblr-share-button" data-color="{color}" data-notes="{count}" href="https://www.tumblr.com/share" role="button">{txt}</a>',
+              $tmpl2: '<a class="tumblrbtn" href="https://www.tumblr.com/share/link?url=%{url}"'+ dodgyPopupAttrs +'"tumblrwin" role="button">{txt}</a>',
 
               $init: function (/* btn, cfg */) {
                   // https://www.tumblr.com/buttons
