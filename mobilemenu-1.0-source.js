@@ -29,7 +29,7 @@
         menuButton:   '.skiplink a',
         // startOpen:    false,
         // autoStart:    false,
-        // setFocus:     true,
+        setFocus:     true,
         // focusDelay:   0, //ms
 
         // container:    'html',
