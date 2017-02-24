@@ -1,7 +1,9 @@
+/* jQuery.fn.listscroller 1.1  -- (c) 2009-2017 Hugsmiðjan ehf.  @preserve */
+
 // ----------------------------------------------------------------------------------
 // jQuery.fn.listscroller v 1.1
 // ----------------------------------------------------------------------------------
-// (c) 2009 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+// (c) 2009-2017 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
 //  written by:
 //   * Már Örlygsson        -- http://mar.anomy.net
 //   * Borgar Þorsteinsson  -- http://borgar.undraland.com
@@ -105,7 +107,31 @@
           statusLabel:       'Síða: ',
           ofTotalSeparator:  ' af ',
           statusLabelAfter:  ''
-        }
+        },
+      no: {
+          labelNext:         'Neste',
+          labelPrev:         'Tidligere',
+          titleNext:         'Bla frem',
+          titlePrev:         'Bla tilbake',
+
+          jumpLabel:         'Sider:',
+
+          statusLabel:       'Side: ',
+          ofTotalSeparator:  ' af ',
+          statusLabelAfter:  ''
+        },
+      da: {
+          labelNext:         'Næste',
+          labelPrev:         'Tidligere',
+          titleNext:         'Rul frem',
+          titlePrev:         'Rul tilbage',
+
+          jumpLabel:         'Sider:',
+
+          statusLabel:       'Side: ',
+          ofTotalSeparator:  ' af ',
+          statusLabelAfter:  ''
+        },
     },
 
     animate : {
@@ -220,8 +246,7 @@
   // detect list aspect
   function detectAspect ( _items )
   {
-    var ret,
-        i2 = _items.eq( 1 ),
+    var i2 = _items.eq( 1 ),
         p1 = _items.eq( 0 ).offset(),
         p2 = i2.offset();
     // usable second item?
@@ -470,8 +495,7 @@
 
   function initScroller ( cfg, _block, _items )
   {
-    var _ref,
-        _inner,
+    var _inner,
         _outer;
 
     var oldCfg = _block.data('listscrollerCfg');
