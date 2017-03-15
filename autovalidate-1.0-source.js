@@ -347,6 +347,14 @@
     var
         fieldIsFocused = 'cni_focused',
         fieldIsChanged = 'cni_changed',
+        getCleanValue = function (input) {
+          var val = input.value;
+          // try to handle pretty numbers, use clever read()
+          val = typeof $.prettyNum === 'object' ?
+                    $.prettyNum.read(val, $(input).closest('[lang]').attr('lang')||'en') :
+                    val;
+          return parseFloat( val );
+        },
         // increment/decrement field value with up/down arrow
         arrowCrement = function (e) {
             var input = this,
@@ -360,7 +368,7 @@
             if ( delta )
             {
               delta = delta * (input.step || 1) * (e.shiftKey ? 10 : 1);
-              var val = parseFloat( input.value );
+              var val = getCleanValue(input);
               var val2 = boundryCheck( input, (val||0) + delta );
               if ( val !== val2 ) // skip unnessesary updates and change events
               {
@@ -425,11 +433,12 @@
             var val = input.value;
             if ( val )
             {
-              val = parseFloat( val );
+              val = getCleanValue(input);
               var val2 = boundryCheck( input, val||0 );
               if ( val !== val2 )
               {
                 input.value = val2;
+                $(input).trigger('keyup.outofbounds');
               }
             }
           };
