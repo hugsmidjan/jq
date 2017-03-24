@@ -36,6 +36,7 @@
       $slNav.find('.col').zap();
       $slNav.find('.title').remove();
       $slNav.find('.goback').remove();
+      $slNav.find('.toggler').remove();
       $slNav.find('[style]').removeAttr('style');
 
       // handle resize throttle
@@ -94,7 +95,7 @@
 
         if ( cfg.doTogglers )
         {
-          $(this).append('<a href="#" class="expand">></a>');
+          $(this).append('<a href="#" class="toggler">></a>');
         }
         $(this).find(cfg.toggler).data('branch', branch);
 
@@ -155,7 +156,7 @@
               backText: $.lang() === 'is' ? 'Til baka' : 'Go back',
               branch: 'li.branch',
               doTogglers: true,
-              toggler: '> a.expand',
+              toggler: '> a.toggler',
               cloneCatClass: false,
               linkTitle: true,
               resizeThrottle: 150,
