@@ -95,7 +95,7 @@
 
         if ( cfg.doTogglers )
         {
-          $(this).append('<a href="#" class="toggler">></a>');
+          $(this).prepend('<a href="#" class="toggler">></a>');
         }
         $(this).find(cfg.toggler).data('branch', branch);
 
