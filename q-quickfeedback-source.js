@@ -14,6 +14,8 @@
 
 (function($){
 
+  // These texts are now embedded as data-attributes in the HTML to allow
+  // all i18n to happen in the same place.
   $.quickFeedback = {
       i18n: {
         en: {
@@ -46,12 +48,13 @@
 
               promptElm
                   .on('click', cfg.yayBtnSel, function (e) {
+                      var thanksText = this.getAttribute('data-thankstext') || i18n.qfeedbackThanks;
                       e.preventDefault();
                       promptElm
                           .addClass('submitted')
                           .pause(200, function () {
                               promptElm
-                                  .html( '<strong class="thanks">'+i18n.qfeedbackThanks+'</strong>' )
+                                  .html( '<strong class="thanks">'+thanksText+'</strong>' )
                                   .focusHere();
                             })
                           .pause(4000)
@@ -70,8 +73,9 @@
                               var ajaxElms = $(html);
                               var feedbackform = ajaxElms.find(cfg.feedbackformSel)
                                                     .append( ajaxElms.filter('script[data-spm]') );
+                              var hideText = feedbackform[0].getAttribute('data-hidetext') || i18n.qfeedbackClose;
 
-                              $('<a class="action cancel" role="button" href="#">'+ i18n.qfeedbackClose +'</a>')
+                              $('<a class="action cancel" role="button" href="#">'+ hideText +'</a>')
                                   .on('click', function (e) {
                                       e.preventDefault();
                                       feedbackform
@@ -143,4 +147,4 @@
         });
   };
 
-})(jQuery);
+})(window.jQuery);
