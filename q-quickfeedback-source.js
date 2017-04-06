@@ -12,7 +12,7 @@
 //  - virtualbrowser
 
 
-(function($){
+(function ($) {
 
   // These texts are now embedded as data-attributes in the HTML to allow
   // all i18n to happen in the same place.
@@ -20,13 +20,13 @@
       i18n: {
         en: {
           qfeedbackThanks: 'That was nice. Thanks!',
-          qfeedbackClose:  'Hide'
+          qfeedbackClose:  'Hide',
         },
         is: {
           qfeedbackThanks: 'Gott að vita. Takk!',
-          qfeedbackClose:  'Fela'
-        }
-      }
+          qfeedbackClose:  'Fela',
+        },
+      },
   };
 
   $.fn.quickFeedback = function ( cfg ) {
@@ -38,11 +38,12 @@
               ajaxParams:     { justPicPos:'pgmain' },
               feedbackformSel: '.quickfeedback',
               thankyouSel:    '.thankyou',
-              logShortPaths:  false
+              logShortPaths:  false,
             }, cfg );
 
-    return this.each(function(){
+    return this.each(function () {
               var promptElm = $(this);
+              var bemName = this.className.split(' ')[0];
               var i18n = $.quickFeedback.i18n[promptElm.lang()] || $.quickFeedback.i18n.is;
               var myPath = cfg.logShortPaths ? document.location.pathname : document.location.href;
 
@@ -54,7 +55,7 @@
                           .addClass('submitted')
                           .pause(200, function () {
                               promptElm
-                                  .html( '<strong class="thanks">'+thanksText+'</strong>' )
+                                  .html( '<strong class="thanks '+ bemName +'__thanks">'+thanksText+'</strong>' )
                                   .focusHere();
                             })
                           .pause(4000)
@@ -104,8 +105,7 @@
                                   .detach();
 
                               var respEmail = feedbackform.find('.resp_email');
-                              if ( respEmail.length )
-                              {
+                              if ( respEmail.length ) {
                                 respEmail.find('[name="send_response"]').on('change', function () {
                                     respEmail[$(this).is(':checked') ? 'addClass' : 'removeClass']('email-active');
                                   });
@@ -118,8 +118,7 @@
                                       req.resultDOM = req.resultDOM.find('.boxbody').contents();
                                     })
                                   .on('VBloaded', function (/*e, req*/) {
-                                      if ( nonEmptyFeedback )
-                                      {
+                                      if ( nonEmptyFeedback ) {
                                         cfg.gaPing && window.ga.eventPing('quickfeedback', 'clicked-no', myPath, 1, false);
                                         feedbackSubmitted = true;
                                       }
@@ -133,7 +132,7 @@
                                   .virtualBrowser({
                                       params:       cfg.ajaxParams,
                                       loadmsgMode:  'replace',
-                                      selector:     cfg.thankyouSel
+                                      selector:     cfg.thankyouSel,
                                     });
                             });
 
