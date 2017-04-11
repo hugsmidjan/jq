@@ -1,4 +1,4 @@
-/* Google analytics helpers  -- (c) 2014 Hugsmiðjan ehf.  @preserve */
+/* Google analytics helpers  -- (c) 2017 Hugsmiðjan ehf.  @preserve */
 // prepares the window.ga object, and sets up a single-use ga.loadScript() method.
 (function(win, ga){
   ga = win.ga = win.ga || function(){ (ga.q=ga.q||[]).push(arguments); };
@@ -29,10 +29,16 @@
   };
 
   ga.viewPing = function (url, title) {
-      ga('send', 'pageview', {
+      // The default behaviour is (now) to set the new url+title as a new value on the 'ga tracker',
+      //   essentially redefining the 'current' page (e.g. in a single-page app).
+      // https://developers.google.com/analytics/devguides/collection/analyticsjs/single-page-applications
+
+      ga('set', {
           'page': url,
           'title': title
         });
+      ga('send', 'pageview');
+
   };
 
 })(window);
