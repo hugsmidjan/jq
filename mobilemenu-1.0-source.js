@@ -10,7 +10,7 @@
 
 // FIXME: Need to write documentation
 
-(function(win){
+(function (win) {
   var $ = win.jQuery;
 
 
@@ -42,7 +42,7 @@
 
       userOpts = userOpts===true ? { minimal:true } : userOpts;
       for (var key in userOpts) {
-        val = userOpts[key];
+        var val = userOpts[key];
         if ( val !== undefined ) {
           opts[key] = val;
         }
@@ -67,23 +67,22 @@
       var $link; // lazy bound
       var $linkTarget; // lazy bound
 
-      var resetScroll = opts.resetScroll.apply ? opts.resetScroll : function(){ return opts.resetScroll; };
+      var resetScroll = opts.resetScroll.apply ?
+                            opts.resetScroll:
+                            function () { return opts.resetScroll; };
       var scrollPosBeforeMenuOpened;
 
       var widget = {
 
               start: function () {
-                  if ( !isActive )
-                  {
+                  if ( !isActive ) {
                     // find the elements
-                    if ( !containerClassList )
-                    {
+                    if ( !containerClassList ) {
                       containerClassList = ($(opts.container)[0] || document.documentElement).classList;
                       $scrollElm = resetScroll()  &&  $( opts.scrollElm || win );
                       $evTarget = $( opts.evTarget || document );
 
-                      if ( opts.menuButton )
-                      {
+                      if ( opts.menuButton ) {
                         $link = $(opts.menuButton);
                         $linkTarget = opts.setFocus  &&  $.focusHere  &&  $link  &&  $link.attr('href');
                         $linkTarget = $linkTarget  &&  $( $linkTarget );
@@ -92,10 +91,9 @@
 
                     isActive = true;
                     isOpen = opts.startOpen;
-                    containerClassList.add( classActive )
-                    containerClassList.add( isOpen ? classOpen : classClosed )
-                    if ( $link )
-                    {
+                    containerClassList.add( classActive );
+                    containerClassList.add( isOpen ? classOpen : classClosed );
+                    if ( $link ) {
                       $link
                           .on('click'+ns, function (e) {
                               e.preventDefault();
@@ -108,13 +106,12 @@
                 },
 
               open: function () {
-                  if ( isActive && !isOpen )
-                  {
+                  if ( isActive && !isOpen ) {
                     $evTarget.trigger( eventPrefix+'open' );
                     scrollPosBeforeMenuOpened = resetScroll()  &&  $scrollElm.scrollTop();
                     containerClassList.add(classOpen);
                     containerClassList.remove(classClosed);
-                    $linkTarget  &&  setTimeout(function(){
+                    $linkTarget  &&  setTimeout(function () {
                       $linkTarget.focusHere();
                     }, opts.focusDelay||0);
                     resetScroll()  &&  $scrollElm.scrollTop( 0 );
@@ -124,13 +121,11 @@
                 },
 
               close: function ( _isStopping ) {
-                  if ( isActive && isOpen )
-                  {
+                  if ( isActive && isOpen ) {
                     $evTarget.trigger( eventPrefix+'close' );
                     containerClassList.remove(classOpen);
                     containerClassList.add(classClosed);
-                    if ( !_isStopping )
-                    {
+                    if ( !_isStopping ) {
                       resetScroll()  &&  $scrollElm.scrollTop( scrollPosBeforeMenuOpened );
                       $link  &&  $link[0].blur();
                     }
@@ -140,23 +135,20 @@
                 },
 
               stop: function () {
-                  if ( isActive )
-                  {
+                  if ( isActive ) {
                     widget.close(true);
                     $link.off('click'+ns);
                     containerClassList.remove(classActive);
                     containerClassList.remove(classClosed);
                     isActive = false;
                   }
-                }
+                },
             };
 
-      if ( opts.minimal )
-      {
+      if ( opts.minimal ) {
         opts.autoStart && widget.start();
       }
-      else
-      {
+      else {
         // old fat behavior - handle formatChange and impose auto-toggling in-case of multiple widgets.
 
         // disallow certain customization to avoid this fat magic causing obscure side-effects
@@ -172,8 +164,7 @@
                             function (media, prefix) { return !mediaGroupOptValue || media[prefix+mediaGroupOptValue]; };
         $win
             .on(formatChangeEv, function (e, media) {
-                if ( !isActive && mediaGroup(media,'became') )
-                {
+                if ( !isActive && mediaGroup(media,'became') ) {
                   widget.start();
                   $evTarget
                       .on( eventPrefix+'open'+ns, function () {
@@ -185,16 +176,14 @@
                         });
                   !mediaGroupOptValue && $win.off(formatChangeEv);
                 }
-                else if ( isActive && mediaGroup(media,'left') )
-                {
+                else if ( isActive && mediaGroup(media,'left') ) {
                   widget.stop();
                   $evTarget.off( ns );
                 }
               });
         triggerOldFormatChangeEvent( formatChangeEv );
 
-        if ( opts.stickyHeader !== false )
-        {
+        if ( opts.stickyHeader !== false ) {
           widget.stickyHeaderWidget = $.initStickyHeader( $.extend({}, opts, { name:'header' }) );
         }
       }
@@ -267,7 +256,7 @@
 
       userOpts = userOpts===true ? { minimal:true } : userOpts;
       for (var key in userOpts) {
-        val = userOpts[key];
+        var val = userOpts[key];
         if ( val !== undefined ) {
           opts[key] = val;
         }
@@ -309,7 +298,7 @@
 
               upLimit: opts.upLimit,
               downLimit: opts.downLimit,
-              recede: opts.recede.apply ? opts.recede : function(){ return opts.recede; },
+              recede: opts.recede.apply ? opts.recede : function () { return opts.recede; },
 
               // distY: 0
               // isFixed: (distY > 0),
@@ -319,8 +308,7 @@
               unfixAt: unfixAt,
 
               start: function () {
-                  if ( !isActive )
-                  {
+                  if ( !isActive ) {
                     container = Q(opts.container) || document.documentElement;
                     containerClassList = container.classList;
                     scrollElm = Q(opts.scrollElm) || win;
@@ -342,8 +330,7 @@
                     var isShown = false;
 
                     var monitorScroll = function (/*e*/) {
-                            if ( !isPaused )
-                            {
+                            if ( !isPaused ) {
                               var yOffs = hasPageYOffset ?
                                               scrollElm.pageYOffset:
                                               scrollTopElm.scrollTop;
@@ -351,48 +338,39 @@
                               var doFix = yOffs > (isFixed ? unfixAt() : headerHeight());
                               clearTimeout( updateLastOffset );
 
-                              if ( doFix !== isFixed )
-                              {
+                              if ( doFix !== isFixed ) {
                                 isFixed = doFix;
                                 lastOffs = yOffs;
                                 containerClassList[isFixed?'add':'remove']( classFixed );
                                 containerClassList[isFixed?'remove':'add']( classUnfixed );
-                                if ( !isFixed )
-                                {
+                                if ( !isFixed ) {
                                   containerClassList.remove( classShown );
                                   containerClassList.remove( classHidden );
                                   isShown = false;
                                 }
                               }
-                              if ( isFixed  &&  widget.recede() )
-                              {
+                              if ( isFixed  &&  widget.recede() ) {
                                 var delta = yOffs - lastOffs;
                                 var exceededLimit;
-                                if ( (exceededLimit = delta > widget.downLimit) ) // going down
-                                {
-                                  if ( isShown )
-                                  {
-                                    containerClassList.remove( classShown )
+                                if ( (exceededLimit = delta > widget.downLimit) ) { // going down
+                                  if ( isShown ) {
+                                    containerClassList.remove( classShown );
                                     containerClassList.add( classHidden );
                                     isShown = false;
                                   }
                                 }
-                                else if ( (exceededLimit = delta < -widget.upLimit) ) // going up
-                                {
-                                  if ( !isShown )
-                                  {
-                                    containerClassList.remove( classHidden )
+                                else if ( (exceededLimit = delta < -widget.upLimit) ) { // going up
+                                  if ( !isShown ) {
+                                    containerClassList.remove( classHidden );
                                     containerClassList.add( classShown );
                                     isShown = true;
                                   }
                                 }
-                                if ( exceededLimit )
-                                {
+                                if ( exceededLimit ) {
                                   lastOffs = yOffs;
                                 }
-                                else
-                                {
-                                  updateLastOffset = setTimeout(function(){
+                                else {
+                                  updateLastOffset = setTimeout(function () {
                                       lastOffs = yOffs;
                                     }, 1000);
                                 }
@@ -420,8 +398,7 @@
                   }
                 },
               stop: function () {
-                  if ( isActive )
-                  {
+                  if ( isActive ) {
                     isActive = false;
                     $(scrollElm).off('scroll');
                     if (onresize) {
@@ -434,18 +411,16 @@
                   }
                 },
 
-              pause: function(){ isPaused = true; },
-              resume: function(){ isPaused = false; },
+              pause: function () { isPaused = true; },
+              resume: function () { isPaused = false; },
 
             };
 
 
-      if ( opts.minimal )
-      {
+      if ( opts.minimal ) {
         opts.autoStart  &&  widget.start();
       }
-      else
-      {
+      else {
         // old fat behavior - handle formatChange
         // disallow certain customization to avoid this fat magic causing obscure side-effects
         opts.container = 'html';
@@ -459,16 +434,14 @@
                             function (media, prefix) { return !mediaGroupOptValue || media[prefix+mediaGroupOptValue]; };
         $win
             .on(formatChangeEv, function (e, media) {
-                if ( !isActive && mediaGroup(media,'became') )
-                {
+                if ( !isActive && mediaGroup(media,'became') ) {
                   widget.start();
                   $(document)
-                      .on('mobilemenuopen',function(){  widget.pause();  })
-                      .on('mobilemenuclosed', function(){  widget.resume();  });
+                      .on('mobilemenuopen',function () {  widget.pause();  })
+                      .on('mobilemenuclosed', function () {  widget.resume();  });
                   !mediaGroupOptValue  &&  $win.off(formatChangeEv);
                 }
-                else if ( isActive && mediaGroup(media,'left') )
-                {
+                else if ( isActive && mediaGroup(media,'left') ) {
                   widget.stop();
                   $(document)
                       .off('mobilemenuopen mobilemenuclosed');
