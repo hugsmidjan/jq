@@ -280,6 +280,8 @@
 
     if ( c.index != c.lastIndex )
     {
+      _block.trigger('beforeMove', {newIndex: c.index});
+
       list
           .addClass( c.hideClass )
           .removeClass( c.cursorItemClass )
