@@ -48,6 +48,7 @@
               vidHeight = data.cfg.vidHeight !== 'auto' ? data.cfg.vidHeight : calcHeight(vidWidth, data.cfg.aspect4x3),
               videoUrl,
               videoId,
+              playlistId,
               mimetype,
               autoplay = '',
               autohide = '',
@@ -63,12 +64,26 @@
               http://www.youtube.com/embed/nTasT5h0LEg?rel=0
               http://www.youtube.com/embed/nTasT5h0LEg
               http://youtu.be/nTasT5h0LEg
+
+              With playlists:
+              https://www.youtube.com/watch?v=E503UT0-TC8&index=3&list=PLeM_UHGUqVy-5jM0tAWX4MeUSKIkI1G1w
+              https://www.youtube.com/playlist?list=PLeM_UHGUqVy-5jM0tAWX4MeUSKIkI1G1w
+              https://www.youtube.com/embed/videoseries?list=PLeM_UHGUqVy-5jM0tAWX4MeUSKIkI1G1w
+              https://www.youtube.com/embed/E503UT0-TC8?list=PLeM_UHGUqVy-5jM0tAWX4MeUSKIkI1G1w
             */
             videoId = type === 'youtube' ? videoHref.match(/(?:embed\/|watch\/?\?v=)([^&?\/]+)/i) : videoHref.match(/\.be\/(.+)$/);
             videoId = videoId && videoId[1];
+
+            playlistId = videoHref.match(/[?&]list=([^&?\/]+)/);
+            playlistId = playlistId && 'list='+playlistId[1]+'&';
+            if ( playlistId && !videoId )
+            {
+              videoId = 'videoseries';
+            }
+
             autoplay = data.cfg.autostart ? '&autoplay=1' : '';
             autohide = data.cfg.autoHide === true ? '' : '&autohide='+ data.cfg.autoHide;
-            videoUrl = docLocPC + '//www.youtube.com/embed/' + videoId + '?rel=0&wmode=transparent' + autoplay + autohide + data.cfg.filePlayerExtraParams;
+            videoUrl = docLocPC + '//www.youtube.com/embed/' + videoId + '?'+ playlistId +'rel=0&wmode=transparent' + autoplay + autohide + data.cfg.filePlayerExtraParams;
             playerHeight = 30;
           }
           else if ( type === 'vimeo' )
