@@ -45,7 +45,7 @@
             .before(curtainElm)
             .css({
                   top:        cfg.topOffset + $(window).scrollTop(),
-                  marginLeft: - $.toInt( popupElm.outerWidth() ) / 2
+                  marginLeft: - parseInt( popupElm.outerWidth() ) / 2
                 })
             .fickle({
                 fadein: 350,
