@@ -8,6 +8,7 @@
 
 // Depends on eutils 1.2+:
 //     $.uniqueArray()
+//     $.fn.lang()
 
 //   Supports sort_isl for icelandic sorting
 
@@ -19,7 +20,7 @@
 //  * expose element.data() object with arrays of inputs and clear buttons.
 //  * noFound message + <tr> template
 
-(function($, undefined){
+(function($){
 
     var msie7 = 8>parseInt((/MSIE ([\w.]+)/.exec(navigator.userAgent)||[])[1],10);
 
@@ -281,7 +282,7 @@
       _injectSelectOptions = function (select) {
           var data = select.data().filterTable;
           var strings = [];
-          var sortFunc = ($.lang === 'is' &&  typeof strings.sortISL === 'function') ? 'sortISL' : 'sort';
+          var sortFunc = ($(data.table).lang() === 'is' &&  typeof strings.sortISL === 'function') ? 'sortISL' : 'sort';
 
           $(data.table).find('tbody tr').each(function () {
               var str = $.trim($(this).find('td:eq('+data.idx+')').text());
