@@ -1,2 +1,3 @@
-import '../jquery-1.12-source';
-import './_/jquery-onload-legacy';
+import $ from '../jquery-1.12-source';
+import jQueryOnload from './_/jquery-onload';
+jQueryOnload( $ );
