@@ -70,8 +70,12 @@
                                     });
                                 });
                           }
-                          else {
-                            curatedResults.push({
+                          var numResults = curatedResults.length + normalResults.length;
+                          if ( !cfg.includeNormalSearch || cfg.maxResults < numResults ) {
+                            normalResults = normalResults.slice(
+                                Math.max(0, cfg.maxResults - curatedResults.length)
+                              );
+                            normalResults.push({
                                 label: cfg.searchForText + ' <strong>"' + request.term + '"</strong>',
                                 className: 'search',
                                 isSearchAction: true,
@@ -82,7 +86,7 @@
                             var normalCount = cfg.includeNormalSearch ? ' | regular:'+ normalResults.length : '';
                             pingSearchResults( request.term + curatedCount + normalCount );
                           }
-                          callback( curatedResults.push.apply(curatedResults, normalResults) );
+                          callback( curatedResults.concat(normalResults) );
                         });
                   },
                 //autoFocus:  false, // default: false
@@ -116,6 +120,7 @@
           editedSearchSelector: '.curatedsearch',
           includeNormalSearch: false,
           normalSearchSelector: '.searchresults',
+          maxResults: 100,  // Only caps the list of "normalSearch" results.
           minSearchLength: 1,
           searchDelay: 200,
           autoFocus: false,   // automatically focus the first item...
