@@ -38,6 +38,7 @@
       $slNav.find('.goback').remove();
       $slNav.find('.toggler').remove();
       $slNav.find('[style]').removeAttr('style');
+      $slNav.find('ul.active').removeClass('active');
 
       // handle resize throttle
       setTimeout(function(){
@@ -47,7 +48,7 @@
       return false;
     }
 
-    $slNav.find('ul.level1').wrap('<div class="col lvl1" />');
+    $slNav.find('ul.level1').addClass('active').wrap('<div class="col lvl1" />');
 
     if (slNavCurrent.length)
     {
