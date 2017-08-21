@@ -21,7 +21,9 @@
     defaultConfig: {
         fadeInSpeed : 250, // set 1 for almost no animation
         fadeOutSpeed : 200, // set 1 for almost no animation
-        preloadImages : true // set to false to disable preloading images in popup
+        marginTop: undefined, // set custom marginTop pos (Integer/Function). Defaults to win.scrollTop. null to disable.
+        preloadImages : true, // set to false to disable preloading images in popup,
+        ficle: {}, // extra fickle config
     },
 
     i18n: {
@@ -112,23 +114,24 @@
         _modal = $.getModal({
                     opener:  _img,
                     className: 'imgpopper',
+                    marginTop: cfg.marginTop,
                     content: _imgPop,
-                    fickle: {
+                    fickle: $.extend({
                         fadein:  cfg.fadeInSpeed,
                         fadeout: cfg.fadeOutSpeed,
                         onClosed: function(){
                             $(window).off('keyup.imgpopper');
                             $(this).remove();
                           }
-                      }
+                      }, cfg.fickle)
                   })
                     .fickle('open');
 
         $(window)
             .on('keyup.imgpopper', function(e) {
-                e.which===37 ? // LEFT arrow == prev image
+                e.which === 37 ? // LEFT arrow == prev image
                     _paging.find('.prev').trigger('click'):
-                e.which===39 ? // RIGHT arrow == next image
+                e.which === 39 ? // RIGHT arrow == next image
                     _paging.find('.next').trigger('click'):
                     null;
               });
