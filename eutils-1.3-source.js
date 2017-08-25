@@ -52,11 +52,11 @@ function aquireId(el, prefDefaultId) { // el is an optional parameter.
   return el.id;
 }
 
-var $$2 = window.jQuery;
+var $$1 = window.jQuery;
 
-$$2.aquireId = aquireId;
+$$1.aquireId = aquireId;
 // enforces DOM-ids on all items in the collection and returns the id of the first item.
-$$2.fn.aquireId = function (prefDefaultId) { return this.each(function () { aquireId(this, prefDefaultId); }).attr('id'); };
+$$1.fn.aquireId = function (prefDefaultId) { return this.each(function () { aquireId(this, prefDefaultId); }).attr('id'); };
 
 // Prototypal inheritance
 var F = function () {};
@@ -203,7 +203,7 @@ window.jQuery.escResultHtml = function (html, cfg) {
   return resultStr;
 };
 
-var $$3 = window.jQuery;
+var $$2 = window.jQuery;
 
 var findUntil = function (collection, expr, inclTextNodes, goBackwards) {
   var match = [];
@@ -212,7 +212,7 @@ var findUntil = function (collection, expr, inclTextNodes, goBackwards) {
     for (var next = this[method], isElm; next; next = next[method] ) {
       isElm = (next.nodeType === 1);
       if ( inclTextNodes || isElm ) {
-        if (isElm && !$$3(next).not(expr).length ) {
+        if (isElm && !$$2(next).not(expr).length ) {
           break;
         }
         match.push( next );
@@ -223,8 +223,8 @@ var findUntil = function (collection, expr, inclTextNodes, goBackwards) {
 };
 
 // different from the built-in jQuery 1.4 methods, because it (optionally) also collects textNodes as well as Elements
-$$3.fn.nextUntil = function (expr, inclTextNodes) { return findUntil(this, expr, inclTextNodes); };
-$$3.fn.prevUntil = function (expr, inclTextNodes) { return findUntil(this, expr, inclTextNodes, 1); };
+$$2.fn.nextUntil = function (expr, inclTextNodes) { return findUntil(this, expr, inclTextNodes); };
+$$2.fn.prevUntil = function (expr, inclTextNodes) { return findUntil(this, expr, inclTextNodes, 1); };
 
 /*
   fixes this issue: http://terrillthompson.com/blog/161
@@ -239,25 +239,25 @@ $$3.fn.prevUntil = function (expr, inclTextNodes) { return findUntil(this, expr,
     $.fixSkiplinks({ offset:40 }); // scroll offset/correction in px
     $.fixSkiplinks({ offset:function(target){ return 40; }  });
 */
-var $$4 = window.jQuery;
+var $$3 = window.jQuery;
 
-$$4.fixSkiplinks = function (opts) {
+$$3.fixSkiplinks = function (opts) {
   var clickEv = 'click.fixSkipLinks';
   var doc = document;
   var docLoc = doc.location;
   var offsetFn =  !opts || opts.offset == null ?
-                      $$4.scrollOffset:
+                      $$3.scrollOffset:
                   opts.offset.apply ?
                       opts.offset:
                       function () { return opts.offset; };
-  $$4(doc)
+  $$3(doc)
       .off(clickEv)
       .on(clickEv, function (e) {
         if ( e.target.href ) {
           var hrefBits = e.target.href.split('#');
           var id = hrefBits[1];
           if ( id  &&  !e.isDefaultPrevented() ) {
-            var elm = $$4(doc.getElementById( id ));
+            var elm = $$3(doc.getElementById( id ));
             if ( elm[0]  &&  hrefBits[0] === docLoc.href.split('#')[0] ) {
               e.preventDefault();
               var hadNoTabindex = elm.attr('tabindex') == null;
@@ -296,7 +296,7 @@ $$4.fixSkiplinks = function (opts) {
 
 // $.focusOffset provides a default scroll-offset value for navigation-related scroll-position calculations
 // esp. useful when pages have a fixed-position header
-$$4.scrollOffset = function (/*elm*/) { return 0; };
+$$3.scrollOffset = function (/*elm*/) { return 0; };
 
 // place keyboard focus on _elm - setting tabindex="" when needed
 // and make sure any window scrolling is both sane and useful
@@ -337,35 +337,35 @@ function focusElm(_elm, opts) {
   }
 }
 
-var $$5 = window.jQuery;
+var $$4 = window.jQuery;
 
-$$5.focusHere = function (_elm, opts) {
+$$4.focusHere = function (_elm, opts) {
   if ( _elm.length ) {
     _elm = _elm[0];
   }
   opts = opts || {};
-  opts.offset = opts.offset || $$5.focusOffset();
+  opts.offset = opts.offset || $$4.focusOffset();
   focusElm(_elm, opts);
 };
 
 // place .focusHere() on the first element in the collection
-$$5.fn.focusHere = function (opts) {
-  $$5.focusHere(this[0], opts);
+$$4.fn.focusHere = function (opts) {
+  $$4.focusHere(this[0], opts);
   return this;
 };
 
 // $.focusOffset provides a default scroll-offset value for $.focusHere()
-$$5.focusOffset = function (/*elm*/) { return 30; };
+$$4.focusOffset = function (/*elm*/) { return 30; };
 
 // Sets the document.location.hash while suppressing the viewport scrolling
 // Accepts a plaintext fragment - and URI encodes it automatically - unless the `_isEncoded` flag is set.
 // Usage:
-//   $.setFrag('myid');
-//   $.setFrag('#myid');
-//   $.setFrag('Fraîce 18%');
-//   $.setFrag('Fra%C3%AEce%2018%25', true);
-//   $.setFrag('');    // unset
-//   $.setFrag(null);  // unset
+//   setFrag('myid');
+//   setFrag('#myid');
+//   setFrag('Fraîce 18%');
+//   setFrag('Fra%C3%AEce%2018%25', true);
+//   setFrag('');    // unset
+//   setFrag(null);  // unset
 
 var setFrag = function (_fragment, _isEncoded) {
   _fragment = (_fragment||'').replace(/^#/, '');
@@ -379,7 +379,7 @@ var setFrag = function (_fragment, _isEncoded) {
   _elm  &&  (_elm.id = '');
 
   // set the damn hash... (Note: Safari 3 & Chrome barf if frag === '#'.)
-  document.location.hash = (_isEncoded ? _fragment : $.encodeFrag(_fragment) );
+  document.location.hash = (_isEncoded ? _fragment : encodeFrag(_fragment) );
 
   // Always reset scrollpos
   // (because Chrome ~v34 seems to scroll to the element which had -
@@ -412,27 +412,27 @@ var frag = {
   encode: encodeFrag,
 };
 
-var $$6 = window.jQuery;
-$$6.getFrag = frag.get;
-$$6.setFrag = frag.set;
-$$6.encodeFrag = frag.encode;
+var $$5 = window.jQuery;
+$$5.getFrag = frag.get;
+$$5.setFrag = frag.set;
+$$5.encodeFrag = frag.encode;
 
 // Utility method to turn `$.get`/`$.ajax` xhr.responseText HTML document source
 // into a DOM tree, wrapped in a `<div/>` element for easy `.find()`ing
 // ...stripping out all nasty `<script>`s and such things.
-var $$7 = window.jQuery;
+var $$6 = window.jQuery;
 
-$$7.getResultBody = function (responseText, cfg) {
-  var myown = $$7.getResultBody;
+$$6.getResultBody = function (responseText, cfg) {
+  var myown = $$6.getResultBody;
   cfg = cfg || {};
   if ( cfg.imgSuppress ) {
     responseText = responseText.replace( /(<img[^>]*? )src=/gi, '$1'+(cfg.srcAttr||'data-srcAttr')+'=' );
   }
 
   //return $('<body/>').append( // <-- this seems to cause crashes in IE8. (Note: Crash doesn't seem to happen on first run)
-  return $$7('<div/>')
+  return $$6('<div/>')
       .append(
-        $$7(($$7.parseHTML||$$7)(responseText||''))
+        $$6(($$6.parseHTML||$$6)(responseText||''))
             .not( cfg.stripFlat || myown.stripFlat || 'script,title,meta,link,style' )
                 .find( cfg.stripDeep || myown.stripDeep || 'script,style' )
                     .remove()
@@ -440,15 +440,15 @@ $$7.getResultBody = function (responseText, cfg) {
       );
 };
 
-var $$8 = window.jQuery;
+var $$7 = window.jQuery;
 
-$$8.fn.if_ = function (cond) {
-  if ($$8.isFunction(cond)) { cond = cond.call(this); }
+$$7.fn.if_ = function (cond) {
+  if ($$7.isFunction(cond)) { cond = cond.call(this); }
   this.if_CondMet = !!cond;
   return this.pushStack(cond ? this : []);
 };
 
-$$8.fn.else_ = function (cond) {
+$$7.fn.else_ = function (cond) {
   var _this = this.end();
   return _this.if_CondMet ?
               _this.pushStack([]):
@@ -458,13 +458,13 @@ $$8.fn.else_ = function (cond) {
 // Escape img[src] values in incoming Ajax html result bodies to avoid automatic preloading of all images.
 // don't use data-src="" by default - to avoid conflict with data-src="" set on the server-side as a part of deliberate lazyloading, etc.
 
-var $$9 = window.jQuery;
+var $$8 = window.jQuery;
 
-$$9.imgSuppress = function (html, attr) {
+$$8.imgSuppress = function (html, attr) {
   return html && html.replace( /(<img[^>]*? )src=/gi, '$1'+(attr||'data-srcAttr')+'=' );
 };
 
-$$9.imgUnsuppress = function (dom, attr) {
+$$8.imgUnsuppress = function (dom, attr) {
   if ( dom ) {
     attr = attr || 'data-srcAttr';
     if ( typeof dom === 'string') {
@@ -490,7 +490,7 @@ $$9.imgUnsuppress = function (dom, attr) {
 };
 
 // Reinserts img[src] values escaped by $.imgSuppress()
-$$9.fn.imgUnsuppress = function (attr) { return $$9.imgUnsuppress(this, attr); };
+$$8.fn.imgUnsuppress = function (attr) { return $$8.imgUnsuppress(this, attr); };
 
 function regEscape(s) {
   return s.replace(/([\\\^\$*+\[\]?{}.=!:(|)])/g, '\\$1');
@@ -543,22 +543,22 @@ window.jQuery.inject = inject;
 // jQuery.lang(elm, true); // returns full language code of elm. e.g. "en-uk"
 // jQuery.lang( jQuery(elm) ); // returns the language of the *first* element in the jquery object/array.
 //
-var $$10 = window.jQuery;
+var $$9 = window.jQuery;
 
-$$10.lang = function (elm, returnFull) {
+$$9.lang = function (elm, returnFull) {
   if ( typeof elm === 'boolean' ) {
     returnFull = elm;
     elm = null;
   }
-  var lang = $$10(elm||'html').closest('[lang]').attr('lang') || '';
+  var lang = $$9(elm||'html').closest('[lang]').attr('lang') || '';
   return lang ?
       (!returnFull ? lang.substr(0,2) : lang).toLowerCase():
       null;
 };
 
 // returns the lang="" value of the first item in the collection
-$$10.fn.lang = function (returnFull) {
-  return $$10.lang(this[0], returnFull);
+$$9.fn.lang = function (returnFull) {
+  return $$9.lang(this[0], returnFull);
 };
 
 // liveVal
@@ -573,17 +573,17 @@ function liveVal(input, value) {
   }
 }
 
-var $$11 = window.jQuery;
+var $$10 = window.jQuery;
 
-$$11.liveVal = liveVal;
+$$10.liveVal = liveVal;
 // update input/textarea values while maintaining cursor-position *from end*
-$$11.fn.liveVal = function (value) {
+$$10.fn.liveVal = function (value) {
   return this.each(function (i, input) { liveVal(input, value); });
 };
 
 // define a custom event, window.onfontresize that fires whenever the document.body font-size changes.
 // TODO: allow binding to elements other than just window/body
-var $$12 = window.jQuery;
+var $$11 = window.jQuery;
 
 var _fontresizeInterval;
 var _body;
@@ -592,15 +592,15 @@ var _monitorFontSize = function () {
   var _spanSize = _body.css('fontSize');
   if (_spanSize !== _lastSize) {
     _lastSize = _spanSize;
-    $$12(window).trigger('fontresize');
+    $$11(window).trigger('fontresize');
   }
 };
 
-$$12.event.special.fontresize = {
+$$11.event.special.fontresize = {
 
   setup: function () {
     if (this === window  || this === document.body) {
-      _body = $$12('body');
+      _body = $$11('body');
       _lastSize = _body.css('fontSize');
       _fontresizeInterval = setInterval(_monitorFontSize, 500);
     }
@@ -630,9 +630,9 @@ window.jQuery.fn.pause = function (duration, callback) {
   // collection.scroll(xPos);                // scrolls to xPos - maintaining the current pageYOffset
   // collection.scroll(null, yPos);          // scrolls to yPos - maintaining the current pageXOffset
   // collection.scroll({ left:xPos, top:yPos });  // scrolls to xPos, yPos
-var $$13 = window.jQuery;
+var $$12 = window.jQuery;
 
-$$13.fn.scrollPos = function (x, y) {
+$$12.fn.scrollPos = function (x, y) {
   if ( x == null  &&  y == null ) {
     return {
       left:this.scrollLeft(),
@@ -649,8 +649,8 @@ $$13.fn.scrollPos = function (x, y) {
 };
 
 // shorthand for $(document).scrollPos()
-$$13.scrollPos = function (x, y) {
-  return $$13(document).scrollPos(x, y);
+$$12.scrollPos = function (x, y) {
+  return $$12(document).scrollPos(x, y);
 };
 
 // // DEPRICATED! (Because our $.fn.scroll overwrites the native method of same name. Oops!)
@@ -678,17 +678,17 @@ window.jQuery.reloadPage = reloadPage;
 // DEPRICATED: Use .focusHere() instead!
 // Focus an _element (or it's first focusable _subElm)
 // (for screen-reader accessibility)
-var $$14 = window.jQuery;
+var $$13 = window.jQuery;
 
-$$14.setFocus = function (_elm) {
+$$13.setFocus = function (_elm) {
   if (_elm) {
-    _elm = $$14(_elm);
+    _elm = $$13(_elm);
     var _focusables = ',A,INPUT,SELECT,TEXTAREA,BUTTON,OBJECT,AREA,';
     var _focusElm = _focusables.indexOf(','+_elm[0].tagName+',')>-1  &&  _elm.is(':visible')  &&  _elm[0];
 
     if ( !_focusElm  &&  _elm.is(':visible') ) {
       _elm.find('*').each(function (i, elm) {
-        if ( _focusables.indexOf(','+elm.tagName+',') > -1  &&  $$14(elm).is(':visible') ) {
+        if ( _focusables.indexOf(','+elm.tagName+',') > -1  &&  $$13(elm).is(':visible') ) {
           _focusElm = elm;
           return false;  // break the .each loop
         }
@@ -696,18 +696,18 @@ $$14.setFocus = function (_elm) {
     }
     if (_focusElm) {
       // Make note of current scroll position
-      var $$ = $$14(document);
+      var $$ = $$13(document);
       var _before = $$.scrollTop();
 
       // Focus the element!
-      $$14(_focusElm)[0].focus();
+      $$13(_focusElm)[0].focus();
 
       // Check for new scroll position
       if ($$.scrollTop() !== _before) {
         // if the browser jumped to the anchor...  (the browser only scrolls the page if the _focusElm was outside the viewport)
         // ...then scroll the window to place the anchor at the top of the viewport.
         // (NOTE: We do this because most browsers place the artificially .focus()ed link at the *bottom* of the viewport.)
-        var _newTop = $$14(_elm).offset().top - 30;
+        var _newTop = $$13(_elm).offset().top - 30;
         if (_newTop < 10) { _newTop = 0; }
         $$.scrollTop(_newTop);
       }
@@ -716,8 +716,8 @@ $$14.setFocus = function (_elm) {
   }
 };
 
-$$14.fn.setFocus = function () {
-  $$14.setFocus(this[0]);
+$$13.fn.setFocus = function () {
+  $$13.setFocus(this[0]);
   return this;
 };
 
@@ -734,12 +734,12 @@ function shuffle(array, mutate) {
   return array;
 }
 
-var $$15 = window.jQuery;
+var $$14 = window.jQuery;
 
-$$15.shuffle = function (arr, immutable) { return shuffle(arr, !immutable); };
+$$14.shuffle = function (arr, immutable) { return shuffle(arr, !immutable); };
 // collection should be .detached() for this to work properly (as many jQuery methods will automtaically resort the collection)
 // `inline` parameter not supported yet - will update the DOM position of the elements directly.
-$$15.fn.shuffle = function () { return shuffle(this, true); };
+$$14.fn.shuffle = function () { return shuffle(this, true); };
 
 window.jQuery.fn.splitN = function (n, func) {
   var this$1 = this;
@@ -815,9 +815,9 @@ window.jQuery.fn.unhide = function () {
 // NOTE: This plugin does not pretend to fix or trigger existing normally bound 'load' events.
 // NOTE: If you update an <img>'s src="" - then you need to re-run the plugin and
 //       re-bind the event handler if you also want it to handle the new image.
-var $$16 = window.jQuery;
+var $$15 = window.jQuery;
 
-$$16.fn.whenImageReady = function (eventHandler, noTriggering) {
+$$15.fn.whenImageReady = function (eventHandler, noTriggering) {
   var images = this;
   eventHandler && images.one('load.j2x5u', eventHandler);
   // use timeout to ensure a slightly more predictable behaviour
@@ -828,7 +828,7 @@ $$16.fn.whenImageReady = function (eventHandler, noTriggering) {
       // so we also check for .naturalWidth to make sure the image has really loaded.
       if ( img.complete  &&  img.naturalWidth !== 0 ) {
         // use namespace to avoid triggering existing (normally bound) load-events a second time
-        $$16(img).trigger('load.j2x5u');
+        $$15(img).trigger('load.j2x5u');
       }
     });
   }, 0);
@@ -854,19 +854,19 @@ window.jQuery.fn.zap = function () {
 
 // Depricated jQuery Crap
 
-var $$17 = window.jQuery;
+var $$16 = window.jQuery;
 
 
-var selHooks = $$17.expr[':'];
+var selHooks = $$16.expr[':'];
 selHooks.is = function (a, i, m) {
-    return $$17(a).is(m[3]);
+    return $$16(a).is(m[3]);
   };
 selHooks.childof = function (a, i, m) {
-    return $$17(a.parentNode).is(m[3]);
+    return $$16(a.parentNode).is(m[3]);
   };
 selHooks.descof = function (a, i, m) {
     while ((a = a.parentNode)  &&  a !== document) {
-      if ($$17(a).is(m[3])) {
+      if ($$16(a).is(m[3])) {
         return true;
       }
     }
@@ -879,13 +879,13 @@ selHooks.target = function (a, h) {
 
 // Clones the jQuery object and wipes out the it's `.prevObject` stack, and other instance-properties.
 // This allows the garbage collector to free up memory. (In some cases gobs of it!)
-$$17.fn.fin = function () { return $$17(this); };
+$$16.fn.fin = function () { return $$16(this); };
 
 
 
-$$17.fn.toggleClasses = function (a, b, state) {
+$$16.fn.toggleClasses = function (a, b, state) {
     return this.each(function () {
-        var _elm = $$17(this),
+        var _elm = $$16(this),
             A = arguments.length>2 ? state : _elm.hasClass(a);
         _elm
             .removeClass(A? a : b)
@@ -900,7 +900,7 @@ $$17.fn.toggleClasses = function (a, b, state) {
 // jQuery.namespace('foo/bar/baz', null, '/');  // finds/builds the object `foo.bar.baz`.
 // jQuery.namespace(foo, 'bar.baz');            // finds/builds the object `foo.bar.baz`.
 //
-$$17.namespace = function (path, obj, splitter, _) {
+$$16.namespace = function (path, obj, splitter, _) {
     var base = window,
         name, i = 0;
     if (typeof path !== 'string') {
@@ -915,7 +915,7 @@ $$17.namespace = function (path, obj, splitter, _) {
     while ((name = path[i++])) {
       base = base[name] || (base[name] = {});
     }
-    return obj ? $$17.extend(base, obj) : base;
+    return obj ? $$16.extend(base, obj) : base;
   };
 
 
@@ -923,15 +923,15 @@ $$17.namespace = function (path, obj, splitter, _) {
 // Usage:
 // $.toInt( '012.34m' )  == `12`
 //
-$$17.toInt = function (str, radix) {
+$$16.toInt = function (str, radix) {
     return parseInt(str, radix||10);
   };
 
 
-$$17.fn.hoverClass = function (hoverClass) {
+$$16.fn.hoverClass = function (hoverClass) {
     return this.hover(
-        function () { $$17(this).addClass(hoverClass); },
-        function () { $$17(this).removeClass(hoverClass); }
+        function () { $$16(this).addClass(hoverClass); },
+        function () { $$16(this).removeClass(hoverClass); }
       );
   };
 
@@ -945,7 +945,7 @@ $$17.fn.hoverClass = function (hoverClass) {
 //         .parent()
 //             ...etc...
 //
-$$17.fn['null'] = function () { return this; };
+$$16.fn['null'] = function () { return this; };
 
 /*
   Fast CSS support checker and vendor-prefix resolver
@@ -1068,20 +1068,20 @@ function zeroPad(number, width) {
 
 RegExp.escape = regEscape$1;
 
-var $$1 = window.jQuery;
+var $ = window.jQuery;
 
-$$1.cssSupport = cssSupport;
+$.cssSupport = cssSupport;
 
-$$1.parseParams = parseParams;
+$.parseParams = parseParams;
 
 
-$$1.zeroPad = zeroPad;
+$.zeroPad = zeroPad;
 
 
 
 
 // Returns window.innerWidth in all browsers (fixes IE8/7 quirks)
-$$1.winWidth = function () {
+$.winWidth = function () {
   var de = document.documentElement;
   return window.innerWidth || (de && de.clientWidth) || document.body.clientWidth;
 };
@@ -1089,7 +1089,7 @@ $$1.winWidth = function () {
 
 
 // Call any function as an "insta-plugin".
-$$1.fn.run = function (func, argsArray, continueChain) {
+$.fn.run = function (func, argsArray, continueChain) {
   // continueChain forces the plugin to return the collection instead of the return value of func
   var ret = func.apply( this, argsArray||[] );
   return (continueChain || ret === undefined) ? this : ret;
@@ -1097,7 +1097,7 @@ $$1.fn.run = function (func, argsArray, continueChain) {
 
 
 
-$$1.fn.log = function () {
+$.fn.log = function () {
   var _console = window.console;
   if (_console) {
     arguments.length && _console.log.call(_console, arguments);
@@ -1108,6 +1108,6 @@ $$1.fn.log = function () {
 
 
 // Virkja reverse á jquery collection
-$$1.fn.reverse = [].reverse;
+$.fn.reverse = [].reverse;
 
 }());
