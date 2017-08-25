@@ -67,7 +67,7 @@ function beget(proto, props) {
   var o = new F();
   if ( props ) {
     for (var key in props) {
-      if ( !hasOwnProperty.call(props, key) ) {
+      if ( hasOwnProperty.call(props, key) ) {
         o[key] = props[key];
       }
     }
