@@ -119,7 +119,8 @@
 
             if ( /\/videos\//.test(videoHref) ) {
               // matches /videos/nnnnn
-              videoUrl = docLocPC + '//www.facebook.com/v2.6/plugins/video.php?href=' + ( encodeURIComponent(videoHref) ) + '&locale=en_US&show_text=false'
+              autoplay = data.cfg.autostart ? '&autoplay=true' : '';
+              videoUrl = docLocPC + '//www.facebook.com/v2.6/plugins/video.php?href=' + ( encodeURIComponent(videoHref) ) + '&locale='+ data.cfg.locale +'&show_text=false'+ autoplay;
             }
             else {
               videoId = videoHref.match(/(?:\/v\/|\/videos\/|[?&]v=)(\d{10,20})/); // matches /v/nnnnn or v=nnnnn
@@ -135,12 +136,12 @@
               urls to handle:
               https://www.instagram.com/p/BYTlKZvhj24/
             */
-            vidFrame = 'instagram';
+            vidFrame = 'blockquote';
             videoUrl = videoHref;
 
             item.data('load-script', {
                 scripttoken: 'instgrm',
-                scripturl: '//platform.instagram.com/en_US/embeds.js',
+                scripturl: '//platform.instagram.com/'+ data.cfg.locale +'/embeds.js',
                 onload: 'window.instgrm.Embeds.process()'
               });
           }
@@ -197,7 +198,7 @@
                           auto   : autoplay
                         }));
           }
-          else if (vidFrame === 'instagram')
+          else if (vidFrame === 'blockquote')
           {
             // instagram depends on small set of inline styles to make it look nice.
             // data-instgrm-captioned is optional in the embed code, maybe it should be optional here too?
@@ -222,7 +223,7 @@
             item.append('<span class="videocaption">'+  data.vidCapt +'</span>');
           }
 
-          if (vidFrame !== 'flash' && data.cfg.vidWidth === 'auto')
+          if (vidFrame !== 'flash' && type !== 'instagram' && data.cfg.vidWidth === 'auto')
           {
             $(window).on('resize', function (/*e*/) {
                 newWidth = data.contElm.width();
@@ -271,6 +272,7 @@
               useCaption: true, // append video caption
               type: null, // overwrite default type
               autoHide: true, // autohide player controls - only active for youtube now. - https://developers.google.com/youtube/player_parameters#autohide
+              locale: 'en_US', // 5 character local code
 
               filePlayerUrl: '/bitar/common/media/mediaplayer.swf?file=',
               filePlayerExtraParams: '',
