@@ -105,17 +105,29 @@
           {
             /*
               urls to handle:
+              (new)
+              https://www.facebook.com/Jolagestir/videos/10150469623167067/
+
+              (old)
               http://www.facebook.com/v/2246424718688
               https://www.facebook.com/video/video.php?v=10150469623167067
               http://www.facebook.com/video/video.php?v=2246424718688
-              https://www.facebook.com/Jolagestir/videos/10150469623167067/
               http://www.facebook.com/photo/photo.php?v=2246424718688
               http://www.facebook.com/photo.php?v=2246424718688
               https://www.facebook.com/photo.php?v=2427791652748&set=vb.144567668911104&type=2&theater
             */
-            videoId = videoHref.match(/(?:\/v\/|\/videos\/|[?&]v=)(\d{10,20})/); // matches /videos/nnnnn, /v/nnnnn or v=nnnnn
-            videoId = videoId && videoId[1];
-            videoUrl = docLocPC + '//www.facebook.com/video/embed?video_id='+ videoId;
+
+            if ( /\/videos\//.test(videoHref) ) {
+              // matches /videos/nnnnn
+              videoUrl = docLocPC + '//www.facebook.com/v2.6/plugins/video.php?href=' + ( encodeURIComponent(videoHref) ) + '&locale=en_US&show_text=false'
+            }
+            else {
+              videoId = videoHref.match(/(?:\/v\/|\/videos\/|[?&]v=)(\d{10,20})/); // matches /v/nnnnn or v=nnnnn
+              videoId = videoId && videoId[1];
+              videoUrl = docLocPC + '//www.facebook.com/video/embed?video_id='+ videoId;
+            }
+
+
           }
           else if ( type === 'instagram' )
           {
