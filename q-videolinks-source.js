@@ -31,6 +31,7 @@
 
       iframeTempl = '<iframe width="%{vidwi}" height="%{vidhe}" src="%{vidurl}" frameborder="0" scrolling="no" title="%{vidTitle}" allowfullscreen></iframe>',
       videoTempl =  '<video width="%{vidwi}" height="%{vidhe}" src="%{vidurl}" controls %{auto}><source src="%{vidurl}" type="video/%{mime}"></source></video>',
+      blockquoteTempl = '<blockquote class="%{class}" %{attributes} style="%{styles}"><a href="%{vidurl}"></a></blockquote>',
 
       calcHeight = function (width, aspect4x3) {
         var vdHeight = aspect4x3 ? (width/4)*3 :
@@ -116,6 +117,21 @@
             videoId = videoId && videoId[1];
             videoUrl = docLocPC + '//www.facebook.com/video/embed?video_id='+ videoId;
           }
+          else if ( type === 'instagram' )
+          {
+            /*
+              urls to handle:
+              https://www.instagram.com/p/BYTlKZvhj24/
+            */
+            vidFrame = 'instagram';
+            videoUrl = videoHref;
+
+            item.data('load-script', {
+                scripttoken: 'instgrm',
+                scripturl: '//platform.instagram.com/en_US/embeds.js',
+                onload: 'window.instgrm.Embeds.process()'
+              });
+          }
           else if ( type === 'file' )
           {
             var mp4v = document.createElement('video'),
@@ -169,6 +185,17 @@
                           auto   : autoplay
                         }));
           }
+          else if (vidFrame === 'instagram')
+          {
+            // instagram depends on small set of inline styles to make it look nice.
+            // data-instgrm-captioned is optional in the embed code, maybe it should be optional here too?
+            item.html($.inject(blockquoteTempl, {
+                          vidurl : videoUrl,
+                          class: 'instagram-media',
+                          attributes  : 'data-instgrm-captioned data-instgrm-version="7"',
+                          styles  : 'margin:1px;padding:0;border:0;max-width:658px;width:calc(100% - 2px);'
+                        }));
+          }
           else if (vidFrame === 'flash')
           {
             item.html($.inject(objectTempl, {
@@ -178,7 +205,7 @@
                         }));
           }
 
-          if (data.cfg.useCaption)
+          if (data.cfg.useCaption && data.vidCapt.length > 0 && vidFrame !== 'instagram')
           {
             item.append('<span class="videocaption">'+  data.vidCapt +'</span>');
           }
@@ -195,6 +222,24 @@
                   item.find('iframe,video').attr('height',vidHeight).attr('width',vidWidth);
                 }
               });
+          }
+
+          var scriptData = item.data('load-script');
+          if ( scriptData ) {
+            setTimeout(function () {
+              if ( !window[scriptData.scripttoken] ) {
+                var scriptTag = document.createElement('script');
+                scriptTag.async = true;
+                scriptTag.defer = true;
+                scriptTag.src = scriptData.scripturl;
+                scriptTag.onload = scriptData.onload;
+                $('head').append(scriptTag);
+              }
+              else {
+                var loadScript = new Function(scriptData.onload)
+                loadScript.apply(null)
+              }
+            }, 10);
           }
 
       }, // end fn
@@ -226,16 +271,17 @@
             videoHref = link.attr('href'),
             type =  cfg.type ||
                     (/\.youtube\.com/i.test( videoHref ) && 'youtube') ||
-                    (/\.(flv|mp4|m4v|mov)(\?|$)/i.test( videoHref ) && 'file') ||
-                    (/vimeo\.com/i.test( videoHref ) && 'vimeo') ||
                     (/youtu\.be/i.test( videoHref ) && 'youtu') ||
+                    (/vimeo\.com/i.test( videoHref ) && 'vimeo') ||
                     (/facebook\.com/i.test( videoHref ) && 'facebook') ||
+                    (/instagram\.com/i.test( videoHref ) && 'instagram') ||
+                    (/\.(flv|mp4|m4v|mov)(\?|$)/i.test( videoHref ) && 'file') ||
                     undefined,
             data = {
                 cfg:         cfg,
                 videoHref:   videoHref,
                 type:        type,
-                vidCapt:     link.text()
+                vidCapt:     link.text().trim()
               },
             wrapper = link.wrap('<span class="videoblock" />').parent();
 
