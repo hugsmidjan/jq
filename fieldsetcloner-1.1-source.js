@@ -57,7 +57,7 @@
                                   }
                                 });
           cfg.$place = ({after:'insertAfter', bottom:'appendTo'})[ cfg.buttonPlacement ] || 'insertAfter';
-          cfg.$num = 1; // Counter for field-name suffixes
+          cfg.$num = cfg.initialCloneNo || 1; // Counter for field-name suffixes
           cfg.cloneCount = 1; // internal number for clonefields
           cfg.cloneMax = parseInt(fieldset.attr(cfg.cloneMaxSel||''), 10) || null;
 
@@ -98,6 +98,9 @@
       addBtnTemplate:    '<a class="%{className}" href="#" title="%{tooltip}">%{label}</a>',
       addBtnClass:       'addrow',
       cloneClass:        'clone',
+      cloneSep:           '-',
+      cloneClassAttributes: true,
+      //initialCloneNo:     1,
       //cloneEvents:       false,
       //rowNameSel:        '' , //hægt að nota selector string, eða attribute-name
       //cloneMaxSel:       'data-clonemax', // data-clonemax (max number of cloner fields including original)
@@ -133,7 +136,7 @@
 
           var fieldset = cfg.$protoFS.clone( !!cfg.cloneEvents ),
               _attr,
-              idSuffix = '-'+(cfg.cloneClass||'clone')+'-',
+              idSuffix = (cfg.cloneClassAttributes ? cfg.cloneSep + cfg.cloneClass : '')+cfg.cloneSep,
               idRegExp = new RegExp('('+idSuffix+'\\d+)?$');
           idSuffix += cfg.$num++;
 
