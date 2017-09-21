@@ -61,7 +61,7 @@
 
      linkedin:  false,    // Boolean|Number(non-zero position index)|Object(button config)  - non-falsy values insert LinkedIn "share" button
               count:   'right', // (facebook-style) or 'top' or 'none' (defaults to "bubble" (== '') )
-              // NOTE: LinkedIn's share button CAN NOT be customized!
+              custom:  false,        // Defaults to using the standard <script> embed code
 
     tumblr:  false,    // Boolean|Number(non-zero position index)|Object(button config)  - non-falsy values insert tumblr "post" button
               count:       'none',       // Other options: 'right', 'top'
@@ -100,7 +100,7 @@
 */
 
 
-(function(win, docLoc, encURI, readystateevents){
+(function(win, docLoc, encURI, readystateevents) {
   'use strict';
 
   var $ = win.jQuery;
@@ -112,14 +112,12 @@
           pageLang = pageLang || $('html').attr('lang').substr(0,2) || 'en';
           var buttonsToInsert = [],
               refElm = this.eq(0);
-          if ( refElm[0] )
-          {
+          if ( refElm[0] ) {
             cfg = $.extend(true, {}, defaultCfg, cfg);
             link = link || $('<a/>')[0];
             $.each(btnDefaults, function (btnName, btnDefault) {
                 var btnSpecificCfg = cfg[btnName];
-                if ( btnSpecificCfg )
-                {
+                if ( btnSpecificCfg ) {
                   var bCfg = cfg[btnName] = $.extend({
                           custom:cfg.custom,
                           url:cfg.url,
@@ -131,7 +129,7 @@
                           description: cfg.description,
                           descriptionSel: cfg.descriptionSel,
                         }, btnDefault);
-                  $.each(presets, function(propName, presetVals){
+                  $.each(presets, function(propName, presetVals) {
                       presetVals = presetVals[btnName];
                       cfg[propName]  &&   presetVals  &&  $.extend(bCfg, presetVals);
                     });
@@ -142,7 +140,7 @@
                   bCfg.$pos = typeof btnSpecificCfg === 'number' ? btnSpecificCfg : bCfg.$pos || 0;
                   bCfg.$prep && bCfg.$prep( cfg );
                   var newBtn = ((bCfg.custom&&bCfg.$tmpl2)||bCfg.$tmpl)
-                                  .replace(/(%=?)?\{(.+?)\}/g, function(m,p1,p2){
+                                  .replace(/(%=?)?\{(.+?)\}/g, function(m,p1,p2) {
                                       var val = bCfg[p2];
                                       val = val==null ? '' : val;
                                       return  !p1 ? // we have a plain {key} marker (i.e. NOT preceeded by % or %=)
@@ -158,12 +156,12 @@
                   newBtn = $( cfg.process ? cfg.process(newBtn, btnName, bCfg) : newBtn );
                   newBtn.$pos = bCfg.$pos;
                   buttonsToInsert.push( newBtn );
-                  !bCfg.custom  &&  bCfg.$init  &&  setTimeout(function(){ bCfg.$init(newBtn, cfg); }, 0);
+                  !bCfg.custom  &&  bCfg.$init  &&  setTimeout(function() { bCfg.$init(newBtn, cfg); }, 0);
                 }
               });
             buttonsToInsert = $.map(
                                   // sort the buttons before inserting
-                                  buttonsToInsert.sort(function(a,b){ var d = a.$pos-b.$pos; return d>0 ? 1 : d<0 ? -1 : 0; }),
+                                  buttonsToInsert.sort(function(a,b) { var d = a.$pos-b.$pos; return d>0 ? 1 : d<0 ? -1 : 0; }),
                                   function (btnCollection) { return btnCollection.toArray(); }
                                 );
             refElm[cfg.insertion]( buttonsToInsert );
@@ -200,9 +198,26 @@
         },
       countNone={ count:'none' },
       presets = {
-          large:     { twitter:{size:'l'},            gplus:{size:''}      },
-          countNone: {                                gplus:countNone,               fbshare:{count:'button'},/*  facebook:{count:'standard'}, */pinterest:countNone,          linkedin:{count:''},     tumblr:countNone },
-          countV:    {                                gplus:{count:'',size:'tall'},  fbshare:{count:'box_count'}, facebook:{count:'box_count'},  pinterest:{ count:'above' },  linkedin:{count:'top'},  tumblr:{count:'top'} }
+          large: {
+            twitter: {size:'l'},
+            gplus: {size:''},
+          },
+          countNone: {
+            gplus: countNone,
+            fbshare: {count:'button'},
+            // facebook: {count:'standard'},
+            pinterest: countNone,
+            linkedin: {count:''},
+            tumblr: countNone,
+          },
+          countV: {
+            gplus: {count:'',size:'tall'},
+            fbshare: {count:'box_count'},
+            facebook: {count:'box_count'},
+            pinterest: { count:'above' },
+            linkedin: {count:'top'},
+            tumblr: {count:'top'},
+          }
         },
 
 
@@ -264,12 +279,10 @@
               $prep: function( /*pluginCfg*/ ) {
                   var b = this;
                   b.text = b.text || _getTitle(b)+'\n';
-                  if ( b.custom )
-                  {
+                  if ( b.custom ) {
                     b.txt = _getTxt(b, { en:'Tweet this!', is:'Senda á Twitter' });
                   }
-                  else
-                  {
+                  else {
                     var large = b.size === 'l';
                     // we must size the iframe manually because Twitter doesn't provide an API for initing/parsing ajax-injected buttons
                     b.width =  large ? '78px' : '62px';
@@ -291,8 +304,7 @@
             // private
               $prep: function ( /*pluginCfg*/ ) {
                   var b = this;
-                  if ( b.custom  &&  !b.txt )
-                  {
+                  if ( b.custom  &&  !b.txt ) {
                     b.txt = _getTxt(b, { en: 'Share on Facebook',  is: 'Deila á Facebook' });
                   }
                 },
@@ -319,13 +331,14 @@
               $tmpl: '<div class="fb-like"'/*data-send="{sendBtn}"*/+' data-share="{shareBtn}" data-layout="{count}" data-width="{width}" data-show-faces="{faces}" data-action="{verb}" data-href="{url}" data-colorScheme="{color}"/>',
               $init: function (/* btn, cfg */) {
                   // https://developers.facebook.com/docs/plugins/like-button/
-                  if ( !$('#fb-root')[0] )
-                  {
+                  if ( !$('#fb-root')[0] ) {
                     $('body').prepend('<div id="fb-root"/>');
                   }
+                  var appid = $('meta[property="fb:app_id"]').attr('content');
+                  appid = appid ? '&appId='+appid : '';
                   injectScriptIfNeeded(
-                      '//connect.facebook.net/'+ _getLocale(this.lang, 'en') +'/sdk.js#xfbml=1&version=v2.0&appId=113869198637480',
-                      function(){  win.FB  &&  win.FB.XFBML.parse();  }
+                      '//connect.facebook.net/'+ _getLocale(this.lang, 'en') +'/sdk.js#xfbml=1&version=v2.10'+appid,
+                      function() {  win.FB  &&  win.FB.XFBML.parse();  }
                     )
                       .attr('id', 'facebook-jssdk');
                 },
@@ -343,12 +356,10 @@
             // private
               $prep: function ( /*pluginCfg*/ ) {
                   var b = this;
-                  if ( b.custom )
-                  {
+                  if ( b.custom ) {
                     b.txt = _getTxt(b, { en: 'Share on Google+',  is: 'Deila á Google+' });
                   }
-                  else
-                  {
+                  else {
                     b.count = b.count ? ' data-annotation="'+b.count+'"' : '';
                   }
                 },
@@ -359,7 +370,7 @@
                   //win.___gcfg = win.___gcfg || {lang:b.lang};
                   injectScriptIfNeeded(
                       '//apis.google.com/js/platform.js',
-                      function(){  win.gapi  &&  win.gapi.plusone.go();  }
+                      function() {  win.gapi  &&  win.gapi.plusone.go();  }
                     );
                 },
               $pos:  30
@@ -394,15 +405,13 @@
             // private
               $prep: function ( /*pluginCfg*/ ) {
                   var b = this;
-                  if ( b.custom )
-                  {
+                  if ( b.custom ) {
                     b.txt = _getTxt(b, { en:'Share on LinkedIn', is:'Deila á LinkedIn' });
                     b.source =  _getSource(b);
                     b.title =  _getTitle(b);
                     b.description =  _getDescription(b);
                   }
-                  else
-                  {
+                  else {
                     b.count = b.count ? ' data-counter="'+b.count+'"' : '';
                   }
                 },
@@ -433,13 +442,11 @@
             // private
               $prep: function( /*pluginCfg*/ ) {
                   var b = this;
-                  if ( !b.imgsrc )
-                  {
+                  if ( !b.imgsrc ) {
                     b.imgsrc =  (b.imgSelector  &&  $(b.imgSelector).attr(b.imgSrcAttr||'src'))  ||
                                 $('meta[property="og:image"]').attr('content')  || // fallback to using the open-graph image
                                 $('img').attr('src');
-                    if ( !/^(https?:)?\/\//.test(b.imgsrc) )
-                    {
+                    if ( !/^(https?:)?\/\//.test(b.imgsrc) ) {
                       b.imgsrc = docLoc.protocol +'//'+ docLoc.host +'/'+ b.imgsrc.replace(/^\//,'');
                     }
                   }
@@ -488,12 +495,11 @@
         },
       injectScriptIfNeeded = function ( scriptURL, callback, body, _multiple ) {
           var scriptState = loadedScripts[scriptURL];
-          if ( _multiple || !scriptState )
-          {
+          if ( _multiple || !scriptState ) {
             loadedScripts[scriptURL] = scriptState = scriptState || { elm: $('<script/>') };
 
             clearTimeout( scriptState.s );
-            scriptState.s = setTimeout(function(){
+            scriptState.s = setTimeout(function() {
                 // we do this instead of $.getScript() to avoid an annoying
                 // cross-frame access violation error in Google Chrome. Ack!
                 scriptState.elm
@@ -506,11 +512,9 @@
                       })
                     .on(readystateevents, function (/*e*/) {
                         var js = this;
-                        if ( !js.readyState || /^(loaded|complete)$/.test(js.readyState) )
-                        {
+                        if ( !js.readyState || /^(loaded|complete)$/.test(js.readyState) ) {
                           scriptState.loaded = 1;
-                          if ( callback )
-                          {
+                          if ( callback ) {
                             clearTimeout( scriptState.t );
                             scriptState.t = setTimeout(callback, _multiple?0:delay);
                           }
@@ -519,8 +523,7 @@
                       });
               }, _multiple?delay:0);
           }
-          else if ( callback  &&  scriptState.loaded )
-          {
+          else if ( callback  &&  scriptState.loaded ) {
             clearTimeout( scriptState.t );
             scriptState.t = setTimeout(callback, delay);
           }
