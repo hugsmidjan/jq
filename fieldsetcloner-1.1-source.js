@@ -11,13 +11,13 @@
 //  - jQuery 1.8
 
 
-(function($, fieldsetCloner){
+(function($, fieldsetCloner) {
 
   $.fn.fieldsetCloner = fieldsetCloner = function ( opts ) {
       return this.each(function () {
-          var fieldset = $(this),
-              texts = fieldsetCloner.i18n[ fieldset.closest('[lang]').attr('lang') ] || fieldsetCloner.i18n.en,
-              cfg = $.extend({}, fieldsetCloner.defaults, texts, opts );
+          var fieldset = $(this);
+          var texts = fieldsetCloner.i18n[ fieldset.closest('[lang]').attr('lang') ] || fieldsetCloner.i18n.en;
+          var cfg = $.extend({}, fieldsetCloner.defaults, texts, opts );
 
           cfg.rowName = ( fieldset.attr(cfg.rowNameSel||'') ||
                           fieldset.find(cfg.rowNameSel).eq(0).text() ||
@@ -42,22 +42,20 @@
                                   var fsElm = $(this).data('$fsclnr');
                                   cfg.cloneCount--;
                                   fsElm
-                                      .slideUp(cfg.showSpeed, function(){ fsElm.remove(); });
+                                      .slideUp(cfg.showSpeed, function() { fsElm.remove(); });
 
-                                  if ( cfg.cloneMax && cfg.cloneCount < cfg.cloneMax )
-                                  {
+                                  if ( cfg.cloneMax && cfg.cloneCount < cfg.cloneMax ) {
                                     $cloneBtn.show();
                                   }
 
-                                  if ( cfg.$place==='appendTo' )
-                                  {
+                                  if ( cfg.$place==='appendTo' ) {
                                     // check if this fieldset has cloneButton inside it (i.e. is the last fieldset)
                                     fsElm.find('.'+cfg.addBtnClass)
                                         [cfg.$place]( fsElm.prev() );
                                   }
                                 });
           cfg.$place = ({after:'insertAfter', bottom:'appendTo'})[ cfg.buttonPlacement ] || 'insertAfter';
-          cfg.$num = cfg.initialCloneNo || 1; // Counter for field-name suffixes
+          cfg.$num = cfg.initialCloneNo || 0; // Counter for field-name suffixes
           cfg.cloneCount = 1; // internal number for clonefields
           cfg.cloneMax = parseInt(fieldset.attr(cfg.cloneMaxSel||''), 10) || null;
 
@@ -71,13 +69,12 @@
           $cloneBtn
               .on('click', function (e) {
                   e.preventDefault();
-                  var btnInside = cfg.$place==='appendTo',
-                      lastFS = btnInside ? $cloneBtn.parent() : $cloneBtn.prev(),
-                      _newFieldset;
+                  var btnInside = cfg.$place==='appendTo';
+                  var lastFS = btnInside ? $cloneBtn.parent() : $cloneBtn.prev();
+                  var _newFieldset;
 
                   cfg.cloneCount++;
-                  if ( cfg.cloneMax && cfg.cloneCount === cfg.cloneMax )
-                  {
+                  if ( cfg.cloneMax && cfg.cloneCount === cfg.cloneMax ) {
                     $cloneBtn.hide();
                   }
 
@@ -85,7 +82,7 @@
                   _newFieldset = _cloneFieldset(cfg)
                                     .hide()
                                     .insertAfter( lastFS )
-                                    .slideDown(cfg.showSpeed);
+                                    [cfg.showFunc](cfg.showSpeed);
                   btnInside  &&  $cloneBtn[cfg.$place]( _newFieldset );
                   cfg.afterClone  &&  cfg.afterClone(_newFieldset);
                 });
@@ -100,16 +97,18 @@
       cloneClass:        'clone',
       cloneSep:           '-',
       cloneClassAttributes: true,
-      //initialCloneNo:     1,
+      //initialCloneNo:     0,
       //cloneEvents:       false,
       //rowNameSel:        '' , //hægt að nota selector string, eða attribute-name
       //cloneMaxSel:       'data-clonemax', // data-clonemax (max number of cloner fields including original)
+      showFunc:          'slideDown', // unhide, show, slideDown ....
       showSpeed:         'fast',          // 'fast', 'slow', integer -- 0 for instant -- >0 for milliseconds
       //addDelBtn:         false,
       //delBtnAppendTo:    sub-selector for cloneBlock - if falsy then appendTo the cloneBlock itself.
       delBtnTemplate:    '<a class="%{className}" href="#" title="%{tooltip}">%{label}</a>',
       delBtnClass:       'delrow',
-      //afterClone:        function(newFS) {} // callback funtion with refrence to newly cloned fieldset
+      //afterClone:        function(newFS) {}, // callback funtion with refrence to newly cloned fieldset
+      attrsToInc:        ['id','for','name'],
     };
 
   fieldsetCloner.i18n = {
@@ -118,30 +117,25 @@
           addBtnTitle:  'Add new ',
           delBtnLabel:  'Delete',
           delBtnTitle:  'Delete this ',
-          rowName:      'row'
+          rowName:      'row',
         },
       'is':  {
           addBtnLabel:  'Bæta við ',
           addBtnTitle:  'Bæta við auka ',
           delBtnLabel:  'Eyða',
           delBtnTitle:  'Eyða þessari ',
-          rowName:      'röð'
-        }
+          rowName:      'röð',
+        },
     };
 
+  var _cloneFieldset =  function ( cfg ) {
+          var attrs = cfg.attrsToInc;
+          var fieldset = cfg.$protoFS.clone( !!cfg.cloneEvents );
+          var _attr;
+          var m;
+          cfg.$num++;
 
-  var msie7 = 8>parseInt((/MSIE ([\w.]+)/.exec(navigator.userAgent)||[])[1],10),
-
-      _cloneFieldset =  function ( cfg ) {
-
-          var fieldset = cfg.$protoFS.clone( !!cfg.cloneEvents ),
-              _attr,
-              idSuffix = (cfg.cloneClassAttributes ? cfg.cloneSep + cfg.cloneClass : '')+cfg.cloneSep,
-              idRegExp = new RegExp('('+idSuffix+'\\d+)?$');
-          idSuffix += cfg.$num++;
-
-          if ( cfg.$delBtn )
-          {
+          if ( cfg.$delBtn ) {
             cfg.$delBtn.clone(true)
                 .data('$fsclnr', fieldset)
                 .appendTo(
@@ -150,40 +144,26 @@
           }
 
           // give new id's to elements
-          if ( (_attr = fieldset[0].id) )
-          {
-            fieldset[0].id = _attr.replace(idRegExp, idSuffix);
+          if ( (_attr = fieldset[0].id) ) {
+            m = _attr.match(/^(.*)(\d+)(\D*)$/);
+            fieldset[0].id = m ?
+                            m[1] + (parseInt(m[2],10) + cfg.$num) + m[3]:
+                            _attr + cfg.cloneSep + cfg.$num;  // automatically add a numeric suffix if there's no number on the original.
           }
 
           // correct other attributes
           fieldset.find('*')
               .each(function () {
                   var _elm = this;
-                  if ( (_attr = _elm.id) )
-                  {
-                    _elm.id = _attr.replace(idRegExp, idSuffix);
-                  }
 
-                  if ( (_attr = $(_elm).attr('for')) )
-                  {
-                    $(_elm).attr('for', _attr.replace(idRegExp, idSuffix));
+                  for (var i=0; i<attrs.length; i++) {
+                    if ( (_attr = _elm.getAttribute(attrs[i])) ) {
+                      m = _attr.match(/^(.*)(\d+)(\D*)$/);
+                      _elm.setAttribute(attrs[i], m ?
+                                      m[1] + (parseInt(m[2],10) + cfg.$num) + m[3] :
+                                      _attr + cfg.cloneSep + cfg.$num);  // automatically add a numeric suffix if there's no number on the original.
+                    }
                   }
-
-                  if ( (_attr = _elm.name) )
-                  {
-                    var m = _attr.match(/^(.*)(\d+)(\D*)$/);
-                    _elm.name = m ?
-                                    m[1] + (parseInt(m[2],10) + cfg.$num) + m[3]:
-                                    _attr + '-' + cfg.$num;  // automatically add a numeric suffix if there's no number on the original.
-                  }
-
-                  /* MSIE 6&7 hack - because of field-cloning expando bug of doom.  (See also: http://www.quirksmode.org/dom/domform.html)  */
-                  if (msie7 && /^(?:INPUT|SELECT|TEXTAREA|BUTTON)$/.test(_elm.tagName))
-                  {
-                    var _newField = $( _elm.outerHTML.replace(/( name=)[^ >]+/, '$1"'+_attr+'"') );
-                    $(_elm).replaceWith(_newField);
-                  }
-                  /* END: MSIE 6&7 hack */
                 });
 
           return fieldset;
@@ -191,4 +171,4 @@
 
 
 
-})(jQuery);
+})(window.jQuery);
