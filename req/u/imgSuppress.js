@@ -17,10 +17,13 @@ $.imgUnsuppress = (dom, attr) => {
       var elms = [];
       var domArr = dom.nodeType ? [dom] : [].slice.call(dom);
       domArr.forEach(function (elm) {
-        if ( elm.nodeName === 'img' && elm.hasAttribute(attr) ) {
-          elms.push(elm);
+        // exclude #text and #comment nodes in domArr
+        if ( elm instanceof HTMLElement ) {
+          if ( elm.nodeName === 'img' && elm.hasAttribute(attr) ) {
+            elms.push(elm);
+          }
+          elms.push.apply( elms, elm.querySelectorAll('img['+ attr +']') );
         }
-        elms.push.apply( elms, elm.querySelectorAll('img['+ attr +']') );
       });
       elms.forEach(function (img) {
         var attrVal = img.getAttribute(attr);

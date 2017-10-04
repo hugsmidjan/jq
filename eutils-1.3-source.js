@@ -96,45 +96,35 @@ window.jQuery.cropText = cropText;
 // debounceFn()
 // returns a debounced function that only runs after `delay` milliseconds of quiet-time
 // the returned function also has a nice .cancel() method.
-function debounce(func, delay, immediate) {
-  if ( typeof delay === 'boolean' ) {
-    immediate = delay;
-    delay = 0;
-  }
-  delay = delay || 50;
+var debounce = function (func, delay, immediate) {
   var timeout;
-  var debouncedFn = !immediate ?
-      // simple delayed function
-      function () {
-        var args = [], len = arguments.length;
-        while ( len-- ) args[ len ] = arguments[ len ];
+  var debouncedFn = function () {
+    var args = [], len = arguments.length;
+    while ( len-- ) args[ len ] = arguments[ len ];
 
-        var _this = this;
-        clearTimeout(timeout);
-        timeout = setTimeout(function () {
-          func.apply(_this, args);
-        }, delay);
-      }:
-      // more complex immediately called function
-      function () {
-        var args = [], len = arguments.length;
-        while ( len-- ) args[ len ] = arguments[ len ];
-
-        var runNow = !timeout && immediate;
-        var _this = this;
-        clearTimeout(timeout);
-        timeout = setTimeout(function () {
-          !runNow  &&  func.apply(_this, args); // don't re-invoke `func` if runNow is true
-          timeout = 0;
-        }, delay);
-        runNow  &&  func.apply(_this, args);
-      };
+    var runNow = immediate && !timeout;
+    var _this = this;
+    clearTimeout(timeout);
+    timeout = setTimeout(function () {
+      !runNow  &&  func.apply(_this, args); // don't re-invoke `func` if runNow is true
+      timeout = 0;
+    }, delay);
+    runNow  &&  func.apply(_this, args);
+  };
   debouncedFn.cancel = function () {
     clearTimeout(timeout);
     timeout = 0;
   };
   return debouncedFn;
-}
+};
+
+// Sugar to produce a debounced function
+// that accepts its contents/behavior at call time.
+// Usage:
+//     const myDebouncer = debounce.d(500);
+//     myDebouncer(() => { alert('Hello world'); });
+//     myDebouncer(() => { alert('I mean: Howdy world!'); });
+debounce.d = function (delay, immediate) { return debounce(function (fn) { return fn(); }, delay, immediate); };
 
 window.jQuery.debounceFn = debounce;
 
@@ -474,10 +464,13 @@ $$8.imgUnsuppress = function (dom, attr) {
       var elms = [];
       var domArr = dom.nodeType ? [dom] : [].slice.call(dom);
       domArr.forEach(function (elm) {
-        if ( elm.nodeName === 'img' && elm.hasAttribute(attr) ) {
-          elms.push(elm);
+        // exclude #text and #comment nodes in domArr
+        if ( elm instanceof HTMLElement ) {
+          if ( elm.nodeName === 'img' && elm.hasAttribute(attr) ) {
+            elms.push(elm);
+          }
+          elms.push.apply( elms, elm.querySelectorAll('img['+ attr +']') );
         }
-        elms.push.apply( elms, elm.querySelectorAll('img['+ attr +']') );
       });
       elms.forEach(function (img) {
         var attrVal = img.getAttribute(attr);
@@ -757,14 +750,9 @@ window.jQuery.fn.splitN = function (n, func) {
 // throttleFn()
 // returns a throttled function that never runs more than every `delay` milliseconds
 // the returned function also has a nice .finish() method.
-function throttle(func, delay, skipFirst) {
-  if ( typeof delay === 'boolean' ) {
-    skipFirst = delay;
-    delay = 0;
-  }
-  delay = delay || 50;
-  var throttled = 0;
+var throttle = function (func, delay, skipFirst) {
   var timeout;
+  var throttled = 0;
   var _args;
   var _this;
   var throttledFn = function () {
@@ -787,7 +775,7 @@ function throttle(func, delay, skipFirst) {
     throttled = 0;
   };
   return throttledFn;
-}
+};
 
 window.jQuery.throttleFn = throttle;
 
@@ -1054,10 +1042,6 @@ function parseParams(paramString) {
   return map;
 }
 
-function regEscape$1(s) {
-  return s.replace(/([\\\^\$*+\[\]?{}.=!:(|)])/g, '\\$1');
-}
-
 // coderjoe zero padding for numbers - http://jsperf.com/left-zero-pad/18
 function zeroPad(number, width) {
   var num = Math.abs(number);
@@ -1066,7 +1050,7 @@ function zeroPad(number, width) {
   return (number<0 ? '-' : '') + zeros + num;
 }
 
-RegExp.escape = regEscape$1;
+RegExp.escape = regEscape;
 
 var $ = window.jQuery;
 
