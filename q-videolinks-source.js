@@ -19,7 +19,7 @@
 // Usage:
 //  - $('.article a.videolink').videoLinks();
 
-(function($){
+(function($) {
 
   var objectTempl = '<object id="video" width="%{vidwi}" height="%{vidhe}">' +
                       '<param name="movie" value="%{vidurl}"></param>' +
@@ -56,8 +56,7 @@
               playerHeight = 0,
               vidFrame = 'iframe';
 
-          if ( type === 'youtube' || type === 'youtu' )
-          {
+          if ( type === 'youtube' || type === 'youtu' ) {
             /*
               urls to handle:
               http://www.youtube.com/watch?v=nTasT5h0LEg&feature=topvideos
@@ -72,13 +71,12 @@
               https://www.youtube.com/embed/videoseries?list=PLeM_UHGUqVy-5jM0tAWX4MeUSKIkI1G1w
               https://www.youtube.com/embed/E503UT0-TC8?list=PLeM_UHGUqVy-5jM0tAWX4MeUSKIkI1G1w
             */
-            videoId = type === 'youtube' ? videoHref.match(/(?:embed\/|watch\/?\?v=)([^&?\/]+)/i) : videoHref.match(/\.be\/(.+)$/);
+            videoId = type === 'youtube' ? videoHref.match(/(?:embed\/|watch\/?\?v=)([^&?/]+)/i) : videoHref.match(/\.be\/(.+)$/);
             videoId = videoId && videoId[1];
 
-            playlistId = videoHref.match(/[?&]list=([^&?\/]+)/);
-            playlistId = playlistId && 'list='+playlistId[1]+'&';
-            if ( playlistId && !videoId )
-            {
+            playlistId = videoHref.match(/[?&]list=([^&?/]+)/);
+            playlistId = playlistId && 'list='+playlistId[1]+'&' || '';
+            if ( playlistId && !videoId ) {
               videoId = 'videoseries';
             }
 
@@ -87,8 +85,7 @@
             videoUrl = docLocPC + '//www.youtube.com/embed/' + videoId + '?'+ playlistId +'rel=0&wmode=transparent' + autoplay + autohide + data.cfg.filePlayerExtraParams;
             playerHeight = 30;
           }
-          else if ( type === 'vimeo' )
-          {
+          else if ( type === 'vimeo' ) {
             /*
               urls to handle:
               http://player.vimeo.com/video/3274372
@@ -101,8 +98,7 @@
             autoplay = data.cfg.autostart ? '&autoplay=1' : '';
             videoUrl = docLocPC + '//player.vimeo.com/video/'+ videoId +'?title=1&amp;byline=0&amp;portrait=0' + autoplay + data.cfg.filePlayerExtraParams;
           }
-          else if ( type === 'facebook' )
-          {
+          else if ( type === 'facebook' ) {
             /*
               urls to handle:
               (new)
@@ -130,8 +126,7 @@
 
 
           }
-          else if ( type === 'instagram' )
-          {
+          else if ( type === 'instagram' ) {
             /*
               urls to handle:
               https://www.instagram.com/p/BYTlKZvhj24/
@@ -142,93 +137,82 @@
             item.data('load-script', {
                 scripttoken: 'instgrm',
                 scripturl: '//platform.instagram.com/'+ data.cfg.locale +'/embeds.js',
-                onload: 'window.instgrm.Embeds.process()'
+                onload: 'window.instgrm.Embeds.process()',
               });
           }
-          else if ( type === 'file' )
-          {
+          else if ( type === 'file' ) {
             var mp4v = document.createElement('video'),
                 mp4Support = !!mp4v.canPlayType && mp4v.canPlayType('video/mp4').replace(/no/, ''),
                 movSupport = !!mp4v.canPlayType && mp4v.canPlayType('video/quicktime').replace(/no/, '');
-            if ( mp4Support && /\.(mp4|m4v)(\?|$)/i.test( videoHref ) )
-            {
+            if ( mp4Support && /\.(mp4|m4v)(\?|$)/i.test( videoHref ) ) {
               videoUrl = videoHref;
               vidFrame = 'video';
               autoplay = data.cfg.autostart ? 'autoplay' : '';
               mimetype = 'mp4';
             }
-            else if ( movSupport && /\.mov(\?|$)/i.test( videoHref ) )
-            {
+            else if ( movSupport && /\.mov(\?|$)/i.test( videoHref ) ) {
               videoUrl = videoHref;
               vidFrame = 'video';
               autoplay = data.cfg.autostart ? 'autoplay' : '';
               mimetype = 'quicktime';
             }
-            else
-            {
+            else {
               autoplay = data.cfg.autostart ? '&autostart=true' : '';
               videoUrl = data.cfg.filePlayerUrl + videoHref + autoplay + data.cfg.filePlayerExtraParams;
               vidFrame = data.cfg.filePlayerFrame;
               vidHeight = vidHeight + data.cfg.filePlayerHeight; //add player height to video height
             }
           }
-          else
-          {
+          else {
             // Everything else
             videoUrl = videoHref;
           }
 
 
 
-          if (vidFrame === 'iframe')
-          {
+          if (vidFrame === 'iframe') {
             item.html($.inject(iframeTempl, {
                           vidurl : videoUrl,
                           vidwi  : vidWidth,
                           vidhe  : vidHeight,
-                          vidTitle: data.vidCapt
+                          vidTitle: data.vidCapt,
                         }));
           }
-          else if (vidFrame === 'video')
-          {
+          else if (vidFrame === 'video') {
             item.html($.inject(videoTempl, {
                           vidurl : videoUrl,
                           vidwi  : vidWidth,
                           vidhe  : vidHeight,
-                          auto   : autoplay
+                          auto   : autoplay,
+                          mime   : mimetype,
                         }));
           }
-          else if (vidFrame === 'blockquote')
-          {
+          else if (vidFrame === 'blockquote') {
             // instagram depends on small set of inline styles to make it look nice.
             // data-instgrm-captioned is optional in the embed code, maybe it should be optional here too?
             item.html($.inject(blockquoteTempl, {
                           vidurl : videoUrl,
                           class: 'instagram-media',
                           attributes  : 'data-instgrm-captioned data-instgrm-version="7"',
-                          styles  : 'margin:1px;padding:0;border:0;max-width:658px;width:calc(100% - 2px);'
+                          styles  : 'margin:1px;padding:0;border:0;max-width:658px;width:calc(100% - 2px);',
                         }));
           }
-          else if (vidFrame === 'flash')
-          {
+          else if (vidFrame === 'flash') {
             item.html($.inject(objectTempl, {
                           vidurl : videoUrl,
                           vidwi  : vidWidth,
-                          vidhe  : vidHeight
+                          vidhe  : vidHeight,
                         }));
           }
 
-          if (data.cfg.useCaption && data.vidCapt.length > 0 && vidFrame !== 'instagram')
-          {
+          if (data.cfg.useCaption && data.vidCapt.length > 0 && vidFrame !== 'instagram') {
             item.append('<span class="videocaption">'+  data.vidCapt +'</span>');
           }
 
-          if (vidFrame !== 'flash' && type !== 'instagram' && data.cfg.vidWidth === 'auto')
-          {
+          if (vidFrame !== 'flash' && type !== 'instagram' && data.cfg.vidWidth === 'auto') {
             $(window).on('resize', function (/*e*/) {
                 newWidth = data.contElm.width();
-                if (newWidth !== vidWidth)
-                {
+                if (newWidth !== vidWidth) {
                   vidWidth = newWidth;
                   vidWidth = data.contElm.width();
                   vidHeight = calcHeight(vidWidth, data.cfg.aspect4x3) + playerHeight;
@@ -249,8 +233,8 @@
                 $('head').append(scriptTag);
               }
               else {
-                var loadScript = new Function(scriptData.onload)
-                loadScript.apply(null)
+                var loadScript = new Function(scriptData.onload);
+                loadScript.apply(null);
               }
             }, 10);
           }
@@ -262,8 +246,7 @@
   $.fn.videoLinks = function ( cfg ) {
     var videoLinks = this;
 
-    if (videoLinks.length)
-    {
+    if (videoLinks.length) {
       cfg = $.extend({
               autostart: false,
               vidWidth:  'auto', //integer or 'auto' ()
@@ -277,7 +260,7 @@
               filePlayerUrl: '/bitar/common/media/mediaplayer.swf?file=',
               filePlayerExtraParams: '',
               filePlayerHeight: 20,
-              filePlayerFrame: 'flash'
+              filePlayerFrame: 'flash',
             }, cfg );
     }
     return videoLinks.map(function () {
@@ -295,13 +278,12 @@
                 cfg:         cfg,
                 videoHref:   videoHref,
                 type:        type,
-                vidCapt:     link.text().trim()
+                vidCapt:     link.text().trim(),
               },
             wrapper = link.wrap('<span class="videoblock" />').parent();
 
         data.contElm = $(wrapper);
-        while ( data.contElm[0]  &&  data.contElm.css('display')==='inline' )
-        {
+        while ( data.contElm[0]  &&  data.contElm.css('display')==='inline' ) {
           data.contElm = $(data.contElm.parent());
         }
 
