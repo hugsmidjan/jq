@@ -210,7 +210,7 @@
           }
 
           if (vidFrame !== 'flash' && type !== 'instagram' && data.cfg.vidWidth === 'auto') {
-            $(window).on('resize', function (/*e*/) {
+            $(window).on('resize.videolinks', function (/*e*/) {
                 newWidth = data.contElm.width();
                 if (newWidth !== vidWidth) {
                   vidWidth = newWidth;
