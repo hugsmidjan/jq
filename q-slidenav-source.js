@@ -105,7 +105,7 @@
     $win
         .on('resize.slNav', $.throttleFn(function (e) {
             slNavWidth = $slNav.width();
-            $slNavBB.find('.col').width( slNavWidth );
+            $slNavBB.find('.col').css({ 'width': slNavWidth });
             $slNavBB.addClass('no-animation');
             $slNavBB.css({
                 left: -(currentLevel*slNavWidth),
