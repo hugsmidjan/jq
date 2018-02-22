@@ -1,3 +1,4 @@
+/* $.fieldsetCloner 1.1  -- (c) 2018 Hugsmiðjan ehf.  @preserve */
 // ----------------------------------------------------------------------------------
 // jQuery.fn.fieldsetCloner v 1.1
 // ----------------------------------------------------------------------------------
@@ -40,11 +41,13 @@
                               .on('click', function (e) {
                                   e.preventDefault();
                                   var fsElm = $(this).data('$fsclnr');
-                                  cfg.cloneCount--;
-                                  fsElm
-                                      .slideUp(cfg.showSpeed, function() { fsElm.remove(); });
+                                  var fsNum = fsElm.attr('data-num');
 
-                                  if ( cfg.cloneMax && cfg.cloneCount < cfg.cloneMax ) {
+                                  _deleteNum(cfg, fsNum);
+
+                                  fsElm.slideUp(cfg.showSpeed, function() { fsElm.remove(); });
+
+                                  if ( cfg.cloneMax && cfg.usedNums.length < cfg.cloneMax ) {
                                     $cloneBtn.show();
                                   }
 
@@ -55,8 +58,7 @@
                                   }
                                 });
           cfg.$place = ({after:'insertAfter', bottom:'appendTo'})[ cfg.buttonPlacement ] || 'insertAfter';
-          cfg.$num = cfg.initialCloneNo || 0; // Counter for field-name suffixes
-          cfg.cloneCount = 1; // internal number for clonefields
+          cfg.usedNums = [(cfg.initialCloneNo < 10?'0':'')+cfg.initialCloneNo]; // zero pad for array sort
           cfg.cloneMax = parseInt(fieldset.attr(cfg.cloneMaxSel||''), 10) || null;
 
           // Create Clone Button
@@ -73,8 +75,7 @@
                   var lastFS = btnInside ? $cloneBtn.parent() : $cloneBtn.prev();
                   var _newFieldset;
 
-                  cfg.cloneCount++;
-                  if ( cfg.cloneMax && cfg.cloneCount === cfg.cloneMax ) {
+                  if ( cfg.cloneMax && cfg.usedNums.length === cfg.cloneMax ) {
                     $cloneBtn.hide();
                   }
 
@@ -97,7 +98,7 @@
       cloneClass:        'clone',
       cloneSep:           '-',
       cloneClassAttributes: true,
-      //initialCloneNo:     0,
+      initialCloneNo:     0,
       //cloneEvents:       false,
       //rowNameSel:        '' , //hægt að nota selector string, eða attribute-name
       //cloneMaxSel:       'data-clonemax', // data-clonemax (max number of cloner fields including original)
@@ -128,12 +129,32 @@
         },
     };
 
+  var _deleteNum = function (cfg, num) {
+        var numIdx = cfg.usedNums.indexOf('0'+num);
+        cfg.usedNums.splice(numIdx, 1);
+  };
+
+  var _fetchNextNum = function (cfg) {
+        var i = cfg.initialCloneNo;
+        while (i < cfg.initialCloneNo+100) {
+          i++;
+          if ( cfg.usedNums.indexOf('0'+i) === -1 ) {
+            break;
+          }
+        }
+        cfg.usedNums.push('0'+i);
+        cfg.usedNums = cfg.usedNums.sort();
+
+        return i;
+  };
+
   var _cloneFieldset =  function ( cfg ) {
           var attrs = cfg.attrsToInc;
           var fieldset = cfg.$protoFS.clone( !!cfg.cloneEvents );
           var _attr;
           var m;
-          cfg.$num++;
+          var nextNum = _fetchNextNum(cfg);
+          fieldset.attr('data-num',nextNum);
 
           if ( cfg.$delBtn ) {
             cfg.$delBtn.clone(true)
@@ -147,8 +168,8 @@
           if ( (_attr = fieldset[0].id) ) {
             m = _attr.match(/^(.*)(\d+)(\D*)$/);
             fieldset[0].id = m ?
-                            m[1] + (parseInt(m[2],10) + cfg.$num) + m[3]:
-                            _attr + cfg.cloneSep + cfg.$num;  // automatically add a numeric suffix if there's no number on the original.
+                            m[1] + (parseInt(m[2],10) + nextNum) + m[3]:
+                            _attr + cfg.cloneSep + nextNum;  // automatically add a numeric suffix if there's no number on the original.
           }
 
           // correct other attributes
@@ -160,8 +181,8 @@
                     if ( (_attr = _elm.getAttribute(attrs[i])) ) {
                       m = _attr.match(/^(.*)(\d+)(\D*)$/);
                       _elm.setAttribute(attrs[i], m ?
-                                      m[1] + (parseInt(m[2],10) + cfg.$num) + m[3] :
-                                      _attr + cfg.cloneSep + cfg.$num);  // automatically add a numeric suffix if there's no number on the original.
+                                      m[1] + (parseInt(m[2],10) + nextNum) + m[3] :
+                                      _attr + cfg.cloneSep + nextNum);  // automatically add a numeric suffix if there's no number on the original.
                     }
                   }
                 });
