@@ -26,6 +26,7 @@
 
     var _paginazor = function (paginglist, cfg) {
             var infinityloadFirst = cfg.infinityLoad && cfg.infinityLoad !== 'notfirst';
+            var page = 1;
 
             if ( cfg.loadLazyImages ) {
               _loadLazy(paginglist.find(cfg.itemSel));
@@ -35,6 +36,7 @@
             paginglist.on('click.loadmore', (cfg.pagingSel + ' ' + cfg.triggerSel), function (e) {
               e.preventDefault();
               !cfg.infinityLoad && $(cfg.loadingClassTarget).addClass('ajax-wait');
+              page++;
 
               $.get(
                   $(this).attr('href'),
@@ -43,9 +45,12 @@
                 .done(function(data) {
                     data = $(data).find(cfg.ajaxSel + ' ' + cfg.itemSel);
                     paginglist.find(cfg.pagingSel).replaceWith(data);
+
                     if ( cfg.loadLazyImages ) {
                       _loadLazy(data);
                     }
+                    paginglist.trigger('listupdated', [{itemlist: data, page: page}]);
+
                     _updatePager(paginglist.find(cfg.pagingSel), cfg.infinityLoad, cfg);
                   })
                 .always(function() {
