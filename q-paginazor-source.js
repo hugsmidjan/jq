@@ -16,11 +16,14 @@
           triggerSel: '.next a',
           ajaxSel: '.articlelist .boxbody',
           itemSel: '> *:not(h2)',
+          ajaxParams: 'justPicPos=pgmain',
 
           loadingClassTarget: 'html',
           loadLazyImages: false,
           infinityLoad: false, // true, false, 'notfirst'
+          showPagesLeft: false,
 
+          pagesLeftText: $.lang() === 'is' ? 'síður eftir' : 'pages left',
           loadMoreText: $.lang() === 'is' ? 'Hlaða fleiri greinum' : 'Load more articles',
         };
 
@@ -35,12 +38,12 @@
 
             paginglist.on('click.loadmore', (cfg.pagingSel + ' ' + cfg.triggerSel), function (e) {
               e.preventDefault();
-              !cfg.infinityLoad && $(cfg.loadingClassTarget).addClass('ajax-wait');
+              $(cfg.loadingClassTarget).addClass('ajax-wait');
               page++;
 
               $.get(
                   $(this).attr('href'),
-                  'justPicPos=pgmain'
+                  cfg.ajaxParams
                 )
                 .done(function(data) {
                     data = $(data).find(cfg.ajaxSel + ' ' + cfg.itemSel);
@@ -66,7 +69,17 @@
             }
             else {
               $paging.addClass('pagelist-active');
-              $paging.find(cfg.triggerSel).text(cfg.loadMoreText);
+              var pageBtnText = cfg.loadMoreText;
+
+              if ( cfg.showPagesLeft ) {
+                var statusNums = $paging.find('.status').text().match(/\d+/g);
+                if ( statusNums && statusNums[1] ) {
+                  var pagesLeft = parseInt(statusNums[1], 10) - parseInt(statusNums[0], 10);
+                  pageBtnText += ' <span>'+ pagesLeft + ' ' + cfg.pagesLeftText +'</span>';
+                }
+              }
+
+              $paging.find(cfg.triggerSel).html(pageBtnText);
             }
 
             if ( infinityload ) {
@@ -81,7 +94,6 @@
     var _loadLazy = function( listItems ) {
             listItems.find('ins.image')
                 .on('whenonscreen', function () {
-                  console.log( $(this).attr('data-src') );
                     $(this)
                         .off('whenonscreen')
                         .css({ 'background-image': 'url('+$(this).attr('data-src')+')' })
