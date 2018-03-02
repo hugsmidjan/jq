@@ -17,10 +17,10 @@
 (function($) {
 
     var defaultCfg = {
-          pagingSel: '> .paging',
+          pagingSel: '.paging',
           triggerSel: '.next a',
-          ajaxSel: '.articlelist .boxbody',
-          itemSel: '> .item',
+          ajaxSel: '.articlelist',
+          itemSel: '.item',
           ajaxParams: 'justPicPos=pgmain',
 
           loadingClassTarget: 'html',
@@ -32,7 +32,7 @@
           clearStatusSelector: 'a:not(.pgmain a)',
           articleIdAttr: 'data-aid',
           scrollOffset: 100,
-          scrollSpeed: 250,
+          scrollSpeed: 1,
 
           pagesLeftText: $.lang() === 'is' ? 'síður eftir' : 'pages left',
           loadMoreText: $.lang() === 'is' ? 'Hlaða fleiri greinum' : 'Load more articles',
@@ -41,16 +41,24 @@
     // used for cfg.maintainStatusOnBack
     var _ss = window.sessionStorage;
     var _target = JSON.parse(_ss.getItem('pagingTarget'));
+    var _targetList = _target && _target.listId;
     var _targetPage = _target && parseInt(_target.pageNo, 10);
     var _targetItem = _target && _target.itemNo;
 
     var _paginazor = function ($paginglist, cfg) {
             var infinityloadFirst = cfg.infinityLoad && cfg.infinityLoad !== 'notfirst';
             var page = 1;
+            var listId =  document.location.pathname;
+
+            if ( _targetList !== listId ) {
+              _ss.removeItem('pagingTarget');
+              _targetPage = _targetItem = null;
+            }
 
             if ( cfg.loadLazyImages ) {
               _loadLazy($paginglist.find(cfg.itemSel));
             }
+
             _updatePager($paginglist.find(cfg.pagingSel), infinityloadFirst, cfg);
 
             $paginglist.on('click.loadmore', (cfg.pagingSel + ' ' + cfg.triggerSel), function (e) {
@@ -96,7 +104,7 @@
             if ( cfg.maintainStatusOnBack ) {
               $paginglist.on('click.setstatus', cfg.itemSel, function () {
                 var aid = $(this).attr(cfg.articleIdAttr);
-                _ss.setItem('pagingTarget', JSON.stringify({pageNo: page, itemNo: aid}));
+                _ss.setItem('pagingTarget', JSON.stringify({pageNo: page, itemNo: aid, listId: listId}));
               });
 
               if ( _targetPage && _targetPage > page ) {
@@ -104,7 +112,7 @@
               }
 
               // Try to clear the paging storage when user clicks on someting not in the paging feed.
-              $('body').on('click.cleartarget', cfg.clearStatusSelector, function () {
+              $(document).on('click.cleartarget', cfg.clearStatusSelector, function () {
                 _ss.removeItem('pagingTarget');
               });
             }
