@@ -3,7 +3,7 @@
 
 // Requires:
 //  - jQuery 1.9+
-//  - eutils  (uses: $.lang() )
+//  - eutils  (uses: $.lang() focusHere() )
 //  - whenonscreen  (used for infinityload and loadLazyImages)
 
 // Usage:
@@ -12,10 +12,10 @@
 (function($) {
 
     var defaultCfg = {
-          pagingSel: '.paging',
+          pagingSel: '> .paging',
           triggerSel: '.next a',
           ajaxSel: '.articlelist .boxbody',
-          itemSel: '> *:not(h2)',
+          itemSel: '> .item',
           ajaxParams: 'justPicPos=pgmain',
 
           loadingClassTarget: 'html',
@@ -23,10 +23,22 @@
           infinityLoad: false, // true, false, 'notfirst'
           showPagesLeft: false,
 
+          maintainStatusOnBack: true,
+          clearStatusSelector: 'a:not(.pgmain a)',
+          articleIdAttr: 'data-aid',
+          scrollOffset: 100,
+          scrollSpeed: 250,
+
           pagesLeftText: $.lang() === 'is' ? 'síður eftir' : 'pages left',
           loadMoreText: $.lang() === 'is' ? 'Hlaða fleiri greinum' : 'Load more articles',
         };
 
+    var _ss = window.sessionStorage;
+
+    // used for cfg.maintainStatusOnBack
+    var _target = JSON.parse(_ss.getItem('pagingTarget'));
+    var _targetPage = _target && parseInt(_target.pageNo, 10);
+    var _targetItem = _target && _target.itemNo;
     var _paginazor = function (paginglist, cfg) {
             var infinityloadFirst = cfg.infinityLoad && cfg.infinityLoad !== 'notfirst';
             var page = 1;
@@ -46,7 +58,7 @@
                   cfg.ajaxParams
                 )
                 .done(function(data) {
-                    data = $(data).find(cfg.ajaxSel + ' ' + cfg.itemSel);
+                    data = $(data).find(cfg.ajaxSel).find(cfg.itemSel+','+cfg.pagingSel);
                     paginglist.find(cfg.pagingSel).replaceWith(data);
 
                     if ( cfg.loadLazyImages ) {
@@ -55,12 +67,42 @@
                     paginglist.trigger('listupdated', [{itemlist: data, page: page}]);
 
                     _updatePager(paginglist.find(cfg.pagingSel), cfg.infinityLoad, cfg);
+
+                    if ( cfg.maintainStatusOnBack ) {
+                      if ( _targetPage > page ) {
+                        paginglist.find(cfg.pagingSel + ' ' + cfg.triggerSel).trigger('click.loadmore');
+                      }
+                      else if ( _targetPage === page ) {
+                        var scrollTarget = paginglist.find('.item[data-aid="' + _targetItem + '"]');
+                        if( scrollTarget.length ) {
+                          var scrollpos = scrollTarget.offset().top - cfg.scrollOffset;
+                          $('html, body').animate({ scrollTop: scrollpos }, cfg.scrollSpeed);
+                          scrollTarget.focusHere();
+                        }
+                      }
+                    }
                   })
                 .always(function() {
                     $(cfg.loadingClassTarget).removeClass('ajax-wait');
                   });
 
             });
+
+            if ( cfg.maintainStatusOnBack ) {
+              paginglist.on('click.setstatus', cfg.itemSel, function () {
+                var aid = $(this).attr(cfg.articleIdAttr);
+                _ss.setItem('pagingTarget', JSON.stringify({pageNo: page, itemNo: aid}));
+              });
+
+              if ( _targetPage > page ) {
+                paginglist.find(cfg.pagingSel + ' ' + cfg.triggerSel).trigger('click.loadmore');
+              }
+
+              // try to clear the paging storage when user clicks on someting not in the paging feed and related articles
+              $(document).on('click', cfg.clearStatusSelector, function () {
+                _ss.removeItem('pagingTarget');
+              });
+            }
         };
 
     var _updatePager = function ($paging, infinityload, cfg) {
