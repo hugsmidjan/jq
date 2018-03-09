@@ -36,11 +36,19 @@
                 source: function (request, callback) {
                     var input = this.element;
                     var form = $( input[0].form );
+
+                    // clean form input data
+                    var ajaxData = form.serializeArray();
+                    for (var i=0; i<ajaxData.length; i++) {
+                      ajaxData[i].value = ajaxData[i].value.trim().replace(/\s+/g, ' ');
+                    }
+                    ajaxData = $.param(ajaxData);
+
                     pingSearchResults.cancel();
                     ajaxRequest  &&  ajaxRequest.abort();
                     ajaxRequest = $.ajax({
                         url:     cfg.ajaxSearchUrl,
-                        data:    form.serialize() +'&'+ $.param(cfg.ajaxParams),
+                        data:    ajaxData +'&'+ $.param(cfg.ajaxParams),
                       })
                       .done(function (html/*, status, xhr*/) {
                           var $dom = $( $.imgSuppress( html ) );
