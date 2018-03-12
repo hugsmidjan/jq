@@ -64,6 +64,7 @@
                 var date = dates[i][0];
                 var dayElm = cfg.allowRange ? $('<span class="day'+ (i+1) +'" />') : jsDate;
                 var thisDay = date.getDay();
+                var thisDate = date.getDate();
                 var thisMonth = date.getMonth();
                 var thisYear = date.getFullYear();
 
@@ -85,7 +86,7 @@
                 var nextYear  = (i !== dates.length && dates[i+1]) ? dates[i+1][0].getFullYear() : null;
 
                 // add day
-                dayElm.append('<span class="d">'+ thisDay +'<i>.</i></span> ');
+                dayElm.append('<span class="d">'+ thisDate +'<i>.</i></span> ');
 
                 // add month
                 if ( !cfg.allowRange || !cfg.collapseDupeMonths || thisYear !== nextYear ) {
