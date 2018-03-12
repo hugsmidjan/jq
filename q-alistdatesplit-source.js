@@ -1,3 +1,4 @@
+/* $.fn.alistDateSplit  -- (c) 2009 Hugsmiðjan ehf.  @preserve */
 // ----------------------------------------------------------------------------------
 // jQuery.fn.alistDateSplit v 1.0
 // ----------------------------------------------------------------------------------
@@ -15,74 +16,110 @@
 //  - $('.articlelist').alistDateSplit();
 
 
-(function($){
+(function($) {
 
   $.alistDateSplit = {
       i18n: {
         en: {
           months: 'January,February,March,April,May,June,July,August,September,October,November,December'.split(','),
-          weekdays: 'Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday'.split(',')
+          weekdays: 'Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday'.split(','),
         },
         is: {
           months: 'janúar,febrúar,mars,apríl,maí,júní,júlí,ágúst,september,október,nóvember,desember'.split(','),
-          weekdays: 'Sunnudagur,Mánudagur,Þriðjudagur,Miðvikudagur,Fimmtudagur,Föstudagur,Laugardagur'.split(',')
-        }
-      }
+          weekdays: 'Sunnudagur,Mánudagur,Þriðjudagur,Miðvikudagur,Fimmtudagur,Föstudagur,Laugardagur'.split(','),
+        },
+      },
   };
 
   $.fn.alistDateSplit = function ( cfg ) {
 
     cfg = $.extend({
-              shortMonths:    1, // 1/true uses fyrst 3/4 letters, 0/false uses full month name
-              monthAfterDate: 1, // 1/true inserts month after date, 0/false before
+              shortMonths:    true, // 1/true uses fyrst 3/4 letters, 0/false uses full month name
+              monthAfterDate: true, // 1/true inserts month after date, 0/false before
               dateSel:        '.item .date',
-              showWeekday:    0, // 1/true inserts weekday, 'short' uses first 3 letters
-              showTime:       0,
-              allowRange:     0,
-              rangeSplitter:  /-/,
-              dateSplitter:   /\.|\s+/
+              showWeekday:    false, // 1/true inserts weekday, 'short' uses first 3 letters
+              showTime:       false,
+              allowRange:     false,
+              collapseDupeMonths: true, // "june 12 - 13 2017" instead of "june 1 2017 - june 13 2017"
+              rangeSplitter:  /(?:[\s\n]+|)-(?:[\s\n]+|)/g,
+              dateSplitter:   /\.|\s+/,
             }, cfg );
 
-    return this.each(function(){
+    return this.each(function() {
 
-        var alist = $(this),
-            text = $.alistDateSplit.i18n[alist.lang()] || $.alistDateSplit.i18n.en;
+        var alist = $(this);
+        var text = $.alistDateSplit.i18n[alist.lang()] || $.alistDateSplit.i18n.en;
 
-        alist.find( cfg.dateSel ).each(function(){
-              var dateElm = $(this),
-                  dates = dateElm.text().split(cfg.rangeSplitter),
-                  jsDate = $('<span class="js-date" />');
+        alist.find( cfg.dateSel ).each(function() {
+              var dateElm = $(this);
+              var dates = dateElm.text().trim().split(cfg.rangeSplitter);
+              var jsDate = $('<span class="js-date" />');
 
-              for (var i=0; i<dates.length; i++)
-              {
-                var date = $.trim(dates[i]).split(cfg.dateSplitter),
-                    dateObj = new Date(date[2],date[1]-1,date[0]),
-                    dayElm = cfg.allowRange ? $('<span class="day'+ (i+1) +'" />') : jsDate,
-                    Amonth = text.months[ dateObj.getMonth() ] || '',
-                    weekday = text.weekdays[ dateObj.getDay() ] || '',
-                    month = cfg.shortMonths && Amonth.length > 4 ? Amonth.substr(0,3) : Amonth,
-                    monthDot = cfg.shortMonths && Amonth.length > 4 ? '<i>.</i> ' : ' ',
-                    timeStamp = cfg.showTime && date[3] ? '<span class="t">'+ date[3] +'</span>' : '',
+              for (var d=0; d<dates.length; d++) {
+                var dateObj = dates[d].trim().split(cfg.dateSplitter);
+                dates[d] = [new Date(dateObj[2],dateObj[1]-1,dateObj[0]), dateObj[3]];
+              }
 
-                    pendFunc = cfg.monthAfterDate ? 'append' : 'prepend';
+              for (var i=0; i<dates.length; i++) {
+                var date = dates[i][0];
+                var dayElm = cfg.allowRange ? $('<span class="day'+ (i+1) +'" />') : jsDate;
+                var thisDay = date.getDay();
+                var thisMonth = date.getMonth();
+                var thisYear = date.getFullYear();
 
-                weekday = cfg.showWeekday == 'short' ?  '<span class="wd">' + weekday.substr(0,3) + '<i>.</i></span> ' :
+                var Amonth = text.months[ thisMonth ] || '';
+                var weekday = text.weekdays[ thisDay ] || '';
+                var month = cfg.shortMonths && Amonth.length > 4 ? Amonth.substr(0,3) : Amonth;
+                var monthDot = cfg.shortMonths && Amonth.length > 4 ? '<i>.</i> ' : ' ';
+                var pendFunc = cfg.monthAfterDate ? 'append' : 'prepend';
+
+                var monthElm = '<span class="m">'+ month + monthDot +'</span>';
+                var yearElm = '<span class="y">'+ thisYear +'</span> ';
+                var timeElm = cfg.showTime && dates[i][1] ? '<span class="t">'+ dates[i][1] +'</span>' : '';
+                var weekdayElm = cfg.showWeekday === 'short' ?  '<span class="wd">' + weekday.substr(0,3) + '<i>.</i></span> ' :
                           cfg.showWeekday ? '<span class="wd">' + weekday + '</span> ' :
                           '';
 
-                dayElm.append('<span class="d">'+ date[0] +'<i>.</i></span> ')[pendFunc]('<span class="m">'+ month + monthDot +'</span>').append('<span class="y">'+ date[2] +'</span> ').append(timeStamp).prepend(weekday);
+                var prevMonth = (i !== 0 && dates[i-1]) ? dates[i-1][0].getMonth() : null;
+                var nextMonth  = (i !== dates.length && dates[i+1]) ? dates[i+1][0].getMonth() : null;
+                var nextYear  = (i !== dates.length && dates[i+1]) ? dates[i+1][0].getFullYear() : null;
 
-                if (cfg.allowRange)
-                {
-                  if (i > 0)
-                  {
+                // add day
+                dayElm.append('<span class="d">'+ thisDay +'<i>.</i></span> ');
+
+                // add month
+                if ( !cfg.allowRange || !cfg.collapseDupeMonths || thisYear !== nextYear ) {
+                  dayElm[pendFunc](monthElm);
+                }
+                else {
+                  if ( pendFunc === 'prepend' && (i === 0 || thisMonth !== prevMonth) ) {
+                    dayElm[pendFunc](monthElm);
+                  }
+                  else if ( pendFunc === 'append' && (i === dates.length || thisMonth !== nextMonth) ) {
+                    dayElm[pendFunc](monthElm);
+                  }
+                }
+
+                // add year
+                if ( !cfg.allowRange ||
+                     !cfg.collapseDupeMonths ||
+                     (cfg.collapseDupeMonths && (i === dates.length || thisYear !== nextYear)) ) {
+                  dayElm.append(yearElm);
+                }
+
+                // add weekday
+                dayElm.append(timeElm).prepend(weekdayElm);
+
+
+                if (cfg.allowRange) {
+                  // add separator
+                  if (i > 0) {
                     jsDate.append('<span class="sep"> - </span>');
                   }
 
                   jsDate.append(dayElm);
                 }
-                else
-                {
+                else {
                   break;
                 }
               }
