@@ -15,7 +15,7 @@
 // todo : callback function when animation finishes ( on hold, pending use )
 // Depends on:
 //  - eutils 1.0+ :  $.fn.deepest() og  $.fn.setFocus()
-(function ($, True, False){
+(function ($, True, False) {
 
   $.listscroller = {
 
@@ -373,14 +373,14 @@
   {
     var c = e.data;
     setPos( c, c.index - c.stepSize );
-    return False;
+    e.preventDefault();
   }
 
   function moveNext ( e )
   {
     var c = e.data;
     setPos( c, c.index + c.stepSize );
-    return False;
+    e.preventDefault();
   }
 
   function movePage ( e )
@@ -388,7 +388,7 @@
     var c = e.data,
         p = (parseInt( $( this ).text(), 10 ) -1) || 0;
     setPos( c, p * c.stepSize );
-    return False;
+    e.preventDefault();
   }
 
   function inputChange ( e )
@@ -397,7 +397,7 @@
         pageIndex = Math.max(0, parseInt('0'+$( this ).val(), 10 )-1)  ||  0,
         newPos = Math.min(pageIndex*cfg.stepSize, max(cfg.list, cfg) );
     setPos( cfg, newPos );
-    return False;
+    e.preventDefault();
   }
 
 
