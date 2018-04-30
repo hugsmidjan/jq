@@ -1,3 +1,4 @@
+/* $.mapPopulizor 1.0  -- (c) 2012 Hugsmiðjan ehf.  @preserve */
 // ----------------------------------------------------------------------------------
 // jQuery.fn.mapPopulizor v 1.0
 // ----------------------------------------------------------------------------------
@@ -41,7 +42,7 @@
       mappoints:          {},
       getXY:              function (bubbleBox) { // try to pull the item's id from it's link
                               var url = this.getLinkUrl(bubbleBox),
-                                  itemId = url  &&  url.replace(/^.*\/(\d+)(\/|$)/, '$1');
+                                  itemId = url  &&  url.replace(/^.*\/(\d+)(\/|$|.html)/, '$1');
                               return this.mappoints[itemId] || { x:0, y:0, f:1 }; // f: false marker, no id match
                             },
 
