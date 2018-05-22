@@ -8,7 +8,7 @@
 
 // Requires:
 //  - jQuery 1.4
-//  - eutils  (uses: $.inject(), $.beget() )
+//  - eutils  (uses: $.inject(), $.beget(), $.setFrag(), $.getFrag() )
 
 // Finds all items in articlelist and generates appropriate player according to the video url
 // Requires the usage of "tivísunarslóð" for each article to point to the correct video
@@ -31,7 +31,7 @@
                       '<embed src="%{vidurl}" type="application/x-shockwave-flash" wmode="transparent" allowscriptaccess="always" allowfullscreen="true" width="%{vidwi}" height="%{vidhe}"></embed>' +
                     '</object>',
 
-      iframeTempl = '<iframe title="YouTube video player" width="%{vidwi}" height="%{vidhe}" src="%{vidurl}" frameborder="0" allowfullscreen></iframe>',
+      iframeTempl = '<iframe title="YouTube video player" width="%{vidwi}" height="%{vidhe}" src="%{vidurl}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>',
 
       docLocPC = document.location.protocol,
       docLocPC = docLocPC == 'file:' ? 'http:' : docLocPC,
@@ -77,7 +77,7 @@
                            cfg.autostart == 'none' ? autoplay = '' :
                            firstrun ? '' : '&autoplay=1';
 
-                videoUrl = docLocPC + '//www.youtube.com/embed/' + youtubeId + '?rel=0&wmode=transparent' + autoplay;
+                videoUrl = docLocPC + '//www.youtube-nocookie.com/embed/' + youtubeId + '?rel=0&wmode=transparent' + autoplay;
                 vidFinHeight = cfg.vidHeight + 30; //add player height to video height
                 useIframe = true;
               }
