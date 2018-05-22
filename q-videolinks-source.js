@@ -29,7 +29,7 @@
                       '<embed src="%{vidurl}" type="application/x-shockwave-flash" wmode="transparent" allowscriptaccess="always" allowfullscreen="true" width="%{vidwi}" height="%{vidhe}"></embed>' +
                     '</object>',
 
-      iframeTempl = '<iframe width="%{vidwi}" height="%{vidhe}" src="%{vidurl}" frameborder="0" scrolling="no" title="%{vidTitle}" allowfullscreen></iframe>',
+      iframeTempl = '<iframe width="%{vidwi}" height="%{vidhe}" src="%{vidurl}" frameborder="0" scrolling="no" title="%{vidTitle}" allow="autoplay; encrypted-media" allowfullscreen></iframe>',
       videoTempl =  '<video width="%{vidwi}" height="%{vidhe}" src="%{vidurl}" controls %{auto}><source src="%{vidurl}" type="video/%{mime}"></source></video>',
       blockquoteTempl = '<blockquote class="%{class}" %{attributes} style="%{styles}"><a href="%{vidurl}"></a></blockquote>',
 
@@ -82,7 +82,7 @@
 
             autoplay = data.cfg.autostart ? '&autoplay=1' : '';
             autohide = data.cfg.autoHide === true ? '' : '&autohide='+ data.cfg.autoHide;
-            videoUrl = docLocPC + '//www.youtube.com/embed/' + videoId + '?'+ playlistId +'rel=0&wmode=transparent' + autoplay + autohide + data.cfg.filePlayerExtraParams;
+            videoUrl = docLocPC + '//www.youtube-nocookie.com/embed/' + videoId + '?'+ playlistId +'rel=0&wmode=transparent' + autoplay + autohide + data.cfg.filePlayerExtraParams;
             playerHeight = 30;
           }
           else if ( type === 'vimeo' ) {
