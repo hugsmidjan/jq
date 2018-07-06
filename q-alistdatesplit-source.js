@@ -78,7 +78,7 @@
                 // var monthDot = cfg.shortMonths && !text.shortMonths && Amonth.length > 4 ? '<i>.</i> ' : ' '; // legazy
                 var pendFunc = cfg.monthAfterDate ? 'append' : 'prepend';
 
-                var monthElm = '<span class="m">'+ month + '</span>';
+                var monthElm = '<span class="m">'+ month + '</span> ';
                 var yearElm = '<span class="y">'+ thisYear +'</span> ';
                 var timeElm = cfg.showTime && dates[i][1] ? '<span class="t">'+ dates[i][1] +'</span>' : '';
                 var weekdayElm = cfg.showWeekday === 'short' ?  '<span class="wd">' + weekday.substr(0,3) + '<i>.</i></span> ' :
