@@ -19,13 +19,17 @@
 (function($) {
 
   $.alistDateSplit = {
+      // https://www.loc.gov/aba/pcc/conser/conserhold/Mosabbr.html
       i18n: {
         en: {
           months: 'January,February,March,April,May,June,July,August,September,October,November,December'.split(','),
+          shortMonths: 'Jan.,Feb.,Mar.,Apr.,May,June,July,Aug.,Sept.,Oct.,Nov.,Dec.'.split(','),
           weekdays: 'Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday'.split(','),
         },
+        //http://malfar.arnastofnun.is/?p=11230
         is: {
           months: 'janúar,febrúar,mars,apríl,maí,júní,júlí,ágúst,september,október,nóvember,desember'.split(','),
+          shortMonths: 'jan.,febr.,mars,apr.,maí,júní,júlí,ág.,sept.,okt.,nóv.,des.'.split(','),
           weekdays: 'Sunnudagur,Mánudagur,Þriðjudagur,Miðvikudagur,Fimmtudagur,Föstudagur,Laugardagur'.split(','),
         },
       },
@@ -68,13 +72,13 @@
                 var thisMonth = date.getMonth();
                 var thisYear = date.getFullYear();
 
-                var Amonth = text.months[ thisMonth ] || '';
+                var month = (cfg.shortMonths && text.shortMonths ? text.shortMonths[ thisMonth ].replace('.','<i>.</i>') : text.months[ thisMonth ]) || '';
                 var weekday = text.weekdays[ thisDay ] || '';
-                var month = cfg.shortMonths && Amonth.length > 4 ? Amonth.substr(0,3) : Amonth;
-                var monthDot = cfg.shortMonths && Amonth.length > 4 ? '<i>.</i> ' : ' ';
+                // var month = cfg.shortMonths && !text.shortMonths && Amonth.length > 4 ? Amonth.substr(0,3) : Amonth; // legazy
+                // var monthDot = cfg.shortMonths && !text.shortMonths && Amonth.length > 4 ? '<i>.</i> ' : ' '; // legazy
                 var pendFunc = cfg.monthAfterDate ? 'append' : 'prepend';
 
-                var monthElm = '<span class="m">'+ month + monthDot +'</span>';
+                var monthElm = '<span class="m">'+ month + '</span>';
                 var yearElm = '<span class="y">'+ thisYear +'</span> ';
                 var timeElm = cfg.showTime && dates[i][1] ? '<span class="t">'+ dates[i][1] +'</span>' : '';
                 var weekdayElm = cfg.showWeekday === 'short' ?  '<span class="wd">' + weekday.substr(0,3) + '<i>.</i></span> ' :
