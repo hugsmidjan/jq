@@ -13,13 +13,14 @@
 //  - fickle 2.0
 //  - getmodal 1.1
 
-(function($){
+(function($) {
 
   $.imgPopper = {
 
     version: 2.0,
 
     defaultConfig: {
+        modalClass: 'imgpopper',
         fadeInSpeed : 250, // set 1 for almost no animation
         fadeOutSpeed : 200, // set 1 for almost no animation
         marginTop: undefined, // set custom marginTop pos (Integer/Function). Defaults to win.scrollTop. null to disable.
@@ -33,15 +34,15 @@
         prevText:    'Previous',
         closeText:   'Close',
         imageText:   'Image',
-        ofTotalText: 'of'
+        ofTotalText: 'of',
       },
       is: {
         nextText:    'Næsta',
         prevText:    'Fyrri',
         closeText:   'Loka',
         imageText:   'Mynd',
-        ofTotalText: 'af'
-      }
+        ofTotalText: 'af',
+      },
     },
 
     imgTempl :    '<div class="image">' +
@@ -59,13 +60,13 @@
                     '<li class="prev"><a href="#">%{prevText}</a></li>' +
                   '</ul>',
 
-    getImage : function( linkElm ) {
+    getImage : function ( linkElm ) {
         return $.inject(this.imgTempl, {
                     img   : linkElm.attr('href'),
                     alt   : linkElm.find('img').attr('alt')   || '',
-                    title : linkElm.find('img').attr('title') || ''
+                    title : linkElm.find('img').attr('title') || '',
                   });
-      }
+      },
   };
 
   $.fn.imgPopper = function ( cfg ) {
@@ -114,7 +115,7 @@
 
         _modal = $.getModal({
                     opener:  _img,
-                    className: 'imgpopper',
+                    className: cfg.modalClass,
                     marginTop: cfg.marginTop,
                     content: _imgPop,
                     fickle: $.extend({
@@ -125,11 +126,11 @@
                             $(this).remove();
                           }
                       }, cfg.fickle)
-                  })
-                    .fickle('open');
+                  });
+        _modal.fickle('open');
 
         $(window)
-            .on('keyup.imgpopper', function(e) {
+            .on('keyup.imgpopper', function (e) {
                 e.which === 37 ? // LEFT arrow == prev image
                     _paging.find('.prev').trigger('click'):
                 e.which === 39 ? // RIGHT arrow == next image
@@ -141,15 +142,13 @@
             .on('click', 'li', function (e) {
                 e.preventDefault();
                 var li = $(this);
-                if ( !li.is('.nav-end') )
-                {
+                if ( !li.is('.nav-end') ) {
                   var delta = li.is('.next') ? 1 : -1;
                   _idx = Math.min( Math.max( 0, _idx+delta ), _hrefElms.length-1 );
                   _imgPop.find('.image').replaceWith( $.imgPopper.getImage( _hrefElms.eq(_idx) ) );
                   _updPager(_paging, _idx, _hrefElms.length);
 
-                  if (cfg.preloadImages)
-                  {
+                  if (cfg.preloadImages) {
                     // preload ajacent images
                     if (_idx !== 0) { (new Image()).src = _hrefElms[_idx-1].href; } // at start
                     if (_idx !== _hrefElms.length-1)   { (new Image()).src = _hrefElms[_idx+1].href; } // at end
