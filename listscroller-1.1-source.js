@@ -50,6 +50,7 @@
       //itemStatusPager:   False,  // true changes statusPager to count items shown rather than "pages" ... e.g. "Displaying: 1-4 of 13 items"
 
       autoScrollDelay:   0, //Timeout in ms for autoscroll
+      pauseOnMouseOver:  true, // pauses autoscroll when mouse is over the banner
       setFocus:          True,   // lets setPos trigger() .focus on the first currently visible list element.
 
       moveCallback:      function () {},
@@ -640,22 +641,23 @@
           };
 
       var delay = cfg.autoScrollDelay;
-      if ( delay )
-      {
+      if ( delay ) {
+        var doPause = cfg.pauseOnMouseOver;
         cfg.scrollTimeout = setTimeout( nextTrigger, delay );
         _block
             .bind('mouseenter.lscr', function (e) {
                 _block.addClass('block-mouseover');
-                clearTimeout(cfg.scrollTimeout);
+                doPause && clearTimeout(cfg.scrollTimeout);
               })
             .bind('mouseleave.lscr', function (e) {
                 _block.removeClass('block-mouseover');
-                clearTimeout(cfg.scrollTimeout);
-                cfg.scrollTimeout = setTimeout( nextTrigger, delay );
+                if ( doPause ) {
+                  clearTimeout(cfg.scrollTimeout);
+                  cfg.scrollTimeout = setTimeout( nextTrigger, delay );
+                }
               })
             .bind('afterMove.lscr', function (e) {
-                if ( !_block.is('.block-mouseover') )
-                {
+                if ( !doPause || !_block.is('.block-mouseover') ) {
                   clearTimeout(cfg.scrollTimeout);
                   cfg.scrollTimeout = setTimeout( nextTrigger, delay );
                 }
