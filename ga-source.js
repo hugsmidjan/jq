@@ -44,4 +44,6 @@
         window.ga('send', 'pageview');
     };
 
+    window.gaHXM = gaHXM;
+
 })(window);
