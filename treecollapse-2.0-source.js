@@ -1,5 +1,4 @@
-// ----------------------------------------------------------------------------------
-// jQuery.fn.treeCollapse v 2.0
+/* jQuery.fn.treeCollapse v 2.0  -- (c) 2009 Hugsmiðjan ehf.  @preserve */
 // ----------------------------------------------------------------------------------
 // (c) 2009 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
 //  written by:
