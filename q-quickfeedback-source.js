@@ -62,7 +62,7 @@
                           .fadeOut(1000, function () {
                               promptElm.remove();
                             });
-                      cfg.gaPing && window.ga.eventPing('quickfeedback', 'clicked-yes', myPath, 1, false);
+                      cfg.gaPing && window.gaHXM.eventPing('quickfeedback', 'clicked-yes', myPath, 1, false);
                     })
                   .on('click', cfg.nayBtnSel, function (e) {
                       e.preventDefault();
@@ -119,7 +119,7 @@
                                     })
                                   .on('VBloaded', function (/*e, req*/) {
                                       if ( nonEmptyFeedback ) {
-                                        cfg.gaPing && window.ga.eventPing('quickfeedback', 'clicked-no', myPath, 1, false);
+                                        cfg.gaPing && window.gaHXM.eventPing('quickfeedback', 'clicked-no', myPath, 1, false);
                                         feedbackSubmitted = true;
                                       }
                                       feedbackform
@@ -138,7 +138,7 @@
 
                         $(window)
                             .on('unload beforeunload', function (/*e*/) {
-                                !feedbackSubmitted  &&  cfg.gaPing &&  window.ga.eventPing('quickfeedback', 'clicked-no-only', myPath, 1, false);
+                                !feedbackSubmitted  &&  cfg.gaPing &&  window.gaHXM.eventPing('quickfeedback', 'clicked-no-only', myPath, 1, false);
                                 feedbackSubmitted = true;
                               });
                     });

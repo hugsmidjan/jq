@@ -12,7 +12,7 @@
 //  - jQuery 1.12
 //  - eutils 1.2 (debounceFn, imgSuppress)
 //  - x/ui-autocomplete 1.11
-//  - ga (ga.eventPing)
+//  - ga (gaHXM.eventPing)
 
 // Usage:
 //  - $('.qsearch form').editedSeach();
@@ -22,7 +22,7 @@
   var makeSearch = function (searchForm, cfg) {
         var searchInput = searchForm.find('input:text');
         var ajaxRequest;
-        var gaPing = (window.ga && window.ga.eventPing) ? window.ga.eventPing : function () {};
+        var gaPing = (window.gaHXM && window.gaHXM.eventPing) ? window.gaHXM.eventPing : function () {};
         var pingSearchResults = $.debounceFn(function (value) {
                 gaPing('sitessearch-box', 'ac-result', value);
               }, 800);
