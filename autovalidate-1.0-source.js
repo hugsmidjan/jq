@@ -17,7 +17,7 @@
 
 */
 
-(function($){
+(function ($) {
 
   $.fn.addBack = $.fn.addBack || $.fn.andSelf;
 
@@ -64,7 +64,7 @@
                                              //  false - doesn't alter bowser defaults,
                                              //  auto  - disables enter submitions if form has more than one submit button
     consumeRequired     : true,              // overtake default browser behaviour of html5 required attibute
-    consumeMinlength    : true               // overtake default browser behaviour of html5 minlength attibute
+    consumeMinlength    : true,               // overtake default browser behaviour of html5 minlength attibute
   };
 
 
@@ -82,8 +82,8 @@
           inlineReqMsg    : 'This field is required ',                // Default "value required" inline error message.
           inlineTypeMsg   : 'This field contains an invalid value ',  // Default "invalid value" inline error message.
           inlineNextError : 'Next error',                             // Text for the "Next Error" link element.
-          resetAlert      : 'Note: You are about to reset all values in the form...'
-        }
+          resetAlert      : 'Note: You are about to reset all values in the form...',
+        },
       },
 
       id : function ( jq ) {
@@ -92,7 +92,7 @@
         return (id) ? id : jq.attr('id', idPrefix + '_' + (idSuffix++)).attr('id');
       },
 
-      cleanLabelString : function( t, maxlength ) {
+      cleanLabelString : function ( t, maxlength ) {
 
         if (!t) { return ''; }
         maxlength = maxlength || 35;
@@ -165,11 +165,11 @@
 
       },
 
-      getText : function( id, lang ) {
+      getText : function ( id, lang ) {
         return $.av.getError(id, lang) || $.av.getError(id, 'en') || '';
       },
 
-      getError : function( id, lang ) {
+      getError : function ( id, lang ) {
         return ($.av.lang[lang] && $.av.lang[lang][id]) || '';
       },
 
@@ -198,7 +198,7 @@
         // there being errors further down the form
         var conf = $.av.config( ctrllist[0] );
 
-        $.each(ctrllist, function(i){
+        $.each(ctrllist, function (i) {
 
           var ctrl = $( this );
           var lang = ctrl.closest('[lang]').attr('lang');
@@ -231,14 +231,13 @@
         var msg       = '';
 
         // sort through invalid inputs and build error messages
-        $.each(ctrllist, function(){
+        $.each(ctrllist, function () {
 
           var ctrl  = $( this ),
               label = $.av.getLabel( ctrl, contexts, conf ),
               errorMsg = ctrl.data('av-error-short');
 
-          if (errorMsg)
-          {
+          if (errorMsg) {
             label += ' ('+errorMsg+')';
           }
 
@@ -266,7 +265,7 @@
       focusNext : function ( refNode ) {
         // order form elements correctly
         var elms = $(':input').get();  // in the context of form rather than the document ?
-        elms = elms.sort(function(a, b){
+        elms = elms.sort(function (a, b) {
           var at = (a.tabIndex > 0) ? a.tabIndex : 99999;
           var bt = (b.tabIndex > 0) ? b.tabIndex : 99999;
           return ((at < bt) * -1) + ((at > bt) * 1);
@@ -281,9 +280,9 @@
           felm.trigger('focus');
         },1);
         return felm;
-      }
+      },
 
-    }
+    },
 
   });
 
@@ -305,8 +304,8 @@
       fi_bdy:  _defaultCheck,
       fi_file: _defaultCheck,
       fi_chk:  _defaultToggleCheck,
-      fi_rdo:  _defaultToggleCheck
-    }
+      fi_rdo:  _defaultToggleCheck,
+    },
   });
 
 
@@ -326,7 +325,7 @@
             })
 
   */
-  (function($){
+  (function ($) {
 
     $.fn.constrainNumberInput = function (opts) {
         opts = !opts ? {} : opts.charAt ? { selector:opts } : opts;
@@ -365,13 +364,11 @@
                             0;
 
             input.autocomplete = 'off'; // do this every time since the event might be delegated and the element dynamically added
-            if ( delta )
-            {
+            if ( delta ) {
               delta = delta * (input.step || 1) * (e.shiftKey ? 10 : 1);
               var val = getCleanValue(input);
               var val2 = boundryCheck( input, (val||0) + delta );
-              if ( val !== val2 ) // skip unnessesary updates and change events
-              {
+              if ( val !== val2 ) { // skip unnessesary updates and change events
                 input.value = val2;
                 var $inp = $(input);
                 // trigger "change" immediately - unless the field is focused - then wait for blur like normal
@@ -399,7 +396,7 @@
                 // and if not (i.e. if input is still marked as focused) then remove the marker
                 // and trigger change manually.
                 .one('focusout.cni', function (/*e*/) {
-                    setTimeout(function(){
+                    setTimeout(function () {
                         if ( input.data(fieldIsFocused) && input.data(fieldIsChanged) )
                         {
                           input
@@ -415,7 +412,7 @@
     var extraChars = {
             44: 1, // ,
             45: 1, // -
-            46: 1  // .
+            46: 1,  // .
           };
 
     var boundryCheck = function (input, num) {
@@ -476,7 +473,7 @@
     // defangReset can may be run against any collection of elements to defang
     // them OR, in case of non reset buttons, turn them into reset buttons.
     defangReset : function () {
-      return this.on('click', function(/* e */){
+      return this.on('click', function (/* e */) {
           var btn = $( this );
           var lang = btn.closest('[lang]').attr('lang') || 'en';
           btn.attr( 'lang', lang );
@@ -493,7 +490,7 @@
 
 
     defangEnter : function () {
-      return this.on('keydown', function(e){
+      return this.on('keydown', function (e) {
           var target = e.target;
           return ( e.which !== 13  ||  target.tagName !== 'INPUT'  ||  /^(button|reset|submit)$/i.test(target.type) );
         });
@@ -501,7 +498,7 @@
 
     autoValidate : function ( config ) {
 
-      return this.each(function(){
+      return this.each(function () {
 
         var context = $( this ),
             form = $( context.closest('form')[0]  ||  context.find('form')[0] );
@@ -526,7 +523,7 @@
 
         // turn the enter key into tab for all inputs except textareas, and buttons
         if (conf.emulateTab) {
-          form.on('keydown', function(e){
+          form.on('keydown', function (e) {
             if (e.keyCode === 13 &&
                 $(e.target).is(':input:not(:button):not(:reset):not(:submit):not(textarea)')) {
               $.av.focusNext( e.target );
@@ -537,7 +534,7 @@
 
         // functionality to tab to the next field when maxlength is reached
         if (conf.maxLengthTab) {
-          form.on('keyup', function(e){
+          form.on('keyup', function (e) {
             var t = $(e.target);
             var w = e.which;
             // only trigger with keycodes (not scancodes), and where keycode isn't backspace,tab,enter,
@@ -580,10 +577,9 @@
             });
         }
 
-        form.on('submit', function(e){
+        form.on('submit', function (e) {
             var f = $( this );
-            if ( !f.data('av.skip') || f.data('av.disabled') )
-            {
+            if ( !f.data('av.skip') || f.data('av.disabled') ) {
               var c = $.av.config( this );
 
             // This is a bad idea. User submits form, presses back button, fixes something, and can't resubmit. :-P
@@ -606,6 +602,15 @@
                 // (not a problem in jQuery 1.3)
                 e.preventDefault();
               }
+
+              // custom event on submit, easier to do post submit actions
+              // like disable submit button to prevent multiple submits
+              form
+                  .trigger({
+                      type:     'autovalidateSubmit',
+                      isValid:  valid,
+                    });
+
               return valid;
             /*}*/
 
@@ -625,7 +630,7 @@
           errMsgSel = '',
           displayAlert = false;   // trigger alerting if any of the contexts want's one
 
-      this.each(function(){
+      this.each(function () {
 
         var context = $( this ),
             contextInvalids = [],
@@ -645,7 +650,7 @@
         // find controls that need validation
         var controls = context.is(':input') ? context : context.find(':input');
 
-        controls.not(conf.includeDisabled?'':':disabled').not(':submit,:reset,:button,[type="hidden"]').each(function(){
+        controls.not(conf.includeDisabled?'':':disabled').not(':submit,:reset,:button,[type="hidden"]').each(function () {
 
           var control = $( this );
 
@@ -787,26 +792,25 @@
 
       var isValid = !invalids.length;
 
-      if ( report )
-      {
+      if ( report ) {
       // we've passed through every control - time to sort out the results
-        if ( !isValid )
-      {
+        if ( !isValid ) {
           var field = $(invalids[0]).find('*').addBack().filter('input, select, textarea');
-        field.focusHere ?
-            field.focusHere():
-        field.setFocus ?
-            field.focusHere():
-            field[0].focus();
+          field.focusHere ?
+              field.focusHere():
+          field.setFocus ?
+              field.focusHere():
+              field[0].focus();
 
           if (displayAlert) {
             $.av.alertErrors( $.unique( invalids ), this );
-      }
-
+          }
         }
 
         var form = $(invalids).closest('form'),
             conf = form.data('av-config') || {};
+        // This event fires every time a field is validated
+        // Does not fire on submit when all fields are valid
         form
             .toggleClass( conf.formInvalidClass||'', !isValid )
             .trigger({
@@ -816,9 +820,10 @@
               });
       }
 
+
       return isValid;
 
-    }
+    },
 
   });
 
