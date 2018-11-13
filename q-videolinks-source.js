@@ -19,7 +19,7 @@
 // Usage:
 //  - $('.article a.videolink').videoLinks();
 
-(function($) {
+(function ($) {
 
   var objectTempl = '<object id="video" width="%{vidwi}" height="%{vidhe}">' +
                       '<param name="movie" value="%{vidurl}"></param>' +
@@ -30,7 +30,7 @@
                     '</object>',
 
       iframeTempl = '<iframe width="%{vidwi}" height="%{vidhe}" src="%{vidurl}" frameborder="0" scrolling="no" title="%{vidTitle}" allow="autoplay; encrypted-media" allowfullscreen></iframe>',
-      videoTempl =  '<video width="%{vidwi}" height="%{vidhe}" src="%{vidurl}" controls %{auto}><source src="%{vidurl}" type="video/%{mime}"></source></video>',
+      videoTempl =  '<video width="%{vidwi}" height="%{vidhe}" src="%{vidurl}" controls %{auto} controlslist="nodownload"><source src="%{vidurl}" type="video/%{mime}"></source></video>',
       blockquoteTempl = '<blockquote class="%{class}" %{attributes} style="%{styles}"><a href="%{vidurl}"></a></blockquote>',
 
       calcHeight = function (width, aspect4x3) {
@@ -39,7 +39,7 @@
         return Math.round(vdHeight);
       },
 
-      playVideo = function(/*e*/) {
+      playVideo = function (/*e*/) {
           var item = $(this),
               data = item.data('playvideo_data'),
               videoHref = data.videoHref,
