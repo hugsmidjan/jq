@@ -1,1 +1,1 @@
-import './jquery-1.12';
+import './jquery-2.2';

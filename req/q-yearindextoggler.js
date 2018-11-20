@@ -1,4 +1,4 @@
 import './u/lang';
 import './delayedhighlight';
 
-import '../q-yearindextoggler';
+import '../q-yearindextoggler-source';

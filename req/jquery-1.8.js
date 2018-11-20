@@ -3,3 +3,5 @@ import jQueryOnload from './_/jquery-onload';
 jQueryOnload( $ );
 // provide forwards compatibility with 1.9 for old versions
 $.fn.addBack = $.fn.addBack || $.fn.andSelf;
+
+export default $;

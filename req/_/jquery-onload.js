@@ -2,7 +2,7 @@ export default function jQueryOnload($) {
   window.jQuery = $;
   // BTW, Because we're operating in CommonJs/module land
   // there's no need to run $.noConflict(); at this point.
-  // However, $.noConflict(true); will work as normal!
+  // However, window.jQuery.noConflict(true); will work as normal!
 
   $.ajaxSettings.traditional = true; // (in jQuery 1.4+) Default to a backwards-compatible (non-PHP like) $.param() behaviour for serializing Arrays to query-strings.
 
