@@ -1,1 +1,1 @@
-import './jquery-2.2';
+export { default } from './jquery-2.2';

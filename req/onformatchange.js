@@ -1,5 +1,3 @@
 import FormatChange from '../onformatchange-source';
-
-if ( FormatChange ) {
-  window.FormatChange = FormatChange;
-}
+window.FormatChange = FormatChange;
+export default FormatChange;
