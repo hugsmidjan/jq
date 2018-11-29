@@ -23,8 +23,7 @@
     var slNavWidth = 0;
     var maxLevel = 1;
 
-    if ( destroy )
-    {
+    if ( destroy ) {
       $win.off('resize.slNav');
       $slNavBB.find(cfg.branch).off('click.slNav', cfg.toggler);
 
@@ -41,7 +40,7 @@
       $slNav.find('ul.active').removeClass('active');
 
       // handle resize throttle
-      setTimeout(function(){
+      setTimeout(function() {
           $slNav.find('[style]').removeAttr('style');
         }, cfg.resizeThrottle);
 
@@ -50,16 +49,9 @@
 
     $slNav.find('ul.level1').addClass('active').wrap('<div class="col lvl1" />');
 
-    if (slNavCurrent.length)
-    {
-      currentLevel = slNavCurrent.is('.homecurrent') ?
-                        0 :
-                        parseInt(
-                            slNavCurrent
-                              .closest( $slNavBB.find(cfg.branch).find('> ul').add($slNavBB.find('.level1'))  )
-                                  .attr('class')
-                                  .match(/level(\d+)/)[1],
-                          10) - 1;
+    if (slNavCurrent.length) {
+      var currentLevelUL = slNavCurrent.closest('ul').attr('class').match(/level(\d+)/);
+      currentLevel = currentLevelUL ? parseInt(currentLevelUL[1], 10) - 1 : 0;
       slNavCurrent.parents('ul').addClass('active');
     }
 
@@ -80,22 +72,19 @@
                   )
           );
 
-        if ( !$slNavBB.find('.lvl'+branchLevel).length )
-        {
+        if ( !$slNavBB.find('.lvl'+branchLevel).length )  {
           $slNavBB.append('<div class="col lvl'+branchLevel+'" />');
           maxLevel++;
         }
 
         branch.appendTo( $slNavBB.find('.lvl'+branchLevel) );
 
-        if ( cfg.cloneBranchClass )
-        {
+        if ( cfg.cloneBranchClass ) {
           extraClasses = $.trim(extraClasses.replace(/(branch|parent|current|first|last)/g,''));
           branch.find('>li').addClass(extraClasses);
         }
 
-        if ( cfg.doTogglers )
-        {
+        if ( cfg.doTogglers ) {
           $(this).prepend('<a href="#" class="toggler">></a>');
         }
         $(this).find(cfg.toggler).data('branch', branch);
@@ -109,9 +98,9 @@
             $slNavBB.addClass('no-animation');
             $slNavBB.css({
                 left: -(currentLevel*slNavWidth),
-                width: maxLevel*slNavWidth
+                width: maxLevel*slNavWidth,
               });
-            setTimeout(function(){
+            setTimeout(function() {
                 $slNavBB.removeClass('no-animation');
               }, 10);
           }, cfg.resizeThrottle))
@@ -137,7 +126,7 @@
             e.preventDefault();
             currentLevel--;
             $slNavBB.css({ left: -(currentLevel*slNavWidth) });
-            setTimeout(function(){
+            setTimeout(function() {
                 $slNavBB.find('.col.lvl'+(currentLevel+2)+' .active').removeClass('active');
               }, cfg.slideTime);
 
@@ -147,12 +136,10 @@
   $.fn.slideNav = function(o) {
       var slideElm = this;
 
-      if ( o === 'destroy' )
-      {
+      if ( o === 'destroy' ) {
        slideNav(slideElm, true);
       }
-      else
-      {
+      else  {
         var defaultCfg = {
               backText: $.lang() === 'is' ? 'Til baka' : 'Go back',
               branch: 'li.branch',
@@ -161,7 +148,7 @@
               cloneCatClass: false,
               linkTitle: true,
               resizeThrottle: 150,
-              slideTime: 300 // css animate in ms
+              slideTime: 300, // css animate in ms
             };
         var cfg = $.extend(defaultCfg, o);
 
