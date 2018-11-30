@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "ssh://git@stash.hugsmidjan.is:7999/misc/jq.git"
+    "url": "https://github.com/hugsmidjan/jq.git"
   },
   "author": "Hugsmiðjan ehf. (www.hugsmidjan.is)",
   "contributors": [
@@ -16,7 +16,7 @@
     "Valur Sverrisson <valur@hugsmidjan.is>"
   ],
   "dependencies": {
-    "qj": "git+ssh://git@github.com/hugsmidjan/qj.git#v1"
+    "qj": "github:hugsmidjan/qj#semver:^2"
   },
   "license": "ISC"
 }
