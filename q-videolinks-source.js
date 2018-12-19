@@ -82,7 +82,7 @@
 
             autoplay = data.cfg.autostart ? '&autoplay=1' : '';
             autohide = data.cfg.autoHide === true ? '' : '&autohide='+ data.cfg.autoHide;
-            videoUrl = docLocPC + '//www.youtube-nocookie.com/embed/' + videoId + '?'+ playlistId +'rel=0&wmode=transparent' + autoplay + autohide + data.cfg.filePlayerExtraParams;
+            videoUrl = docLocPC + '//www.youtube-nocookie.com/embed/' + videoId + '?'+ playlistId +'rel=0&modestbranding=1&wmode=transparent' + autoplay + autohide + data.cfg.filePlayerExtraParams;
             playerHeight = 30;
           }
           else if ( type === 'vimeo' ) {
