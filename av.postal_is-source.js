@@ -1,3 +1,4 @@
+/* jQuery.fn.islPostcodeSelect and jQuery.av.postCodes.is  -- (c) 2010 Hugsmiðjan ehf.  @preserve*/
 // ----------------------------------------------------------------------------------
 // jQuery.fn.islPostcodeSelect and jQuery.av.postCodes.is
 // ----------------------------------------------------------------------------------
@@ -110,7 +111,7 @@
   HOWTO rebuild the postcode list (stored in the `d` variable):
 
   Go here http://www.postur.is/gogn/Gotuskra/postnumer.txt
-  In firebug console run the following command,
+  In the console run the following command,
   and copy-paste the resulting string into the `d` variable above:
 
   // ===========================================================
