@@ -9,11 +9,14 @@
 
 /*
   Requires
-   * jQuery 1.3 or better (event bubbling)
+   * jQuery 1.7 or better (event bubbling)
    * Eutils ($.setFrag, $.beget)
+
+  Aria rules:
+  * https://www.w3.org/TR/wai-aria-practices/examples/tabs/tabs-1/tabs.html
 */
 
-(function($, document){
+(function ($, document) {
 
 /*
   $.event.special.fragment = {
@@ -60,8 +63,8 @@
   // ===  internal variables  ===
 
   var _cookieTargets,
-      _hashTarget,
-      _inEventPhase = false,
+      //_hashTarget,
+      //_inEventPhase = false,
       _openTabs = {},  // a list of all currently active tabs
       _allTabIds = {},
       _tabsToOpen,
@@ -72,8 +75,7 @@
   // ===  internal support functions  ===
 
 
-      closePanel = function ( id )
-      {
+      closePanel = function ( id ) {
         // grab the panel
         var panel = $( '#' + id );
         var data  = panel.data( _tabswitcherData );
@@ -81,22 +83,24 @@
 
         // de-highlight the tab
         data.tab.removeClass( c.currentTabClass );
+        if (data.link.is('[aria-selected]')) { data.link.attr('aria-selected', 'false'); }
 
         // unwrap the `currentTabTag` element if it exists
-        if ( c.currentTabTag )
-        {
+        if ( c.currentTabTag ) {
           data.tab.find( c.currentTabTag ).zap();
         }
 
         // hide the tabPanel block
         if (c.cssHide) {
           panel.addClass( c.hiddenPaneClass );
+          panel.attr( 'aria-hidden', true );
+          panel.attr( 'tabindex', '-1' );
         }
         else {
           panel.hide();
         }
 
-        if (c.openTabId == id) { delete c.openTabId; }
+        if (c.openTabId === id) { delete c.openTabId; }
         delete _openTabs[id];
 
         data.block.trigger( 'Tabclose', id );
@@ -106,8 +110,7 @@
 
 
 
-      openPanel = function ( id )
-      {
+      openPanel = function ( id ) {
 
         var panel = $( '#' + id );
         var data  = panel.data( _tabswitcherData );
@@ -115,17 +118,19 @@
 
         // highlight the tab
         data.tab.addClass( c.currentTabClass );
+        if (data.link.is('[aria-selected]')) { data.link.attr('aria-selected', 'true'); }
 
         // add new STRONG to current tab
         // but don't add strong to tabs that already have it
-        if ( c.currentTabTag  &&  !$( c.currentTabTag, data.link ).length )
-        {
+        if ( c.currentTabTag  &&  !$( c.currentTabTag, data.link ).length ) {
           data.link.wrapInner('<'+ c.currentTabTag +'/>');
         }
 
         // hide the tabPanel block
         if ( c.cssHide ) {
           panel.removeClass( c.hiddenPaneClass );
+          panel.removeAttr( 'aria-hidden' );
+          panel.removeAttr( 'tabindex' );
         }
         else {
           panel.show();
@@ -143,35 +148,29 @@
 
       // event delegate monitor that grabs
       // FIXME: Finish this comment...
-      crossReferenceMonitor = function ( e )
-      {
+      crossReferenceMonitor = function ( e ) {
         var l = $(e.target).closest('a, area');
-        if ( l.is('[href*="#"]')  &&  !l.data(_tabswitcherData+'Link')  &&  document.location.href.split('#')[0]==l[0].href.split('#')[0] )
-        {
+        if ( l.is('[href*="#"]')  &&  !l.data(_tabswitcherData+'Link')  &&  document.location.href.split('#')[0]===l[0].href.split('#')[0] ) {
           var id = $.getFrag( l[0].href );
-          if (id  &&  _allTabIds[id] )
-          {
+          if (id  &&  _allTabIds[id] ) {
             $.tabSwitcher.switchTo( id );
             e.preventDefault();
           }
         }
       },
 
-      switchToFragmentPanel = function (e)
-      {
+      switchToFragmentPanel = function (e) {
         $.tabSwitcher.switchTo( this );
         e.preventDefault();
       },
 
-      returnToTab = function (e)
-      {
+      returnToTab = function (/* e */) {
         $(this).parent().data( _tabswitcherData ).tab.setFocus();
         return false; // no bubbling!
       },
 
 
-      detectNestedTabswitch = function (e)
-      {
+      detectNestedTabswitch = function (e) {
         e.target !== this  &&  $.tabSwitcher.switchTo( this.id, true );
       },
 
@@ -210,11 +209,11 @@
         returnLinkTemplate: '<a href="#" class="stream">.</a>',
 
         en:  {
-          backLinkText:     'Back to '
+          backLinkText:     'Back to ',
         },
         is:  {
-          backLinkText:     'Til baka í '
-        }
+          backLinkText:     'Til baka í ',
+        },
       },
 
 
@@ -228,17 +227,15 @@
             c      = d.config,
             from   = c.openTabId;
 
-        if (c)
-        {
+        if (c) {
           // Note: we always fire the event... even if the new tab was already open
           d.block.trigger('Tabswitch', {
             from : from,
-            to   : id
+            to   : id,
           });
 
-          if (c.openTabId != id) { // redundant if the new tab is already open.
-            if (c.openTabId)
-            {
+          if (c.openTabId !== id) { // redundant if the new tab is already open.
+            if (c.openTabId) {
               closePanel( c.openTabId );
             }
             // open our new selection
@@ -250,7 +247,7 @@
           }
 
           if ( !silentSwitch ) {
-            if ( c.setFragment ) {
+            if (c.setFragment) {
               $.setFrag( id );
             }
             if (d.focusLink) {
@@ -261,30 +258,29 @@
           // Note: we always fire the event... even if the new tab was already open
           d.block.trigger('Tabswitched', {
             from : from,
-            to   : id
+            to   : id,
           });
         }
-      }
+      },
 
-    }
+    },
   });
 
 
 
 
-  $.fn.tabSwitcher = function ( conf )
-  {
+  $.fn.tabSwitcher = function ( conf ) {
 
     var _hashTarget = $.getFrag();
 
     // todo : detect usage of id, or index to set tab index => switchto
 
     _tabsToOpen = [[],[],[],[]];
-    this.each(function() {
+    this.each(function () {
 
-      var block     = $( this ),
-          _conf     = $.extend( {}, $.tabSwitcher.defaultConfig, conf ),
-          tabs      = $( _conf.tabSelector, this ),
+      var block     = $(this),
+          _conf     = $.extend( {}, $.tabSwitcher.defaultConfig, conf),
+          tabs      = $(_conf.tabSelector, this),
           openTabId = '',
           openLevel = 0;
 
@@ -292,17 +288,21 @@
       _conf.tabBlock = this;
       tabs.each(function ( i, t ) {
           var data    = { tab : $(t) },
-              link    = data.link   = (t.tagName == 'A') ? data.tab : $( 'a', t ),
+              link    = data.link   = (t.tagName === 'A') ? data.tab : $( 'a', t ),
               lang    = (link.closest('[lang]').attr('lang') || 'en').substr(0,2);
           data.lang   = _conf[lang] ? lang : 'en';
           data.config = _conf;
           data.block  = block;
           var id      = $.getFrag( link.attr('href') ),
+              ariaLabeledBy = link.attr('id'),
               panel   = $(id ? '#'+id : []);
-          panel.data( _tabswitcherData, data );
+          panel.data(_tabswitcherData, data);
 
-          if (panel.length)
-          {
+          if (panel.length) {
+
+            if ( ariaLabeledBy ) {
+              panel.attr('aria-labelledby', ariaLabeledBy);
+            }
 
             panel.addClass( _conf.paneClass );
             var backtxt = _conf[data.lang].backLinkText + data.tab.text();
@@ -310,16 +310,16 @@
 
             // Accessibility: Add a focusAnchor (+ "return to tab" link) to the top of the _tabPanelElm.
             if (_conf.focusLinkTemplate) {
-              data.focusLink = $( _conf.focusLinkTemplate )
-                                      .attr( 'title', backtxt )
-                                      .on( 'click', returnToTab )
+              data.focusLink = $(_conf.focusLinkTemplate)
+                                      .attr('title', backtxt)
+                                      .on('click', returnToTab)
                                       .prependTo( panel );
             }
             // Add a second "return to tab" link to the bottom of the _tabPanelElm.
             if (_conf.returnLinkTemplate) {
-              data.returnLink = $( _conf.returnLinkTemplate )
-                                      .attr( 'title', backtxt )
-                                      .on( 'click', returnToTab )
+              data.returnLink = $(_conf.returnLinkTemplate)
+                                      .attr('title', backtxt)
+                                      .on('click', returnToTab)
                                       .appendTo( panel );
             }
 
@@ -339,14 +339,14 @@
               openLevel = 3; // COOKIE;
             }
             // HASH: is the index element marked current? -- trumps all
-            if (openLevel < 4  &&  _hashTarget == id) {
+            if (openLevel < 4  &&  _hashTarget === id) {
               $(window).scrollTop(0);
               openTabId = id;
               openLevel = 4; // HASH;
             }
 
             data.tab
-                .on('click', function (e) { return false; /* cancel the bubble! */ });
+                .on('click', function (/* e */) { return false; /* cancel the bubble! */ });
             ( data.tab.is('a') ? data.tab : data.tab.find('a:first') )
                 .data(_tabswitcherData+'Link', 1)
                 .on('click', switchToFragmentPanel);
@@ -367,14 +367,13 @@
 
       // open and activate
       block.addClass( _conf.stripActiveClass );
-      if (openTabId)
-      {
+      if (openTabId) {
         // schedule for opening when _setParentTabTriggers has finished running
         _tabsToOpen[openLevel-1].unshift( openTabId );
       }
 
       // Remove the fragment from the location bar --- if that's really what we want. ...?
-      if ($.tabSwitcher.fixInitScroll && openLevel == 4 /*_LEVEL.HASH*/  && !_conf.setFragment) {
+      if ($.tabSwitcher.fixInitScroll && openLevel === 4 /*_LEVEL.HASH*/  && !_conf.setFragment) {
         document.location.hash = '';
       }
 
@@ -405,9 +404,14 @@
 
           var tabBox = [],
               tabPanes = this;
-          if (tabPanes.length >= cfg.min)
-          {
+          if (tabPanes.length >= cfg.min) {
             tabBox = $( cfg.boxTempl ).addClass( cfg.boxClass );
+            if ( cfg.ariaLabel ) {
+              tabBox
+                .attr('aria-label', cfg.ariaLabel)
+                .attr('aria-role', 'tablist');
+              tabPanes.attr('role', 'tabpanel');
+            }
             var tabList = cfg.tabContSel ? $(cfg.tabContSel, tabBox) : tabBox,
                 paneParent = tabPanes.eq(0).parent(),
                 refLang = paneParent.closest('[lang]').attr('lang') || '';
@@ -415,12 +419,12 @@
             paneParent.attr('lang', refLang);  // to speed up lookup of paneLang later.
 
             tabPanes
-                .each(function(){
+                .each(function () {
                     var tabPane = $(this);
                     tabPane.aquireId(cfg.defaultId);
                     var newTab = cfg.makeTab(tabPane, cfg).appendTo( tabList ),
                         paneLang = tabPane.closest('[lang]').attr('lang');
-                    paneLang  &&  paneLang != refLang  &&  newTab.attr('lang', paneLang);
+                    paneLang  &&  paneLang !== refLang  &&  newTab.attr('lang', paneLang);
                   })
                 .eq(0)
                     .before( tabBox );
@@ -430,20 +434,22 @@
           return this.pushStack( tabBox );
         },
       tabboxDefaults = makeTabbox.defaults = {
+          ariaLabel:  '',
           min:        2,
           defaultId:  'tab1',
           tabContSel: 'ul',
           titleSel:   'h1, h2, h3',
           boxClass:   'tab-box',
           boxTempl:   '<div><ul class="tabs" /></div>',
-          tabTempl:   '<li><a href="#%{id}" title="%{title}">%{title}</a></li>',
-          makeTab:    function(tabPane, cfg){
+          tabTempl:   '<li><a id="%{id}-tab" href="#%{id}" title="%{title}" aria-controls="#%{id}" role="tab" aria-selected="false">%{title}</a></li>',
+          makeTab:    function (tabPane, cfg) {
+                          var titleElm = tabPane.find(cfg.titleSel).eq(0);
                           return $(  $.inject(cfg.tabTempl, {
                                           id:    tabPane[0].id,
-                                          title: tabPane.find(cfg.titleSel).eq(0).text()
+                                          title: titleElm.text(),
                                         })
                                     );
-                        }
+                        },
         };
 
 
