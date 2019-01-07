@@ -78,7 +78,7 @@
       statusWrapTempl:   '<span/>',
       statusCurrTempl:   '<b/>',
       statusTotalTempl:  '<i/>',
-      inputPagerTempl:   '<input type="text" value="" size="2"/>'
+      inputPagerTempl:   '<input type="text" value="" size="2"/>',
 
       //destroy:           false // true strips away all listscroller classes, paging elements, etc. etc.
     },
@@ -95,7 +95,7 @@
 
           statusLabel:       'Page: ',
           ofTotalSeparator:  ' of ',
-          statusLabelAfter:  ''
+          statusLabelAfter:  '',
         },
       is: {
           labelNext:         'Næsta',
@@ -107,7 +107,7 @@
 
           statusLabel:       'Síða: ',
           ofTotalSeparator:  ' af ',
-          statusLabelAfter:  ''
+          statusLabelAfter:  '',
         },
       no: {
           labelNext:         'Neste',
@@ -119,7 +119,7 @@
 
           statusLabel:       'Side: ',
           ofTotalSeparator:  ' af ',
-          statusLabelAfter:  ''
+          statusLabelAfter:  '',
         },
       da: {
           labelNext:         'Næste',
@@ -131,12 +131,12 @@
 
           statusLabel:       'Side: ',
           ofTotalSeparator:  ' af ',
-          statusLabelAfter:  ''
+          statusLabelAfter:  '',
         },
     },
 
     animate : {
-      none : function ( l, c ) {},
+      none : function ( /* l, c */ ) {},
       carousel : function ( l, c ) {
         var p,
             w = l.eq(0).closest( '.' + c.classPrefix + '-wrapper'),
@@ -152,23 +152,20 @@
         p = l.eq( c.index ).position();
         conf[scrollProp] = p[posProp];
 
-        if ( c.wrap == 'loop' && c.lastIndex == 0 && c.index == last )
-        {
+        if ( c.wrap === 'loop' && c.lastIndex === 0 && c.index === last ) {
           w[scrollProp]( z.position()[posProp] + z[dimp]() );
           w.animate( conf, c.speed, c.easing );
         }
-        else if ( c.wrap == 'loop' && c.lastIndex == last && c.index == 0 )
-        {
+        else if ( c.wrap === 'loop' && c.lastIndex === last && c.index === 0 ) {
           conf[scrollProp] = z.position()[posProp] + z[dimp]();
-          w.animate(conf, c.speed, c.easing, function(){ w[scrollProp](0); });
+          w.animate(conf, c.speed, c.easing, function () { w[scrollProp](0); });
         }
-        else
-        {
+        else {
           w.animate( conf, c.speed, c.easing );
         }
       },
       crossfade : function ( l, c ) {
-        l.each(function (i, nw, ow ){
+        l.each(function (i, nw, ow ) {
           nw = (i >= c.index && i < c.index + c.windowSize);
           ow = (c.lastIndex == null) || (i >= c.lastIndex && i < c.lastIndex + c.windowSize);
           if ( !nw && c.lastIndex == null ) // init
@@ -186,8 +183,8 @@
         });
       },
       accordion : function ( l, c ) {
-        var ac, ap = (c.aspect == 'vertical') ? 'height' : 'width';
-        l.each(function (i, nw, ow ){
+        var ac, ap = (c.aspect === 'vertical') ? 'height' : 'width';
+        l.each(function (i, nw, ow ) {
           nw = (i >= c.index && i < c.index + c.windowSize);
           ow = (c.lastIndex == null) || (i >= c.lastIndex && i < c.lastIndex + c.windowSize);
           ac = {};
@@ -195,13 +192,12 @@
           {
             $(this).stop().hide();
           }
-          else
-          {
+          else {
             ac[ap] = (nw && !ow) ?  'show':  (!nw && ow) ?  'hide':  undefined;
-            ac[ap]  &&  $(this).stop().animate( ac, c.speed, c.easing, function(){ this.style[ap] = ''; });
+            ac[ap]  &&  $(this).stop().animate( ac, c.speed, c.easing, function () { this.style[ap] = ''; });
           }
         });
-      }
+      },
     },
 
     wrap : {
@@ -211,48 +207,46 @@
       },
       start: function ( i, l, c ) {
         var m = max( l, c );
-        if ( i < 0 ) { return (c.index == 0) ? m : 0; }
+        if ( i < 0 ) { return (c.index === 0) ? m : 0; }
         if ( i > m ) { return m; }
         return i;
       },
       end: function ( i, l, c ) {
         var m = max( l, c );
         if ( i < 0 ) { return 0; }
-        if ( i > m ) { return (c.index == m) ? 0 : m; }
+        if ( i > m ) { return (c.index === m) ? 0 : m; }
         return i;
       },
       both: function ( i, l, c ) {
         var m = max( l, c );
-        if ( i < 0 ) { return (c.index == 0) ? m : 0; }
-        if ( i > m ) { return (c.index == m) ? 0 : m; }
+        if ( i < 0 ) { return (c.index === 0) ? m : 0; }
+        if ( i > m ) { return (c.index === m) ? 0 : m; }
         return i;
       },
-      random: function ( i, l, c ) {
+      random: function ( i, l/* , c */ ) {
         return Math.floor( Math.random() * l.length );
       },
-      loop: function ( i, l, c ) {
+      loop: function ( i, l/* , c */ ) {
         return (l.length+i) % l.length;
-      }
+      },
     },
 
     aspectDefaults : {
       none      : 'vertical',
       carousel  : 'horizontal',
       crossfade : 'horizontal',
-      accordion : 'vertical'
-    }
+      accordion : 'vertical',
+    },
 
   };
 
   // detect list aspect
-  function detectAspect ( _items )
-  {
+  function detectAspect( _items ) {
     var i2 = _items.eq( 1 ),
         p1 = _items.eq( 0 ).offset(),
         p2 = i2.offset();
     // usable second item?
-    if ( p2 && i2.is(':visible') )
-    {
+    if ( p2 && i2.is(':visible') ) {
       return ( Math.abs( p2.top - p1.top ) <= Math.abs( p2.left - p1.left ) )
               ? 'horizontal'
               : 'vertical';
@@ -261,16 +255,14 @@
     return False;
   }
 
-  function max ( list, cfg )
-  {
-    var maxVal = (cfg.overflow == 'visible') ?
+  function max( list, cfg ) {
+    var maxVal = (cfg.overflow === 'visible') ?
                       list.length - (list.length % cfg.stepSize || cfg.stepSize):
                       list.length - cfg.windowSize;
     return maxVal;
   }
 
-  function setPos ( c, _newIndex, opts )
-  {
+  function setPos( c, _newIndex, opts ) {
     clearTimeout( c.scrollTimeout );
 
     opts = opts || {};
@@ -279,8 +271,7 @@
     c.lastIndex = c.index;
     c.index = $.listscroller.wrap[ c.wrap || 'none' ]( _newIndex, list, c );
 
-    if ( c.index != c.lastIndex )
-    {
+    if ( c.index !== c.lastIndex ) {
       _block.trigger('beforeMove', {newIndex: c.index});
 
       list
@@ -293,23 +284,19 @@
               .eq(0)
                   .addClass( c.cursorItemClass );
 
-      if ( $.isFunction( c.moveCallback ) )
-      {
+      if ( $.isFunction( c.moveCallback ) ) {
         c.moveCallback.call( _block, list, c );
       }
 
-      if ( $.isFunction( c.animation ) )
-      {
+      if ( $.isFunction( c.animation ) ) {
         c.animation.call( _block, list, c );
       }
-      else
-      {
+      else {
         $.listscroller.animate[ c.animation||'none' ].call( _block, list, c );
       }
       // Food for thought: should we move this block out of the c.index != c.lastIndex check??
-      if ( !opts._noFocus  &&  c.setFocus )
-      {
-        setTimeout(function(){
+      if ( !opts._noFocus  &&  c.setFocus ) {
+        setTimeout(function () {
             list.eq( c.index ).setFocus();
           }, c.speed || 1 );
       }
@@ -318,29 +305,25 @@
         .removeClass( c.topClass )
         .removeClass( c.bottomClass );
 
-      if ( c.index == 0 )
-      {
+      if ( c.index === 0 ) {
         _block.addClass( c.topClass );
       }
 
-      if ((list.length - c.index) <= c.windowSize)
-      {
+      if ((list.length - c.index) <= c.windowSize) {
         _block.addClass( c.bottomClass );
       }
 
       // flash the container
-      if (!opts._noFlash)
-      {
+      if (!opts._noFlash) {
         _block.addClass( c.classPrefix + '-changed' );
-        setTimeout(function(){
+        setTimeout(function () {
             _block.removeClass( c.classPrefix + '-changed' );
           }, c.speed || 1);
       }
 
       var newWinIndex = Math.ceil(c.index / c.stepSize);
       // mark paging/status/ element if needed
-      if ( c.jumps )
-      {
+      if ( c.jumps ) {
         c.jumps
             .removeClass( c.currentPageClass )
             .eq( newWinIndex )
@@ -351,15 +334,13 @@
       c.inputPager  &&  c.inputPager.val( newWinIndex+1 );
       c.status      &&  c.status.text( newSatusIndex+1 );
 
-      if (c.status  &&  c.itemStatusPager  &&  c.windowSize > 1)
-      {
+      if (c.status  &&  c.itemStatusPager  &&  c.windowSize > 1) {
         var lastIdx = newSatusIndex + c.windowSize;
         lastIdx = ( lastIdx > list.length ) ? list.length : lastIdx;
          c.status.append( '-' + lastIdx );
       }
 
-      if(c.autoScrollDelay)
-      {
+      if (c.autoScrollDelay) {
         _block.queue(function () {
             _block
                 .trigger('afterMove')
@@ -370,30 +351,45 @@
 
   }
 
-  function movePrev ( e )
-  {
-    var c = e.data;
-    setPos( c, c.index - c.stepSize );
+  function prevClick( e ) {
+    movePrev( e.data, true );
+    e.preventDefault();
+  }
+  function movePrev( cfg, doFocus ) {
+    doFocus = doFocus ? {} : { _noFlash:True, _noFocus:True };
+    var atTop = cfg.index === 0;
+
+    if ( atTop && ['none', 'end'].indexOf(cfg.wrap) > -1 ) {
+      return false;
+    }
+
+    setPos( cfg, cfg.index - cfg.stepSize, doFocus );
+  }
+
+  function nextClick( e ) {
+    moveNext( e.data, true );
     e.preventDefault();
   }
 
-  function moveNext ( e )
-  {
-    var c = e.data;
-    setPos( c, c.index + c.stepSize );
-    e.preventDefault();
+  function moveNext( cfg, doFocus ) {
+    doFocus = doFocus ? {} : { _noFlash:True, _noFocus:True };
+    var atBottom = (cfg.list.length - cfg.index) <= cfg.windowSize;
+
+    if ( atBottom && ['none', 'start'].indexOf(cfg.wrap) > -1 ) {
+      return false;
+    }
+    setPos( cfg, cfg.index + cfg.stepSize, doFocus );
   }
 
-  function movePage ( e )
-  {
+
+  function movePage( e ) {
     var c = e.data,
         p = (parseInt( $( this ).text(), 10 ) -1) || 0;
     setPos( c, p * c.stepSize );
     e.preventDefault();
   }
 
-  function inputChange ( e )
-  {
+  function inputChange( e ) {
     var cfg = e.data,
         pageIndex = Math.max(0, parseInt('0'+$( this ).val(), 10 )-1)  ||  0,
         newPos = Math.min(pageIndex*cfg.stepSize, max(cfg.list, cfg) );
@@ -402,8 +398,7 @@
   }
 
 
-  function buildControls ( cfg )
-  {
+  function buildControls( cfg ) {
 
     var nextBtn = $( cfg.nextBtnTemplate ),
         prevBtn = $( cfg.prevBtnTemplate ),
@@ -411,25 +406,23 @@
         status;
 
     $(nextBtn.find('a')[0]||nextBtn)
-        .bind( 'click', cfg, moveNext )
+        .bind( 'click', cfg, nextClick )
         .attr( 'title', cfg.titleNext )
         .text( cfg.labelNext );
 
     $(prevBtn.find('a')[0]||prevBtn)
-        .bind( 'click', cfg, movePrev )
+        .bind( 'click', cfg, prevClick )
         .attr( 'title', cfg.titlePrev )
         .text( cfg.labelPrev );
 
 
-    if ( cfg.paging )
-    {
+    if ( cfg.paging ) {
       var page = Math.ceil( cfg.index / cfg.stepSize ),
           numWindows = Math.ceil( cfg.list.length / cfg.stepSize ),
           statusNumTotal = cfg.itemStatusPager ? cfg.list.length : numWindows;
 
       // input pager
-      if (cfg.statusPager  ||  cfg.inputPager)
-      {
+      if (cfg.statusPager  ||  cfg.inputPager) {
         status = $( cfg.statusTempl );
         $( cfg.statusLabelTempl )
             .html( cfg.statusLabel )
@@ -442,41 +435,36 @@
             .html( cfg.ofTotalSeparator + statusNumTotal + cfg.statusLabelAfter )
             .appendTo( jTemp );
 
-        if ( cfg.inputPager )
-        {
+        if ( cfg.inputPager ) {
           cfg.inputPager = $( cfg.inputPagerTempl )
                         .prependTo( jTemp )
                         .val( page+1 )
                         .bind( 'change', cfg, inputChange );
         }
-        else
-        {
+        else {
           cfg.status =  $( cfg.statusCurrTempl )
                           .prependTo( jTemp );
         }
       }
 
       // jump buttons
-      if (cfg.jumpPager)
-      {
+      if (cfg.jumpPager) {
         var jmps = [];
         jumpMenu = $( cfg.jumpTemplate );
-        if ( cfg.jumpLabelTemplate )
-        {
+        if ( cfg.jumpLabelTemplate ) {
           $( cfg.jumpLabelTemplate )
               .text( cfg.jumpLabel )
               .appendTo( jumpMenu );
         }
         // make buttons+
-        for (var i=0; i<numWindows; i++)
-        {
+        for (var i=0; i<numWindows; i++) {
           var bt = $( cfg.jumpBtnTemplate ),
               a = $(bt.find('a')[0]||bt)
                       .text( i + 1 )
                       .attr('title', cfg.statusLabel + (i + 1) )
                       .addClass('p' + (i+1))
                       .bind( 'click', cfg, movePage );
-          if (cfg.index == i) { a.addClass( cfg.currentPageClass ); }
+          if (cfg.index === i) { a.addClass( cfg.currentPageClass ); }
           jmps.push( bt[0] );
         }
         cfg.jumps = $( jmps );
@@ -496,22 +484,19 @@
 
 
 
-  function initScroller ( cfg, _block, _items )
-  {
+  function initScroller( cfg, _block, _items ) {
     var _inner,
         _outer;
 
     var oldCfg = _block.data('listscrollerCfg');
-    if ( oldCfg )
-    {
+    if ( oldCfg ) {
       // reset/clear to allow a fresh start
 
       _block.removeData('listscrollerCfg');
 
       _inner = oldCfg.list.parent();
       _outer = _inner.parent();
-      if ( cfg.destroy )
-      {
+      if ( cfg.destroy ) {
         _inner.filter('div').zap();
         _outer.zap();
         _inner = _outer = undefined;
@@ -552,15 +537,13 @@
 
     }
 
-    if ( !cfg.destroy )
-    {
+    if ( !cfg.destroy ) {
 
-      _items = typeof _items == 'string' ?
+      _items = typeof _items === 'string' ?
               _block.find( _items ):
               _items;
 
-      if ( !oldCfg )
-      {
+      if ( !oldCfg ) {
         // wrap elements with containers
         _inner = _items.eq( 0 ).is( 'li' ) ?
                     _items.parent():
@@ -583,8 +566,7 @@
               .css( 'position', 'relative' );
 
       // for circular carousels
-      if ( cfg.wrap == 'loop' )
-      {
+      if ( cfg.wrap === 'loop' ) {
         // generate flipover items
         cfg.flipover = _items
                         .slice( 0, cfg.windowSize )
@@ -597,17 +579,14 @@
 
       // create and display control-links
       var pagingElms = [];
-      if ( cfg.controls !== 'none' && _items.length > 0 )
-      {
-        if ( /^(above|both)$/.test( cfg.controls ) )
-        {
+      if ( cfg.controls !== 'none' && _items.length > 0 ) {
+        if ( /^(above|both)$/.test( cfg.controls ) ) {
           pagingElms.unshift( buildControls( cfg ).addClass( cfg.pagingTopClass )[0] );
           _outer
               .before( pagingElms[0] );
         }
 
-        if ( /^(below|both)$/.test( cfg.controls ) )
-        {
+        if ( /^(below|both)$/.test( cfg.controls ) ) {
           pagingElms.unshift( buildControls( cfg ).addClass( cfg.pagingBottomClass )[0] );
           _outer
               .after( pagingElms[0] );
@@ -616,8 +595,7 @@
       }
       _block.data('lstscr_pagingElms', $(pagingElms) );
 
-      if ( cfg.aspect == 'auto' )
-      {
+      if ( cfg.aspect === 'auto' ) {
         cfg.aspect = detectAspect( _items ) || // try to determine aspect
                    $.listscroller.aspectDefaults[ cfg.animation ] ||  // pick default aspect for animation
                    'horizontal';  // final fallback
@@ -625,63 +603,53 @@
       _outer.addClass( cfg.classPrefix + '-' + cfg.aspect );
 
       //randomize starting position
-      if ( cfg.startPos == 'random' )
-      {
+      if ( cfg.startPos === 'random' ) {
         cfg.startPos = Math.floor(Math.ceil(_items.length / cfg.stepSize) * Math.random()) * cfg.stepSize;
       }
 
       // set initial position
       setPos( cfg, cfg.startPos || 0, { _noFlash:True, _noFocus:True } );
 
-      var nextTrigger = function ( e ) {
-            setPos( cfg, cfg.index + cfg.stepSize, { _noFlash:True, _noFocus:True } );
-          },
-          prevTrigger = function ( e ) {
-            setPos( cfg, cfg.index - cfg.stepSize, { _noFlash:True, _noFocus:True } );
-          };
-
       var delay = cfg.autoScrollDelay;
       if ( delay ) {
         var doPause = cfg.pauseOnMouseOver;
-        cfg.scrollTimeout = setTimeout( nextTrigger, delay );
+        cfg.scrollTimeout = setTimeout( moveNext, delay, cfg );
         _block
-            .bind('mouseenter.lscr', function (e) {
+            .bind('mouseenter.lscr', function (/* e */) {
                 _block.addClass('block-mouseover');
                 doPause && clearTimeout(cfg.scrollTimeout);
               })
-            .bind('mouseleave.lscr', function (e) {
+            .bind('mouseleave.lscr', function (/* e */) {
                 _block.removeClass('block-mouseover');
                 if ( doPause ) {
                   clearTimeout(cfg.scrollTimeout);
-                  cfg.scrollTimeout = setTimeout( nextTrigger, delay );
+                  cfg.scrollTimeout = setTimeout( moveNext, delay, cfg );
                 }
               })
-            .bind('afterMove.lscr', function (e) {
+            .bind('afterMove.lscr', function (/* e */) {
                 if ( !doPause || !_block.is('.block-mouseover') ) {
                   clearTimeout(cfg.scrollTimeout);
-                  cfg.scrollTimeout = setTimeout( nextTrigger, delay );
+                  cfg.scrollTimeout = setTimeout( moveNext, delay, cfg );
                 }
               });
       }
 
-      if ( cfg.aspect == 'horizontal' )
-      {
+      if ( cfg.aspect === 'horizontal' ) {
         _block
-            .on('swipeleft', function (e) {
-                nextTrigger();
+            .on('swipeleft', function (/* e */) {
+                moveNext(cfg);
               })
-            .on('swiperight', function (e) {
-                prevTrigger();
+            .on('swiperight', function (/* e */) {
+                movePrev(cfg);
               });
       }
-      else if ( cfg.aspect == 'vertical' )
-      {
+      else if ( cfg.aspect === 'vertical' ) {
         _block
-            .on('swipeup', function (e) {
-                nextTrigger();
+            .on('swipeup', function (/* e */) {
+                moveNext(cfg);
               })
-            .on('swipedown', function (e) {
-                prevTrigger();
+            .on('swipedown', function (/* e */) {
+                movePrev(cfg);
               });
       }
 
@@ -690,11 +658,9 @@
   }
 
 
-  $.fn.listscroller = function ( config )
-  {
+  $.fn.listscroller = function ( config ) {
     var dc = $.listscroller.defaultConfig;
-    if ( (config && (config.item || config.destroy)) || dc.item )
-    {
+    if ( (config && (config.item || config.destroy)) || dc.item ) {
       this.each(function () {
           var b = $( this ),
               _lang = b.closest('[lang]').attr( 'lang' ) || '',
@@ -702,8 +668,7 @@
               txts = i18n[_lang.toLowerCase()] || i18n[_lang.substr(0,2)] || i18n.en,
               cfg = $.extend( {}, dc, txts, config );
 
-          if (cfg.itemStatusPager)
-          {
+          if (cfg.itemStatusPager) {
             cfg.inputPager = False;
           }
 
@@ -714,8 +679,7 @@
             );
         });
     }
-    else if (this.length)
-    {
+    else if (this.length) {
       this.eq(0)
           .parent()
               .listscroller(
@@ -726,4 +690,4 @@
 
   };
 
-})(jQuery, !0, !1);
+})(window.jQuery, !0, !1);
