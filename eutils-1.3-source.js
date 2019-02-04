@@ -843,7 +843,7 @@
 
   var dedupeArray = uniqueArray;
 
-  console.warn('Module "qj/uniqueArray" is depricated.\nUse "qj/dedupeArray" instead.');
+  console.warn('Module "qj/uniqueArray" is deprecated.\nUse "qj/dedupeArray" instead.');
 
   var uniqueArray$1 = dedupeArray;
 
