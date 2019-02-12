@@ -298,46 +298,81 @@
   // esp. useful when pages have a fixed-position header
   $$2.scrollOffset = function (/*elm*/) { return 0; };
 
+  function unwrapExports (x) {
+  	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x.default : x;
+  }
+
+  function createCommonjsModule(fn, module) {
+  	return module = { exports: {} }, fn(module, module.exports), module.exports;
+  }
+
+  var focusElm_1 = createCommonjsModule(function (module, exports) {
+  Object.defineProperty(exports, '__esModule', { value: true });
+
   // place keyboard focus on _elm - setting tabindex="" when needed
   // and make sure any window scrolling is both sane and useful
-  function focusElm(_elm, opts) {
-    if (_elm) {
-      if ( _elm.tabIndex < 0 ) {
-        _elm.setAttribute('tabindex', -1);
+
+  var getYScroll = function () { return window.pageYOffset ||
+    document.documentElement.scrollTop ||
+    document.body.scrollTop; };
+
+  var _focusElm = function (_elm, opts) {
+    if (_elm.tabIndex < 0) {
+      _elm.setAttribute('tabindex', -1);
+    }
+
+    // Make note of current scroll position
+    var _before = getYScroll();
+
+    // Focus the element!
+    _elm.focus();
+
+    // Measure the distance scrolled
+    var _scrolld = getYScroll() - _before;
+
+    // Check if the browser jumped to the anchor...
+    // (the browser only scrolls the page if the _focusElm was outside the viewport)
+    if (_scrolld) {
+      // But actually, Chrome (as of v.33 at least) will always scroll
+      // unless the focused element is wholly within the viewport.
+      var elmTopFromViewport = _elm.getBoundingClientRect().top;
+      var orgWinBottom =
+        window.innerHeight || document.documentElement.clientHeight;
+      // var elmTop = _before + _scrolld + _elm.getBoundingClientRect().top;
+      // var orgWinBottom =
+      //   _before + window.innerHeight || document.documentElement.clientHeight;
+      if (_scrolld > 0 && _scrolld + elmTopFromViewport < orgWinBottom - 50) {
+        window.scrollTo(window.pageXOffset, _before);
+      } else {
+        // ...then scroll the window to place the anchor at the top of the viewport.
+        // (NOTE: We do this because most browsers place the artificially .focus()ed link at the *bottom* of the viewport.)
+        var offset = opts.offset;
+        var offsetPx = offset && offset.apply ? offset(_elm) : offset || 0;
+        var elmTopPos = elmTopFromViewport + getYScroll();
+        window.scrollTo(window.pageXOffset, elmTopPos - offsetPx);
       }
+    }
+  };
 
-      // Make note of current scroll position
-      var _before = window.pageYOffset;
-
-      // Focus the element!
-      _elm.focus();
-
-      // Measure the distance scrolled
-      var _scrolld = window.pageYOffset - _before;
-
-      // Check if the browser jumped to the anchor...
-      // (the browser only scrolls the page if the _focusElm was outside the viewport)
-      if ( _scrolld ) {
-        // But actually, Chrome (as of v.33 at least) will always scroll
-        // unless the focused element is wholly within the viewport.
-        var elmTop = /*_before + */_scrolld + _elm.getBoundingClientRect().top;
-        var orgWinBottom = /*_before + */(window.innerHeight||document.documentElement.clientHeight);
-        if ( _scrolld>0  &&  elmTop < orgWinBottom - 50 ) {
-          window.scrollTo(window.pageXOffset, _before);
-        }
-        else {
-          // ...then scroll the window to place the anchor at the top of the viewport.
-          // (NOTE: We do this because most browsers place the artificially .focus()ed link at the *bottom* of the viewport.)
-          var offset = opts && opts.offset;
-          var offsetPx = offset && offset.apply ? offset(_elm) : offset || 0;
-          var elmTopPos = _elm.getBoundingClientRect().top + document.body.scrollTop;
-          window.scrollTo( window.pageXOffset,  elmTopPos - offsetPx );
-        }
+  function focusElm(elm, opts) {
+    if (elm) {
+      opts = opts || {};
+      if (opts.delay == null) {
+        _focusElm(elm, opts);
+      } else {
+        return setTimeout(function () {
+          _focusElm(elm, opts);
+        }, opts.delay);
       }
     }
   }
 
-  var focusElm_1 = focusElm;
+  exports.getYScroll = getYScroll;
+  exports.default = focusElm;
+  });
+
+  var focusElm = unwrapExports(focusElm_1);
+  var focusElm_2 = focusElm_1.getYScroll;
 
   var $$3 = window.jQuery;
 
@@ -347,7 +382,7 @@
     }
     opts = opts || {};
     opts.offset = opts.offset || $$3.focusOffset();
-    focusElm_1(_elm, opts);
+    focusElm(_elm, opts);
   };
 
   // place .focusHere() on the first element in the collection
@@ -358,14 +393,6 @@
 
   // $.focusOffset provides a default scroll-offset value for $.focusHere()
   $$3.focusOffset = function (/*elm*/) { return 30; };
-
-  function unwrapExports (x) {
-  	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x.default : x;
-  }
-
-  function createCommonjsModule(fn, module) {
-  	return module = { exports: {} }, fn(module, module.exports), module.exports;
-  }
 
   var frag_1 = createCommonjsModule(function (module, exports) {
   Object.defineProperty(exports, '__esModule', { value: true });
@@ -384,8 +411,7 @@
     _fragment = (_fragment||'').replace(/^#/, '');
     // check if there exists an element with .id same as _fragment
     var _elm = _fragment  &&  document.getElementById( _isEncoded ? decodeURIComponent(_fragment) : _fragment );
-    // var _prePos = !_fragment  &&  $.scrollTop();
-    var _prePos = document.body.scrollTop||document.documentElement.scrollTop;
+    var _prePos = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
     var _tmpId = _elm && _elm.id;
 
     // temporaily defuse the element's id

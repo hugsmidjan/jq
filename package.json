@@ -16,7 +16,7 @@
     "Valur Sverrisson <valur@hugsmidjan.is>"
   ],
   "dependencies": {
-    "qj": "github:hugsmidjan/qj#semver:^2"
+    "qj": "github:hugsmidjan/qj#semver:^2.3.1"
   },
   "license": "ISC"
 }
