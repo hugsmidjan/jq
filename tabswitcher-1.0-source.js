@@ -409,7 +409,7 @@
             if ( cfg.ariaLabel ) {
               tabBox
                 .attr('aria-label', cfg.ariaLabel)
-                .attr('aria-role', 'tablist');
+                .attr('role', 'tablist');
               tabPanes.attr('role', 'tabpanel');
             }
             var tabList = cfg.tabContSel ? $(cfg.tabContSel, tabBox) : tabBox,
@@ -441,12 +441,13 @@
           titleSel:   'h1, h2, h3',
           boxClass:   'tab-box',
           boxTempl:   '<div><ul class="tabs" /></div>',
-          tabTempl:   '<li><a id="%{id}-tab" href="#%{id}" title="%{title}" aria-controls="#%{id}" role="tab" aria-selected="false">%{title}</a></li>',
+          tabTempl:   '<li><a id="%{id}-tab" href="#%{id}" title="%{title}" %{ariaTags}>%{title}</a></li>',
           makeTab:    function (tabPane, cfg) {
                           var titleElm = tabPane.find(cfg.titleSel).eq(0);
                           return $(  $.inject(cfg.tabTempl, {
                                           id:    tabPane[0].id,
                                           title: titleElm.text(),
+                                          ariaTags: cfg.ariaLabel ? 'aria-controls="'+ tabPane[0].id +'" role="tab" aria-selected="false"' : '',
                                         })
                                     );
                         },
