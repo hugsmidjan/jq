@@ -869,11 +869,7 @@
 
   var dedupeArray = uniqueArray;
 
-  console.warn('Module "qj/uniqueArray" is deprecated.\nUse "qj/dedupeArray" instead.');
-
-  var uniqueArray$1 = dedupeArray;
-
-  window.jQuery.uniqueArray = uniqueArray$1;
+  window.jQuery.uniqueArray = dedupeArray;
 
   // Un-opinionated .show()
   // simply removes style="display:none" and hands things over to the CSS
