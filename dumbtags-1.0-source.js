@@ -1,5 +1,4 @@
-// ----------------------------------------------------------------------------------
-// jQuery.fn.dumbTags v 1.0
+/* jQuery.fn.dumbTags v 1.0  -- (c) 2013 Hugsmiðjan ehf.  @preserve */
 // ----------------------------------------------------------------------------------
 // (c) 2012-2013 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
 //  written by:
@@ -18,7 +17,7 @@
 
 
 */
-(function($){
+(function ($) {
 
   var dataKey = 'dumbtags_cfg',
       methods = {
@@ -38,13 +37,12 @@
                   .removeClass( cfg.disabledClass )
                   .find('input')
                       .prop('disabled', false);
-            }
+            },
         };
 
   var dumbTags = $.fn.dumbTags = function (options) {
 
-      if ( methods[options] )
-      {
+      if ( methods[options] ) {
         this.each(function () {
             var elm = $(this);
             elm = elm.is('input') ? elm : elm.find('input:text');
@@ -55,8 +53,7 @@
               });
           });
       }
-      else
-      {
+      else {
         this.each(function () {
             var input = $(this),
                 cfg  = $.extend(true, {}, dumbTags.defaults, options ),
@@ -83,12 +80,11 @@
                         // trimmed tagItem
                         var tagItem = {
                                 value: itm.id||itm.value, // id
-                                tag:   itm.value            // human readable tag "name"
+                                tag:   itm.value,            // human readable tag "name"
                               },
                             tagElm = $( cfg.tagTempl );
 
-                        if ( tagItem.value )
-                        {
+                        if ( tagItem.value ) {
                           tagElm
                               [cfg.htmlTags ? 'html' : 'text']( tagItem.tag )
                               .data( 'dumbTag', tagItem)
@@ -99,7 +95,7 @@
                                   $('<input type="hidden"/>')
                                       .attr({
                                           name:  submName,
-                                          value: tagItem.value
+                                          value: tagItem.value,
                                         })
                                 )
                               .append(
@@ -115,17 +111,14 @@
                     return $(tagElms).insertBefore( input );
                   },
                 delTag = function ( tagElm, autoDelete ) {
-                    if ( !input[0].disabled )
-                    {
+                    if ( !input[0].disabled ) {
                       tagElm = $(tagElm);
                       var removeEv = $.Event('dumbTagRemove');
                       removeEv.autoDelete = autoDelete;
                       tagElm.trigger(removeEv);
-                      if ( autoDelete  ||  !removeEv.isDefaultPrevented() )
-                      {
+                      if ( autoDelete  ||  !removeEv.isDefaultPrevented() ) {
                         var pos = $.inArray( tagElm.data('dumbTag').tag.toLowerCase(), activeTags );
-                        if ( pos > -1 )
-                        {
+                        if ( pos > -1 ) {
                           activeTags.splice( pos , 1);
                         }
                         tagElm.remove();
@@ -138,19 +131,17 @@
                   },
 
                 addItem = function ( item ) {
-                    if ( item.value || item.id )
-                    {
+                    if ( item.value || item.id ) {
                       // IDEA: trigger 'dumbTagAdd' event  here!
                       var tag = item.value.toLowerCase(),
                           tagElms = input.prevAll(cfg.tagSel)
-                                      .filter(function(){
+                                      .filter(function () {
                                           var same = $(this).data('dumbTag').tag.toLowerCase() === tag;
                                           if (same) {  delTag(this, true);  } // silently remove existing duplicates
                                           return !same;
                                         });
                       // auto remove the last tag when we've hit the maxTags limit.
-                      if ( cfg.maxTags  &&  tagElms.length >= cfg.maxTags )
-                      {
+                      if ( cfg.maxTags  &&  tagElms.length >= cfg.maxTags ) {
                         delTag( input.prev( cfg.tagSel ), true );
                       }
                       var tagElm = buildTagElms([item]);
@@ -162,33 +153,28 @@
 
                 addCurrentValue = function () {
                     var val = input.val();
-                    if ( !cfg.limitVocab  &&  val  &&  !input.autocomplete('widget').find('a.ui-state-hover,a.ui-state-focus')[0] )
-                    {
+                    if ( !cfg.limitVocab  &&  val  &&  !input.autocomplete('widget').find('a.ui-state-hover,a.ui-state-focus')[0] ) {
                       val = $.trim( val.replace(/\s+/g, ' ') );
                       addItem({ value:val });
                     }
-                    setTimeout(function(){
+                    setTimeout(function () {
                         input.autocomplete('close');
                       }, 0);
                   },
 
                 selectBox;
 
-            if ( input.is('select') )
-            {
+            if ( input.is('select') ) {
               selectBox = input;
               input = selectBox.siblings('input:text');
-              if ( !input[0] )
-              {
-                if ( !('limitVocab' in cfg) )
-                {
+              if ( !input[0] ) {
+                if ( !('limitVocab' in cfg) ) {
                   cfg.limitVocab = true;
                 }
                 input = $('<input type="text" />').insertAfter( selectBox );
               }
             }
-            else
-            {
+            else {
               selectBox = input.siblings('select');
             }
 
@@ -199,32 +185,26 @@
                     .each(function () {
                         var elm = $(this),
                             itm = { id:elm.val(),  value:elm.text() };
-                        if ( itm.id )
-                        {
+                        if ( itm.id ) {
                           itm.label = itm.value;
                           acLocalValues.push( itm );
-                          if (  elm.is('[selected]') )
-                          {
+                          if (  elm.is('[selected]') ) {
                             prefills.push({ id:elm.val(),  value:elm.text() } );
                           }
                         }
                       });
 
             var val = input.attr('value');
-            if ( val )
-            {
-              if ( cfg.splitter )
-              {
+            if ( val ) {
+              if ( cfg.splitter ) {
                 $.each(val.split(cfg.splitter), function (i, val) {
                     val = $.trim( val ).replace(/\s+/g, '');
-                    if (val)
-                    {
+                    if (val) {
                       prefills.push({ id:val, value:val });
                     }
                   });
               }
-              if ( input.val() === val )
-              {
+              if ( input.val() === val ) {
                 input.val('');
               }
             }
@@ -234,13 +214,11 @@
                 .parent()// .tagswrap
                     .bind('click', function (e) {
                         // direct clicks to the white background of .tagswrap should move focus to the input
-                        if ( e.target === this )
-                        {
+                        if ( e.target === this ) {
                           input.trigger('focus');
                         }
                         // handle clicks on the delete buttons
-                        else if ( $(e.target).is( cfg.delSel ) )
-                        {
+                        else if ( $(e.target).is( cfg.delSel ) ) {
                           delTag( $(e.target).closest( cfg.tagSel ) );
                           return false;
                         }
@@ -261,14 +239,12 @@
                     input
                         .bind('keydown', function (e) {
                             // backspace inside an empty input should delete the last .tag and fill the input with its value
-                            if ( !this.value  &&  e.which === 8 )
-                            {
+                            if ( !this.value  &&  e.which === 8 ) {
                               var input = $(this);
-                              setTimeout(function(){
+                              setTimeout(function () {
                                   var prevTagElm = input.prev( cfg.tagSel ),
                                       prevValue = prevTagElm.data('dumbTag').tag;
-                                  if ( delTag( prevTagElm ) )
-                                  {
+                                  if ( delTag( prevTagElm ) ) {
                                     input
                                         .val(
                                             cfg.htmlTags ?
@@ -280,68 +256,60 @@
                                 }, 0);
                             }
                             // enter inside the input-field may create a new tag
-                            if ( e.which === 13/* ENTER */ )
-                            {
+                            if ( e.which === 13/* ENTER */ ) {
                               e.preventDefault();
                               addCurrentValue();
                             }
                           })
                         .bind('blur', function (/*e*/) {
                             // add the current value on blur
-                            cfg.blurTimeout = setTimeout(function(){
+                            cfg.blurTimeout = setTimeout(function () {
                                 addCurrentValue();
                                 input
                                     .val('')
                                     .parent()
                                         .removeClass( cfg.focusClass );
-                              }, 150);
+                              }, 350); // needs to be long enough delay for people who click slowly
                           });
-                    if ( cfg.splitter )
-                    {
+                    if ( cfg.splitter ) {
                       input
                           .bind('keypress', function (e) {
-                              if ( cfg.splitter.test( String.fromCharCode(e.which) ) )
-                              {
+                              if ( cfg.splitter.test( String.fromCharCode(e.which) ) ) {
                                 e.preventDefault();
                                 addCurrentValue();
                               }
                             });
                     }
-                    if ( cfg.ajax  ||  acLocalValues[0] )
-                    {
+                    if ( cfg.ajax  ||  acLocalValues[0] ) {
                       var minLengthOverride = acLocalValues[0] ? { minLength: 0 } : {};
                       input
                           .autocomplete(
                               $.extend(
                                   {
-                                    position:{ of:input.parent() }
+                                    position:{ of:input.parent() },
                                   },
                                   cfg.acCfg,
                                   minLengthOverride,
                                   {
-                                    source:     function(request, callback){
+                                    source:     function (request, callback) {
                                         var term = $.trim( request.term.toLowerCase() ).replace(/\s+/g, ' ');
-                                        if ( cfg.ajax  &&  request.term.length >= cfg.acCfg.minLength )
-                                        {
-                                          if ( cfg.ajaxMethod )
-                                          {
+                                        if ( cfg.ajax  &&  request.term.length >= cfg.acCfg.minLength ) {
+                                          if ( cfg.ajaxMethod ) {
                                             cfg.ajaxMethod({
                                                 term: term,
                                                 input: input,
                                                 config: cfg,
-                                                callback: callback
+                                                callback: callback,
                                               });
                                           }
-                                          else
-                                          {
+                                          else {
                                             $.ajax({
                                                 url:      acUrl,
                                                 type:     cfg.ajaxCfg.type,
                                                 data:     acName + '=' + encodeURIComponent( term ),
                                                 dataType: cfg.ajaxCfg.dataType,
                                                 success:  function (results) {
-                                                    if ( cfg.acFixResults )
-                                                    {
+                                                    if ( cfg.acFixResults ) {
                                                       var newResults = cfg.acFixResults(results);
                                                       results = newResults===undefined ?
                                                                     results:
@@ -349,12 +317,10 @@
                                                     }
                                                     // untangle the naming-conflict coming from the server
                                                     results = $.map(results, function (itm) {
-                                                        if ( cfg.acFixItem )
-                                                        {
+                                                        if ( cfg.acFixItem ) {
                                                           cfg.acFixItem(itm);
                                                         }
-                                                        else
-                                                        {
+                                                        else {
                                                           itm.id =    itm.value;
                                                           itm.value = itm.tag;
                                                         }
@@ -367,20 +333,17 @@
                                                                     null;
                                                       });
                                                     callback(results);
-                                                  }
+                                                  },
                                               });
                                           }
                                         }
-                                        else
-                                        {
+                                        else {
                                           var res = [],
                                               i = 0,
                                               localItem;
-                                          while ( (localItem = acLocalValues[i++]) )
-                                          {
+                                          while ( (localItem = acLocalValues[i++]) ) {
                                             var localTag = localItem.label.toLowerCase();
-                                            if ( localTag.indexOf( term ) > -1 )
-                                            {
+                                            if ( localTag.indexOf( term ) > -1 ) {
                                               if ( $.inArray( localTag, activeTags ) === -1 ) // skip over tags that are already active
                                               {
                                                 res.push( localItem );
@@ -389,7 +352,7 @@
                                           }
                                           callback( res );
                                         }
-                                      }
+                                      },
                                   }
                                 )
                             )
@@ -405,15 +368,14 @@
                             })
                           .bind('autocompleteselect', function (e, ui) {
                               addItem(ui.item);
-                              if ( cfg.reShowLocals )
-                              {
-                                setTimeout(function(){  input.autocomplete('search');  }, 100);
+                              if ( cfg.reShowLocals ) {
+                                setTimeout(function () {  input.autocomplete('search');  }, 100);
                               }
+                              input.blur(); // Without blur users need to click outside the input and back in to get the dropdown.
                               return false; // prevent autocomplete from filling the input field with the selected value.
                             });
 
-                      if ( !cfg.acCfg.minLength  ||  cfg.showLocals )
-                      {
+                      if ( !cfg.acCfg.minLength  ||  cfg.showLocals ) {
                         input
                             .bind('focus', function (/*e*/) {
                                 input.autocomplete('search');
@@ -437,12 +399,12 @@
       i18n: {
           en: {
               delTitle:  'Remove this value',
-              delLabel:  'x'
+              delLabel:  'x',
             },
           is: {
               delTitle:  'Eyða þessu gildi',
-              delLabel:  'x'
-            }
+              delLabel:  'x',
+            },
         },
       //limitVocab:   false,  // Boolean - indicates whether only a limited set of values can be chosen from - or if free-form tagging is allowed.
       wrapperTempl: '<span class="tagswrap"/>',
@@ -469,14 +431,14 @@
           //autoFocus:  false,
           delay:      300,
           //position:   { of:input.parent() },
-          html:       true
+          html:       true,
         },
       //acFixResults:  null  // Function(ajaxResults) - may either modify ajaxResults (if it's an object) or return a completely new results
       //acFixItem:     null  // Function(item) - custom function for manipulating each incoming ac item (useful for mapping conflicting json values)
       ajaxCfg: {
           //type: 'GET'
-          dataType: 'json'
-        }
+          dataType: 'json',
+        },
     };
 
 
