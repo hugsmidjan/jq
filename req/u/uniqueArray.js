@@ -1,3 +1,3 @@
-import uniqueArray from 'qj/uniqueArray';
+import dedupeArray from 'qj/dedupeArray';
 
-window.jQuery.uniqueArray = uniqueArray;
+window.jQuery.uniqueArray = dedupeArray;

@@ -63,8 +63,8 @@
     getImage : function ( linkElm ) {
         return $.inject(this.imgTempl, {
                     img   : linkElm.attr('href'),
-                    alt   : linkElm.find('img').attr('alt')   || '',
-                    title : linkElm.find('img').attr('title') || '',
+                    alt   : linkElm.find('img').attr('alt') || linkElm.find('ins.image').data('alt') || '',
+                    title : linkElm.find('img').attr('title') || linkElm.find('ins.image').data('title') || '',
                   });
       },
   };
