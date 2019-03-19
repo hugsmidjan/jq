@@ -1,8 +1,5 @@
-// encoding: utf-8
+/* jQuery.fn.fontsizer 1.0  -- (c) 2009-2019 Hugsmiðjan ehf.   @preserve */
 // ----------------------------------------------------------------------------------
-// jQuery.fn.fontsizer v 1.0
-// ----------------------------------------------------------------------------------
-// (c) 2009 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
 //  written by:
 //   * Már Örlygsson        -- http://mar.anomy.net
 //   * Borgar Þorsteinsson  -- http://borgar.undraland.com
@@ -29,37 +26,32 @@
         };
 
 
-  $.fn.fontsizer = function ( options )
-  {
-    if ( this.length )
-    {
+  $.fn.fontsizer = function ( options ) {
+    if ( this.length ) {
       _body = _body || document.body;
 
       _config = $.extend({
           doClientSide:  !1,  // default: false (rely on server-side functions)
-          fontDownSel:   '.dwn a',
-          fontUpSel:     '.up a',
+          fontDownSel:   '.dwn a, .dwn button',
+          fontUpSel:     '.up a, .dwn button',
           fontJumpSel:   '[class*=fsz] > a',
           minSize:       1,
           maxSize:       3,
           defaultSize:   1,
           currentSize:   1,
-          cookie:       'fontSize'
+          cookie:       'fontSize',
         }, options );
 
       _config.currentSize = _config.defaultSize;
 
-      if (/\bzoom(\d+)\b/.test( _body.className ))
-      {
+      if (/\bzoom(\d+)\b/.test( _body.className )) {
         _config.currentSize = parseInt( RegExp.$1, 10 );
       }
 
       // apply cookie values
-      if (_config.doClientSide)
-      {
+      if (_config.doClientSide) {
         var _cookieFontSize = ( $.cookie ) ? parseInt( $.cookie(_config.cookie), 10 ) : 0;
-        if (_cookieFontSize)
-        {
+        if (_cookieFontSize) {
           _config.currentSize = Math.min( _config.maxSize,  Math.max( _cookieFontSize, _config.minSize ) );
         }
         _applySize();
@@ -67,25 +59,24 @@
 
       this
           .find( _config.fontUpSel )
-              .bind('click', function (e) { return _resize( _config.currentSize + 1 ); })
+              .on('click', function (e) { return _resize( _config.currentSize + 1 ); })
           .end()
           .find( _config.fontDownSel )
-              .bind('click', function (e) { return _resize( _config.currentSize - 1 ); })
+              .on('click', function (e) { return _resize( _config.currentSize - 1 ); })
           .end()
           .find( _config.fontJumpSel )
-              .each(function(){
-                  if ( /(^|\s)fsz(\d+)(\s|$)/.test( this.parentNode.className ) )
-                  {
+              .each(function () {
+                  if ( /(^|\s)fsz(\d+)(\s|$)/.test( this.parentNode.className ) ) {
                     $( this )
                         .data( 'fontsize', parseInt( RegExp.$2, 10 ) )
-                        .bind('click', function (e) { 
-                            return _resize( $(this).data('fontsize') ); 
+                        .on('click', function (e) {
+                            return _resize( $(this).data('fontsize') );
                           });
                   }
                 });
     }
     return this;
   };
-  
-  
-})(jQuery);
+
+
+})(window.jQuery);

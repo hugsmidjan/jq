@@ -1,22 +1,28 @@
+/* jQuery.fn.makePageStyles 1.0  -- (c) 2011-2019 Hugsmiðjan ehf.   @preserve */
 // ----------------------------------------------------------------------------------
-// jQuery.fn.makePageStyles v 1.0
-// ----------------------------------------------------------------------------------
-// (c) 2011-2012 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
 //  written by:
 //   * Már Örlygsson        -- http://mar.anomy.net
 // ----------------------------------------------------------------------------------
 //
 //
-(function($, makePageStyles){
+(function ($, makePageStyles) {
 
   $[makePageStyles] = function (cfg) {
       cfg = $.extend({}, defaults, cfg);
       var lang = cfg.lang || $('html').attr('lang') || 'en',
           txt = i18n[ lang ] || i18n.en,
-          makeItem = function (type, classIdx, menuElm) {
+          makeItem = function (type, classIdx, menuElm, opts) {
+              opts = opts || {};
+              var tag =  opts.tag || cfg.buttonTag || 'a';
+              var isLink = tag === 'a';
+              var href = isLink ? ' href="'+(opts.href||'#')+'"' : '';
               return $(cfg.itemTempl
-                            .replace(/%\{label\}/g, txt[type+'L'])
-                            .replace(/%\{title\}/g, txt[type+'T'])
+                          .replace(/%\{tag\}/g, tag)
+                          .replace(/ href=('|")?#\1/, '')
+                          .replace(isLink ? / type=('|")?button\1/ : '', '' )
+                          .replace(/<a( |>)/, '<a'+href+'$1')
+                          .replace(/%\{label\}/g, txt[type+'L'])
+                          .replace(/%\{title\}/g, txt[type+'T'])
                         )
                           .addClass( cfg.itemClasses[classIdx] )
                           .appendTo( menuElm );
@@ -24,12 +30,10 @@
           menuCont = $( cfg.menuTempl.replace(/%\{headline\}/g, txt.headline) ),
           menuFB = menuCont.find( cfg.menuSel );
 
-      if ( cfg.boldBtn )
-      {
+      if ( cfg.boldBtn ) {
         var boldOn = !!$.cookie('font-bold'),
             toggleBold = function (e) {
-                if (e)
-                {
+                if (e) {
                   boldOn = !boldOn;
                   $.cookie('font-bold', (boldOn ? 'on' : null), { path:cfg.cookiePath, expires:cfg.cookieExpires });
                   e.preventDefault();
@@ -40,22 +44,18 @@
         makeItem('b', 2, menuFB)
             .on('click', toggleBold);
       }
-      if ( cfg.fontsizeBtns )
-      {
+      if ( cfg.fontsizeBtns ) {
         makeItem('up',  0, menuFB);
         makeItem('dwn', 1, menuFB);
-        if ( $.fn.fontsizer )
-        {
+        if ( $.fn.fontsizer ) {
           menuFB.fontsizer( cfg.fontsizerCfg );
         }
       }
-      if ( cfg.userstyles )
-      {
+      if ( cfg.userstyles ) {
         var menuUS = menuFB.clone().empty(),
             userstylesOn = !!(cfg.userstyles  &&  $.cookie('userstyles')==='on'),
             toggleMode = function (e) {
-                if ( e )
-                {
+                if ( e ) {
                   e.preventDefault();
                   // toggle style cookie and refresh the page.
                   userstylesOn = !userstylesOn;
@@ -63,9 +63,7 @@
                   $.reloadPage ?
                       $.reloadPage():
                       location.replace(location.href.split('#')[0]); // quick and dirty method
-                }
-                else if ( userstylesOn )
-                {
+                } else if ( userstylesOn ) {
                   // turn userstyles on
                   menuFB
                       .before( menuUS )
@@ -75,7 +73,7 @@
                       .appendTo( 'head' )
                       .attr({
                           'media': cfg.userstyleMedia,
-                          'href':  $('meta[name="X-UserstyleURL"]').attr('content')
+                          'href':  $('meta[name="X-UserstyleURL"]').attr('content'),
                         });
                   $('body').addClass('userstyles-on');
                 }
@@ -86,15 +84,15 @@
 
         makeItem('uoff', 4, menuUS)
             .on('click', toggleMode);
-        makeItem('pref', 5, menuUS)
-            .find('a')
-                .attr('href', '//minar.stillingar.is/lesa/form/?redirect=yes&l='+ lang );
+        makeItem('pref', 5, menuUS, {
+          tag:'a',
+          href: '//minar.stillingar.is/lesa/form/?redirect=yes&l='+ lang,
+        });
 
         toggleMode();
       }
 
-      if ( cfg.appendTo )
-      {
+      if ( cfg.appendTo ) {
         menuCont.appendTo( cfg.appendTo );
       }
       return menuCont;
@@ -110,12 +108,13 @@
           //lang:           null, // defaults to html[lang] || 'en'
           appendTo:       'body',
           menuSel:        'ul',
-          itemTempl:      '<li><a href="#" title="%{title}">%{label}</a></li>',
+          buttonTag:      'a',
+          itemTempl:      '<li><%{tag} title="%{title}">%{label}</%{tag}></li>',
           itemClasses:    ['up','dwn','bold','userstyles','off','settings'],
           userstyleMedia: 'all',
           cookieExpires:  365,
           cookiePath:     '/',
-          fontsizerCfg:   { doClientSide:true }
+          fontsizerCfg:   { doClientSide:true },
         },
 
       i18n = $[makePageStyles].i18n = {
@@ -132,7 +131,7 @@
               uoffL:    'Venjulegt útlit',
               uoffT:    'Skipta yfir í venjulegt útlit vefsins',
               prefL:    'Breyta stillingum',
-              prefT:    'Breyta mínum lita- og leturstillingum'
+              prefT:    'Breyta mínum lita- og leturstillingum',
             },
           en: {
               headline: 'Page style',
@@ -147,7 +146,7 @@
               uoffL:    'Normal style',
               uoffT:    'Switch to the normal style of this website',
               prefL:    'Edit settings',
-              prefT:    'Change my text and color settings'
+              prefT:    'Change my text and color settings',
             },
           dk: {
               headline: 'Sidens visning',
@@ -162,8 +161,8 @@
               uoffL:    'Normal visning',
               uoffT:    'Skift til denne hjemmesides normale visning',
               prefL:    'Redigér indstillinger',
-              prefT:    'Ændre mine tekst- og farveindstillinger'
-            }
+              prefT:    'Ændre mine tekst- og farveindstillinger',
+            },
         };
 
 }(jQuery, 'makePageStyles'));
