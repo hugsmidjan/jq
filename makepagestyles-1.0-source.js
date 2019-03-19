@@ -15,7 +15,7 @@
               opts = opts || {};
               var tag =  opts.tag || cfg.buttonTag || 'a';
               var isLink = tag === 'a';
-              var href = isLink ? ' href="'+(opts.href||'#')+'"' : '';
+              var href = !isLink ? '' : opts.href ? ' href="'+opts.href+'"' : ' href="#" role="button"';
               return $(cfg.itemTempl
                           .replace(/%\{tag\}/g, tag)
                           .replace(/ href=('|")?#\1/, '')
@@ -72,8 +72,8 @@
                   $('<link rel="stylesheet" type="text/css" class="userstylesheet" />')
                       .appendTo( 'head' )
                       .attr({
-                          'media': cfg.userstyleMedia,
-                          'href':  $('meta[name="X-UserstyleURL"]').attr('content'),
+                          media: cfg.userstyleMedia,
+                          href:  $('meta[name="X-UserstyleURL"]').attr('content'),
                         });
                   $('body').addClass('userstyles-on');
                 }
@@ -165,7 +165,7 @@
             },
         };
 
-}(jQuery, 'makePageStyles'));
+}(window.jQuery, 'makePageStyles'));
 
 
 
