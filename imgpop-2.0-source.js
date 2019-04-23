@@ -10,6 +10,7 @@
 // Requires:
 //  - jQuery 1.8
 //  - eutils 1.2
+//  - x/hammer 1.1
 //  - fickle 2.0
 //  - getmodal 1.1
 
@@ -70,28 +71,43 @@
   };
 
   $.fn.imgPopper = function ( cfg ) {
-
-    var _i18n = $.imgPopper.i18n,
-        _hrefElms = this,
-        _idx,
-        _img,
-        _modal,
-        _paging = $('<div class="paging" />'),
-        _imgPop = $('<div class="imgwrap" />'),
-
-        _updPager = function (pager, idx, total) {
-          pager.find('li.prev').toggleClass( 'nav-end', !idx ); // at start
-          pager.find('li.next').toggleClass( 'nav-end', idx===total-1 ); // at end
-          pager.find('b').text( idx + 1 );
-        };
-
+    var _i18n = $.imgPopper.i18n;
     _i18n = _i18n[ $.lang() ] || _i18n.en;
     cfg = $.extend({}, $.imgPopper.defaultConfig, _i18n, cfg );
+
+    var _hrefElms = this;
+    var _idx;
+    var _img;
+    var _modal;
+
+    var _updPager = function (pager, idx, total) {
+      pager.find('li.prev').toggleClass( 'nav-end', !idx ); // at start
+      pager.find('li.next').toggleClass( 'nav-end', idx===total-1 ); // at end
+      pager.find('b').text( idx + 1 );
+    };
+
+    var _pageFunc = function (imgPop, idx, delta) {
+          var newIdx = Math.min( Math.max( 0, idx+delta ), _hrefElms.length-1 );
+          if ( newIdx !== idx) {
+            _idx = newIdx;
+            imgPop.find('.image').replaceWith( $.imgPopper.getImage( _hrefElms.eq(_idx) ) );
+            _updPager(imgPop.find('.paging'), _idx, _hrefElms.length);
+
+            if (cfg.preloadImages) {
+              // preload ajacent images
+              if (_idx !== 0) { (new Image()).src = _hrefElms[_idx-1].href; } // at start
+              if (_idx !== _hrefElms.length-1)   { (new Image()).src = _hrefElms[_idx+1].href; } // at end
+            }
+          }
+    };
+
 
     _hrefElms.on('click', function (e) {
         e.preventDefault();
         _img = $(this);
         _idx = _hrefElms.index(_img);
+        var _paging = $('<div class="paging" />');
+        var _imgPop = $('<div class="imgwrap" />');
 
         _paging
             .empty()
@@ -111,7 +127,14 @@
         _imgPop
             .empty()
             .append( $.imgPopper.getImage( _hrefElms.eq(_idx) ) )
-            .append( _paging );
+            .append( _paging )
+            .hammer()
+            .on('swipeleft', function (/* e */) {
+              _pageFunc(_imgPop, _idx, 1);
+            })
+            .on('swiperight', function (/* e */) {
+              _pageFunc(_imgPop, _idx, -1);
+            });
 
         _modal = $.getModal({
                     opener:  _img,
@@ -131,29 +154,19 @@
 
         $(window)
             .on('keyup.imgpopper', function (e) {
-                e.which === 37 ? // LEFT arrow == prev image
-                    _paging.find('.prev').trigger('click'):
-                e.which === 39 ? // RIGHT arrow == next image
-                    _paging.find('.next').trigger('click'):
-                    null;
+                var delta = e.which === 37 ? // LEFT arrow == prev image
+                              -1 :
+                            e.which === 39 ? // RIGHT arrow == next image
+                              1:
+                              0;
+                _pageFunc(_imgPop, _idx, delta);
               });
 
         _paging
             .on('click', 'li', function (e) {
                 e.preventDefault();
-                var li = $(this);
-                if ( !li.is('.nav-end') ) {
-                  var delta = li.is('.next') ? 1 : -1;
-                  _idx = Math.min( Math.max( 0, _idx+delta ), _hrefElms.length-1 );
-                  _imgPop.find('.image').replaceWith( $.imgPopper.getImage( _hrefElms.eq(_idx) ) );
-                  _updPager(_paging, _idx, _hrefElms.length);
-
-                  if (cfg.preloadImages) {
-                    // preload ajacent images
-                    if (_idx !== 0) { (new Image()).src = _hrefElms[_idx-1].href; } // at start
-                    if (_idx !== _hrefElms.length-1)   { (new Image()).src = _hrefElms[_idx+1].href; } // at end
-                  }
-                }
+                var delta = $(this).is('.next') ? 1 : -1;
+                _pageFunc(_imgPop, _idx, delta);
               });
       });
 
