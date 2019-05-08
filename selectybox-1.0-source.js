@@ -168,7 +168,7 @@
         widget._isEmpty = isEmpty;
         widget.container.classList[isEmpty?'add':'remove'](widget.emptyClass);
       }
-      widget.button.innerHTML = widget.text( selectedOption.text.replace(/</g, '&lt;') ) ||
+      widget.button.textContent = widget.text( selectedOption.textContent ) ||
                                 widget.emptyVal;
     },
 
