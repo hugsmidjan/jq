@@ -161,8 +161,14 @@
   $.fn.paginazor = function (cfg) {
       cfg = $.extend(defaultCfg, cfg);
       return this.each(function() {
-          _paginazor( $(this), cfg );
+          if ( !$(this).data('paginazor-active') ) {
+            _paginazor( $(this), cfg );
+            $(this).data('paginazor-active', true);
+          }
+          else {
+            window.console.warn('Warning: paginazor already running.');
+          }
         });
     };
 
-})(jQuery);
+})(window.jQuery);
