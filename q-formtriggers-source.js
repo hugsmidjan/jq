@@ -1,4 +1,4 @@
-// $.fn.formTriggers -- (c) 2012 Hugsmiðjan ehf.
+/* $.fn.formTriggers  -- (c) 2014 Hugsmiðjan ehf.  @preserve */
 // Valur Sverrisson
 
 /*
@@ -13,12 +13,14 @@
 (function($){
     var defaultCfg = {
           triggerSel: '.trigger',
+          reqClass:   'req',
           subreqClass: 'subreq',
           showFunc:    'fadeIn',
           showSpeed:   'fast',
           hideFunc:    'hide',
           hideSpeed:    0,
-          closedClass: 'closed'
+          closedClass: 'closed',
+
         },
         triggerFunc = function (triggerData, cfg) {
           if (triggerData)
@@ -29,15 +31,13 @@
                     tOpCl = tData.pop();
                 tData = tData.join('-');
 
-                ;;;window.console&&console.log( triggerData );
-
                 if ( tOpCl == 'open' )
                 {
                   $('#'+tData)[cfg.showFunc](cfg.showSpeed)
                       .find('.'+cfg.subreqClass)
                       .addBack()
                       .filter('.'+cfg.subreqClass)
-                          .addClass('req');
+                          .addClass(cfg.reqClass);
                 }
                 else
                 {
@@ -45,7 +45,7 @@
                       .find('.'+cfg.subreqClass)
                       .addBack()
                       .filter('.'+cfg.subreqClass)
-                          .removeClass('req');
+                          .removeClass(cfg.reqClass);
                 }
               });
           }
@@ -59,10 +59,10 @@
       $(this)
           .find('.'+cfg.closedClass)
               .hide()
-              .find('.req')
+              .find('.'+cfg.reqClass)
                   .addBack()
-                  .filter('.req')
-                      .removeClass('req')
+                  .filter('.'+cfg.reqClass)
+                      .removeClass(cfg.reqClass)
                       .addClass(cfg.subreqClass);
 
       $(this).find(cfg.triggerSel)
