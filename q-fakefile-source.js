@@ -1,14 +1,14 @@
-// $.fn.fakeFile -- (c) 2014 Hugsmiðjan ehf.
+/* $.fn.fakeFile  -- (c) 2014 Hugsmiðjan ehf.  @preserve */
 // Valur Sverrisson
 // Ægir Pétursson
 
 (function($){
 
   var fakeFile = function (fileElm, cfg) {
-        var fileInp = fileElm.find('input').data('data-fileNo', fileNo),
+        var fileInp = fileElm.find('input'),
             fileWrap = fileInp.wrap('<div class="filewrap" />').parent(),
             fileId, fileNo,
-            fakeFile = $('<a class="fakefile" href="#" />')
+            fakeFile = $(cfg.useButtonElm ? '<button class="fakefile" type="button" />' : '<a class="fakefile" href="#" />')
                             .on('click', function (e) {
                                 e.preventDefault();
                               })
@@ -35,14 +35,16 @@
                 {
                   var fileEnding = filename.toLowerCase().match(/[a-z0-9]+$/);
                   fileEnding = fileEnding ? fileEnding[0] : 'default';
+                  var filename = filename.length > cfg.textLength ? $.cropText(filename, (cfg.textLength-3) ) : filename;
+                  var fileUploadedText = cfg.fileUploadedText ? '<span class="upload-title">' + cfg.fileUploadedText + '</span>' : '';
                   $(this)
                       .next('.fakefile')
-                          .text( filename.length > cfg.textLength ? $.cropText(filename, (cfg.textLength-3) ) : filename )
+                          .html( fileUploadedText + '<span class="upload-filename">' + filename + '</span>' )
                           [0].className = 'fakefile file_'+ fileEnding;
                 }
                 else
                 {
-                  $(this).next('.fakefile').text(cfg.nofileText)[0].className = 'fakefile file_empty';
+                  $(this).next('.fakefile').html(cfg.nofileText)[0].className = 'fakefile file_empty';
                 }
 
                 if( cfg.cloneField && $(this).closest('.filewrap').is(':last-child') && $(this).val() )
@@ -56,7 +58,7 @@
                               .attr('name', fileId + fileNo)
                           .end()
                               .find('.fakefile')
-                                  .text(cfg.nofileText)
+                                  .html(cfg.nofileText)
                                   [0].className = 'fakefile file_empty';
                 }
 
@@ -71,8 +73,10 @@
     var defaultCfg = {
           cloneField: false,
           textLength: 40,
+          useButtonElm: false,
           removeText: $.lang() == 'is' ? 'Fjarlægja skrá' : 'Remove file',
-          nofileText: $.lang() == 'is' ? 'Engin skrá valin' : 'No file selected'
+          nofileText: $.lang() == 'is' ? 'Engin skrá valin' : 'No file selected',
+          fileUploadedText: '',
         },
         cfg = $.extend(defaultCfg, o);
 
