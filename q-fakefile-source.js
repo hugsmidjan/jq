@@ -6,7 +6,7 @@
 
   var fakeFile = function (fileElm, cfg) {
         var fileInp = fileElm.find('input'),
-            fileWrap = fileInp.wrap('<div class="filewrap" />').parent(),
+            fileWrap = fileInp.wrap('<div class="fakefile__filewrap filewrap" />').parent(),
             fileId, fileNo,
             fakeFile = $(cfg.useButtonElm ? '<button class="fakefile" type="button" />' : '<a class="fakefile" href="#" />')
                             .on('click', function (e) {
@@ -20,7 +20,7 @@
           fileNo = fileInp.attr('id').match(/(\d+)$/);
           fileNo = fileNo ? fileNo[0] : 0;
 
-          $('<a class="remove" href="#" title="'+ cfg.removeText +'">X</a>')
+          $('<a class="fakefile__remove remove" href="#" title="'+ cfg.removeText +'">X</a>')
               .appendTo(fileWrap)
               .on('click', function (e) {
                   e.preventDefault();
@@ -36,10 +36,10 @@
                   var fileEnding = filename.toLowerCase().match(/[a-z0-9]+$/);
                   fileEnding = fileEnding ? fileEnding[0] : 'default';
                   var filename = filename.length > cfg.textLength ? $.cropText(filename, (cfg.textLength-3) ) : filename;
-                  var fileUploadedText = cfg.fileUploadedText ? '<span class="upload-title">' + cfg.fileUploadedText + '</span>' : '';
+                  var fileUploadedText = cfg.fileUploadedText ? '<span class="fakefile__title">' + cfg.fileUploadedText + '</span>' : '';
                   $(this)
                       .next('.fakefile')
-                          .html( fileUploadedText + '<span class="upload-filename">' + filename + '</span>' )
+                          .html( fileUploadedText + '<span class="fakefile__filename">' + filename + '</span>' )
                           [0].className = 'fakefile file_'+ fileEnding;
                 }
                 else
