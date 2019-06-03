@@ -213,7 +213,7 @@
           if ( options === 'widget' ) {
             return Selectybox.getWidget( selects[0] );
           }
-          else if ( /^(?:refresh|val|destroy)$/.test(options) ) {
+          else if ( /^(?:refresh|val|destroy|disable)$/.test(options) ) {
             selects.each(function(){
               var widget = Selectybox.getWidget(this);
               if ( widget ) {
