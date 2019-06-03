@@ -8,14 +8,13 @@
         var fileInp = fileElm.find('input'),
             fileWrap = fileInp.wrap('<div class="fakefile__filewrap filewrap" />').parent(),
             fileId, fileNo,
-            fakeFile = $(cfg.useButtonElm ? '<button class="fakefile" type="button" />' : '<a class="fakefile" href="#" />')
+            fakeFile = $(cfg.useAElm ? '<a class="fakefile" href="#" />' : '<div class="fakefile" />')
                             .on('click', function (e) {
                                 e.preventDefault();
                               })
                             .appendTo(fileWrap);
 
-        if (cfg.cloneField)
-        {
+        if (cfg.cloneField) {
           fileId = fileInp.attr('id').replace(/\d+$/,'');
           fileNo = fileInp.attr('id').match(/(\d+)$/);
           fileNo = fileNo ? fileNo[0] : 0;
@@ -31,8 +30,7 @@
         fileWrap
             .on('change.file', 'input', function () {
                 var filename = $(this).val().replace("C:\\fakepath\\", "");
-                if (filename)
-                {
+                if (filename) {
                   var fileEnding = filename.toLowerCase().match(/[a-z0-9]+$/);
                   fileEnding = fileEnding ? fileEnding[0] : 'default';
                   var filename = filename.length > cfg.textLength ? $.cropText(filename, (cfg.textLength-3) ) : filename;
@@ -42,13 +40,11 @@
                           .html( fileUploadedText + '<span class="fakefile__filename">' + filename + '</span>' )
                           [0].className = 'fakefile file_'+ fileEnding;
                 }
-                else
-                {
-                  $(this).next('.fakefile').html(cfg.nofileText)[0].className = 'fakefile file_empty';
+                else {
+                  $(this).next('.fakefile').html(cfg.nofileText)[0].className = 'fakefile fakefile__empty file_empty';
                 }
 
-                if( cfg.cloneField && $(this).closest('.filewrap').is(':last-child') && $(this).val() )
-                {
+                if( cfg.cloneField && $(this).closest('.filewrap').is(':last-child') && $(this).val() ) {
                   fileNo++;
                   fileWrap
                       .clone(true,true)
@@ -59,9 +55,8 @@
                           .end()
                               .find('.fakefile')
                                   .html(cfg.nofileText)
-                                  [0].className = 'fakefile file_empty';
+                                  [0].className = 'fakefile fakefile__empty file_empty';
                 }
-
               })
             .find('input')
                 .trigger('change.file');
@@ -73,7 +68,7 @@
     var defaultCfg = {
           cloneField: false,
           textLength: 40,
-          useButtonElm: false,
+          useAElm: true, // legazy.... not a11y friendly :/
           removeText: $.lang() == 'is' ? 'Fjarlægja skrá' : 'Remove file',
           nofileText: $.lang() == 'is' ? 'Engin skrá valin' : 'No file selected',
           fileUploadedText: '',
