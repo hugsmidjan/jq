@@ -24,8 +24,8 @@
               disclaimerClose   : txt['disclaimer-Close'],
               privacyPolicyLink : $.inject(cfg.privacyPolicyTempl, {
                                       privacyPolicyPreText : txt['disclaimer-PrivacyPolicy-PreText'],
-                                      privacyPolicyLink : txt['disclaimer-PrivacyPolicy-link'],
-                                      privacyPolicyLinkText : txt['disclaimer-PrivacyPolicy-linktext'],
+                                      privacyPolicyLink : txt['disclaimer-PrivacyPolicy-Link'],
+                                      privacyPolicyLinkText : txt['disclaimer-PrivacyPolicy-LinkText'],
                                       privacyPolicyPostText : txt['disclaimer-PrivacyPolicy-PostText'],
                                   })
             }));
@@ -118,21 +118,21 @@
       disclaimerTempl: '<div class="disclaimer">'+
                           '<p class="disclaimer__intro">%{disclaimerIntro}</p>'+
                           '<span class="disclaimer__act">'+
-                            '<button type="button" class="disclaimer__accept">%{disclaimerAccept}</button>'+
-                            '<button type="button" class="disclaimer__deny">%{disclaimerDeny}</button>'+
+                            '<button type="button" class="disclaimer__accept button">%{disclaimerAccept}</button>'+
+                            '<button type="button" class="disclaimer__deny button">%{disclaimerDeny}</button>'+
                             '%{privacyPolicyLink}'+
                           '</span>'+
                           '<button type="button" class="disclaimer__close">%{disclaimerClose}</button>'+
                         '</div>',
-      privacyPolicyTempl: '<p>%{privacyPolicyPreText} <a class="button" href="%{privacyPolicyLink}">%{privacyPolicyLinkText}</a> %{privacyPolicyPostText}</p>',
+      privacyPolicyTempl: '<p class="disclaimer__privacy-policy">%{privacyPolicyPreText} <a class="disclaimer__link" href="%{privacyPolicyLink}">%{privacyPolicyLinkText}</a> %{privacyPolicyPostText}</p>',
       myConsentTempl: '<div class="my-consent">'+
                         '<p class="my-consent__intro">%{myConsentIntro}</p>'+
                       '</div>',
       myConsentBtnTempl: '<div class="my-consent__buttons">'+
                             '%{myConsentPretext}'+
                             '<div class="my-consent__act">'+
-                              '<button class="my-consent__accept">%{myConsentAccept}</button>'+
-                              '<button class="my-consent__deny">%{myConsentDeny}</button>'+
+                              '<button class="my-consent__accept button">%{myConsentAccept}</button>'+
+                              '<button class="my-consent__deny button">%{myConsentDeny}</button>'+
                             '</div>'+
                           '</div>',
     };
@@ -146,13 +146,13 @@
   $.cookieConsent.lang = {
     en: {
       'disclaimer-trackers': 'cookies',
-      'disclaimer-Intro': 'This website uses %{trackers} to measure traffic.',
-      'disclaimer-Accept': 'Accept',
-      'disclaimer-Deny': 'Deny',
+      'disclaimer-Intro': 'Do we get your permission to use %{trackers} to gather anonymous data for your visit to our site?',
+      'disclaimer-Accept': 'Yes, that\'s OK',
+      'disclaimer-Deny': 'No',
       'disclaimer-Close': 'Close',
       'disclaimer-PrivacyPolicy-PreText': 'See more on',
-      'disclaimer-PrivacyPolicy-linktext': 'our privacy policy page',
-      'disclaimer-PrivacyPolicy-link': '/privacy-policy',
+      'disclaimer-PrivacyPolicy-LinkText': 'our privacy policy page',
+      'disclaimer-PrivacyPolicy-Link': '/privacy-policy',
       'disclaimer-PrivacyPolicy-PreText': 'what this means.',
       'myConsent-trackers': 'Google Analytics',
       'myConsent-Undecided': 'You have not made a decision regarding tracking cookies, therefore %{trackers} have <strong>not been activated</strong>.',
@@ -167,13 +167,13 @@
     },
     is: {
       'disclaimer-trackers': 'vafrakökum',
-      'disclaimer-Intro': 'Þessi vefur mælir umferð um vefinn með %{trackers}.',
-      'disclaimer-Accept': 'Samþykja',
-      'disclaimer-Deny': 'Hafna',
+      'disclaimer-Intro': 'Fáum við leyfi þitt til að nota %{trackers} til að safna nafnlausum upplýsingum um notkun þína á þessum vef?',
+      'disclaimer-Accept': 'Já, það er í lagi',
+      'disclaimer-Deny': 'Nei',
       'disclaimer-Close': 'Loka',
       'disclaimer-PrivacyPolicy-PreText': 'Sjáðu nánar á',
-      'disclaimer-PrivacyPolicy-text': 'persónuverndarsíðu okkar ',
-      'disclaimer-PrivacyPolicy-link': '/personuverndarstefna',
+      'disclaimer-PrivacyPolicy-LinkText': 'persónuverndarsíðu okkar ',
+      'disclaimer-PrivacyPolicy-Link': '/personuverndarstefna',
       'disclaimer-PrivacyPolicy-PostText': 'hvaða áhrif svar þitt hefur.',
       'myConsent-trackers': 'Google Analytics',
       'myConsent-Undecided': 'Þú hefur ekki tekið afstöðu til þess hvort okkur er leyfilegt er að mæla þína notkun og því hefur %{trackers} <strong>ekki verið virkjað</strong>.',
