@@ -14,6 +14,33 @@
 //  - eutils (lang, inject)
 
 (function ($) {
+  var defaultCfg = {
+    injectSelector: '.privacy-policy h1',
+    injectFn: 'after',
+    lang: $.lang(),
+    cookieExpiresDays: 180,
+    disclaimerTempl: '<div class="disclaimer">'+
+                        '<p class="disclaimer__intro">%{disclaimerIntro}</p>'+
+                        '<span class="disclaimer__act">'+
+                          '<button type="button" class="disclaimer__accept button">%{disclaimerAccept}</button>'+
+                          '<button type="button" class="disclaimer__deny button">%{disclaimerDeny}</button>'+
+                          '%{privacyPolicyLink}'+
+                        '</span>'+
+                        '<button type="button" class="disclaimer__close">%{disclaimerClose}</button>'+
+                      '</div>',
+    privacyPolicyTempl: '<p class="disclaimer__privacy-policy">%{privacyPolicyPreText} <a class="disclaimer__link" href="%{privacyPolicyLink}">%{privacyPolicyLinkText}</a> %{privacyPolicyPostText}</p>',
+    myConsentTempl: '<div class="my-consent">'+
+                      '<p class="my-consent__intro">%{myConsentIntro}</p>'+
+                    '</div>',
+    myConsentBtnTempl: '<div class="my-consent__buttons">'+
+                          '%{myConsentPretext}'+
+                          '<div class="my-consent__act">'+
+                            '<button class="my-consent__accept button">%{myConsentAccept}</button>'+
+                            '<button class="my-consent__deny button">%{myConsentDeny}</button>'+
+                          '</div>'+
+                        '</div>',
+  };
+
   var initCookieDisclaimer = function (cfg) {
       if ( !$.cookie('cookie') ) {
           var txt = $.cookieConsent.lang[cfg.lang] || $.cookieConsent.lang['en'];
@@ -35,13 +62,13 @@
             $disclaimer.addClass('disclaimer--visible');
           }, 1000);
           $disclaimer.on('click', '.disclaimer__accept--all', function (e) {
-            _setConsentCookie(e, '2');
+            _setConsentCookie(e, '2', cfg);
           });
           $disclaimer.on('click', '.disclaimer__accept', function (e) {
-            _setConsentCookie(e, '1');
+            _setConsentCookie(e, '1', cfg);
           });
           $disclaimer.on('click', '.disclaimer__deny', function (e) {
-            _setConsentCookie(e, '0');
+            _setConsentCookie(e, '0', cfg);
           });
           $disclaimer.on('click', '.disclaimer__close', function (e) {
             $.cookie('cookie', '-1', { expires: 0, path: '/' });
@@ -71,6 +98,7 @@
             myConsentIntro: $.inject(consentString, {
               trackers: txt['myConsent-trackers'],
               consentDate: consentDate,
+              cookieExpiresDays: cfg.cookieExpiresDays,
             }),
         }));
 
@@ -87,56 +115,30 @@
         $myConsentTarget[cfg.injectFn]($myConsent);
 
         $myConsent.on('click', '.my-consent__accept--all', function (e) {
-            _setConsentCookie(e, '2');
+            _setConsentCookie(e, '2', cfg);
         });
         $myConsent.on('click', '.my-consent__accept', function (e) {
-            _setConsentCookie(e, '1');
+            _setConsentCookie(e, '1', cfg);
         });
         $myConsent.on('click', '.my-consent__deny', function (e) {
-            _setConsentCookie(e, '0');
+            _setConsentCookie(e, '0', cfg);
         });
     }
   };
 
-  var _setConsentCookie = function (e, value) {
+  var _setConsentCookie = function (e, value, cfg) {
     e.preventDefault();
-    $.cookie('cookie', value, { expires: 180, path: '/' });
+    $.cookie('cookie', value, { expires: cfg.cookieExpiresDays, path: '/' });
 
     // set a date cookie, just for show
     var now = new Date();
     var daystring = now.toISOString().split('T')[0];
-    $.cookie('cookieConsentDate', daystring, { expires: 180, path: '/' });
+    $.cookie('cookieConsentDate', daystring, { expires: cfg.cookieExpiresDays, path: '/' });
 
     window.location.reload(); // start (or stop) the tracking
   };
 
   $.cookieConsent = function (o) {
-    var defaultCfg = {
-      injectSelector: '.privacy-policy h1',
-      injectFn: 'after',
-      lang: $.lang(),
-      disclaimerTempl: '<div class="disclaimer">'+
-                          '<p class="disclaimer__intro">%{disclaimerIntro}</p>'+
-                          '<span class="disclaimer__act">'+
-                            '<button type="button" class="disclaimer__accept button">%{disclaimerAccept}</button>'+
-                            '<button type="button" class="disclaimer__deny button">%{disclaimerDeny}</button>'+
-                            '%{privacyPolicyLink}'+
-                          '</span>'+
-                          '<button type="button" class="disclaimer__close">%{disclaimerClose}</button>'+
-                        '</div>',
-      privacyPolicyTempl: '<p class="disclaimer__privacy-policy">%{privacyPolicyPreText} <a class="disclaimer__link" href="%{privacyPolicyLink}">%{privacyPolicyLinkText}</a> %{privacyPolicyPostText}</p>',
-      myConsentTempl: '<div class="my-consent">'+
-                        '<p class="my-consent__intro">%{myConsentIntro}</p>'+
-                      '</div>',
-      myConsentBtnTempl: '<div class="my-consent__buttons">'+
-                            '%{myConsentPretext}'+
-                            '<div class="my-consent__act">'+
-                              '<button class="my-consent__accept button">%{myConsentAccept}</button>'+
-                              '<button class="my-consent__deny button">%{myConsentDeny}</button>'+
-                            '</div>'+
-                          '</div>',
-    };
-
     var cfg = $.extend(defaultCfg, o);
 
     initCookieDisclaimer(cfg);
@@ -159,7 +161,7 @@
       'myConsent-Accept-all': 'You choose <strong>to allow all cookies</strong>.',
       'myConsent-Accepted': 'You choose <strong>to allow us to track your visit</strong> with %{trackers}.',
       'myConsent-Denied': 'You choose <strong>not to allow %{trackers}</strong>. Your visit will not be tracked.',
-      'myConsent-Date': 'That decision was made on <code>%{consentDate}</code> and is stored for 6 months.',
+      'myConsent-Date': 'That decision was made on <code>%{consentDate}</code> and is stored for %{cookieExpiresDays} days.',
       'myConsent-button-Pretext': 'You can reconsider your choice here:',
       'myConsent-button-Accept-all': 'Allow all cookies',
       'myConsent-button-Accept': 'Allow tracking cookies',
@@ -180,7 +182,7 @@
       'myConsent-Accept-all': 'Þú valdir að <strong>leyfa allar kökur</strong>.',
       'myConsent-Accepted': 'Þú valdir að <strong>leyfa okkur að mæla notkun þína</strong> með %{trackers}.',
       'myConsent-Denied': 'Þú valdir að <strong>leyfa ekki notkun %{trackers}</strong>. Notkun þín er því ekki mæld.',
-      'myConsent-Date': 'Sú ákvörðun þín er dagsett <code>%{consentDate}</code> og gildir í 6 mánuði. Eftir það spyrjum við þig aftur.',
+      'myConsent-Date': 'Sú ákvörðun þín er dagsett <code>%{consentDate}</code> og gildir í %{cookieExpiresDays} daga. Eftir það spyrjum við þig aftur.',
       'myConsent-button-Pretext': 'Þú getur að sjálfsögðu endurskoðað ákvörðun þína hér:',
       'myConsent-button-Accept-all': 'Ég leyfi allar kökur',
       'myConsent-button-Accept': 'Ég leyfi mælingar',
