@@ -20,14 +20,15 @@
     lang: $.lang(),
     cookieExpiresDays: 180,
     disclaimerTempl: '<div class="disclaimer">'+
-                        '<p class="disclaimer__intro">%{disclaimerIntro}</p>'+
+                        '%{discIntro}'+
                         '<span class="disclaimer__act">'+
                           '<button type="button" class="disclaimer__accept button">%{disclaimerAccept}</button>'+
                           '<button type="button" class="disclaimer__deny button">%{disclaimerDeny}</button>'+
-                          '%{privacyPolicyLink}'+
                         '</span>'+
+                        '%{privacyPolicyLink}'+
                         '<button type="button" class="disclaimer__close">%{disclaimerClose}</button>'+
                       '</div>',
+    introTempl: '<p class="disclaimer__intro">%{disclaimerIntro}</p>',
     privacyPolicyTempl: '<p class="disclaimer__privacy-policy">%{privacyPolicyPreText} <a class="disclaimer__link" href="%{privacyPolicyLink}">%{privacyPolicyLinkText}</a> %{privacyPolicyPostText}</p>',
     myConsentTempl: '<div class="my-consent">'+
                       '<p class="my-consent__intro">%{myConsentIntro}</p>'+
@@ -45,16 +46,18 @@
       if ( !$.cookie('cookie') ) {
           var txt = $.cookieConsent.lang[cfg.lang] || $.cookieConsent.lang['en'];
           var $disclaimer = $($.inject(cfg.disclaimerTempl, {
-              disclaimerIntro   : $.inject(txt['disclaimer-Intro'], { trackers: txt['disclaimer-trackers'] }),
-              disclaimerAccept  : txt['disclaimer-Accept'],
-              disclaimerDeny    : txt['disclaimer-Deny'],
-              disclaimerClose   : txt['disclaimer-Close'],
-              privacyPolicyLink : $.inject(cfg.privacyPolicyTempl, {
-                                      privacyPolicyPreText : txt['disclaimer-PrivacyPolicy-PreText'],
-                                      privacyPolicyLink : txt['disclaimer-PrivacyPolicy-Link'],
-                                      privacyPolicyLinkText : txt['disclaimer-PrivacyPolicy-LinkText'],
-                                      privacyPolicyPostText : txt['disclaimer-PrivacyPolicy-PostText'],
-                                  })
+                discIntro   : $.inject(cfg.introTempl, {
+                                        disclaimerIntro: $.inject(txt['disclaimer-Intro'], { trackers: txt['disclaimer-trackers'] }),
+                                    }),
+                disclaimerAccept  : txt['disclaimer-Accept'],
+                disclaimerDeny    : txt['disclaimer-Deny'],
+                disclaimerClose   : txt['disclaimer-Close'],
+                privacyPolicyLink : $.inject(cfg.privacyPolicyTempl, {
+                                        privacyPolicyPreText : txt['disclaimer-PrivacyPolicy-PreText'],
+                                        privacyPolicyLink : txt['disclaimer-PrivacyPolicy-Link'],
+                                        privacyPolicyLinkText : txt['disclaimer-PrivacyPolicy-LinkText'],
+                                        privacyPolicyPostText : txt['disclaimer-PrivacyPolicy-PostText'],
+                                    })
             }));
           $disclaimer.appendTo('body');
 
@@ -168,7 +171,7 @@
       'myConsent-button-Deny': 'Deny tracking cookies',
     },
     is: {
-      'disclaimer-trackers': 'vafrakökum',
+      'disclaimer-trackers': 'vafrakökur',
       'disclaimer-Intro': 'Fáum við leyfi þitt til að nota %{trackers} til að safna nafnlausum upplýsingum um notkun þína á þessum vef?',
       'disclaimer-Accept': 'Já, það er í lagi',
       'disclaimer-Deny': 'Nei',
