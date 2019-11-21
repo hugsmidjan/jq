@@ -177,7 +177,7 @@
       'disclaimer-Deny': 'Nei',
       'disclaimer-Close': 'Loka',
       'disclaimer-PrivacyPolicy-PreText': 'Sjáðu nánar á',
-      'disclaimer-PrivacyPolicy-LinkText': 'persónuverndarsíðu okkar ',
+      'disclaimer-PrivacyPolicy-LinkText': 'persónuverndarsíðu okkar',
       'disclaimer-PrivacyPolicy-Link': '/personuverndarstefna',
       'disclaimer-PrivacyPolicy-PostText': 'hvaða áhrif svar þitt hefur.',
       'myConsent-trackers': 'Google Analytics',
