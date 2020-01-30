@@ -151,7 +151,7 @@
   $.cookieConsent.lang = {
     en: {
       'disclaimer-trackers': 'cookies',
-      'disclaimer-Intro': 'Do we get your permission to use %{trackers} to gather anonymous data for your visit to our site?',
+      'disclaimer-Intro': 'Do we get your permission to use %{trackers} to gather data for your visit to our site?',
       'disclaimer-Accept': 'Yes, that\'s OK',
       'disclaimer-Deny': 'No',
       'disclaimer-Close': 'Close',
@@ -172,7 +172,7 @@
     },
     is: {
       'disclaimer-trackers': 'vafrakökur',
-      'disclaimer-Intro': 'Fáum við leyfi þitt til að nota %{trackers} til að safna nafnlausum upplýsingum um notkun þína á þessum vef?',
+      'disclaimer-Intro': 'Fáum við leyfi þitt til að nota %{trackers} til að safna upplýsingum um notkun þína á þessum vef?',
       'disclaimer-Accept': 'Já, það er í lagi',
       'disclaimer-Deny': 'Nei',
       'disclaimer-Close': 'Loka',
