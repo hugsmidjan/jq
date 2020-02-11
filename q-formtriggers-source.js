@@ -15,6 +15,7 @@
           triggerSel: '.trigger',
           reqClass:   'req',
           subreqClass: 'subreq',
+          subdisabledClass: 'subdisabled',
           showFunc:    'fadeIn',
           showSpeed:   'fast',
           hideFunc:    'hide',
@@ -27,25 +28,32 @@
           {
             triggerData = triggerData.split(/\s+/);
             $.each(triggerData, function (i) {
-                var tData = triggerData[i].split('-'),
-                    tOpCl = tData.pop();
+                var tData = triggerData[i].split('-');
+                var tOpCl = tData.pop();
                 tData = tData.join('-');
+                var $targets = $('#'+tData);
 
-                if ( tOpCl == 'open' )
-                {
-                  $('#'+tData)[cfg.showFunc](cfg.showSpeed)
-                      .find('.'+cfg.subreqClass)
-                      .addBack()
+                if ( tOpCl == 'open' ) {
+                  $targets[cfg.showFunc](cfg.showSpeed);
+
+                  $targets.find('.'+cfg.subreqClass).addBack()
                       .filter('.'+cfg.subreqClass)
                           .addClass(cfg.reqClass);
+
+                  $targets.find('.'+cfg.subdisabledClass).addBack()
+                      .filter('.'+cfg.subdisabledClass)
+                          .find('input,textarea,select').prop('disabled', false);
                 }
-                else
-                {
-                  $('#'+tData)[cfg.hideFunc](cfg.hideSpeed)
-                      .find('.'+cfg.subreqClass)
-                      .addBack()
+                else {
+                  $targets[cfg.hideFunc](cfg.hideSpeed);
+
+                  $targets.find('.'+cfg.subreqClass).addBack()
                       .filter('.'+cfg.subreqClass)
                           .removeClass(cfg.reqClass);
+
+                  $targets.find('.'+cfg.subdisabledClass).addBack()
+                      .filter('.'+cfg.subdisabledClass)
+                          .find('input,textarea,select').prop('disabled', true);
                 }
               });
           }
