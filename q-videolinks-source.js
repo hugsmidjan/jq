@@ -33,8 +33,9 @@
       videoTempl =  '<video width="%{vidwi}" height="%{vidhe}" src="%{vidurl}" controls %{auto} controlslist="nodownload"><source src="%{vidurl}" type="video/%{mime}"></source></video>',
       blockquoteTempl = '<blockquote class="%{class}" %{attributes} style="%{styles}"><a href="%{vidurl}"></a></blockquote>',
 
-      calcHeight = function (width, aspect4x3) {
-        var vdHeight = aspect4x3 ? (width/4)*3 :
+      calcHeight = function (width, aspect) {
+        var vdHeight = aspect === '4x3' ? (width/4)*3 :
+                       aspect === '9x16' ? (width/9)*16 :
                        (width/16)*9;
         return Math.round(vdHeight);
       },
@@ -46,7 +47,7 @@
               type = data.type,
               vidWidth = data.cfg.vidWidth !== 'auto' ? data.cfg.vidWidth : data.contElm.width(),
               newWidth, // used for responsive
-              vidHeight = data.cfg.vidHeight !== 'auto' ? data.cfg.vidHeight : calcHeight(vidWidth, data.cfg.aspect4x3),
+              vidHeight = data.cfg.vidHeight !== 'auto' ? data.cfg.vidHeight : calcHeight(vidWidth, data.cfg.aspect),
               videoUrl,
               videoId,
               playlistId,
@@ -116,7 +117,7 @@
             if ( /\/videos\//.test(videoHref) ) {
               // matches /videos/nnnnn
               autoplay = data.cfg.autostart ? '&autoplay=true' : '';
-              videoUrl = docLocPC + '//www.facebook.com/v2.6/plugins/video.php?href=' + ( encodeURIComponent(videoHref) ) + '&locale='+ data.cfg.locale +'&show_text=false'+ autoplay;
+              videoUrl = docLocPC + '//www.facebook.com/v6.0/plugins/video.php?href=' + ( encodeURIComponent(videoHref) ) + '&locale='+ data.cfg.locale +'&show_text=false'+ autoplay;
             }
             else {
               videoId = videoHref.match(/(?:\/v\/|\/videos\/|[?&]v=)(\d{10,20})/); // matches /v/nnnnn or v=nnnnn
@@ -215,7 +216,7 @@
                 if (newWidth !== vidWidth) {
                   vidWidth = newWidth;
                   vidWidth = data.contElm.width();
-                  vidHeight = calcHeight(vidWidth, data.cfg.aspect4x3) + playerHeight;
+                  vidHeight = calcHeight(vidWidth, data.cfg.aspect) + playerHeight;
                   item.find('iframe,video').attr('height',vidHeight).attr('width',vidWidth);
                 }
               });
@@ -251,7 +252,7 @@
               autostart: false,
               vidWidth:  'auto', //integer or 'auto' ()
               vidHeight: 'auto',
-              aspect4x3:  false,
+              aspect:  '16x9', // 16x9, 9x16, 4x3
               useCaption: true, // append video caption
               type: null, // overwrite default type
               autoHide: true, // autohide player controls - only active for youtube now. - https://developers.google.com/youtube/player_parameters#autohide
@@ -262,6 +263,9 @@
               filePlayerHeight: 20,
               filePlayerFrame: 'flash',
             }, cfg );
+      if ( cfg.aspect4x3 ) {
+        cfg.aspect = '4x3'; // legazy :/
+      }
     }
     return videoLinks.map(function () {
         var link = $(this),
