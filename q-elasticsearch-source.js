@@ -44,10 +44,10 @@
 	};
 
 	let $searchform;
-	let $results;
-	let $hitsTitle;
-	let $resultsList;
-	let $paging;
+	let $results = $('<div class="searchresults" />');
+	let $hitsTitle = $('<h3 class="searchresults__title"></h3>');
+	let $resultsList = $('<ul class="searchresults__list"/>');
+	let $paging = $('<div class="searchresults__paging"/>');
 
 	let searchXHR;
 	let currentPage = 0;
@@ -130,7 +130,7 @@
 			}
 
 			if (cfg.pages || searchStr !== prevSearchText) {
-				_resetSearch(cfg);
+				_resetSearch();
 			}
 
 			$searchform.addClass('searchform--searching');
@@ -174,12 +174,11 @@
 		prevSearchText = searchText;
 	};
 
-	const _initialize = ($this) => {
-		$searchform = $this;
-		$results = $('<div class="searchresults" />').appendTo($searchform);
-		$hitsTitle = $('<h3 class="searchresults__title"></h3>').insertBefore($results);
-		$resultsList = $('<ul class="searchresults__list"/>').appendTo($results);
-		$paging = $('<div class="searchresults__paging"/>').appendTo($results);
+	const _initialize = (cfg) => {
+		$results.appendTo($searchform);
+		$hitsTitle.insertBefore($results);
+		$resultsList.appendTo($results);
+		$paging.appendTo($results);
 
 		$paging.on('click', 'button', (e) => {
 			const $btn = $(e.target);
@@ -187,15 +186,16 @@
 		});
 	};
 
-	$.fn.elasticSearch = function (cfg) {
+	$.fn.elasticSearch = function (cfg, i18n) {
 		if (this.length) {
-			_initialize($(this));
-			const block = $(this);
-			const _lang = block.closest('[lang]').attr('lang') || '';
-			const i18n = cfg.i18n ? $.extend(defaultConfig.i18n, cfg.i18n) : defaultConfig.i18n;
+			$searchform = $(this);
+			const _lang = $searchform.lang() || '';
+			i18n = $.extend(defaultConfig.i18n, i18n);
 			const txts = i18n[_lang.toLowerCase()] || i18n[_lang.substr(0, 2)] || i18n.en;
 			cfg = $.extend(defaultConfig, txts, cfg);
-			const searchInput = block.find(cfg.inputSelector);
+			const searchInput = $searchform.find(cfg.inputSelector);
+
+			_initialize(cfg);
 
 			// if searchbox has initial search value
 			searchText = searchInput.val();
