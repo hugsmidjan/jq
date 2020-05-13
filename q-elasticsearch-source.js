@@ -1,6 +1,6 @@
-/* jQuery.fn.elsearch v 1.0  -- (c) 2016 Hugsmiðjan ehf.  @preserve */
+/* jQuery.fn.elasticSearch v 1.0  -- (c) 2020 Hugsmiðjan ehf.  @preserve */
 // ----------------------------------------------------------------------------------
-// (c) 2016 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+// (c) 2020 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
 //  written by:
 //   * Valur Sverrisson
 //   * Sara Arnadottir
@@ -8,20 +8,19 @@
 
 // Requires:
 //  - jQuery
-//  - eutils  (uses: $.inject() )
+//  - eutils ($.cropText)
 
 (function ($) {
 
-	$.search = {
-		defaultConfig: {
-			apiKey: 'api-unset',
-			url: 'https://search-api.hugsmidjan.is/v1/search',
-			pageSize: 10,
-			paginator: true,
-			minCharacters: 2,
-			maxCharacters: 100,
-			pages: true, // If false then 'load more' button - If true then 'pagination' at bottom
-		},
+	const defaultConfig = {
+		inputSelector: 'input[type="text"]',
+		apiKey: 'api-unset',
+		url: 'https://search-api.hugsmidjan.is/v1/search',
+		pageSize: 10,
+		paginator: true,
+		minCharacters: 2,
+		maxCharacters: 100,
+		pages: true, // If false then 'load more' button - If true then 'pagination' at bottom
 		i18n: {
 			en: {
 				minCharactersError: 'Minimum ${minChar} characters in search term',
@@ -41,9 +40,8 @@
 				pagingTitle: 'Síður: ',
 				searchPending: 'Leit í gangi...',
 			},
-		},
+		}
 	};
-
 
 	let $searchform;
 	let $results;
@@ -182,35 +180,34 @@
 		$hitsTitle = $('<h3 class="searchresults__title"></h3>').insertBefore($results);
 		$resultsList = $('<ul class="searchresults__list"/>').appendTo($results);
 		$paging = $('<div class="searchresults__paging"/>').appendTo($results);
+
+		$paging.on('click', 'button', (e) => {
+			const $btn = $(e.target);
+			_fetchdata(searchText, parseInt($btn.data('page'), 10), cfg);
+		});
 	};
 
-	$.fn.search = function (cfg) {
+	$.fn.elasticSearch = function (cfg) {
 		if (this.length) {
 			_initialize($(this));
-			let block = $(this);
-			let dc = $.search.defaultConfig;
-			let _lang = block.closest('[lang]').attr('lang') || '';
-			let i18n = $.extend($.search.i18n, cfg.i18n);
-			let txts = i18n[_lang.toLowerCase()] || i18n[_lang.substr(0, 2)] || i18n.en;
-			cfg = $.extend(dc, txts, cfg);
+			const block = $(this);
+			const _lang = block.closest('[lang]').attr('lang') || '';
+			const i18n = $.extend(defaultConfig.i18n, cfg.i18n);
+			const txts = i18n[_lang.toLowerCase()] || i18n[_lang.substr(0, 2)] || i18n.en;
+			cfg = $.extend(defaultConfig, txts, cfg);
+			const searchInput = block.find(inputSelector);
 
 			// if searchbox has initial search value
-			searchText = block.find('.searchform__field').val();
-
+			searchText = searchInput.val();
 			if (searchText) {
 				_search(cfg);
 			}
 
-			$('.searchform__field').on('keyup', (e) => {
+			searchInput.on('keyup.search', (e) => {
 				searchText = $(e.target)
 					.val()
 					.trim();
 				_search(cfg);
-			});
-
-			$paging.on('click', 'button', (e) => {
-				const $btn = $(e.target);
-				_fetchdata(searchText, parseInt($btn.data('page'), 10), cfg);
 			});
 		}
 	};
