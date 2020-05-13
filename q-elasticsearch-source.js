@@ -192,10 +192,10 @@
 			_initialize($(this));
 			const block = $(this);
 			const _lang = block.closest('[lang]').attr('lang') || '';
-			const i18n = $.extend(defaultConfig.i18n, cfg.i18n);
+			const i18n = cfg.i18n ? $.extend(defaultConfig.i18n, cfg.i18n) : defaultConfig.i18n;
 			const txts = i18n[_lang.toLowerCase()] || i18n[_lang.substr(0, 2)] || i18n.en;
 			cfg = $.extend(defaultConfig, txts, cfg);
-			const searchInput = block.find(inputSelector);
+			const searchInput = block.find(cfg.inputSelector);
 
 			// if searchbox has initial search value
 			searchText = searchInput.val();
