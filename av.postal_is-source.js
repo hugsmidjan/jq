@@ -18,7 +18,7 @@
   pobox=' (pósthólf)';
   a=($.av=$.av||{});
   p=(a.postCodes=a.postCodes||{}).is={};
-  d='902;900|Vestmannaeyjum;880|Kirkjubæjarklaustri;870871|Vík;860861|Hvolsvelli;850851|Hellu;845|Flúðum;840|Laugarvatni;825|Stokkseyri;820|Eyrarbakka;816|Ölfus;815|Þorlákshöfn;810|Hveragerði;802;800801|Selfossi;785|Öræfum;780781|Höfn í Hornafirði;765|Djúpavogi;760|Breiðdalsvík;755|Stöðvarfirði;750|Fáskrúðsfirði;740|Neskaupstað;735|Eskifirði;730|Reyðarfirði;720|Borgarfirði (eystri);715|Mjóafirði;710|Seyðisfirði;700701|Egilsstöðum;690|Vopnafirði;685|Bakkafirði;680681|Þórshöfn;675|Raufarhöfn;670671|Kópaskeri;660|Mývatni;650|Laugum;645|Fosshólli;640641|Húsavík;630|Hrísey;625|Ólafsfirði;620621|Dalvík;611|Grímsey;610|Grenivík;603|Akureyri;602;600601|Akureyri;580|Siglufirði;570|Fljótum;565566|Hofsós;560|Varmahlíð;550551|Sauðárkróki;545|Skagaströnd;540541|Blönduósi;530531|Hvammstanga;524|Árneshreppi;520|Drangsnesi;510512|Hólmavík;500|Stað;470471|Þingeyri;465|Bíldudal;460|Tálknafirði;450451|Patreksfirði;430|Suðureyri;425|Flateyri;420|Súðavík;415|Bolungarvík;410|Hnífsdal;400401|Ísafirði;380|Reykhólahreppi;370371|Búðardal;360|Hellissandi;356|Snæfellsbæ;355|Ólafsvík;350|Grundarfirði;345|Flatey á Breiðafirði;340|Stykkishólmi;320|Reykholt í Borgarfirði;310311|Borgarnesi;302;300301|Akranesi;270271276|Mosfellsbæ;260|Reykjanesbæ;250|Garði;245|Sandgerði;240|Grindavík;233235|Reykjanesbæ;232;230|Reykjanesbæ;225|Álftanesi;222;220221|Hafnarfirði;212;210|Garðabæ;203|Kópavogi;202;200201|Kópavogi;190|Vogum;172;170|Seltjarnarnesi;123124125127128129130132150155;101103104105107108109110111112113116121|Reykjavík'
+  d='902;900|Vestmannaeyjum;880881|Kirkjubæjarklaustri;870871|Vík;860861|Hvolsvelli;850851|Hellu;845846|Flúðum;840|Laugarvatni;825|Stokkseyri;820|Eyrarbakka;816|Ölfus;815|Þorlákshöfn;810|Hveragerði;803804805806|Selfossi;802;800801|Selfossi;785|Öræfum;780781|Höfn í Hornafirði;765766|Djúpavogi;760761|Breiðdalsvík;755756|Stöðvarfirði;750751|Fáskrúðsfirði;740741|Neskaupstað;735736|Eskifirði;730731|Reyðarfirði;720721|Borgarfirði (eystri);715|Mjóafirði;710711|Seyðisfirði;700701|Egilsstöðum;690691|Vopnafirði;685686|Bakkafirði;680681|Þórshöfn;675676|Raufarhöfn;670671|Kópaskeri;660|Mývatni;650|Laugum;645|Fosshóli;640641|Húsavík;630|Hrísey;625626|Ólafsfirði;620621|Dalvík;616|Grenivík;611|Grímsey;610|Grenivík;603604605606607|Akureyri;602;600601|Akureyri;580581|Siglufirði;570|Fljótum;565566|Hofsósi;560561|Varmahlíð;550551|Sauðárkróki;545546|Skagaströnd;540541|Blönduósi;530531|Hvammstanga;524|Árneshreppi;520|Drangsnesi;510511512|Hólmavík;500|Stað;470471|Þingeyri;465466|Bíldudal;460461|Tálknafirði;450451|Patreksfirði;430431|Suðureyri;425426|Flateyri;420421|Súðavík;415416|Bolungarvík;410|Hnífsdal;400401|Ísafirði;380381|Reykhólahreppi;370371|Búðardal;360|Hellissandi;356|Snæfellsbæ;355|Ólafsvík;350351|Grundarfirði;345|Flatey á Breiðafirði;340341342|Stykkishólmi;320|Reykholti í Borgarfirði;310311|Borgarnesi;302;300301|Akranesi;270271276|Mosfellsbæ;260262|Reykjanesbæ;245246250251|Suðurnesjabæ;240241|Grindavík;235|Keflavíkurflugvelli;233|Reykjanesbæ;232;230|Reykjanesbæ;225|Garðabæ;222;220221|Hafnarfirði;212;210|Garðabæ;203206|Kópavogi;202;200201|Kópavogi;190191|Vogum;172;170|Seltjarnarnesi;162|Reykjavík - Dreifbýli;161|Reykjavík;121123124125127128129130132;101102103104105107108109110111112113116|Reykjavík'
         .split(';');
   k=d.length;
   while(k--){
@@ -118,32 +118,32 @@
 
 var compact = [];
 document.body.innerHTML
-    .replace(/<.+?>/g,'') // strip out HTML <pre> gunk
-    .split('\n')          // turn into array
-    .slice(1)             // chop off the first row (colum headers)
-    // process each line
-    .forEach(function(val){
-        var isPOBox = /pósthólf|fyrirtækjaþjónusta/.test(val.toLowerCase()),
-            v = val.split(';').slice(0,2),
-            last = compact[compact.length-1];
-        v.push(isPOBox);
-        if ( v[0] && v[0] != '102' ) { // skip over empty lines and "102 - millilanda póstur"
-          if ( last  &&  last[1]==v[1]  &&  last[2]==v[2] ) {
-            last[0] += v[0];
-          }
-          else {
-            compact.push( v );
-          }
-        }
-      });
+  .replace(/<.+?>/g,'') // strip out HTML <pre> gunk
+  .split('\n')          // turn into array
+  .slice(1)             // chop off the first row (colum headers)
+  // process each line
+  .forEach(function(val){
+    var isPOBox = /pósthólf|fyrirtækjaþjónusta/.test(val.toLowerCase()),
+        v = val.split(';').slice(0,2),
+        last = compact[compact.length-1];
+    v.push(isPOBox);
+    if ( v[0] ) { // skip over empty lines
+      if ( last  &&  last[1]==v[1]  &&  last[2]==v[2] ) {
+        last[0] += v[0];
+      }
+      else {
+        compact.push( v );
+      }
+    }
+  });
 var output = compact
-                .map(function(val){
-                    return val[2] ? // if isPOBox
-                               val[0]:  // only include the postcodes (town-name then assumed to be the same as last)
-                               val[0]+'|'+val[1]; // (join postcodes and townname)
-                  })
-                .reverse()
-                .join(';');
+  .map(function(val){
+      return val[2] ? // if isPOBox
+        val[0]:  // only include the postcodes (town-name then assumed to be the same as last)
+        val[0]+'|'+val[1]; // (join postcodes and townname)
+    })
+  .reverse()
+  .join(';');
 document.body.innerHTML = '<pre>\'' + output.replace(/</g, '&lt;') + '\'</pre>';
 
   // ===========================================================
@@ -151,6 +151,7 @@ document.body.innerHTML = '<pre>\'' + output.replace(/</g, '&lt;') + '\'</pre>';
 Alternative names:
 
     101;Reykjavík - Miðbær
+    102;Reykjavík - Vatnsýri
     103;Reykjavík - Kringlan/Hvassaleiti
     104;Reykjavík - Vogar
     105;Reykjavík - Austubær
