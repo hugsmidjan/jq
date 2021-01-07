@@ -181,7 +181,7 @@
       'disclaimer-PrivacyPolicy-Link': '/personuverndarstefna',
       'disclaimer-PrivacyPolicy-PostText': 'hvaða áhrif svar þitt hefur.',
       'myConsent-trackers': 'Google Analytics',
-      'myConsent-Undecided': 'Þú hefur ekki tekið afstöðu til þess hvort okkur er leyfilegt er að mæla þína notkun og því hefur %{trackers} <strong>ekki verið virkjað</strong>.',
+      'myConsent-Undecided': 'Þú hefur ekki tekið afstöðu til þess hvort okkur er leyfilegt að mæla þína notkun og því hefur %{trackers} <strong>ekki verið virkjað</strong>.',
       'myConsent-Accept-all': 'Þú valdir að <strong>leyfa allar kökur</strong>.',
       'myConsent-Accepted': 'Þú valdir að <strong>leyfa okkur að mæla notkun þína</strong> með %{trackers}.',
       'myConsent-Denied': 'Þú valdir að <strong>leyfa ekki notkun %{trackers}</strong>. Notkun þín er því ekki mæld.',
