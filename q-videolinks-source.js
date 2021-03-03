@@ -87,17 +87,32 @@
             playerHeight = 30;
           }
           else if ( type === 'vimeo' ) {
-            /*
-              urls to handle:
-              http://player.vimeo.com/video/3274372
-              http://vimeo.com/3274372/
-              http://vimeo.com/3274372?title=1
-              http://vimeo.com/3274372
-            */
-            videoId = videoHref.match(/\/([0-9a-z]{5,10})\/?(?:[#?]|$)/i);
-            videoId = videoId && videoId[1];
-            autoplay = data.cfg.autostart ? '&autoplay=1' : '';
-            videoUrl = docLocPC + '//player.vimeo.com/video/'+ videoId +'?title=1&amp;byline=0&amp;portrait=0' + autoplay + data.cfg.filePlayerExtraParams;
+            if (/\/event\//.test(videoHref)) {
+              /*
+                first handle the special case of vimeo events:
+                https://vimeo.com/event/683754 or https://vimeo.com/event/683754/videos/510320687/ , eventId !== videoId
+               */
+              videoId = videoHref.match(/\/event\/([0-9a-z]{5,8})\/?/i);
+              videoId = videoId && videoId[1];
+              // assuming that the player specific parameters are irrelevant here (as the event is by default live (or not started))
+              videoUrl = docLocPC + '//vimeo.com/event/'+ videoId +'/embed/'+ data.cfg.filePlayerExtraParams;
+            }
+
+            else {
+              /*
+                default behaviour (non-event)
+                urls to handle:
+                http://player.vimeo.com/video/3274372
+                http://vimeo.com/3274372/
+                http://vimeo.com/3274372?title=1
+                http://vimeo.com/3274372
+              */
+              videoId = videoHref.match(/\/([0-9a-z]{5,10})\/?(?:[#?]|$)/i);
+              videoId = videoId && videoId[1];
+              autoplay = data.cfg.autostart ? '&autoplay=1' : '';
+              videoUrl = docLocPC + '//player.vimeo.com/video/'+ videoId +'?title=1&amp;byline=0&amp;portrait=0' + autoplay + data.cfg.filePlayerExtraParams;
+            }
+
           }
           else if ( type === 'facebook' ) {
             /*
