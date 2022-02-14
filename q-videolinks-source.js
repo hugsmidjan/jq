@@ -88,14 +88,21 @@
           }
           else if ( type === 'vimeo' ) {
             if (/\/event\//.test(videoHref)) {
-              /*
-                first handle the special case of vimeo events:
-                https://vimeo.com/event/683754 or https://vimeo.com/event/683754/videos/510320687/ , eventId !== videoId
-               */
-              videoId = videoHref.match(/\/event\/([0-9a-z]{5,8})\/?/i);
-              videoId = videoId && videoId[1];
-              // assuming that the player specific parameters are irrelevant here (as the event is by default live (or not started))
-              videoUrl = docLocPC + '//vimeo.com/event/'+ videoId +'/embed/'+ data.cfg.filePlayerExtraParams;
+              if (/\/embed\//.test(videoHref)) {
+                // special case for direct event embed url:
+                // https://vimeo.com/event/1842601/embed/0fe28d39a0
+                videoUrl = videoHref;
+              }
+              else {
+                /*
+                  first handle the special case of vimeo events:
+                  https://vimeo.com/event/683754 or https://vimeo.com/event/683754/videos/510320687/ , eventId !== videoId
+                 */
+                videoId = videoHref.match(/\/event\/([0-9a-z]{5,8})\/?/i);
+                videoId = videoId && videoId[1];
+                // assuming that the player specific parameters are irrelevant here (as the event is by default live (or not started))
+                videoUrl = docLocPC + '//vimeo.com/event/'+ videoId +'/embed/'+ data.cfg.filePlayerExtraParams;
+              }
             }
 
             else {
